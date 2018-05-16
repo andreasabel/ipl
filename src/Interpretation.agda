@@ -45,6 +45,14 @@ D⦅ trueI ⦆      = _
 consistency : (t : ε ⊢ False) → ⊥
 consistency t = D⦅ t ⦆ _
 
-R⦅_⦆ : ∀{Γ Δ} (τ : Γ ≤ Δ) (γ : C⦅ Γ ⦆) → C⦅ Δ ⦆
-R⦅_⦆ {Γ} {ε}     τ γ = _
-R⦅_⦆ {Γ} {Δ ∙ A} τ γ = R⦅ τ ∘ pop ⦆ γ , H⦅ τ top ⦆ γ
+Ne⦅_⦆ : ∀{Γ A} (t : Ne Γ A) → Fun Γ A
+Ne⦅_⦆ = D⦅_⦆ ∘ ne[_]
+
+Nf⦅_⦆ : ∀{Γ A} (t : Nf Γ A) → Fun Γ A
+Nf⦅_⦆ = D⦅_⦆ ∘ nf[_]
+
+-- Functor
+
+R⦅_⦆ : ∀{Γ Δ} (τ : Γ ≤ Δ) → Mor Γ Δ
+R⦅_⦆ {Γ} {ε}     τ _ = _
+R⦅_⦆ {Γ} {Δ ∙ A} τ = < R⦅ τ ∘ pop ⦆ , H⦅ τ top ⦆ >
