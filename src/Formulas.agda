@@ -1,3 +1,5 @@
+{-# OPTIONS --rewriting #-}
+
 -- Formulæ and hypotheses (contexts)
 
 open import Library
@@ -33,11 +35,35 @@ data Hyp : (Γ : Cxt) (A : Form) → Set where
 
 -- Context extension and permutation
 
-_≤_ : (Γ Δ : Cxt) → Set
-Γ ≤ Δ = ∀{A} → Hyp Δ A → Hyp Γ A
-
 infix 3 _≤_
 
-lift : ∀{Γ Δ A} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
-lift τ top = top
-lift τ (pop x) = pop (τ x)
+data _≤_ : (Γ Δ : Cxt) → Set where
+  id≤ : ∀{Γ} → Γ ≤ Γ
+  weak : ∀{Γ Δ A} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ
+  lift : ∀{Γ Δ A} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
+
+postulate lift-id≤ : ∀{Γ A} → lift id≤ ≡ id≤ {Γ ∙ A}
+{-# REWRITE lift-id≤ #-}
+
+monH : ∀{Γ Δ A} (τ : Γ ≤ Δ) (x : Hyp Δ A) → Hyp Γ A
+monH id≤      x       = x
+monH (weak τ) x       = pop (monH τ x)
+monH (lift τ) top     = top
+monH (lift τ) (pop x) = pop (monH τ x)
+
+_•_ : ∀{Γ Δ Φ} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) → Γ ≤ Φ
+id≤ • σ = σ
+weak τ • σ = weak (τ • σ)
+lift τ • id≤ = lift τ
+lift τ • weak σ = weak (τ • σ)
+lift τ • lift σ = lift (τ • σ)
+
+monH• : ∀{Γ Δ Φ A} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) (x : Hyp Φ A) → monH (τ • σ) x ≡ monH τ (monH σ x)
+monH• id≤      σ        x       = refl
+monH• (weak τ) σ        x       = cong pop (monH• τ σ x)
+monH• (lift τ) id≤      x       = refl
+monH• (lift τ) (weak σ) x       = cong pop (monH• τ σ x)
+monH• (lift τ) (lift σ) top     = refl
+monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
+
+{-# REWRITE monH• #-}

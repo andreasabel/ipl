@@ -1,3 +1,5 @@
+{-# OPTIONS --rewriting #-}
+
 -- Syntax
 
 open import Library
@@ -31,7 +33,7 @@ andComm = impI (andI (andE₂ (hyp top)) (andE₁ (hyp top)))
 -- Weakening
 
 monD : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Γ ⊢ A) → Δ ⊢ A
-monD τ (hyp x)     = hyp (τ x)
+monD τ (hyp x)     = hyp (monH τ x)
 monD τ (impI t)    = impI (monD (lift τ) t)
 monD τ (impE t u)  = impE (monD τ t) (monD τ u)
 monD τ (andI t u)  = andI (monD τ t) (monD τ u)
@@ -42,6 +44,19 @@ monD τ (orI₂ t)    = orI₂ (monD τ t)
 monD τ (orE t u v) = orE (monD τ t) (monD (lift τ) u) (monD (lift τ) v)
 monD τ (falseE t)  = falseE (monD τ t)
 monD τ trueI       = trueI
+
+monD-id : ∀{Γ A} (t : Γ ⊢ A) → monD id≤ t ≡ t
+monD-id (hyp x) = refl
+monD-id (impI t) = cong impI (monD-id t)  -- REWRITE lift-id≤
+monD-id (impE t u) = cong₂ impE (monD-id t) (monD-id u)
+monD-id (andI t u) = cong₂ andI (monD-id t) (monD-id u)
+monD-id (andE₁ t) = cong andE₁ (monD-id t)
+monD-id (andE₂ t) = cong andE₂ (monD-id t)
+monD-id (orI₁ t) = cong orI₁ (monD-id t)
+monD-id (orI₂ t) = cong orI₂ (monD-id t)
+monD-id (orE t u v) = cong₃ orE (monD-id t) (monD-id u) (monD-id v)
+monD-id (falseE t) = cong falseE (monD-id t)
+monD-id trueI = refl
 
 -- For normal forms, we use the standard presentation.
 -- Normal forms are not unique.
@@ -88,7 +103,7 @@ mutual
 mutual
 
   monNe : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Ne Γ A) → Ne Δ A
-  monNe τ (hyp x)     = hyp (τ x)
+  monNe τ (hyp x)     = hyp (monH τ x)
   monNe τ (impE t u)  = impE (monNe τ t) (monNf τ u)
   monNe τ (andE₁ t)   = andE₁ (monNe τ t)
   monNe τ (andE₂ t)   = andE₂ (monNe τ t)

@@ -1,3 +1,5 @@
+{-# OPTIONS --rewriting #-}
+
 -- Set-theoretic interpretation and consistency
 
 open import Library
@@ -32,13 +34,13 @@ H⦅ pop x ⦆ = H⦅ x ⦆ ∘ proj₁
 D⦅_⦆ : ∀{Γ A} (t : Γ ⊢ A) → Fun Γ A
 D⦅ hyp x ⦆      = H⦅ x ⦆
 D⦅ impI t ⦆     = curry D⦅ t ⦆
-D⦅ impE t u ⦆ γ = D⦅ t ⦆ γ (D⦅ u ⦆ γ)
+D⦅ impE t u ⦆   = apply D⦅ t ⦆ D⦅ u ⦆
 D⦅ andI t u ⦆   = < D⦅ t ⦆ , D⦅ u ⦆ >
 D⦅ andE₁ t ⦆    = proj₁ ∘ D⦅ t ⦆
 D⦅ andE₂ t ⦆    = proj₂ ∘ D⦅ t ⦆
 D⦅ orI₁ t ⦆     = inj₁ ∘ D⦅ t ⦆
 D⦅ orI₂ t ⦆     = inj₂ ∘ D⦅ t ⦆
-D⦅ orE t u v ⦆ γ = [ D⦅ u ⦆ ∘ (γ ,_) , D⦅ v ⦆ ∘ (γ ,_) ] (D⦅ t ⦆ γ)
+D⦅ orE t u v ⦆ = caseof D⦅ t ⦆ D⦅ u ⦆ D⦅ v ⦆
 D⦅ falseE t ⦆  = ⊥-elim ∘ D⦅ t ⦆
 D⦅ trueI ⦆      = _
 
@@ -54,5 +56,47 @@ Nf⦅_⦆ = D⦅_⦆ ∘ nf[_]
 -- Functor
 
 R⦅_⦆ : ∀{Γ Δ} (τ : Γ ≤ Δ) → Mor Γ Δ
-R⦅_⦆ {Γ} {ε}     τ _ = _
-R⦅_⦆ {Γ} {Δ ∙ A} τ = < R⦅ τ ∘ pop ⦆ , H⦅ τ top ⦆ >
+R⦅ id≤    ⦆ = id
+R⦅ weak τ ⦆ = R⦅ τ ⦆ ∘ proj₁
+R⦅ lift τ ⦆ = R⦅ τ ⦆ ×̇ id
+
+-- Kripke application
+
+kapp : ∀{Γ Δ A B} (f : Fun Γ (A ⇒ B)) (τ : Δ ≤ Γ) (a : Fun Δ A) → Fun Δ B
+kapp f τ a δ = f (R⦅ τ ⦆ δ) (a δ)
+
+-- Naturality
+
+natH  : ∀{Γ Δ A} (τ : Δ ≤ Γ) (x : Hyp Γ A) → H⦅ monH τ x ⦆ ≡ H⦅ x ⦆ ∘ R⦅ τ ⦆
+natH id≤ x = refl
+natH (weak τ) x = cong (_∘ proj₁) (natH τ x)
+natH (lift τ) top = refl
+natH (lift τ) (pop x) = cong (_∘ proj₁) (natH τ x)
+
+{-# REWRITE natH #-}
+
+natR : ∀{Γ Δ Φ} (σ : Φ ≤ Δ) (τ : Δ ≤ Γ) → R⦅ σ • τ ⦆ ≡ R⦅ τ ⦆ ∘ R⦅ σ ⦆
+natR id≤ τ = refl
+natR (weak σ) τ = cong (_∘ proj₁) (natR σ τ)
+natR (lift σ) id≤ = refl
+natR (lift σ) (weak τ) = cong (_∘ proj₁) (natR σ τ)
+natR (lift σ) (lift τ) = cong (_×̇ id) (natR σ τ)
+
+{-# REWRITE natR #-}
+
+natD : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Γ ⊢ A) → D⦅ monD τ t ⦆ ≡ D⦅ t ⦆ ∘ R⦅ τ ⦆
+natD τ (hyp x) = natH τ x
+natD τ (impI t) = cong curry (natD (lift τ) t)
+natD τ (impE t u) = cong₂ apply (natD τ t) (natD τ u)
+natD τ (andI t u) = cong₂ <_,_> (natD τ t) (natD τ u)
+natD τ (andE₁ t) = cong (proj₁ ∘_) (natD τ t)
+natD τ (andE₂ t) = cong (proj₂ ∘_) (natD τ t)
+natD τ (orI₁ t) = cong (inj₁ ∘_) (natD τ t)
+natD τ (orI₂ t) = cong (inj₂ ∘_) (natD τ t)
+natD τ (orE t u v) = cong₃ caseof (natD τ t) (natD (lift τ) u) (natD (lift τ) v)
+natD τ (falseE t) = cong (⊥-elim ∘_) (natD τ t)
+natD τ trueI = funExt λ _ → refl
+
+{-# REWRITE natD #-}
+
+-- -}

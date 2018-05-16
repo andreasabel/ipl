@@ -20,9 +20,9 @@ data _∈_ Γ : ({Δ} : Cxt) (C : Cover Δ) → Set where
   right : ∀{Δ A B C D}{t : Δ ⊢ A ∨ B} (e : Γ ∈ D) → Γ ∈ node t C D
 
 coverWk : ∀{Γ Δ} {C : Cover Δ} (e : Γ ∈ C) → Γ ≤ Δ
-coverWk here      = id
-coverWk (left  e) = coverWk e ∘ pop
-coverWk (right e) = coverWk e ∘ pop
+coverWk here      = id≤
+coverWk (left  e) = coverWk e • weak id≤
+coverWk (right e) = coverWk e • weak id≤
 
 transC : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) → Cover Γ
 transC idc f = f here
@@ -107,7 +107,7 @@ monT (A ∨ B) {Γ} {Δ} τ (C , f) = monC τ C ,  λ {Φ} e →
   let Ψ , e' , σ = mon∈ C τ e
   in  map-⊎ (monT A σ) (monT B σ) (f {Ψ} e')
 monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
-monT (A ⇒ B) τ f σ = f (σ ∘ τ)
+monT (A ⇒ B) τ f σ = f (σ • τ)
 
 -- Reflection / reification
 
@@ -132,7 +132,7 @@ mutual
   reify False           = fromEmptyCover
   reify (A ∨ B) (C , f) = paste' C ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ pop (reflect A (hyp top))))
+  reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (reflect A (hyp top))))
 
 -- In the absurd world, every proposition holds.
 
@@ -190,7 +190,7 @@ falseElim C f = paste _ C (⊥-elim ∘ f)
 fund :  ∀{Γ A} (t : Γ ⊢ A) {Δ} (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
 fund (hyp x) = fundH x
 fund (impI t) γ τ a = fund t (monG τ γ , a)
-fund (impE t u) γ = fund t γ id (fund u γ)
+fund (impE t u) γ = fund t γ id≤ (fund u γ)
 fund (andI t u) γ = fund t γ , fund u γ
 fund (andE₁ t) = proj₁ ∘ fund t
 fund (andE₂ t) = proj₂ ∘ fund t

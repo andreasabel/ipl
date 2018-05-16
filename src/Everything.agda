@@ -5,3 +5,4 @@ import Formulas
 import Derivations
 import Interpretation
 import TermModel
+import NfModel
