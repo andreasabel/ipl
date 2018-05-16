@@ -102,3 +102,22 @@ mutual
   monNf τ (orE t u v) = orE (monNe τ t) (monNf (lift τ) u) (monNf (lift τ) v)
   monNf τ (falseE t)  = falseE (monNe τ t)
   monNf τ trueI       = trueI
+
+-- Forgetting normality
+
+mutual
+  ne[_] : ∀{Γ A} (t : Ne Γ A) → Γ ⊢ A
+  ne[ hyp x ]     = hyp x
+  ne[ impE t u ]  = impE ne[ t ] nf[ u ]
+  ne[ andE₁ t ]   = andE₁ ne[ t ]
+  ne[ andE₂ t ]   = andE₂ ne[ t ]
+
+  nf[_] : ∀{Γ A} (t : Nf Γ A) → Γ ⊢ A
+  nf[ ne t ]      = ne[ t ]
+  nf[ impI t ]    = impI nf[ t ]
+  nf[ andI t u ]  = andI nf[ t ] nf[ u ]
+  nf[ orI₁ t ]    = orI₁ nf[ t ]
+  nf[ orI₂ t ]    = orI₂ nf[ t ]
+  nf[ orE t u v ] = orE ne[ t ] nf[ u ] nf[ v ]
+  nf[ falseE t ]  = falseE ne[ t ]
+  nf[ trueI ]     = trueI

@@ -19,11 +19,17 @@ C⦅_⦆ : (Γ : Cxt) → Set
 C⦅ ε ⦆ = ⊤
 C⦅ Γ ∙ A ⦆ = C⦅ Γ ⦆ × T⦅ A ⦆
 
-H⦅_⦆ : ∀{Γ A} (x : Hyp Γ A) (γ : C⦅ Γ ⦆) → T⦅ A ⦆
+Fun : (Γ : Cxt) (A : Form) → Set
+Fun Γ A = (γ : C⦅ Γ ⦆) → T⦅ A ⦆
+
+Mor : (Γ Δ : Cxt) → Set
+Mor Γ Δ = (γ : C⦅ Γ ⦆) → C⦅ Δ ⦆
+
+H⦅_⦆ : ∀{Γ A} (x : Hyp Γ A) → Fun Γ A
 H⦅ top   ⦆ = proj₂
 H⦅ pop x ⦆ = H⦅ x ⦆ ∘ proj₁
 
-D⦅_⦆ : ∀{Γ A} (t : Γ ⊢ A) (γ : C⦅ Γ ⦆) → T⦅ A ⦆
+D⦅_⦆ : ∀{Γ A} (t : Γ ⊢ A) → Fun Γ A
 D⦅ hyp x ⦆      = H⦅ x ⦆
 D⦅ impI t ⦆     = curry D⦅ t ⦆
 D⦅ impE t u ⦆ γ = D⦅ t ⦆ γ (D⦅ u ⦆ γ)
@@ -33,8 +39,7 @@ D⦅ andE₂ t ⦆    = proj₂ ∘ D⦅ t ⦆
 D⦅ orI₁ t ⦆     = inj₁ ∘ D⦅ t ⦆
 D⦅ orI₂ t ⦆     = inj₂ ∘ D⦅ t ⦆
 D⦅ orE t u v ⦆ γ = [ D⦅ u ⦆ ∘ (γ ,_) , D⦅ v ⦆ ∘ (γ ,_) ] (D⦅ t ⦆ γ)
-D⦅ falseE t ⦆ γ with D⦅ t ⦆ γ
-... | ()
+D⦅ falseE t ⦆  = ⊥-elim ∘ D⦅ t ⦆
 D⦅ trueI ⦆      = _
 
 consistency : (t : ε ⊢ False) → ⊥
