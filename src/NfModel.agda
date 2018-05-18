@@ -62,7 +62,7 @@ fromEmptyCover (C , f) = reifyF C f
   where
   reifyF : ∀ {Γ} (C : Cover Γ) (f : ∀ {Δ} → Δ ∈ C → ⊥) → Nf Γ False
   reifyF idc          f = ⊥-elim (f here)
-  reifyF (bot t)      f = ne t
+  reifyF (bot t)      f = falseE t  -- falseE is needed (instead of ne) for η-long forms
   reifyF (node t C D) f = orE t (reifyF C (f ∘ left)) (reifyF D (f ∘ right))
 
 transE : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → EmptyCover Δ) → EmptyCover Γ

@@ -91,7 +91,8 @@ mutual
     andE₂  : ∀{B} (t : Ne Γ (B ∧ A)) → Ne Γ A
 
   data Nf (Γ : Cxt) : (A : Form) → Set where
-    ne     : ∀{A} (t : Ne Γ A) → Nf Γ A
+    -- ne     : ∀{A} (t : Ne Γ A) → Nf Γ A   -- allows η-short nfs
+    ne     : ∀{P} (t : Ne Γ (Atom P)) → Nf Γ (Atom P)
     impI   : ∀{A B} (t : Nf (Γ ∙ A) B) → Nf Γ (A ⇒ B)
     andI   : ∀{A B} (t : Nf Γ A) (u : Nf Γ B) → Nf Γ (A ∧ B)
     orI₁   : ∀{A B} (t : Nf Γ A) → Nf Γ (A ∨ B)
@@ -99,6 +100,13 @@ mutual
     orE    : ∀{A B C} (t : Ne Γ (A ∨ B)) (u : Nf (Γ ∙ A) C) (v : Nf (Γ ∙ B) C) → Nf Γ C
     falseE : ∀{A} (t : Ne Γ False) → Nf Γ A
     trueI  : Nf Γ True
+
+-- Admissible false-Elimination from a normal proof of false (using case splits)
+
+falseE! : ∀{A Γ} (t : Nf Γ False) → Nf Γ A
+-- falseE! (ne t)       = falseE t  -- only for η-short
+falseE! (orE t t₁ t₂) = orE t (falseE! t₁) (falseE! t₂)
+falseE! (falseE t)   = falseE t
 
 mutual
 
