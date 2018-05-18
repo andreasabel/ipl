@@ -147,13 +147,13 @@ mutual
 
 mutual
 
-  monD-ne : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Ne Γ A) → monD τ ne[ t ] ≡ ne[ monNe τ t ]
+  monD-ne : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Ne Γ A) → ne[ monNe τ t ] ≡ monD τ ne[ t ]
   monD-ne τ (hyp x)     = refl
   monD-ne τ (impE t u)  = cong₂ impE (monD-ne τ t) (monD-nf τ u)
   monD-ne τ (andE₁ t)   = cong andE₁ (monD-ne τ t)
   monD-ne τ (andE₂ t)   = cong andE₂ (monD-ne τ t)
 
-  monD-nf : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Nf Γ A) → monD τ nf[ t ] ≡ nf[ monNf τ t ]
+  monD-nf : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Nf Γ A) → nf[ monNf τ t ] ≡ monD τ nf[ t ]
   monD-nf τ (ne t)      = monD-ne τ t
   monD-nf τ (impI t)    = cong impI (monD-nf (lift τ) t)
   monD-nf τ (andI t u)  = cong₂ andI (monD-nf τ t) (monD-nf τ u)
@@ -162,5 +162,21 @@ mutual
   monD-nf τ (orE t u v) = cong₃ orE (monD-ne τ t) (monD-nf (lift τ) u) (monD-nf (lift τ) v)
   monD-nf τ (falseE t)  = cong falseE (monD-ne τ t)
   monD-nf τ trueI       = refl
+
+  -- monD-ne : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Ne Γ A) → monD τ ne[ t ] ≡ ne[ monNe τ t ]
+  -- monD-ne τ (hyp x)     = refl
+  -- monD-ne τ (impE t u)  = cong₂ impE (monD-ne τ t) (monD-nf τ u)
+  -- monD-ne τ (andE₁ t)   = cong andE₁ (monD-ne τ t)
+  -- monD-ne τ (andE₂ t)   = cong andE₂ (monD-ne τ t)
+
+  -- monD-nf : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Nf Γ A) → monD τ nf[ t ] ≡ nf[ monNf τ t ]
+  -- monD-nf τ (ne t)      = monD-ne τ t
+  -- monD-nf τ (impI t)    = cong impI (monD-nf (lift τ) t)
+  -- monD-nf τ (andI t u)  = cong₂ andI (monD-nf τ t) (monD-nf τ u)
+  -- monD-nf τ (orI₁ t)    = cong orI₁ (monD-nf τ t)
+  -- monD-nf τ (orI₂ t)    = cong orI₂ (monD-nf τ t)
+  -- monD-nf τ (orE t u v) = cong₃ orE (monD-ne τ t) (monD-nf (lift τ) u) (monD-nf (lift τ) v)
+  -- monD-nf τ (falseE t)  = cong falseE (monD-ne τ t)
+  -- monD-nf τ trueI       = refl
 
 {-# REWRITE monD-ne monD-nf #-}
