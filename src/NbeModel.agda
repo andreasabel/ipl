@@ -22,8 +22,11 @@ monNeImg τ (t , refl) = monNe τ t , natD τ (ne[ t ])
 monNfImg : ∀{Γ Δ} (τ : Δ ≤ Γ) {A f} (nfi : NfImg Γ A f) → NfImg Δ A (f ∘ R⦅ τ ⦆)
 monNfImg τ (t , refl) = monNf τ t , natD τ nf[ t ]
 
-iNe : ∀{Γ A f} → NeImg Γ A f → NfImg Γ A f
-iNe (t , eq) = ne t , eq
+iNe : ∀{Γ P f} → NeImg Γ (Atom P) f → NfImg Γ (Atom P) f
+iNe (t , eq) =  ne t , eq
+
+-- iNe : ∀{Γ A f} → NeImg Γ A f → NfImg Γ A f
+-- iNe (t , eq) = ne t , eq
 
 iHyp : ∀{Γ A} (x : Hyp Γ A) → NeImg Γ A H⦅ x ⦆
 iHyp x = (hyp x , refl)
@@ -54,13 +57,31 @@ iOrI₂ (t , eq) = orI₂ t , cong (inj₂ ∘_) eq
 
 -- Beth model
 
+KPred : (A : Form) → Set₁
+KPred A = ∀ Γ → Fun Γ A → Set
+
+Mon : ∀{S} (𝓐 : ∀ Γ (f : C⦅ Γ ⦆ → S) → Set) → Set
+Mon {S} 𝓐 = ∀ {Γ Δ} (τ : Δ ≤ Γ) {f : C⦅ Γ ⦆ → S} → 𝓐 Γ f → 𝓐 Δ (f ∘ R⦅ τ ⦆)
+
 -- Need to track domain C⦅ Δ ⦆ → Set
 
-data Cover (Δ : Cxt) : Set where
-  idc  : Cover Δ
-  bot  : (t : Ne Δ False) → Cover Δ
-  node : ∀{A B} (t : Ne Δ (A ∨ B)) (C : Cover (Δ ∙ A)) (D : Cover (Δ ∙ B)) → Cover Δ
+data Cover (X : Form) (Δ : Cxt) (P : ∀ Γ → Fun Γ X → Set) : (f : Fun Δ X) → Set where
+  idc  : ∀{f} → P Δ f → Cover X Δ P f
+  bot  : (t : Ne Δ False) → Cover X Δ P (⊥-elim ∘ Ne⦅ t ⦆)
+  node : ∀{A B} (t : Ne Δ (A ∨ B))
+         {g} (cg : Cover X (Δ ∙ A) P g)
+         {h} (ch : Cover X (Δ ∙ B) P h) → Cover X Δ P (caseof Ne⦅ t ⦆ g h)
 
+-- Weakening Covers
+
+monC : ∀{X} {P : ∀ Δ  → Fun Δ X → Set} (monP : Mon P)
+  {Γ} {f : Fun Γ X} {Δ} (τ : Δ ≤ Γ) (C : Cover X Γ P f) → Cover X Δ P (f ∘ R⦅ τ ⦆)
+monC monP τ (idc p) = idc (monP τ p)
+monC monP τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
+monC monP τ (node t cg ch) = node (monNe τ t) (monC monP (lift τ) cg) (monC monP (lift τ) ch)
+  -- REWRITE monD-ne natD
+
+{-
 data _∈_ Γ : ({Δ} : Cxt) (C : Cover Δ) → Set where
   here  : Γ ∈ idc {Γ}
   left  : ∀{Δ A B C D} {t : Ne Δ (A ∨ B)} (e : Γ ∈ C) → Γ ∈ node t C D
@@ -123,14 +144,9 @@ paste' : ∀{A Γ} (C : Cover Γ) (f : ∀{Δ} (e : Δ ∈ C) → Nf Δ A) → N
 paste' idc          f = f here
 paste' (bot t)      f = falseE t
 paste' (node t C D) f = orE t (paste' C (f ∘ left)) (paste' D (f ∘ right))
+-}
 
--- Weakening Covers
-
-monC : ∀{Γ Δ} (τ : Δ ≤ Γ) (C : Cover Γ) → Cover Δ
-monC τ idc = idc
-monC τ (bot t) = bot (monNe τ t)
-monC τ (node t C D) = node (monNe τ t) (monC (lift τ) C) (monC (lift τ) D)
-
+{-
 mon∈ : ∀{Γ Δ Φ} (C : Cover Γ) (τ : Δ ≤ Γ) (e : Φ ∈ monC τ C) → ∃ λ Ψ → Ψ ∈ C × Φ ≤ Ψ
 mon∈ {Γ} {Δ} {.Δ} idc τ here = _ , here , τ
 mon∈ {Γ} {Δ} {Φ} (bot t) τ ()
@@ -138,30 +154,43 @@ mon∈ {Γ} {Δ} {Φ} (node t C D) τ (left e) with mon∈ C (lift τ) e
 ... | Ψ , e' , σ = Ψ , left e' , σ
 mon∈ {Γ} {Δ} {Φ} (node t C D) τ (right e) with mon∈ D (lift τ) e
 ... | Ψ , e' , σ = Ψ , right e' , σ
+-- -}
 
+data Disj A B Γ (⟦A⟧ : Fun Γ A → Set) (⟦B⟧ : Fun Γ B → Set) : Fun Γ (A ∨ B) → Set where
+  left  : {g : Fun Γ A} (⟦g⟧ : ⟦A⟧ g) → Disj _ _ _ _ _ (inj₁ ∘ g)
+  right : {h : Fun Γ B} (⟦h⟧ : ⟦B⟧ h) → Disj _ _ _ _ _ (inj₂ ∘ h)
 
 -- The Beth model
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) (f : Fun Γ A) → Set
 T⟦ Atom P ⟧ Γ = NfImg Γ (Atom P)
 T⟦ True ⟧ Γ _ = ⊤
-T⟦ False ⟧ Γ f = EmptyCover Γ
-T⟦ A ∨ B ⟧ Γ f = ∃ λ (C : Cover Γ) → ∀{Δ} → (e : Δ ∈ C) →
-  (∃ λ (g : Fun Δ A) → f ∘ E⦅ e ⦆ ≡ inj₁ ∘ g × T⟦ A ⟧ Δ g) ⊎
-  (∃ λ (h : Fun Δ B) → f ∘ E⦅ e ⦆ ≡ inj₂ ∘ h × T⟦ B ⟧ Δ h)
+T⟦ False ⟧ Γ = Cover False Γ (λ _ _ → ⊥)
+T⟦ A ∨ B ⟧ Γ = Cover (A ∨ B) Γ λ Δ f → Disj A B Δ (T⟦ A ⟧ Δ) (T⟦ B ⟧ Δ) f
+-- T⟦ A ∨ B ⟧ Γ = Cover (A ∨ B) Γ λ Δ f →
+--   (∃ λ (g : Fun Δ A) → f ≡ inj₁ ∘ g × T⟦ A ⟧ Δ g) ⊎
+--   (∃ λ (h : Fun Δ B) → f ≡ inj₂ ∘ h × T⟦ B ⟧ Δ h)
 T⟦ A ∧ B ⟧ Γ f = T⟦ A ⟧ Γ (proj₁ ∘ f) × T⟦ B ⟧ Γ (proj₂ ∘ f)
 T⟦ A ⇒ B ⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ : T⟦ A ⟧ Δ a) → T⟦ B ⟧ Δ (kapp {A = A} {B = B} f τ a)
 
-monT : ∀ A {Γ Δ} {f : Fun Γ A} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ f → T⟦ A ⟧ Δ (f ∘ R⦅ τ ⦆)
-monT (Atom P) τ nfi = monNfImg τ nfi
+
+monT : ∀ A → Mon T⟦ A ⟧
+   -- {Γ Δ} {f : Fun Γ A} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ f → T⟦ A ⟧ Δ (f ∘ R⦅ τ ⦆)
+monT (Atom P) τ = monNfImg τ
 monT True τ _ = _
-monT False τ (C , f) = monC τ C , λ {Φ} e → f (proj₁ (proj₂ (mon∈ C τ e)))
-monT (A ∨ B) {Γ} {Δ} τ (C , f) = monC τ C ,  λ {Φ} e →
-  let Ψ , e' , σ = mon∈ C τ e
-  in  {! map-⊎ (monT A σ) (monT B σ) (f {Ψ} e') !}
+monT False τ = monC (λ _ ()) τ
+monT (A ∨ B) {Γ} {Δ} τ = monC {!!} τ
 monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
 monT (A ⇒ B) τ f σ = f (σ • τ)
-
+-- monT (Atom P) τ nfi = monNfImg τ nfi
+-- monT True τ _ = _
+-- monT False τ (C , f) = monC τ C , λ {Φ} e → f (proj₁ (proj₂ (mon∈ C τ e)))
+-- monT (A ∨ B) {Γ} {Δ} τ (C , f) = monC τ C ,  λ {Φ} e →
+--   let Ψ , e' , σ = mon∈ C τ e
+--   in  {! map-⊎ (monT A σ) (monT B σ) (f {Ψ} e') !}
+-- monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
+-- monT (A ⇒ B) τ f σ = f (σ • τ)
+{-
 -- Reflection / reification
 
 mutual
