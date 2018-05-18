@@ -16,6 +16,9 @@ open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym
 
 postulate funExt : ∀{a b} → Extensionality a b
 
+⊥-elim-ext : ∀{a b} {A : Set a} {B : Set b} {f : A → ⊥} {g : A → B} → ⊥-elim {b} {B} ∘ f ≡ g
+⊥-elim-ext {f = f} = funExt λ a → ⊥-elim (f a)
+
 cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
         (f : A → B → C → D) {a a' b b' c c'} → a ≡ a' → b ≡ b' → c ≡ c' → f a b c ≡ f a' b' c'
 cong₃ f refl refl refl = refl

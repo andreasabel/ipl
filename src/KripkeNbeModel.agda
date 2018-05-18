@@ -58,9 +58,6 @@ iOrI₂ (t , eq) = orI₂ t , cong (inj₂ ∘_) eq
 ⊥-ext : ∀ {x y : ⊥} {a} {A : Set a} (f : ⊥ → A) → f x ≡ f y
 ⊥-ext {}
 
-⊥-elim-ext : ∀{a b} {A : Set a} {B : Set b} {f : A → ⊥} {g : A → B} → ⊥-elim {b} {B} ∘ f ≡ g
-⊥-elim-ext {f = f} = funExt λ a → ⊥-elim (f a)
-
 -- ⊥-elim-ext-app : ∀{a b} {A : Set a} {B : Set b} {f : A → ⊥} {g : B → ⊥) {h : A → B}
 --   → ⊥-elim {b} {B} ∘ f ≡ ⊥-elim g ∘ h
 
