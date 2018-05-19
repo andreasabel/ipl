@@ -9,7 +9,7 @@ open import Data.Unit    public using (⊤)
 open import Data.Empty   public using (⊥; ⊥-elim)
 open import Data.Product public using (Σ; ∃; _×_; _,_; proj₁; proj₂; <_,_>; curry; uncurry) renaming (map to map-×)
 open import Data.Sum     public using (_⊎_; inj₁; inj₂; [_,_]; [_,_]′) renaming (map to map-⊎)
-open import Function     public using (_∘_; _∘′_; id; case_of_)
+open import Function     public using (_∘_; _∘′_; id; case_of_; const)
 
 open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst; Extensionality)
 {-# BUILTIN REWRITE _≡_ #-}
@@ -46,6 +46,24 @@ sum-perm : ∀{A B C D : Set} (k : C → D) {g : A → C} {h : B → C} (x : A �
 sum-perm k (inj₁ x) = refl
 sum-perm k (inj₂ y) = refl
 
+caseof-perm' : ∀{A B C D E : Set}
+  (k : C → D → E) {f : C → A ⊎ B} {g : C × A → D} {h : C × B → D} →
+  caseof f (apply (k ∘ proj₁) g) (apply (k ∘ proj₁) h)
+    ≡ apply k (caseof f g h)
+caseof-perm' k {f} = funExt λ c → sum-perm (k c) (f c)
+
 caseof-perm : ∀{A B C D E : Set} (k : D → E) {f : C → A ⊎ B} {g : C × A → D} {h : C × B → D}
   → caseof f (k ∘ g) (k ∘ h) ≡ k ∘ caseof f g h
-caseof-perm k {f} = funExt λ c → sum-perm k (f c)
+caseof-perm = caseof-perm' ∘ const
+
+caseof-swap : ∀{A B C D X Y : Set}
+    (f : C → X ⊎ Y)
+    (i : C × X → A ⊎ B)
+    (j : C × Y → A ⊎ B)
+    (g : C → A → D)
+    (h : C → B → D) →
+    caseof f (caseof i (uncurry (g ∘ proj₁)) (uncurry (h ∘ proj₁)))
+             (caseof j (uncurry (g ∘ proj₁)) (uncurry (h ∘ proj₁)))
+      ≡ caseof (caseof f i j) (uncurry g) (uncurry h)
+caseof-swap {A} {B} {C} {D} {X} {Y} f i j g h = funExt λ c →
+  sum-perm [ (g c) , (h c) ] (f c)
