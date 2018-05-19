@@ -8,8 +8,8 @@ module Library where
 open import Data.Unit    public using (⊤)
 open import Data.Empty   public using (⊥; ⊥-elim)
 open import Data.Product public using (Σ; ∃; _×_; _,_; proj₁; proj₂; <_,_>; curry; uncurry) renaming (map to map-×)
-open import Data.Sum     public using (_⊎_; inj₁; inj₂; [_,_]) renaming (map to map-⊎)
-open import Function     public using (_∘_; id)
+open import Data.Sum     public using (_⊎_; inj₁; inj₂; [_,_]; [_,_]′) renaming (map to map-⊎)
+open import Function     public using (_∘_; _∘′_; id; case_of_)
 
 open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst; Extensionality)
 {-# BUILTIN REWRITE _≡_ #-}
@@ -33,3 +33,19 @@ apply f a = λ c → f c (a c)
 
 caseof : ∀{A B C D : Set} (f : C → A ⊎ B) (g : C × A → D) (h : C × B → D) → C → D
 caseof f g h = λ c → [ curry g c , curry h c ] (f c)
+
+sum-eta : ∀{A B : Set} (x : A ⊎ B) → [ inj₁ , inj₂ ] x ≡ x
+sum-eta (inj₁ x) = refl
+sum-eta (inj₂ y) = refl
+
+caseof-eta : ∀{A B C : Set} (f : C → A ⊎ B) → caseof f (inj₁ ∘ proj₂) (inj₂ ∘ proj₂) ≡ f
+caseof-eta f = funExt λ c → sum-eta (f c)
+
+sum-perm : ∀{A B C D : Set} (k : C → D) {g : A → C} {h : B → C} (x : A ⊎ B) →
+  [ k ∘ g , k ∘ h ]′ x ≡ k ([ g , h ]′ x)
+sum-perm k (inj₁ x) = refl
+sum-perm k (inj₂ y) = refl
+
+caseof-perm : ∀{A B C D E : Set} (k : D → E) {f : C → A ⊎ B} {g : C × A → D} {h : C × B → D}
+  → caseof f (k ∘ g) (k ∘ h) ≡ k ∘ caseof f g h
+caseof-perm k {f} = funExt λ c → sum-perm k (f c)
