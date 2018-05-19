@@ -141,14 +141,6 @@ convC g P⊂Q (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
 --   (node t (convC φ P⊂Q cg) (convC φ P⊂Q ch))
 
 {-
-  where
-  lemma : ∀{A B C D E : Set} (k : (C × A → D) → C × A → E) {f : C → A ⊎ A} {g : C × A → D} {h : C × A → D} c →
-         [ (λ a → k g (c , a)) , (λ b → k h (c , b)) ] (f c) ≡
-         k (λ c → [ (λ a → g (c , a)) , (λ b → h (c , b)) ] (f c)) c
-  lemma c = ?
--}
-
-{-
 DPred : (S : Cxt → Set) → Set₁
 DPred S = ∀ Γ (f : C⦅ Γ ⦆ → S Γ) → Set
 
@@ -185,42 +177,6 @@ joinC (idc c) = c
 joinC (bot t) = bot t
 joinC (node t cg ch) = node t (joinC cg) (joinC ch)
 
-{-
-data _∈_ Γ : ({Δ} : Cxt) (C : Cover Δ) → Set where
-  here  : Γ ∈ idc {Γ}
-  left  : ∀{Δ A B C D} {t : Ne Δ (A ∨ B)} (e : Γ ∈ C) → Γ ∈ node t C D
-  right : ∀{Δ A B C D} {t : Ne Δ (A ∨ B)} (e : Γ ∈ D) → Γ ∈ node t C D
-
-coverWk : ∀{Γ Δ} {C : Cover Δ} (e : Γ ∈ C) → Γ ≤ Δ
-coverWk here      = id≤
-coverWk (left  e) = coverWk e • weak id≤
-coverWk (right e) = coverWk e • weak id≤
-
-E⦅_⦆ : ∀{Γ Δ} {C : Cover Δ} (e : Γ ∈ C) → Mor Γ Δ
-E⦅ e ⦆ = R⦅ coverWk e ⦆
-
-transC : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) → Cover Γ
-transC idc f = f here
-transC (bot t) f = bot t
-transC (node t C D) f = node t (transC C (f ∘ left)) (transC D (f ∘ right))
-
--- UNUSED:
-trans∈ : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) →
-  ∀ {Φ} {Δ} (e : Δ ∈ C) → Φ ∈ f e → Φ ∈ transC C f
-trans∈ idc f here = id
-trans∈ (bot t) f ()
-trans∈ (node t C D) f (left  e) = left  ∘ trans∈ C (f ∘ left ) e
-trans∈ (node t C D) f (right e) = right ∘ trans∈ D (f ∘ right) e
-
-split∈ : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) {Φ} (e : Φ ∈ transC C f)
-  → ∃ λ Δ → ∃ λ (e : Δ ∈ C) → Φ ∈ f e
-split∈ idc f e = _ , _ , e
-split∈ (bot t) f ()
-split∈ (node t C D) f (left e) with split∈ C (f ∘ left) e
-... | Δ , e₁ , e₂ = Δ , left e₁ , e₂
-split∈ (node t C D) f (right e) with split∈ D (f ∘ right) e
-... | Δ , e₁ , e₂ = Δ , right e₁ , e₂
--}
 -- Empty cover
 
 EmptyCover : KPred False
@@ -240,21 +196,7 @@ fromEmptyCover' (bot t) = falseE t , refl
 fromEmptyCover' (node t eg eh) with fromEmptyCover' eg | fromEmptyCover' eh
 ... | u , refl | v , refl = orE t u v , refl
 
-{-
-transE : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → EmptyCover Δ) → EmptyCover Γ
-transE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
-
--}
-
-{-
-mon∈ : ∀{Γ Δ Φ} (C : Cover Γ) (τ : Δ ≤ Γ) (e : Φ ∈ monC τ C) → ∃ λ Ψ → Ψ ∈ C × Φ ≤ Ψ
-mon∈ {Γ} {Δ} {.Δ} idc τ here = _ , here , τ
-mon∈ {Γ} {Δ} {Φ} (bot t) τ ()
-mon∈ {Γ} {Δ} {Φ} (node t C D) τ (left e) with mon∈ C (lift τ) e
-... | Ψ , e' , σ = Ψ , left e' , σ
-mon∈ {Γ} {Δ} {Φ} (node t C D) τ (right e) with mon∈ D (lift τ) e
-... | Ψ , e' , σ = Ψ , right e' , σ
--- -}
+-- Semantic disjunction type
 
 data Disj A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) Γ : Fun Γ (A ∨ B) → Set where
   left  : {g : Fun Γ A} (⟦g⟧ : ⟦A⟧ Γ g) → Disj _ _ _ _ _ (inj₁ ∘ g)
@@ -277,9 +219,6 @@ T⟦ Atom P ⟧ Γ = NfImg (Atom P) Γ
 T⟦ True ⟧ Γ _ = ⊤
 T⟦ False ⟧ = Cover False   λ _ _ → ⊥
 T⟦ A ∨ B ⟧ = Cover (A ∨ B) (Disj A B (T⟦ A ⟧) (T⟦ B ⟧))
--- T⟦ A ∨ B ⟧ Γ = Cover (A ∨ B) Γ λ Δ f →
---   (∃ λ (g : Fun Δ A) → f ≡ inj₁ ∘ g × T⟦ A ⟧ Δ g) ⊎
---   (∃ λ (h : Fun Δ B) → f ≡ inj₂ ∘ h × T⟦ B ⟧ Δ h)
 T⟦ A ∧ B ⟧ = Conj A B T⟦ A ⟧ T⟦ B ⟧
 T⟦ A ⇒ B ⟧ = Imp A B T⟦ A ⟧ T⟦ B ⟧
 
@@ -291,14 +230,6 @@ monT False τ = monC (λ _ ()) τ
 monT (A ∨ B) = monC (monDisj (monT A) (monT B))
 monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
 monT (A ⇒ B) τ f σ = f (σ • τ)
--- monT (Atom P) τ nfi = monNfImg τ nfi
--- monT True τ _ = _
--- monT False τ (C , f) = monC τ C , λ {Φ} e → f (proj₁ (proj₂ (mon∈ C τ e)))
--- monT (A ∨ B) {Γ} {Δ} τ (C , f) = monC τ C ,  λ {Φ} e →
---   let Ψ , e' , σ = mon∈ C τ e
---   in  {! map-⊎ (monT A σ) (monT B σ) (f {Ψ} e') !}
--- monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
--- monT (A ⇒ B) τ f σ = f (σ • τ)
 
 -- Reflection / reification
 
@@ -349,12 +280,6 @@ paste (A ⇒ B) {Γ} {f} c {Δ} τ {a} ⟦a⟧ = paste B {!convC'!}
   aux (idc ⟦f⟧) = idc (⟦f⟧ τ ⟦a⟧)
   aux (bot t) = subst (Cover _ _ _ ) ⊥-elim-ext (bot (monNe τ t))
   aux (node t cg ch) = {!subst (Cover _ _ _) ? (node (monNe τ t) (aux cg) (aux ch))!}
--- paste (Atom P) = {! paste' !}
--- paste True C f = _
--- paste False C f = transE C f
--- paste (A ∨ B) C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in {! f e₁ .proj₂ e₂ !}
--- paste (A ∧ B) C f = paste A C (proj₁ ∘ f) , paste B C (proj₂ ∘ f)
--- paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e → let Ψ , e' , σ  = mon∈ C τ e in {! f e' σ (monT A (coverWk e) a) !}
 
 -- Fundamental theorem
 
@@ -478,10 +403,10 @@ ide : ∀ Γ → G⟦ Γ ⟧ Γ id
 ide ε = _
 ide (Γ ∙ A) = monG (weak id≤) (ide Γ) , reflect A (iHyp top)
 
--- Normalization
+-- Normalization by evaluation
 
-norm : ∀{Γ A} (t : Γ ⊢ A) → Nf Γ A
-norm t = proj₁ (reify _ (fund t (ide _)))
+norm : ∀{Γ A} (t : Γ ⊢ A) → NfImg A Γ D⦅ t ⦆
+norm t = reify _ (fund t (ide _))
 
 -- -}
 -- -}
