@@ -164,7 +164,7 @@ T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
 T⟦ Atom P ⟧ Γ = Nf Γ (Atom P)
 T⟦ True   ⟧ Γ = ⊤
 T⟦ False  ⟧ Γ = EmptyCover Γ
-T⟦ A ∨ B  ⟧ Γ = ∃ λ (C : Cover Γ) → ∀{Δ} → Δ ∈ C → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
+T⟦ A ∨ B  ⟧ Γ = Σ (Cover Γ) λ C → ∀{Δ} → Δ ∈ C → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
 T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
 T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧ Δ
 
@@ -196,12 +196,9 @@ mutual
   reflect (Atom P) t = ne t
   reflect True     t = _
   reflect False      = toEmptyCover
-  reflect (A ∨ B)  t = orC t hole hole , aux
-    where
-    aux : ∀{Δ} → Δ ∈ orC t hole hole → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
-    aux (left  here) = inj₁ (reflect A (hyp top))
-    aux (right here) = inj₂ (reflect B (hyp top))
-
+  reflect (A ∨ B)  t = orC t hole hole , λ where
+    (left  here) → inj₁ (reflect A (hyp top))
+    (right here) → inj₂ (reflect B (hyp top))
   reflect (A ∧ B)  t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B)  t τ a = reflect B (impE (monNe τ t) (reify A a))
 
