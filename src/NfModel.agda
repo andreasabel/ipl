@@ -31,6 +31,16 @@ data _∈_ Δ : ({Γ} : Cxt) (C : Cover Γ) → Set where
   left  : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ C) → Δ ∈ orC t C D
   right : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ D) → Δ ∈ orC t C D
 
+-- Given a case tree C : Cover Γ and a context-indexed set P,
+-- f : All C P  is an assignment of things in  P Δ  to holes
+-- of type Δ reached by pathes e : Δ ∈ C.
+
+-- We can also use All C P with a property P on context,
+-- to express that all holes of C satify P.
+
+All : ∀{Γ} (C : Cover Γ) (P : (Δ : Cxt) → Set) → Set
+All C P = ∀{Δ} (e : Δ ∈ C) → P Δ
+
 -- If  C : Cover Γ  and  e : Δ ∈ C,  then Δ must be an extension of Γ.
 -- Here, we only prove that it is a thinning.
 
@@ -38,6 +48,9 @@ coverWk : ∀{Γ} {C : Cover Γ} {Δ} (e : Δ ∈ C) → Δ ≤ Γ
 coverWk here      = id≤
 coverWk (left  e) = coverWk e • weak id≤
 coverWk (right e) = coverWk e • weak id≤
+
+-- This could be expressed as:
+-- coverWk : ∀{Γ} {C : Cover Γ} → All C (_≤ Γ)
 
 -- We can substitute leaves in the case tree by case trees in turn.
 -- The following is a ``parallel substitution'' operations for covers.
@@ -48,7 +61,7 @@ coverWk (right e) = coverWk e • weak id≤
 -- Here, the case tree substitution is given as a function from pathes
 -- p : Δ ∈ C  to covers.
 
-transC : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) → Cover Γ
+transC : ∀{Γ} (C : Cover Γ) (f : All C Cover) → Cover Γ
 transC hole        f = f here
 transC (falseC t)  f = falseC t
 transC (orC t C D) f = orC t (transC C (f ∘ left)) (transC D (f ∘ right))
@@ -61,8 +74,8 @@ transC (orC t C D) f = orC t (transC C (f ∘ left)) (transC D (f ∘ right))
 
 -- Note that we maintain f only for the sake of typing.
 
-trans∈ : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) →
-  ∀ {Φ} {Δ} (e : Δ ∈ C) → Φ ∈ f e → Φ ∈ transC C f
+trans∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) →
+  ∀ {Δ} (e : Δ ∈ C) {Φ} → Φ ∈ f e → Φ ∈ transC C f
 trans∈ hole        f here      = id
 trans∈ (falseC t)  f ()
 trans∈ (orC t C D) f (left  e) = left  ∘ trans∈ C (f ∘ left ) e
@@ -74,7 +87,7 @@ trans∈ (orC t C D) f (right e) = right ∘ trans∈ D (f ∘ right) e
 -- If we have a path q : Φ ∈ transC C f we can split it into some
 -- e : Δ ∈ C and p : Φ ∈ f e.
 
-split∈ : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → Cover Δ) {Φ} (q : Φ ∈ transC C f)
+split∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) {Φ} (q : Φ ∈ transC C f)
   → ∃ λ Δ → ∃ λ (e : Δ ∈ C) → Φ ∈ f e
 split∈ hole        f q = _ , _ , q
 split∈ (falseC t)  f ()
@@ -89,7 +102,7 @@ split∈ (orC t C D) f (right q) with split∈ D (f ∘ right) q
 -- a case tree whose every branch ends in an absurd match.
 
 EmptyCover : (Γ : Cxt) → Set
-EmptyCover Γ = Σ (Cover Γ) λ C → ∀{Δ} → Δ ∈ C → ⊥
+EmptyCover Γ = Σ (Cover Γ) λ C → All C λ Δ → ⊥
 
 -- Empty cover is isomorphic to a witness of inconsistency.
 
@@ -113,7 +126,7 @@ fromEmptyCover (C , f) = reifyF C f
 -- Given a case tree C : Cover Γ, if all grafted trees f have no leaves,
 -- then the resulting tree  transC C f  has no leaves.
 
-transE : ∀{Γ} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → EmptyCover Δ) → EmptyCover Γ
+transE : ∀{Γ} (C : Cover Γ) (f : All C EmptyCover) → EmptyCover Γ
 transE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
 
 -- Syntactic paste (from Thorsten).
@@ -121,7 +134,7 @@ transE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ 
 -- If for each leave e : Δ ∈ C of a case tree C : Cover Γ we have a normal form
 -- f e : Nf Δ A  of type A, grafting these nfs onto C gives us a  Nf Γ A.
 
-paste' : ∀{A Γ} (C : Cover Γ) (f : ∀{Δ} (e : Δ ∈ C) → Nf Δ A) → Nf Γ A
+paste' : ∀{A Γ} (C : Cover Γ) (f : All C λ Δ → Nf Δ A) → Nf Γ A
 paste' hole        f = f here
 paste' (falseC t)  f = falseE t
 paste' (orC t C D) f = orE t (paste' C (f ∘ left)) (paste' D (f ∘ right))
@@ -215,7 +228,7 @@ mutual
 -- This grafts semantic values f onto a case tree C : Cover Γ.
 -- For atomic propositions, this is grafting of normal forms (defined before).
 
-paste : ∀ A {Γ} (C : Cover Γ) (f : ∀{Δ} (e : Δ ∈ C) → T⟦ A ⟧ Δ) → T⟦ A ⟧ Γ
+paste : ∀ A {Γ} (C : Cover Γ) (f : All C λ Δ → T⟦ A ⟧ Δ) → T⟦ A ⟧ Γ
 paste (Atom P) = paste'
 paste True    C f = _
 paste False   C f = transE C f
@@ -253,7 +266,7 @@ orElim C f g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
 
 -- Casts an empty cover into any semantic value (by contradiction).
 
-falseElim : ∀{Γ A} (C : Cover Γ) (f : ∀{Δ} → Δ ∈ C → ⊥) → T⟦ A ⟧ Γ
+falseElim : ∀{Γ A} (C : Cover Γ) (f : All C λ _ → ⊥) → T⟦ A ⟧ Γ
 falseElim C f = paste _ C (⊥-elim ∘ f)
 
 -- The fundamental theorem
