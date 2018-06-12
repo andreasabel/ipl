@@ -101,39 +101,6 @@ split∈ (orC t C D) f (left q) with split∈ C (f ∘ left) q
 split∈ (orC t C D) f (right q) with split∈ D (f ∘ right) q
 ... | Δ , e₁ , e₂ = Δ , right e₁ , e₂
 
--- Then empty cover is a case tree without leaves.
---
--- Thus, it witnesses the inconsistency of a context, since we construct
--- a case tree whose every branch ends in an absurd match.
-
-EmptyCover : (Γ : Cxt) → Set
-EmptyCover Γ = Σ (Cover Γ) λ C → All C λ Δ → ⊥
-
--- Empty cover is isomorphic to a witness of inconsistency.
-
--- Splitting on a neutral proof of False we immediately get the empty cover.
-
-toEmptyCover : ∀{Γ} (t : Ne Γ False) → EmptyCover Γ
-toEmptyCover t = falseC t , λ()
-
--- Given a case tree without leaves, we can turn it into a normal proof of False.
--- This is just a change of representation: we replace bot-nodes by falseE
--- and sum splits (orC) by orE.  The case hole is impossible (no leaves).
-
-fromEmptyCover : ∀{Γ} (ec : EmptyCover Γ) → Nf Γ False
-fromEmptyCover (C , f) = reifyF C f
-  where
-  reifyF : ∀ {Γ} (C : Cover Γ) (f : ∀ {Δ} → Δ ∈ C → ⊥) → Nf Γ False
-  reifyF hole        f = ⊥-elim (f here)
-  reifyF (falseC t)  f = falseE t  -- falseE is needed (instead of ne) for η-long forms
-  reifyF (orC t C D) f = orE t (reifyF C (f ∘ left)) (reifyF D (f ∘ right))
-
--- Given a case tree C : Cover Γ, if all grafted trees f have no leaves,
--- then the resulting tree  transC C f  has no leaves.
-
-transE : ∀{Γ} (C : Cover Γ) (f : All C EmptyCover) → EmptyCover Γ
-transE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
-
 -- Syntactic paste (from Thorsten).
 
 -- If for each leave e : Δ ∈ C of a case tree C : Cover Γ we have a normal form
@@ -166,6 +133,14 @@ mon∈ (orC t C D) τ (left e)  with mon∈ C (lift τ) e
 mon∈ (orC t C D) τ (right e) with mon∈ D (lift τ) e
 ... | Ψ , e' , σ = Ψ , right e' , σ
 
+-- Packaging a case tree with its valuation.
+
+CovExt : (Γ : Cxt) (P : Cxt → Set) → Set
+CovExt Γ P = Σ (Cover Γ) λ C → All C P
+
+transCE : ∀ {P Γ} (C : Cover Γ) (f : All C λ Δ → CovExt Δ P) → CovExt Γ P
+transCE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
+
 -- The syntactic Beth model.
 
 -- We interpret base propositions  Atom P  by their normal deriviations.
@@ -181,8 +156,8 @@ mon∈ (orC t C D) τ (right e) with mon∈ D (lift τ) e
 T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
 T⟦ Atom P ⟧ Γ = Nf Γ (Atom P)
 T⟦ True   ⟧ Γ = ⊤
-T⟦ False  ⟧ Γ = Σ (Cover Γ) λ C → All C λ Δ → ⊥
-T⟦ A ∨ B  ⟧ Γ = Σ (Cover Γ) λ C → All C λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
+T⟦ False  ⟧ Γ = CovExt Γ λ Δ → ⊥
+T⟦ A ∨ B  ⟧ Γ = CovExt Γ λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
 T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
 T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧ Δ
 
@@ -235,9 +210,9 @@ mutual
 
 paste : ∀ A {Γ} (C : Cover Γ) (f : All C (T⟦ A ⟧)) → T⟦ A ⟧ Γ
 paste (Atom P) = paste'
-paste True    C f = _
-paste False   C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
-paste (A ∨ B) C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
+paste True     = _
+paste False    = transCE
+paste (A ∨ B)  = transCE
 paste (A ∧ B) C f = paste A C (proj₁ ∘ f) , paste B C (proj₂ ∘ f)
 paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e → let Ψ , e' , σ  = mon∈ C τ e in f e' σ (monT A (coverWk e) a)
 
@@ -261,18 +236,18 @@ fundH (pop x) = fundH x ∘ proj₁
 
 -- A lemma for the orE case.
 
-orElim : ∀ {Γ A B X} (C : Cover Γ) (f : {Δ : Cxt} → Δ ∈ C → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ) →
+orElim : ∀ {Γ A B X} → T⟦ A ∨ B ⟧ Γ →
          (∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ X ⟧ Δ) →
          (∀{Δ} (τ : Δ ≤ Γ) → T⟦ B ⟧ Δ → T⟦ X ⟧ Δ) →
          T⟦ X ⟧ Γ
-orElim C f g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
+orElim (C , f) g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
 
 -- A lemma for the falseE case.
 
 -- Casts an empty cover into any semantic value (by contradiction).
 
-falseElim : ∀{Γ A} (C : Cover Γ) (f : All C λ _ → ⊥) → T⟦ A ⟧ Γ
-falseElim C f = paste _ C (⊥-elim ∘ f)
+falseElim : ∀{Γ A} → T⟦ False ⟧ Γ → T⟦ A ⟧ Γ
+falseElim (C , f) = paste _ C (⊥-elim ∘ f)
 
 -- The fundamental theorem
 
@@ -285,10 +260,10 @@ fund (andE₁ t)         = proj₁ ∘ fund t
 fund (andE₂ t)         = proj₂ ∘ fund t
 fund (orI₁ t)    γ     = hole , inj₁ ∘ λ{ here → fund t γ }
 fund (orI₂ t)    γ     = hole , inj₂ ∘ λ{ here → fund t γ }
-fund (orE t u v) γ     = uncurry orElim (fund t γ)
+fund (orE t u v) γ     = orElim (fund t γ)
   (λ τ a → fund u (monG τ γ , a))
   (λ τ b → fund v (monG τ γ , b))
-fund (falseE t)  γ     = uncurry falseElim (fund t γ)
+fund (falseE t)  γ     = falseElim (fund t γ)
 fund trueI       γ     = _
 
 -- Identity environment
