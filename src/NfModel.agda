@@ -181,8 +181,8 @@ mon∈ (orC t C D) τ (right e) with mon∈ D (lift τ) e
 T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
 T⟦ Atom P ⟧ Γ = Nf Γ (Atom P)
 T⟦ True   ⟧ Γ = ⊤
-T⟦ False  ⟧ Γ = EmptyCover Γ
-T⟦ A ∨ B  ⟧ Γ = Σ (Cover Γ) λ C → ∀{Δ} → Δ ∈ C → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
+T⟦ False  ⟧ Γ = Σ (Cover Γ) λ C → All C λ Δ → ⊥
+T⟦ A ∨ B  ⟧ Γ = Σ (Cover Γ) λ C → All C λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
 T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
 T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧ Δ
 
@@ -213,17 +213,17 @@ mutual
   reflect : ∀{Γ} A (t : Ne Γ A) → T⟦ A ⟧ Γ
   reflect (Atom P) t = ne t
   reflect True     t = _
-  reflect False      = toEmptyCover
+  reflect False    t = falseC t , λ()
   reflect (A ∨ B)  t = orC t hole hole , λ where
     (left  here) → inj₁ (reflect A (hyp top))
     (right here) → inj₂ (reflect B (hyp top))
   reflect (A ∧ B)  t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B)  t τ a = reflect B (impE (monNe τ t) (reify A a))
 
-  reify : ∀{Γ} A (⟦f⟧ :  T⟦ A ⟧ Γ) → Nf Γ A
+  reify : ∀{Γ} A (⟦f⟧ : T⟦ A ⟧ Γ) → Nf Γ A
   reify (Atom P) t      = t
   reify True _          = trueI
-  reify False           = fromEmptyCover
+  reify False   (C , f) = paste' C (⊥-elim ∘ f)
   reify (A ∨ B) (C , f) = paste' C ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (reflect A (hyp top))))
@@ -233,10 +233,10 @@ mutual
 -- This grafts semantic values f onto a case tree C : Cover Γ.
 -- For atomic propositions, this is grafting of normal forms (defined before).
 
-paste : ∀ A {Γ} (C : Cover Γ) (f : All C λ Δ → T⟦ A ⟧ Δ) → T⟦ A ⟧ Γ
+paste : ∀ A {Γ} (C : Cover Γ) (f : All C (T⟦ A ⟧)) → T⟦ A ⟧ Γ
 paste (Atom P) = paste'
 paste True    C f = _
-paste False   C f = transE C f
+paste False   C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
 paste (A ∨ B) C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
 paste (A ∧ B) C f = paste A C (proj₁ ∘ f) , paste B C (proj₂ ∘ f)
 paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e → let Ψ , e' , σ  = mon∈ C τ e in f e' σ (monT A (coverWk e) a)
