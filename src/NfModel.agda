@@ -35,22 +35,24 @@ data _∈_ Δ : ({Γ} : Cxt) (C : Cover Γ) → Set where
 -- f : All C P  is an assignment of things in  P Δ  to holes
 -- of type Δ reached by pathes e : Δ ∈ C.
 
+All : ∀{Γ} (C : Cover Γ) (P : (Δ : Cxt) → Set) → Set
+All C P = ∀{Δ} (e : Δ ∈ C) → P Δ
+
 -- We can also use All C P with a property P on context,
 -- to express that all holes of C satify P.
 
-All : ∀{Γ} (C : Cover Γ) (P : (Δ : Cxt) → Set) → Set
-All C P = ∀{Δ} (e : Δ ∈ C) → P Δ
+-- We might want to depend on the path e : Δ ∈ C also:
+
+All' : ∀{Γ} (C : Cover Γ) (P : ∀ {Δ} (e : Δ ∈ C) → Set) → Set
+All' C P = ∀{Δ} (e : Δ ∈ C) → P e
 
 -- If  C : Cover Γ  and  e : Δ ∈ C,  then Δ must be an extension of Γ.
 -- Here, we only prove that it is a thinning.
 
-coverWk : ∀{Γ} {C : Cover Γ} {Δ} (e : Δ ∈ C) → Δ ≤ Γ
+coverWk : ∀{Γ} {C : Cover Γ} → All C (_≤ Γ)
 coverWk here      = id≤
 coverWk (left  e) = coverWk e • weak id≤
 coverWk (right e) = coverWk e • weak id≤
-
--- This could be expressed as:
--- coverWk : ∀{Γ} {C : Cover Γ} → All C (_≤ Γ)
 
 -- We can substitute leaves in the case tree by case trees in turn.
 -- The following is a ``parallel substitution'' operations for covers.
@@ -74,8 +76,11 @@ transC (orC t C D) f = orC t (transC C (f ∘ left)) (transC D (f ∘ right))
 
 -- Note that we maintain f only for the sake of typing.
 
+-- trans∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) →
+--   ∀ {Δ} (e : Δ ∈ C) {Φ} → Φ ∈ f e → Φ ∈ transC C f
+
 trans∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) →
-  ∀ {Δ} (e : Δ ∈ C) {Φ} → Φ ∈ f e → Φ ∈ transC C f
+  All' C λ {Δ} (e : Δ ∈ C) → All (f e) (_∈ transC C f)
 trans∈ hole        f here      = id
 trans∈ (falseC t)  f ()
 trans∈ (orC t C D) f (left  e) = left  ∘ trans∈ C (f ∘ left ) e
