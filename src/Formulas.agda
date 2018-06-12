@@ -29,9 +29,9 @@ data Cxt : Set where
 
 infixl 4 _∙_
 
-data Hyp : (Γ : Cxt) (A : Form) → Set where
-  top : ∀{Γ A} → Hyp (Γ ∙ A) A
-  pop : ∀{Γ A B} (x : Hyp Γ A) → Hyp (Γ ∙ B) A
+data Hyp (A : Form) : (Γ : Cxt) → Set where
+  top : ∀{Γ} → Hyp A (Γ ∙ A)
+  pop : ∀{Γ B} (x : Hyp A Γ) → Hyp A (Γ ∙ B)
 
 -- Context extension and permutation
 
@@ -45,7 +45,10 @@ data _≤_ : (Γ Δ : Cxt) → Set where
 postulate lift-id≤ : ∀{Γ A} → lift id≤ ≡ id≤ {Γ ∙ A}
 {-# REWRITE lift-id≤ #-}
 
-monH : ∀{Γ Δ A} (τ : Γ ≤ Δ) (x : Hyp Δ A) → Hyp Γ A
+Mon : (P : Cxt → Set) → Set
+Mon P = ∀{Γ Δ} (τ : Γ ≤ Δ) → P Δ → P Γ
+
+monH : ∀{A} → Mon (Hyp A)
 monH id≤      x       = x
 monH (weak τ) x       = pop (monH τ x)
 monH (lift τ) top     = top
@@ -58,7 +61,7 @@ lift τ • id≤ = lift τ
 lift τ • weak σ = weak (τ • σ)
 lift τ • lift σ = lift (τ • σ)
 
-monH• : ∀{Γ Δ Φ A} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) (x : Hyp Φ A) → monH (τ • σ) x ≡ monH τ (monH σ x)
+monH• : ∀{Γ Δ Φ A} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) (x : Hyp A Φ) → monH (τ • σ) x ≡ monH τ (monH σ x)
 monH• id≤      σ        x       = refl
 monH• (weak τ) σ        x       = cong pop (monH• τ σ x)
 monH• (lift τ) id≤      x       = refl

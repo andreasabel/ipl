@@ -114,7 +114,8 @@ paste' (orC t C D) f = orE t (paste' C (f ∘ left)) (paste' D (f ∘ right))
 -- Weakening covers:  A case tree in Γ can be transported to a thinning Δ
 -- by weakening all the scrutinees.
 
-monC : ∀{Γ Δ} (τ : Δ ≤ Γ) (C : Cover Γ) → Cover Δ
+-- monC : ∀{Γ Δ} (τ : Δ ≤ Γ) (C : Cover Γ) → Cover Δ
+monC : Mon Cover
 monC τ hole        = hole
 monC τ (falseC t)  = falseC (monNe τ t)
 monC τ (orC t C D) = orC (monNe τ t) (monC (lift τ) C) (monC (lift τ) D)
@@ -139,7 +140,14 @@ CovExt : (Γ : Cxt) (P : Cxt → Set) → Set
 CovExt Γ P = Σ (Cover Γ) λ C → All C P
 
 transCE : ∀ {P Γ} (C : Cover Γ) (f : All C λ Δ → CovExt Δ P) → CovExt Γ P
-transCE C f = transC C (proj₁ ∘ f) , λ e → let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e in f e₁ .proj₂ e₂
+transCE C f = transC C (proj₁ ∘ f) , λ e →
+  let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e
+  in  f e₁ .proj₂ e₂
+
+monCE : ∀{P} → Mon P → Mon λ Γ → CovExt Γ P
+monCE monP τ (C , f) = monC τ C ,  λ {Φ} e →
+  let Ψ , e' , σ = mon∈ C τ e
+  in  monP σ (f {Ψ} e')
 
 -- The syntactic Beth model.
 
@@ -164,15 +172,15 @@ T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧
 -- Monotonicity of the model is proven by induction on the proposition,
 -- using monotonicity of covers and the built-in monotonicity at implication.
 
-monT : ∀ A {Γ Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ → T⟦ A ⟧ Δ
-monT (Atom P)        τ t = monNf τ t
-monT True            τ _ = _
-monT False           τ (C , f) = monC τ C , λ {Φ} e → f (proj₁ (proj₂ (mon∈ C τ e)))
-monT (A ∨ B) {Γ} {Δ} τ (C , f) = monC τ C ,  λ {Φ} e →
-  let Ψ , e' , σ = mon∈ C τ e
-  in  map-⊎ (monT A σ) (monT B σ) (f {Ψ} e')
-monT (A ∧ B)         τ (a , b) = monT A τ a , monT B τ b
-monT (A ⇒ B)         τ f σ = f (σ • τ)
+-- monT : ∀ A {Γ Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ → T⟦ A ⟧ Δ
+
+monT : ∀ A → Mon T⟦ A ⟧
+monT (Atom P) = monNf
+monT True     = _
+monT False    = monCE λ τ ()
+monT (A ∨ B)  = monCE λ τ → map-⊎ (monT A τ) (monT B τ)
+monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
+monT (A ⇒ B) τ f σ = f (σ • τ)
 
 -- Reflection / reification, proven simultaneously by induction on the proposition.
 
@@ -224,13 +232,15 @@ G⟦_⟧ : ∀ (Γ Δ : Cxt) → Set
 G⟦ ε     ⟧ Δ = ⊤
 G⟦ Γ ∙ A ⟧ Δ = G⟦ Γ ⟧ Δ × T⟦ A ⟧ Δ
 
-monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
+-- monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
+
+monG : ∀{Γ} → Mon G⟦ Γ ⟧
 monG {ε} τ _ = _
 monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
 -- Variable case.
 
-fundH : ∀{Γ Δ A} (x : Hyp Γ A) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
+fundH : ∀{Γ Δ A} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 

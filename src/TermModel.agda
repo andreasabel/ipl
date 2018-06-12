@@ -169,7 +169,7 @@ monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
 -- Variable case
 
-fundH : ∀{Γ Δ A} (x : Hyp Γ A) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
+fundH : ∀{Γ Δ A} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 

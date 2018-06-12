@@ -27,7 +27,7 @@ Fun Γ A = (γ : C⦅ Γ ⦆) → T⦅ A ⦆
 Mor : (Γ Δ : Cxt) → Set
 Mor Γ Δ = (γ : C⦅ Γ ⦆) → C⦅ Δ ⦆
 
-H⦅_⦆ : ∀{Γ A} (x : Hyp Γ A) → Fun Γ A
+H⦅_⦆ : ∀{Γ A} (x : Hyp A Γ) → Fun Γ A
 H⦅ top   ⦆ = proj₂
 H⦅ pop x ⦆ = H⦅ x ⦆ ∘ proj₁
 
@@ -67,7 +67,7 @@ kapp f τ a δ = f (R⦅ τ ⦆ δ) (a δ)
 
 -- Naturality
 
-natH  : ∀{Γ Δ A} (τ : Δ ≤ Γ) (x : Hyp Γ A) → H⦅ monH τ x ⦆ ≡ H⦅ x ⦆ ∘ R⦅ τ ⦆
+natH  : ∀{Γ Δ A} (τ : Δ ≤ Γ) (x : Hyp A Γ) → H⦅ monH τ x ⦆ ≡ H⦅ x ⦆ ∘ R⦅ τ ⦆
 natH id≤ x = refl
 natH (weak τ) x = cong (_∘ proj₁) (natH τ x)
 natH (lift τ) top = refl

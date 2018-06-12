@@ -13,7 +13,7 @@ import Formulas; open module Form = Formulas Base
 infix 2 _⊢_
 
 data _⊢_ (Γ : Cxt) : (A : Form) → Set where
-  hyp    : ∀{A} (x : Hyp Γ A) → Γ ⊢ A
+  hyp    : ∀{A} (x : Hyp A Γ) → Γ ⊢ A
   impI   : ∀{A B} (t : Γ ∙ A ⊢ B) → Γ ⊢ A ⇒ B
   impE   : ∀{A B} (t : Γ ⊢ A ⇒ B) (u : Γ ⊢ A) → Γ ⊢ B
   andI   : ∀{A B} (t : Γ ⊢ A) (u : Γ ⊢ B) → Γ ⊢ A ∧ B
@@ -65,7 +65,7 @@ monD-id trueI = refl
 
 mutual
   data Neutral {Γ} {A} : (t : Γ ⊢ A) → Set where
-    hyp : (x : Hyp Γ A) → Neutral (hyp x)
+    hyp : (x : Hyp A Γ) → Neutral (hyp x)
     impE : ∀{B} {t : Γ ⊢ B ⇒ A} {u : Γ ⊢ B} (ne : Neutral t) (nf : Normal u) → Neutral (impE t u)
     andE₁ : ∀{B} {t : Γ ⊢ A ∧ B} (ne : Neutral t) → Neutral (andE₁ t)
     andE₂ : ∀{B} {t : Γ ⊢ B ∧ A} (ne : Neutral t) → Neutral (andE₂ t)
@@ -85,7 +85,7 @@ mutual
 
 mutual
   data Ne (Γ : Cxt) (A : Form) : Set where
-    hyp    : ∀    (x : Hyp Γ A) → Ne Γ A
+    hyp    : ∀    (x : Hyp A Γ) → Ne Γ A
     impE   : ∀{B} (t : Ne Γ (B ⇒ A)) (u : Nf Γ B) → Ne Γ A
     andE₁  : ∀{B} (t : Ne Γ (A ∧ B)) → Ne Γ A
     andE₂  : ∀{B} (t : Ne Γ (B ∧ A)) → Ne Γ A
