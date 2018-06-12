@@ -9,32 +9,32 @@ import Derivations; open module Der  = Derivations Base
 
 -- Beth model
 
--- A cover for Δ is the skeleton of a case tree that can be formed in Δ.
+-- A cover for Γ is the skeleton of a case tree that can be formed in Γ.
 -- It contains the (neutral) scrutinees we case over and the markers (hole)
 -- for the leaves that have to be filled by the branches of the case statement.
 
-data Cover (Δ : Cxt) : Set where
-  hole   : Cover Δ
-  falseC : (t : Ne Δ False) → Cover Δ
-  orC    : ∀{A B} (t : Ne Δ (A ∨ B)) (C : Cover (Δ ∙ A)) (D : Cover (Δ ∙ B)) → Cover Δ
+data Cover (Γ : Cxt) : Set where
+  hole   : Cover Γ
+  falseC : (t : Ne Γ False) → Cover Γ
+  orC    : ∀{A B} (t : Ne Γ (A ∨ B)) (C : Cover (Γ ∙ A)) (D : Cover (Γ ∙ B)) → Cover Γ
 
 -- Choice of names.
 -- hole  : has the same role as the hole-evaluation context (identity).
 -- falseC: basically falseE.
 -- orC   : basically orE.
 
--- Given C : Cover Δ, a path p : Γ ∈ C leads us from the root to one of the leaves (hole)
--- of the case tree.  Γ is the context at the leaf.
+-- Given C : Cover Γ, a path p : Δ ∈ C leads us from the root to one of the leaves (hole)
+-- of the case tree.  Δ is the context at the leaf.
 
-data _∈_ Γ : ({Δ} : Cxt) (C : Cover Δ) → Set where
-  here  : Γ ∈ hole {Γ}
-  left  : ∀{Δ A B C D} {t : Ne Δ (A ∨ B)} (e : Γ ∈ C) → Γ ∈ orC t C D
-  right : ∀{Δ A B C D} {t : Ne Δ (A ∨ B)} (e : Γ ∈ D) → Γ ∈ orC t C D
+data _∈_ Δ : ({Γ} : Cxt) (C : Cover Γ) → Set where
+  here  : Δ ∈ hole {Δ}
+  left  : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ C) → Δ ∈ orC t C D
+  right : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ D) → Δ ∈ orC t C D
 
--- If  C : Cover Δ  and  e : Γ ∈ C,  then Γ must be an extension of Δ.
+-- If  C : Cover Γ  and  e : Δ ∈ C,  then Δ must be an extension of Γ.
 -- Here, we only prove that it is a thinning.
 
-coverWk : ∀{Γ Δ} {C : Cover Δ} (e : Γ ∈ C) → Γ ≤ Δ
+coverWk : ∀{Γ} {C : Cover Γ} {Δ} (e : Δ ∈ C) → Δ ≤ Γ
 coverWk here      = id≤
 coverWk (left  e) = coverWk e • weak id≤
 coverWk (right e) = coverWk e • weak id≤
