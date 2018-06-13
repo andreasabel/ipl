@@ -6,7 +6,7 @@ open import Library
 
 module NbeModel (Base : Set) (B⦅_⦆ : Base → Set) where
 
-import Formulas      ; open module Form = Formulas    Base
+import Formulas      ; open module Form = Formulas    Base hiding (Mon)
 import Derivations   ; open module Der  = Derivations Base
 import Interpretation; open module Intp = Interpretation Base B⦅_⦆
 
@@ -37,7 +37,7 @@ iNe (t , eq) =  ne t , eq
 -- iNe : ∀{Γ A f} → NeImg Γ A f → NfImg Γ A f
 -- iNe (t , eq) = ne t , eq
 
-iHyp : ∀{Γ A} (x : Hyp Γ A) → NeImg A Γ H⦅ x ⦆
+iHyp : ∀{Γ A} (x : Hyp A Γ) → NeImg A Γ H⦅ x ⦆
 iHyp x = (hyp x , refl)
 
 iImpI : ∀{Γ A B f} → NfImg B (Γ ∙ A) f → NfImg (A ⇒ B) Γ (curry f)
@@ -295,7 +295,7 @@ monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
 -- Variable case
 
-fundH : ∀{Γ Δ A ρ} (x : Hyp Γ A) (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (H⦅ x ⦆ ∘ ρ)
+fundH : ∀{Γ Δ A ρ} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (H⦅ x ⦆ ∘ ρ)
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 
