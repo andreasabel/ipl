@@ -124,40 +124,60 @@ mutual
 
 -- Fundamental theorem
 
+-- Delayed lifting
+
+record ◇ (G : Cxt → Set) (Γ : Cxt) : Set where
+  constructor dia; field
+    {Δ} : Cxt
+    τ   : Γ ≤ Δ
+    γ   : G Δ
+
+mon◇ : ∀{P} → Mon (◇ P)
+mon◇ τ′ (dia τ x) = dia (τ′ • τ) x
+
 -- Extension of T⟦_⟧ to contexts
 
 G⟦_⟧ : ∀ (Γ Δ : Cxt) → Set
 G⟦ ε     ⟧ Δ = ⊤
-G⟦ Γ ∙ A ⟧ Δ = G⟦ Γ ⟧ Δ × T⟦ A ⟧ Δ
+G⟦ Γ ∙ A ⟧ Δ = ◇ G⟦ Γ ⟧ Δ × T⟦ A ⟧ Δ
 
 -- monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
 
 monG : ∀{Γ} → Mon G⟦ Γ ⟧
 monG {ε} τ _ = _
-monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
+monG {Γ ∙ A} τ (γ , a) = mon◇ τ γ , monT A τ a
+
+ext : ∀ A {Γ Δ₁ Δ} →
+      (τ : Δ ≤ Δ₁) (γ : ◇ G⟦ Γ ⟧ Δ₁) →
+      (a : T⟦ A ⟧ Δ) →
+      ◇ G⟦ Γ ∙ A ⟧ Δ
+ext A τ (dia τ′ γ) a = dia id≤ (dia (τ • τ′) γ , a)
 
 -- Variable case.
 
-fundH : ∀{Γ Δ A} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
-fundH top     = proj₂
-fundH (pop x) = fundH x ∘ proj₁
+fundH' : ∀{A Γ} (x : Hyp A Γ) → G⟦ Γ ⟧  →̇ □ T⟦ A ⟧
+fundH' {A} top (_       , a) τ = monT A τ a
+fundH' (pop x) (dia τ′ γ , _) τ = fundH' x γ (τ • τ′)
+
+fundH : ∀{A Γ} (x : Hyp A Γ) → ◇ G⟦ Γ ⟧  →̇ □ T⟦ A ⟧
+fundH x (dia τ′ γ) τ = fundH' x γ (τ • τ′)
 
 -- The fundamental theorem:
 -- A call-by-value interpreter.
 
-fund :  ∀{Γ A} (t : Γ ⊢ A) {Δ} (γ : G⟦ Γ ⟧ Δ) → M' T⟦ A ⟧ Δ
+fund :  ∀{Γ A} (t : Γ ⊢ A) → ◇ G⟦ Γ ⟧  →̇ M' T⟦ A ⟧
 
-fund (hyp {A} x) γ = return λ τ → monT A τ (fundH x γ)
-fund (impI t)    γ = return' λ τ a → fund t (monG τ γ , a)
+fund (hyp {A} x) γ = return (fundH x γ)
+fund (impI {A} t) γ = return' λ τ a → fund t (ext A τ γ a)
 
 fund (impE t u)  γ =
   fund t γ          >>= λ τ f →
-  fund u (monG τ γ) >>= λ τ′ a →
+  fund u (mon◇ τ γ) >>= λ τ′ a →
   f τ′ a
 
 fund (andI {A} {B} t u) γ =
   fund t γ >>= λ τ a →
-  fund u (monG τ γ) >>= λ τ′ b →
+  fund u (mon◇ τ γ) >>= λ τ′ b →
   return λ τ₁ → monT A (τ₁ • τ′) a , monT B τ₁ b
 
 fund (andE₁ t)    γ = proj₁ <$> fund t γ
@@ -165,9 +185,9 @@ fund (andE₂ t)    γ = proj₂ <$> fund t γ
 fund (orI₁ t)     γ = inj₁  <$> fund t γ
 fund (orI₂ t)     γ = inj₂  <$> fund t γ
 
-fund (orE t u v) γ = fund t γ >>= λ τ →
-  [ (λ a → fund u (monG τ γ , a))
-  , (λ b → fund v (monG τ γ , b))
+fund (orE {A} {B} t u v) γ = fund t γ >>= λ τ →
+  [ (λ a → fund u (ext A τ γ a))
+  , (λ b → fund v (ext B τ γ b))
   ]
 
 fund (falseE t)  γ = fund t γ >>= λ τ ()
@@ -180,14 +200,16 @@ ide ε       τ = return _
 ide (Γ ∙ A) τ =
   ide Γ (τ • weak id≤)           >>= λ τ₁ γ →
   reflect A (mon□ (τ₁ • τ) fresh) >>= λ τ₂ a →
-  return λ τ₃ → monG (τ₃ • τ₂) γ , monT A τ₃ a
+  return λ τ₃ → dia (τ₃ • τ₂) γ , monT A τ₃ a
+
+  -- return λ τ₃ → mon◇ τ₃ (ext A τ₂ γ a)
 
 -- Normalization
 
 norm : ∀{A Γ} (t : Γ ⊢ A) → Nf Γ A
 norm {A} {Γ} t = reset $
   ide Γ id≤ >>= λ _ γ →
-  fund t γ <&> λ a →
+  fund t (dia id≤ γ) <&> λ a →
   reify A a id≤
 
 idD : (A : Form) → ε ⊢ (A ⇒ A)
