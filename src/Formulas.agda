@@ -70,3 +70,12 @@ monH• (lift τ) (lift σ) top     = refl
 monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 
 {-# REWRITE monH• #-}
+
+_→̇_ : (P Q : Cxt → Set) → Set
+P →̇ Q = ∀{Γ} → P Γ → Q Γ
+
+CFun : (P Q : Cxt → Set) → Cxt → Set
+CFun P Q Γ = P Γ → Q Γ
+
+KFun : (P Q : Cxt → Set) → Cxt → Set
+KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
