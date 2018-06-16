@@ -13,8 +13,15 @@ open import Derivations Base
 -- Shift-reset continutation monad
 
 record M (A B C : Cxt → Set) (Γ : Cxt) : Set where
+  constructor shift
   field run : KFun (KFun C B) A Γ
 open M
+
+-- shift : ∀{X Y A Γ} (f : KFun (KFun A Y) X Γ) → M X Y A Γ
+-- shift f .run σ k = f σ k
+
+reset : ∀{Y A} → M A Y Y →̇ A
+reset m = m .run id≤ λ τ → id
 
 return : ∀{X A} → □ A →̇ M X X A
 return x .run τ k = k id≤ (x τ)
@@ -33,18 +40,6 @@ _<&>_ : ∀{X Y A B Γ} (m : M X Y A Γ) (f : A →̇ B) → M X Y B Γ
 
 K$ : ∀{X Y A B} → KFun A B →̇ KFun (M X Y A) (M X Y B)
 K$ f τ m .run σ k = m .run σ λ τ′ a →  k τ′ (f (τ′ • (σ • τ)) a)
-
-shift' : ∀{X Y A Γ} (f : KFun (KFun A Y) X Γ) → M X Y A Γ
-shift' f .run σ k = f σ k
-
-shift : ∀{X Y A Γ} (f : KFun (KFun A Y) (M X Y Y) Γ) → M X Y A Γ
-shift f .run σ k = f σ k .run id≤ λ τ → id
-
-reset' : ∀{Y A} → M A Y Y →̇ A
-reset' m = m .run id≤ λ τ → id
-
-reset : ∀{X Y A} → M A Y Y →̇ M X X A
-reset m .run σ k = k id≤ (m .run σ λ τ → id)
 
 -- We use a continuation monad with answer type Nf.
 
@@ -90,14 +85,14 @@ mutual
   reflect : ∀ A → □ (Ne' A) →̇ M' T⟦ A ⟧
   reflect (Atom P) t = return' (ne ∘′ t) -- λ τ → ne (monNe τ t)
   reflect True     t = return _
-  reflect False    t = shift' λ τ k → falseE (t τ)
-  reflect (A ∨ B)  t = shift' λ τ k → orE (t τ)
-    (reset' (K$ k (weak id≤) (inj₁ <$> reflect A fresh)))
-    (reset' (K$ k (weak id≤) (inj₂ <$> reflect B fresh)))
+  reflect False    t = shift λ τ k → falseE (t τ)
+  reflect (A ∨ B)  t = shift λ τ k → orE (t τ)
+    (reset (K$ k (weak id≤) (inj₁ <$> reflect A fresh)))
+    (reset (K$ k (weak id≤) (inj₂ <$> reflect B fresh)))
 
     -- ((inj₂ <$> reflect B (hyp top)) .run λ τ → k (τ • weak id≤))
     -- Wrong:
-    --     (reset' (k (weak id≤) <$> (inj₁ <$> reflect A (hyp top))))
+    --     (reset (k (weak id≤) <$> (inj₁ <$> reflect A (hyp top))))
 
   -- reflect (A ∧ B) t = do
   --   a ← reflect A (andE₁ t)
@@ -109,7 +104,7 @@ mutual
     reflect B (mon□ {Ne' B} τ (andE₂ ∘ t)) >>= λ τ′ b →
     return λ τ₁ → monT A (τ₁ • τ′) a , monT B τ₁ b
 
-  reflect (A ⇒ B)  t = return' λ τ a → reflect B (λ τ′ → impE (t (τ′ • τ)) (reify A a τ′))
+  reflect (A ⇒ B)  t = return' λ τ a → reflect B λ τ′ → impE (t (τ′ • τ)) (reify A a τ′)
 
 
   reify : ∀ A → T⟦ A ⟧ →̇ □ (Nf' A)
@@ -121,7 +116,7 @@ mutual
   reify (A ∨ B) (inj₂ b) τ = orI₂ (reify B b τ)
   reify (A ∧ B) (a , b) τ = andI (reify A a τ) (reify B b τ)
 
-  reify (A ⇒ B) f       τ = impI $ reset' $
+  reify (A ⇒ B) f       τ = impI $ reset $
     reflect A fresh >>= λ τ′ a →
     f (τ′ • weak τ) a <&> λ b →
     reify B b id≤
@@ -190,7 +185,7 @@ ide (Γ ∙ A) τ =
 -- Normalization
 
 norm : ∀{A Γ} (t : Γ ⊢ A) → Nf Γ A
-norm {A} {Γ} t = reset' $
+norm {A} {Γ} t = reset $
   ide Γ id≤ >>= λ _ γ →
   fund t γ <&> λ a →
   reify A a id≤
