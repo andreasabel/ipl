@@ -71,6 +71,9 @@ monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 
 {-# REWRITE monH• #-}
 
+□ : (P : Cxt → Set) → Cxt → Set
+□ P Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ
+
 _→̇_ : (P Q : Cxt → Set) → Set
 P →̇ Q = ∀{Γ} → P Γ → Q Γ
 
