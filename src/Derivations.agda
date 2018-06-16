@@ -6,7 +6,8 @@ open import Library
 
 module Derivations (Base : Set) where
 
-import Formulas; open module Form = Formulas Base
+import Formulas; private open module Form = Formulas Base
+-- open import Formulas Base public
 
 -- Derivations
 

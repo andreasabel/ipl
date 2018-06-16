@@ -12,9 +12,6 @@ data Base : Set where
 open import Formulas    Base
 open import Derivations Base
 
-Nf' : (C : Form) (Γ : Cxt) → Set
-Nf' C Γ = Nf Γ C
-
 -- -- Shift-reset continutation monad
 
 -- record M (A B C : Set) : Set where
@@ -48,14 +45,17 @@ open M
 return : ∀{X A} → □ A →̇ M X X A
 return x .run τ k = k id≤ (x τ)
 
+return' : ∀{X A} → □ A →̇ M X X (□ A)
+return' x .run τ k = k id≤ λ τ₁ → x (τ₁ • τ)
+
 _>>=_ : ∀{X Y Z A B Γ} (m : M X Y A Γ) (f : KFun A (M Y Z B) Γ) → M X Z B Γ
 (m >>= f) .run σ k = m .run σ λ τ a → f (τ • σ) a .run id≤ λ τ′ → k (τ′ • τ)
 
 _<$>_ : ∀{X Y A B} (f : A →̇ B) → M X Y A →̇ M X Y B
 (f <$> m) .run σ k = m .run σ λ τ → k τ ∘ f
 
-liftA2 : ∀{X Y A B C} (f : ∀{Γ} → A Γ → B Γ → C Γ) → ∀{Γ} → M X Y A Γ → M X Y B Γ → M X Y C Γ
-liftA2 f ma mb .run σ k = ma .run σ λ τ a → {!mb .run!}
+-- liftA2 : ∀{X Y A B C} (f : ∀{Γ} → A Γ → B Γ → C Γ) → ∀{Γ} → M X Y A Γ → M X Y B Γ → M X Y C Γ
+-- liftA2 f ma mb .run σ k = ma .run σ λ τ a → {!mb .run!}
 
 K$ : ∀{X Y A B} → KFun A B →̇ KFun (M X Y A) (M X Y B)
 K$ f τ m .run σ k = m .run σ λ τ′ a →  k τ′ (f (τ′ • (σ • τ)) a)
@@ -71,6 +71,11 @@ reset' m = m .run id≤ λ τ → id
 
 reset : ∀{X Y A} → M A Y Y →̇ M X X A
 reset m .run σ k = k id≤ (m .run σ λ τ → id)
+
+-- We use a continuation monad with answer type Nf.
+
+Nf' : (C : Form) (Γ : Cxt) → Set
+Nf' C Γ = Nf Γ C
 
 M' : (X : Cxt → Set) (Γ : Cxt)→ Set
 M' X Γ = ∀ {C} → M (Nf' C) (Nf' C) X Γ
@@ -100,11 +105,6 @@ monT (A ⇒ B) τ f σ = f (σ • τ)
 -- Reflection / reification, proven simultaneously by induction on the proposition.
 
 -- Reflection is η-expansion (and recursively reflection);
--- at positive connections we build a case tree with a single scrutinee: the neutral
--- we are reflecting.
-
--- At implication, we need reification, which produces introductions
--- and reifies the stored case trees.
 
 mutual
 
@@ -115,8 +115,8 @@ mutual
   reflect (A ∨ B)  t = shift' λ τ k → orE (monNe τ t)
     (reset' (K$ k (weak id≤) (inj₁ <$> reflect A (hyp top))))
     (reset' (K$ k (weak id≤) (inj₂ <$> reflect B (hyp top))))
-    -- ((inj₂ <$> reflect B (hyp top)) .run λ τ → k (τ • weak id≤))
 
+    -- ((inj₂ <$> reflect B (hyp top)) .run λ τ → k (τ • weak id≤))
     -- Wrong:
     --     (reset' (k (weak id≤) <$> (inj₁ <$> reflect A (hyp top))))
 
@@ -130,20 +130,21 @@ mutual
     reflect B (andE₂ (monNe τ t)) >>= λ τ′ b →
     return λ τ₁ → monT A (τ₁ • τ′) a , monT B τ₁ b
 
-  reflect (A ⇒ B)  t = return λ τ τ₁ a → reflect B (impE (monNe (τ₁ • τ) t) (reify A a))
-  -- a {!  !}
+  reflect (A ⇒ B)  t = return' λ τ a → reflect B (impE (monNe τ t) (reify A a))
 
 
   reify : ∀{Γ} A (⟦f⟧ : T⟦ A ⟧ Γ) → Nf Γ A
+
   reify (Atom P) t      = t
   reify True _          = trueI
   reify False   ()
   reify (A ∨ B) (inj₁ a) = orI₁ (reify A a)
   reify (A ∨ B) (inj₂ b) = orI₂ (reify B b)
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  reify (A ⇒ B) ⟦f⟧     = impI $ reset' $
-    reflect A (hyp top) >>= λ τ ⟦a⟧ →
-    reify B <$> ⟦f⟧ (τ • weak id≤) ⟦a⟧
+
+  reify (A ⇒ B) f     = impI $ reset' $
+    reflect A (hyp top) >>= λ τ a →
+    reify B <$> f (τ • weak id≤) a
 
 
 -- Fundamental theorem
@@ -166,45 +167,36 @@ fundH : ∀{Γ Δ A} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ) → T⟦ A ⟧ Δ
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 
--- A lemma for the orE case.
-
-orElim : ∀ {A B X Γ} → T⟦ A ∨ B ⟧ Γ → T⟦ A ⇒ X ⟧ Γ → T⟦ B ⇒ X ⟧ Γ → M' T⟦ X ⟧ Γ
-orElim (inj₁ a) g h = g id≤ a
-orElim (inj₂ b) g h = h id≤ b
-
--- A lemma for the falseE case.
-
--- Casts an empty cover into any semantic value (by contradiction).
-
-falseElim : ∀{Γ A} → T⟦ False ⟧ Γ → T⟦ A ⟧ Γ
-falseElim ()
-
--- The fundamental theorem
+-- The fundamental theorem:
+-- A call-by-value interpreter.
 
 fund :  ∀{Γ A} (t : Γ ⊢ A) {Δ} (γ : G⟦ Γ ⟧ Δ) → M' T⟦ A ⟧ Δ
+
 fund (hyp {A} x) γ = return λ τ → monT A τ (fundH x γ)
-fund (impI t)    γ = return (λ τ τ₁ a → fund t (monG (τ₁ • τ) γ , a))
+fund (impI t)    γ = return' λ τ a → fund t (monG τ γ , a)
+
 fund (impE t u)  γ =
-  fund t γ >>= λ τ f →
+  fund t γ          >>= λ τ f →
   fund u (monG τ γ) >>= λ τ′ a →
   f τ′ a
+
 fund (andI {A} {B} t u) γ =
   fund t γ >>= λ τ a →
   fund u (monG τ γ) >>= λ τ′ b →
   return λ τ₁ → monT A (τ₁ • τ′) a , monT B τ₁ b
-fund (andE₁ t) γ        = proj₁ <$> fund t γ
-fund (andE₂ t) γ        = proj₂ <$> fund t γ
-fund (orI₁ t)  γ        = inj₁ <$> fund t γ
-fund (orI₂ t)  γ        = inj₂ <$> fund t γ
-fund (orE t u v) γ  = fund t γ >>= λ τ →
+
+fund (andE₁ t)    γ = proj₁ <$> fund t γ
+fund (andE₂ t)    γ = proj₂ <$> fund t γ
+fund (orI₁ t)     γ = inj₁  <$> fund t γ
+fund (orI₂ t)     γ = inj₂  <$> fund t γ
+
+fund (orE t u v) γ = fund t γ >>= λ τ →
   [ (λ a → fund u (monG τ γ , a))
   , (λ b → fund v (monG τ γ , b))
   ]
--- fund (orE {A} {B} {C} t u v) γ  = (fund t γ) >>= λ σ ab → orElim {A} {B} {C} ab
---   (λ τ a → fund u (monG (τ • σ) γ , a))
---   (λ τ b → fund v (monG (τ • σ) γ , b))
-fund (falseE t)  γ     = fund t γ >>= λ τ ()
-fund trueI       γ     = return _
+
+fund (falseE t)  γ = fund t γ >>= λ τ ()
+fund trueI       γ = return _
 
 -- Identity environment
 
@@ -216,15 +208,19 @@ ide (Γ ∙ A) τ =
   return λ τ₃ → monG (τ₃ • τ₂) γ , monT A τ₃ a
 
 -- Normalization
+
 norm : ∀{A Γ} (t : Γ ⊢ A) → Nf Γ A
 norm {A} {Γ} t = reset' $
-  ide Γ id≤ >>= λ τ γ → reify A <$> fund t γ
+  ide Γ id≤ >>= λ _ γ →
+  reify A <$> fund t γ
 
-idOr : {A B : Form} → ε ⊢ (A ∨ B ⇒ A ∨ B)
-idOr = impI (hyp top)
+idD : (A : Form) → ε ⊢ (A ⇒ A)
+idD A = impI (hyp top)
 
 test : let A = Atom α; B = Atom β in Nf ε (A ∨ B ⇒ A ∨ B)
-test = norm idOr
+test = norm (idD (Atom α ∨ Atom β))
+
+test2 = norm (idD (Atom α ∨ Atom β ∨ Atom α))
 
 -- Q.E.D. -}
 -- -}
