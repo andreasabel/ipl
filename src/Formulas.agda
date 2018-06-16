@@ -74,6 +74,9 @@ monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 □ : (P : Cxt → Set) → Cxt → Set
 □ P Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ
 
+mon□ : ∀{P} → Mon (□ P)
+mon□ τ x τ′ = x (τ′ • τ)
+
 _→̇_ : (P Q : Cxt → Set) → Set
 P →̇ Q = ∀{Γ} → P Γ → Q Γ
 
@@ -81,4 +84,4 @@ CFun : (P Q : Cxt → Set) → Cxt → Set
 CFun P Q Γ = P Γ → Q Γ
 
 KFun : (P Q : Cxt → Set) → Cxt → Set
-KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
+KFun P Q = □ (CFun P Q)
