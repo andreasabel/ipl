@@ -1,4 +1,9 @@
+-- An implementation of Olivier Danvy's Type-Directed Partial Evaluation (POPL 1996)
+-- for STLC with sum types using continuations in form of shift and reset.
+--
+-- The algorithm was originally for a two-level lambda-calculus.
 
+-- Our use of Kripke semantics makes the effect of fresh variable generation explicit and formal.
 
 open import Library
 
@@ -21,6 +26,7 @@ open M
 -- shift f .run σ k = f σ k
 
 reset : ∀{Y A} → M A Y Y →̇ A
+-- reset : ∀{A} → M A A A →̇ A
 reset m = m .run id≤ λ τ → id
 
 return : ∀{X A} → □ A →̇ M X X A
@@ -60,8 +66,7 @@ T⟦ A ∨ B  ⟧ Γ = T⟦ A ⟧ Γ ⊎ T⟦ B ⟧ Γ
 T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
 T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → M' T⟦ B ⟧ Δ
 
--- Monotonicity of the model is proven by induction on the proposition,
--- using monotonicity of covers and the built-in monotonicity at implication.
+-- Monotonicity of the model is proven by induction on the proposition.
 
 -- monT : ∀ A {Γ Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ → T⟦ A ⟧ Δ
 
@@ -135,25 +140,28 @@ record ◇ (G : Cxt → Set) (Γ : Cxt) : Set where
 mon◇ : ∀{P} → Mon (◇ P)
 mon◇ τ′ (dia τ x) = dia (τ′ • τ) x
 
--- Extension of T⟦_⟧ to contexts
+-- Extension of T⟦_⟧ to contexts to classify semantic environments.
 
 G⟦_⟧ : ∀ (Γ Δ : Cxt) → Set
 G⟦ ε     ⟧ _ = ⊤
 G⟦ Γ ∙ A ⟧ = ◇ λ Δ → G⟦ Γ ⟧ Δ × T⟦ A ⟧ Δ
 
--- monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
+-- monG is lazy except for matching on the context.
 
 monG : ∀{Γ} → Mon G⟦ Γ ⟧
 monG {ε} τ _ = _
 monG {Γ ∙ A} τ γ = mon◇ τ γ
 
+-- Environment extension.
+
 ext : ∀ A {Γ Δ₁ Δ} →
       (τ : Δ ≤ Δ₁) (γ : G⟦ Γ ⟧ Δ₁) →
       (a : T⟦ A ⟧ Δ) →
-      G⟦ Γ ∙ A ⟧ Δ
-ext A τ γ a = dia id≤ (monG τ γ , a)
+      □ G⟦ Γ ∙ A ⟧ Δ
+ext A τ γ a τ′ = dia τ′ (monG τ γ , a)
 
--- Variable case.
+-- Lookup in the environment.
+-- Accumulates embedded weakenings from environment.
 
 fundH : ∀{A Γ} (x : Hyp A Γ) → G⟦ Γ ⟧  →̇ □ T⟦ A ⟧
 fundH {A} top (dia τ′ (_ , a)) τ = monT A (τ • τ′) a
@@ -165,7 +173,7 @@ fundH (pop x) (dia τ′ (γ , _)) τ = fundH x γ (τ • τ′)
 fund :  ∀{Γ A} (t : Γ ⊢ A) → G⟦ Γ ⟧  →̇ M' T⟦ A ⟧
 
 fund (hyp {A} x) γ = return (fundH x γ)
-fund (impI {A} t) γ = return' λ τ a → fund t (ext A τ γ a)
+fund (impI {A} t) γ = return' λ τ a → fund t (ext A τ γ a id≤)
 
 fund (impE t u)  γ =
   fund t γ          >>= λ τ f →
@@ -173,7 +181,7 @@ fund (impE t u)  γ =
   f τ′ a
 
 fund (andI {A} {B} t u) γ =
-  fund t γ >>= λ τ a →
+  fund t γ          >>= λ τ a →
   fund u (monG τ γ) >>= λ τ′ b →
   return λ τ₁ → monT A (τ₁ • τ′) a , monT B τ₁ b
 
@@ -183,8 +191,8 @@ fund (orI₁ t)     γ = inj₁  <$> fund t γ
 fund (orI₂ t)     γ = inj₂  <$> fund t γ
 
 fund (orE {A} {B} t u v) γ = fund t γ >>= λ τ →
-  [ (λ a → fund u (ext A τ γ a))
-  , (λ b → fund v (ext B τ γ b))
+  [ (λ a → fund u (ext A τ γ a id≤))
+  , (λ b → fund v (ext B τ γ b id≤))
   ]
 
 fund (falseE t)  γ = fund t γ >>= λ τ ()
@@ -197,9 +205,8 @@ ide ε       τ = return _
 ide (Γ ∙ A) τ =
   ide Γ (τ • weak id≤)           >>= λ τ₁ γ →
   reflect A (mon□ (τ₁ • τ) fresh) >>= λ τ₂ a →
-  return λ τ₃ → dia τ₃ (monG τ₂ γ , a)
-
-  -- return λ τ₃ → mon◇ τ₃ (ext A τ₂ γ a)
+  return (ext A τ₂ γ a)
+  -- return λ τ₃ → dia τ₃ (monG τ₂ γ , a)
 
 -- Normalization
 
@@ -209,6 +216,8 @@ norm {A} {Γ} t = reset $
   fund t γ <&> λ a →
   reify A a id≤
 
+-- Testing
+
 idD : (A : Form) → ε ⊢ (A ⇒ A)
 idD A = impI (hyp top)
 
@@ -216,6 +225,8 @@ test : let A = Atom α; B = Atom β in Nf ε (A ∨ B ⇒ A ∨ B)
 test = norm (idD (Atom α ∨ Atom β))
 
 test2 = norm (idD (Atom α ∨ Atom β ∨ Atom α))
+
+test3 = norm (idD False)
 
 -- Q.E.D. -}
 -- -}
