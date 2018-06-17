@@ -15,36 +15,42 @@ data Base : Set where
 open import Formulas    Base
 open import Derivations Base
 
--- Shift-reset continutation monad
+-- Continutation monad with answer type R.
+-- (Cf. Haskell's Control.Monad.Cont.Cont).
 
-record M (A B C : Cxt → Set) (Γ : Cxt) : Set where
+record M (R A : Cxt → Set) (Γ : Cxt) : Set where
   constructor shift
-  field run : KFun (KFun C B) A Γ
+  field run : KFun (KFun A R) R Γ
 open M
 
--- shift : ∀{X Y A Γ} (f : KFun (KFun A Y) X Γ) → M X Y A Γ
+-- shift : ∀{R A Γ} (f : KFun (KFun A R) R Γ) → M R A Γ
 -- shift f .run σ k = f σ k
 
-reset : ∀{Y A} → M A Y Y →̇ A
--- reset : ∀{A} → M A A A →̇ A
+reset : ∀{A} → M A A →̇ A
 reset m = m .run id≤ λ τ → id
 
-return : ∀{X A} → □ A →̇ M X X A
+return : ∀{R A} → □ A →̇ M R A
 return x .run τ k = k id≤ (x τ)
 
-return' : ∀{X A} → □ A →̇ M X X (□ A)
+return' : ∀{R A} → □ A →̇ M R (□ A)
 return' x .run τ k = k id≤ λ τ₁ → x (τ₁ • τ)
 
-_>>=_ : ∀{X Y Z A B Γ} (m : M X Y A Γ) (f : KFun A (M Y Z B) Γ) → M X Z B Γ
+-- Bind
+
+_>>=_ : ∀{R A B Γ} (m : M R A Γ) (f : KFun A (M R B) Γ) → M R B Γ
 (m >>= f) .run σ k = m .run σ λ τ a → f (τ • σ) a .run id≤ λ τ′ → k (τ′ • τ)
 
-_<$>_ : ∀{X Y A B} (f : A →̇ B) → M X Y A →̇ M X Y B
+-- Map
+
+_<$>_ : ∀{R A B} (f : A →̇ B) → M R A →̇ M R B
 (f <$> m) .run σ k = m .run σ λ τ → k τ ∘ f
 
-_<&>_ : ∀{X Y A B Γ} (m : M X Y A Γ) (f : A →̇ B) → M X Y B Γ
+_<&>_ : ∀{R A B Γ} (m : M R A Γ) (f : A →̇ B) → M R B Γ
 (m <&> f) .run σ k = m .run σ λ τ → k τ ∘ f
 
-K$ : ∀{X Y A B} → KFun A B →̇ KFun (M X Y A) (M X Y B)
+-- Kripke map
+
+K$ : ∀{R A B} → KFun A B →̇ KFun (M R A) (M R B)
 K$ f τ m .run σ k = m .run σ λ τ′ a →  k τ′ (f (τ′ • (σ • τ)) a)
 
 -- We use a continuation monad with answer type Nf.
@@ -56,7 +62,7 @@ Nf' : (C : Form) (Γ : Cxt) → Set
 Nf' C Γ = Nf Γ C
 
 M' : (X : Cxt → Set) (Γ : Cxt)→ Set
-M' X Γ = ∀ {C} → M (Nf' C) (Nf' C) X Γ
+M' X Γ = ∀ {C} → M (Nf' C) X Γ
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
 T⟦ Atom P ⟧ = □ (Nf' (Atom P))
