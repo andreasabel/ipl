@@ -1,3 +1,9 @@
+-- An implementation of Olivier Danvy's Type-Directed Partial Evaluation (POPL 1996)
+-- for STLC with sum types using continuations in form of shift and reset.
+--
+-- The algorithm was originally for a two-level lambda-calculus.
+
+-- Our use of Kripke semantics makes the effect of fresh variable generation explicit and formal.
 
 
 open import Library
@@ -88,8 +94,7 @@ T⟦ A ∨ B  ⟧ Γ = T⟦ A ⟧ Γ ⊎ T⟦ B ⟧ Γ
 T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
 T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → M' T⟦ B ⟧ Δ
 
--- Monotonicity of the model is proven by induction on the proposition,
--- using monotonicity of covers and the built-in monotonicity at implication.
+-- Monotonicity of the model is proven by induction on the proposition.
 
 -- monT : ∀ A {Γ Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ → T⟦ A ⟧ Δ
 
