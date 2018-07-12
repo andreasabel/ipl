@@ -16,7 +16,7 @@ open import Formulas    Base
 open import Derivations Base
 
 -- Continutation monad with answer type R.
--- (Cf. Haskell's Control.Monad.Cont.Cont).
+-- (Cf. Haskell's Control.Monad.Cont.Cont = (A → R) → R).
 
 record M (R A : Cxt → Set) (Γ : Cxt) : Set where
   constructor shift
