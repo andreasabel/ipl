@@ -1,20 +1,20 @@
 {-# OPTIONS --postfix-projections #-}
 module PresheavesAndSheaves where
 
-open import Library
+open import Library hiding (refl; trans)
 
 open import Level
 import Relation.Binary.Core as Eq
 import Relation.Binary.PropositionalEquality as Eq
 import Relation.Binary.PropositionalEquality.Core as Eq
-open import Function.Inverse hiding (_∘_)
-open import Function.Equality hiding (_∘_)
+open import Function.Inverse using (_↔_; module Inverse)
+open import Function.Equality using (_⟨$⟩_)
 
 module _ {A : Set} {B : Set} (e : A ↔ B) where
   open Inverse e
 
   –> : A → B
-  –> = to ⟨$⟩_
+  –> a = to ⟨$⟩ a
 
   <– : B → A
   <– b = from ⟨$⟩ b
