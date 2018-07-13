@@ -251,7 +251,7 @@ orElim : ∀ {Γ A B X} → T⟦ A ∨ B ⟧ Γ →
          (∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ X ⟧ Δ) →
          (∀{Δ} (τ : Δ ≤ Γ) → T⟦ B ⟧ Δ → T⟦ X ⟧ Δ) →
          T⟦ X ⟧ Γ
-orElim (C , f) g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
+orElim (C , f) g h = paste _ C λ e → case f e of [ g (coverWk e) , h (coverWk e) ]
 
 -- A lemma for the falseE case.
 
