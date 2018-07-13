@@ -222,10 +222,11 @@ paste True     = _
 paste False    = transCE
 paste (A ∨ B)  = transCE
 paste (A ∧ B) C f = paste A C (proj₁ ∘ f) , paste B C (proj₂ ∘ f)
-paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e → let Ψ , e' , σ  = mon∈ C τ e in f e' σ (monT A (coverWk e) a)
+paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e →
+  let Ψ , e' , σ  = mon∈ C τ e
+  in  f e' σ (monT A (coverWk e) a)
 
 -- Fundamental theorem
-
 -- Extension of T⟦_⟧ to contexts
 
 G⟦_⟧ : ∀ (Γ Δ : Cxt) → Set
