@@ -311,11 +311,11 @@ mutual
 -- Semantic paste
 
 paste : ∀ A {Γ f} (c : Cover A (T⟦ A ⟧) Γ f) → T⟦ A ⟧ Γ f
-paste (Atom P) c = paste' c
-paste True c = _
-paste False c = joinC c
-paste (A ∨ B) c = joinC c
-paste (A ∧ B) c = paste A (convC proj₁ proj₁ c) , paste B (convC proj₂ proj₂ c)
+paste (Atom P) = paste'
+paste True     = _
+paste False    = joinC
+paste (A ∨ B)  = joinC
+paste (A ∧ B)  = < paste A ∘ convC proj₁ proj₁ , paste B ∘ convC proj₂ proj₂ >
   where
   fst : ∀ Γ f → Cover (A ∧ B) (Conj A B T⟦ A ⟧ T⟦ B ⟧) Γ f → Cover A T⟦ A ⟧ Γ (proj₁ ∘ f)
   fst Γ f c = convC proj₁ {Conj A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ A ⟧} proj₁ c
@@ -354,21 +354,7 @@ fundH : ∀{Γ Δ A ρ} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ �
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 
-
--- A lemma for the orE case
-{-
-orElim : ∀ {Γ A B X} (C : Cover Γ) (f : {Δ : Cxt} → Δ ∈ C → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ) →
-         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ X ⟧ Δ) →
-         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ B ⟧ Δ → T⟦ X ⟧ Δ) →
-         T⟦ X ⟧ Γ
-orElim C f g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
--}
--- orElim' : ∀ X {Γ A B} {f g h } → (⟦f⟧ : Disj A B T⟦ A ⟧ T⟦ B ⟧ Γ f) →
---          (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ (curry g)) →
---          (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ (curry h)) →
---          T⟦ X ⟧ Γ (caseof f g h)
--- orElim' X (left ⟦a⟧) ⟦g⟧ ⟦h⟧ = ⟦g⟧ (id≤) ⟦a⟧
--- orElim' X (right ⟦b⟧) ⟦g⟧ ⟦h⟧ = ⟦h⟧ id≤ ⟦b⟧
+-- orE case
 
 CF : (S T : Set) (Γ : Cxt) → Set
 CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Fun' Δ S → Fun' Δ T
@@ -399,8 +385,11 @@ convOr : ∀ X {Γ A B}
          g (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
          h (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) →
          CovConv (Cover (A ∨ B) (Disj A B T⟦ A ⟧ T⟦ B ⟧)) (Cover X T⟦ X ⟧) (φCase X A B g h)
-convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ τ {f} (idc p) = idc {f = φCase X A B g h τ f} ( orElim' X g ⟦g⟧ h ⟦h⟧ τ p )
+
+convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ τ {f} (idc p) = idc {f = φCase X A B g h τ f} (orElim' X g ⟦g⟧ h ⟦h⟧ τ p)
+
 convOr X g ⟦g⟧ h ⟦h⟧ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
+
 convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ {Δ} τ (node {C} {D} t {i} ci {j} cj) =
   subst (Cover _ _ _) (caseof-swap Ne⦅ t ⦆ i j (g ∘ R⦅ τ ⦆) (h ∘ R⦅ τ ⦆))  -- (funExt (aux Ne⦅ t ⦆))
     (node t (convOr X g ⟦g⟧ h ⟦h⟧ (weak τ) ci)
@@ -413,8 +402,6 @@ convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ {Δ} τ (node {C} {D} t {i} ci {j} cj)
   aux f δ with f δ
   aux f δ | inj₁ a = refl
   aux f δ | inj₂ b = refl
-  -- = funExt λ δ → case f δ of λ{ (inj₁ a) → {!refl!} ; (inj₂ b) → {!!} }
-
 
 -- orElim should be a call to paste, using a converted Cover
 
@@ -423,12 +410,7 @@ orElim : ∀ X {Γ A B}
          {g} (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
          {h} (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) →
          T⟦ X ⟧ Γ (caseof f (uncurry g) (uncurry h))
--- orElim X (idc ⟦f⟧) ⟦g⟧ ⟦h⟧ = orElim' X ⟦f⟧ ⟦g⟧ ⟦h⟧
--- orElim X (bot t) ⟦g⟧ ⟦h⟧ =  subst (T⟦ X ⟧ _) ⊥-elim-ext (paste X (bot t))
---   -- {!convC ⊥-elim ⊥-elim (toEmptyCover t)!}
--- orElim X (node t ⟦a⟧ ⟦b⟧) ⟦g⟧ ⟦h⟧ = {!!}
 orElim X ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X (convOr X g ⟦g⟧ h ⟦h⟧ id≤ ⟦f⟧)
-  -- paste X (convC {!λ f → caseof f g h!} {!λ d → orElim' X d ⟦g⟧ ⟦h⟧!} ⟦f⟧)  -- NEED generalization of convC
 
 -- A lemma for the falseE case
 
