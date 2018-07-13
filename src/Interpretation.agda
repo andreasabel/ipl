@@ -21,11 +21,14 @@ C⦅_⦆ : (Γ : Cxt) → Set
 C⦅ ε ⦆ = ⊤
 C⦅ Γ ∙ A ⦆ = C⦅ Γ ⦆ × T⦅ A ⦆
 
+Fun' : (Γ : Cxt) (S : Set) → Set
+Fun' Γ S = (γ : C⦅ Γ ⦆) → S
+
 Fun : (Γ : Cxt) (A : Form) → Set
-Fun Γ A = (γ : C⦅ Γ ⦆) → T⦅ A ⦆
+Fun Γ A = Fun' Γ T⦅ A ⦆
 
 Mor : (Γ Δ : Cxt) → Set
-Mor Γ Δ = (γ : C⦅ Γ ⦆) → C⦅ Δ ⦆
+Mor Γ Δ = Fun' Γ C⦅ Δ ⦆
 
 H⦅_⦆ : ∀{Γ A} (x : Hyp A Γ) → Fun Γ A
 H⦅ top   ⦆ = proj₂

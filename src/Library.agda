@@ -31,8 +31,14 @@ _×̇_ : ∀{A B C D : Set} → (A → C) → (B → D) → A × B → C × D
 apply : ∀{A B C : Set} (f : C → A → B) (d : C → A) → C → B
 apply f a = λ c → f c (a c)
 
+-- Kripke application
+
+kapply : ∀{A B C D : Set} (f : C → A → B) (τ : D → C) (d : D → A) → D → B
+kapply f τ a = apply (f ∘ τ) a
+-- kapply f τ a = λ d → f (τ d) (a d)
+
 caseof : ∀{A B C D : Set} (f : C → A ⊎ B) (g : C × A → D) (h : C × B → D) → C → D
-caseof f g h = λ c → [ curry g c , curry h c ] (f c)
+caseof f g h = λ c → [ curry g c , curry h c ]′ (f c)
 
 sum-eta : ∀{A B : Set} (x : A ⊎ B) → [ inj₁ , inj₂ ] x ≡ x
 sum-eta (inj₁ x) = refl
@@ -55,6 +61,41 @@ caseof-perm' k {f} = funExt λ c → sum-perm (k c) (f c)
 caseof-perm : ∀{A B C D E : Set} (k : D → E) {f : C → A ⊎ B} {g : C × A → D} {h : C × B → D}
   → caseof f (k ∘ g) (k ∘ h) ≡ k ∘ caseof f g h
 caseof-perm = caseof-perm' ∘ const
+
+caseof-wk : ∀{A B C D E : Set} (k : D → C) {f : C → A ⊎ B} {g : C × A → E} {h : C × B → E}
+  → caseof (f ∘ k) (g ∘ (k ×̇ id)) (h ∘ (k ×̇ id)) ≡ caseof f g h ∘ k
+caseof-wk {A} {B} {C} {D} {E} k {f} {g} {h} = refl
+
+caseof-apply : ∀{A B C D E : Set}
+  (f : C → A ⊎ B) {g : C × A → D → E} {h : C × B → D → E} (d : C → D)
+
+  → caseof f (apply g (d ∘ proj₁)) (apply h (d ∘ proj₁))
+     ≡ apply (caseof f g h) d
+
+caseof-apply f {g} {h} d = funExt λ c → sum-perm (λ z → z (d c)) {curry g c} {curry h c} (f c)
+
+-- caseof-apply {A} {B} {C} {D} {E} d {f} {g} {h} = funExt λ c → aux (f c)
+--   where
+--   aux : ∀ {c : C} (w : A ⊎ B) →
+--       [ (λ y → curry g c y (d c)) , (λ y → curry h c y (d c)) ]′ w ≡
+--       [ curry g c , curry h c ]′ w (d c)
+--   aux (inj₁ a) = refl
+--   aux (inj₂ b) = refl
+
+-- caseof (f ∘ τ)
+--       (apply (g ∘ (τ ×̇ id)) (a ∘ proj₁))
+--       (apply (h ∘ (τ ×̇ id)) (a ∘ proj₁))
+--       ≡
+--       apply (caseof f g h ∘ τ) a
+
+caseof-kapply : ∀{A B C D E F : Set}
+  (f : C → A ⊎ B) (g : C × A → E → F) (h : C × B → E → F) (τ : D → C) (a : D → E)
+  → caseof (f ∘ τ)
+      (kapply g (τ ×̇ id) (a ∘ proj₁))
+      (kapply h (τ ×̇ id) (a ∘ proj₁))
+      ≡
+    kapply (caseof f g h) τ a
+caseof-kapply f g h τ a = caseof-apply (f ∘ τ) a
 
 caseof-swap : ∀{A B C D X Y : Set}
     (f : C → X ⊎ Y)

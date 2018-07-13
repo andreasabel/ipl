@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting #-}
 
--- A Beth model of normal forms
+-- A Beth model for normalization by evaluation
 
 open import Library
 
@@ -10,41 +10,79 @@ import Formulas      ; open module Form = Formulas    Base hiding (Mon)
 import Derivations   ; open module Der  = Derivations Base
 import Interpretation; open module Intp = Interpretation Base B⦅_⦆
 
+-- Form of Kripke predicates into a set S
+
+KPred' : (S : Set) → Set₁
+KPred' S = ∀ Γ → (C⦅ Γ ⦆ → S) → Set
+
+-- Form of Kripke predicate on functions into type A
+-- KPred A = ∀ Γ → Fun Γ A → Set
+
 KPred : (A : Form) → Set₁
-KPred A = ∀ Γ → Fun Γ A → Set
+KPred A = KPred' T⦅ A ⦆
+
+-- Pointwise inclusion of Kripke predicates
 
 Sub : ∀ A (P Q : KPred A) → Set
 Sub A P Q = ∀{Γ f} → P Γ f → Q Γ f
 
-Mon : ∀{S} (𝓐 : ∀ Γ (f : C⦅ Γ ⦆ → S) → Set) → Set
-Mon {S} 𝓐 = ∀ {Γ Δ} (τ : Δ ≤ Γ) {f : C⦅ Γ ⦆ → S} → 𝓐 Γ f → 𝓐 Δ (f ∘ R⦅ τ ⦆)
+-- Statement of monotonicity for Kripke predicates
+
+Mon : ∀{S} (𝓐 : KPred' S) → Set
+Mon {S} 𝓐 = ∀ {Γ Δ} (τ : Δ ≤ Γ) {f : Fun' Γ S} → 𝓐 Γ f → 𝓐 Δ (f ∘ R⦅ τ ⦆)
+
+-- Image under evaluation of a neutral term
 
 NeImg : ∀ A → KPred A
 NeImg A Γ f = ∃ λ (t : Ne Γ A) → Ne⦅ t ⦆ ≡ f
 
+-- Image under evaluation of a normal term
+
 NfImg : ∀ A → KPred A
 NfImg A Γ f = ∃ λ (t : Nf Γ A) → Nf⦅ t ⦆ ≡ f
 
-monNeImg : ∀{A} → Mon (NeImg A) -- ∀{Γ Δ} (τ : Δ ≤ Γ) {A f} (nei : NeImg Γ A f) → NeImg Δ A (f ∘ R⦅ τ ⦆)
+-- Being an image is Kripke (monotone in weakening)
+-- ∀ (f : Fun Γ A) (τ : Δ ≤ Γ) → Img Γ A f → Img Δ A (f ∘ R⦅ τ ⦆)
+
+monNeImg : ∀{A} → Mon (NeImg A)
 monNeImg τ (t , refl) = monNe τ t , natD τ (ne[ t ])
 
-monNfImg : ∀{A} → Mon (NfImg A) -- ∀{Γ Δ} (τ : Δ ≤ Γ) {A f} (nfi : NfImg Γ A f) → NfImg Δ A (f ∘ R⦅ τ ⦆)
+monNfImg : ∀{A} → Mon (NfImg A)
 monNfImg τ (t , refl) = monNf τ t , natD τ nf[ t ]
+
+-- Extending the constructions of neutral and normal forms to images of such.
+
+-- Neutrals of base type are normal
 
 iNe : ∀{Γ P f} → NeImg (Atom P) Γ f → NfImg (Atom P) Γ f
 iNe (t , eq) =  ne t , eq
 
--- iNe : ∀{Γ A f} → NeImg Γ A f → NfImg Γ A f
--- iNe (t , eq) = ne t , eq
+-- Variables are neutral
 
 iHyp : ∀{Γ A} (x : Hyp A Γ) → NeImg A Γ H⦅ x ⦆
 iHyp x = (hyp x , refl)
 
+-- Abstraction operates on normal forms
+
 iImpI : ∀{Γ A B f} → NfImg B (Γ ∙ A) f → NfImg (A ⇒ B) Γ (curry f)
 iImpI (t , eq) = impI t , cong curry eq
 
+-- Application of a neutral is neutral
+
 iImpE : ∀{Γ A B f g} → NeImg (A ⇒ B) Γ f → NfImg A Γ g → NeImg B Γ (apply f g)
 iImpE (t , eq) (u , eq') = (impE t u , cong₂ apply eq eq')
+
+-- Empty tuple is normal
+
+iTrueI : ∀{Γ f} → NfImg True Γ f
+iTrueI = trueI , refl
+
+-- Pairing operates on normal forms
+
+iAndI : ∀{Γ A B f g} → NfImg A Γ f → NfImg B Γ g → NfImg (A ∧ B) Γ < f , g >
+iAndI (t , eq) (u , eq') = andI t u , cong₂ <_,_> eq eq'
+
+-- Projection of a neutral is neutral
 
 iAndE₁ : ∀{Γ A B f} → NeImg (A ∧ B) Γ f → NeImg A Γ (proj₁ ∘ f)
 iAndE₁ (t , eq) = andE₁ t , cong (proj₁ ∘_) eq
@@ -52,17 +90,34 @@ iAndE₁ (t , eq) = andE₁ t , cong (proj₁ ∘_) eq
 iAndE₂ : ∀{Γ A B f} → NeImg (A ∧ B) Γ f → NeImg B Γ (proj₂ ∘ f)
 iAndE₂ (t , eq) = andE₂ t , cong (proj₂ ∘_) eq
 
-iTrueI : ∀{Γ f} → NfImg True Γ f
-iTrueI = trueI , refl
-
-iAndI : ∀{Γ A B f g} → NfImg A Γ f → NfImg B Γ g → NfImg (A ∧ B) Γ < f , g >
-iAndI (t , eq) (u , eq') = andI t u , cong₂ <_,_> eq eq'
+-- Injections operate on normal forms
 
 iOrI₁ : ∀{Γ A B f} → NfImg A Γ f → NfImg (A ∨ B) Γ (inj₁ ∘ f)
 iOrI₁ (t , eq) = orI₁ t , cong (inj₁ ∘_) eq
 
 iOrI₂ : ∀{Γ A B f} → NfImg B Γ f → NfImg (A ∨ B) Γ (inj₂ ∘ f)
 iOrI₂ (t , eq) = orI₂ t , cong (inj₂ ∘_) eq
+
+-- Case splitting forms:
+
+iOrE : ∀{Γ A B C f g h}
+  → NeImg (A ∨ B) Γ f
+  → NfImg C (Γ ∙ A) g
+  → NfImg C (Γ ∙ B) h
+  → NfImg C Γ (caseof f g h)
+iOrE (t , eqt) (u , equ) (v , eqv) = orE t u v , cong₃ caseof eqt equ eqv
+
+iFalseE : ∀{Γ C f}
+  → NeImg False Γ f
+  → NfImg C Γ (⊥-elim ∘ f)
+iFalseE (t , eq) = falseE t , cong (⊥-elim ∘_) eq
+
+-- For falseE, we can get the stronger:
+
+iFalseE' : ∀{Γ C f}
+  → Ne Γ False
+  → NfImg C Γ (⊥-elim ∘ f)
+iFalseE' t = falseE t , ⊥-elim-ext
 
 -- Beth model
 
@@ -80,22 +135,15 @@ monCP P⊂Q (idc p) = idc (P⊂Q p)
 monCP P⊂Q (bot t) = bot t
 monCP P⊂Q (node t cg ch) = node t (monCP P⊂Q cg) (monCP P⊂Q ch)
 
-
-GPred : (S : Set) → Set₁
-GPred S = ∀ Γ (f : C⦅ Γ ⦆ → S) → Set
-
-Func : Cxt → Set → Set
-Func Γ S = C⦅ Γ ⦆ → S
-
 module SUB where
 
 
   CF : (S T : Set) (Γ : Cxt) → Set
-  CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Func Δ S → Func Δ T
+  CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Fun' Δ S → Fun' Δ T
 
-  Conv : ∀{S T : Set} (P : GPred S) (Q : GPred T) → Set
+  Conv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) → Set
   Conv {S} {T} P Q = ∀ {Γ} (φ : CF S T Γ) →
-    ∀{Δ} (τ : Δ ≤ Γ) {f : Func Δ S} (p : P Δ f) → Q Δ (φ τ f)
+    ∀{Δ} (τ : Δ ≤ Γ) {f : Fun' Δ S} (p : P Δ f) → Q Δ (φ τ f)
 
   convC : ∀{X Y} {P Q} (P⊂Q : Conv P Q) → Conv (Cover X P) (Cover Y Q)
   convC P⊂Q φ τ (idc p) = idc (P⊂Q φ τ p)
@@ -106,7 +154,7 @@ module SUB where
     -- aux : ∀{X Y C A : Set} (φ : (C → X) → (C → Y) → (C × A → X) → C × A → Y
     -- aux φ g (c , a) = IMPOSSIBLE
 
-Conv : ∀{S T : Set} (g : S → T) (P : GPred S) (Q : GPred T) → Set
+Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
 Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
 
 convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
@@ -119,7 +167,7 @@ convC g P⊂Q (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
 -- Func : Cxt → Set → Set
 -- Func Γ S = C⦅ Γ ⦆ → S
 
--- Conv : ∀{S T : Set} (P : GPred S) (Q : GPred T) → Set
+-- Conv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) → Set
 -- Conv {S} {T} P Q = ∀ {Γ} (φ : Func Γ S → Func Γ T) {f : Func Γ S} (p : P Γ f) → Q Γ (φ f)
 
 -- convC : ∀{X Y} {P Q} (P⊂Q : Conv P Q) → Conv (Cover X P) (Cover Y Q)
@@ -131,7 +179,7 @@ convC g P⊂Q (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
 --   -- aux : ∀{X Y C A : Set} (φ : (C → X) → (C → Y) → (C × A → X) → C × A → Y
 --   -- aux φ g (c , a) = IMPOSSIBLE
 
--- Conv : ∀{S T : Set} (g : ∀{Γ} → Func Γ S → Func Γ T) (P : GPred S) (Q : GPred T) → Set
+-- Conv : ∀{S T : Set} (g : ∀{Γ} → Func Γ S → Func Γ T) (P : KPred' S) (Q : KPred' T) → Set
 -- Conv {S} g P Q = ∀ {Γ} {f : Func Γ S} (p : P Γ f) → Q Γ (g f)
 
 -- convC : ∀{X Y} (φ : ∀{Γ} → Fun Γ X → Fun Γ Y) {P Q} (P⊂Q : Conv φ P Q) → Conv φ (Cover X P) (Cover Y Q)
@@ -165,16 +213,15 @@ monC monP τ (node t cg ch) = node (monNe τ t) (monC monP (lift τ) cg) (monC m
 -- Syntactic paste (from Thorsten)
 
 paste' : ∀{A Γ f} (C : Cover A (NfImg A) Γ f) → NfImg A Γ f
-paste' (idc t) = t
-paste' (bot t) = falseE t , refl
-paste' (node t cg ch) with paste' cg | paste' ch
-... | u , refl | v , refl = orE t u v , refl
+paste' (idc t)        = t
+paste' (bot t)        = iFalseE (t , refl)
+paste' (node t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
 
 -- Monad
 
 joinC : ∀{A} {P : KPred A} → Sub A (Cover A (Cover A P)) (Cover A P)
-joinC (idc c) = c
-joinC (bot t) = bot t
+joinC (idc c)        = c
+joinC (bot t)        = bot t
 joinC (node t cg ch) = node t (joinC cg) (joinC ch)
 
 -- Empty cover
@@ -182,19 +229,13 @@ joinC (node t cg ch) = node t (joinC cg) (joinC ch)
 EmptyCover : KPred False
 EmptyCover = Cover False λ _ _ → ⊥
 
--- Empty cover is isomorphic to a witness of inconsistency
+-- -- Empty cover is isomorphic to a witness of inconsistency
 
-toEmptyCover : ∀{Γ} (t : Ne Γ False) → EmptyCover Γ (⊥-elim ∘ Ne⦅ t ⦆)
-toEmptyCover t = bot t
+-- toEmptyCover : ∀{Γ} (t : Ne Γ False) → EmptyCover Γ (⊥-elim ∘ Ne⦅ t ⦆)
+-- toEmptyCover t = bot t
 
-fromEmptyCover : ∀{Γ f} (ec : EmptyCover Γ f) → NfImg False Γ f
-fromEmptyCover ec =  paste' (monCP (λ()) ec)
-
-fromEmptyCover' : ∀{Γ f} (ec : EmptyCover Γ f) → NfImg False Γ f
-fromEmptyCover' (idc ())
-fromEmptyCover' (bot t) = falseE t , refl
-fromEmptyCover' (node t eg eh) with fromEmptyCover' eg | fromEmptyCover' eh
-... | u , refl | v , refl = orE t u v , refl
+-- fromEmptyCover : ∀{Γ f} (ec : EmptyCover Γ f) → NfImg False Γ f
+-- fromEmptyCover = paste' ∘ monCP λ()
 
 -- Semantic disjunction type
 
@@ -206,8 +247,12 @@ monDisj : ∀{A B ⟦A⟧ ⟦B⟧} (monA : Mon ⟦A⟧) (monB : Mon ⟦B⟧) →
 monDisj monA monB τ (left  ⟦g⟧) = left  (monA τ ⟦g⟧)
 monDisj monA monB τ (right ⟦h⟧) = right (monB τ ⟦h⟧)
 
+-- Semantic conjunction type
+
 Conj : ∀ A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) → KPred (A ∧ B)
 Conj A B ⟦A⟧ ⟦B⟧ Γ f = ⟦A⟧ Γ (proj₁ ∘ f) × ⟦B⟧ Γ (proj₂ ∘ f)
+
+-- Semantic implication type
 
 Imp : ∀ A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) → KPred (A ⇒ B)
 Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ : ⟦A⟧ Δ a) → ⟦B⟧ Δ (kapp {A = A} {B = B} f τ a)
@@ -215,20 +260,22 @@ Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ 
 -- The Beth model
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) (f : Fun Γ A) → Set
-T⟦ Atom P ⟧ Γ = NfImg (Atom P) Γ
-T⟦ True ⟧ Γ _ = ⊤
+T⟦ Atom P ⟧ = NfImg (Atom P)
+T⟦ True ⟧ _ _ = ⊤
 T⟦ False ⟧ = Cover False   λ _ _ → ⊥
 T⟦ A ∨ B ⟧ = Cover (A ∨ B) (Disj A B (T⟦ A ⟧) (T⟦ B ⟧))
 T⟦ A ∧ B ⟧ = Conj A B T⟦ A ⟧ T⟦ B ⟧
 T⟦ A ⇒ B ⟧ = Imp A B T⟦ A ⟧ T⟦ B ⟧
 
+-- Monotonicity of semantics
+-- (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ f → T⟦ A ⟧ Δ (f ∘ R⦅ τ ⦆)
+
 monT : ∀ A → Mon T⟦ A ⟧
-   -- {Γ Δ} {f : Fun Γ A} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ f → T⟦ A ⟧ Δ (f ∘ R⦅ τ ⦆)
-monT (Atom P) τ = monNfImg τ
-monT True τ _ = _
-monT False τ = monC (λ _ ()) τ
-monT (A ∨ B) = monC (monDisj (monT A) (monT B))
-monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
+monT (Atom P)  = monNfImg
+monT True      = _
+monT False     = monC λ _ ()
+monT (A ∨ B)   = monC (monDisj (monT A) (monT B))
+monT (A ∧ B) τ = monT A τ ×̇ monT B τ
 monT (A ⇒ B) τ f σ = f (σ • τ)
 
 -- Reflection / reification
@@ -238,7 +285,7 @@ mutual
   reflect : ∀{Γ} A {f} (t : NeImg A Γ f) → T⟦ A ⟧ Γ f
   reflect (Atom P) t = iNe t
   reflect True t = _
-  reflect False (t , refl) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
+  reflect False (t , _) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
 
   -- x : A ∨ B  is reflected as case(x, y. inl y, z. inr z)
   -- Need a proof of caseof x inj₁ inj₂ = x
@@ -252,8 +299,8 @@ mutual
   reify : ∀{Γ} A {f} (⟦f⟧ : T⟦ A ⟧ Γ f) → NfImg A Γ f
   reify (Atom P) t      = t
   reify True _          = iTrueI
-  reify False   cov     = fromEmptyCover cov
-  reify (A ∨ B) cov     = paste' (monCP reifyDisj cov)
+  reify False           = paste' ∘ monCP λ()
+  reify (A ∨ B)         = paste' ∘ monCP reifyDisj
   reify (A ∧ B) (a , b) = iAndI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = iImpI (reify B (⟦f⟧ (weak id≤) (reflect A (iHyp top))))
 
@@ -273,13 +320,21 @@ paste (A ∧ B) c = paste A (convC proj₁ proj₁ c) , paste B (convC proj₂ p
   fst : ∀ Γ f → Cover (A ∧ B) (Conj A B T⟦ A ⟧ T⟦ B ⟧) Γ f → Cover A T⟦ A ⟧ Γ (proj₁ ∘ f)
   fst Γ f c = convC proj₁ {Conj A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ A ⟧} proj₁ c
 
-paste (A ⇒ B) {Γ} {f} c {Δ} τ {a} ⟦a⟧ = paste B {!convC'!}
+paste (A ⇒ B) {Γ} {f} c {Δ} τ {a} ⟦a⟧ = paste B (aux τ ⟦a⟧ c)
   where
-  aux : Cover (A ⇒ B) (Imp A B T⟦ A ⟧ T⟦ B ⟧) Γ f → Cover B T⟦ B ⟧ Δ (kapp {A = A} {B = B} f τ a)
+  aux : ∀{Γ f Δ} (τ : Δ ≤ Γ) {a} (⟦a⟧ : T⟦ A ⟧ Δ a)
+    → Cover (A ⇒ B) (Imp A B T⟦ A ⟧ T⟦ B ⟧) Γ f
+    → Cover B T⟦ B ⟧ Δ (kapp {A = A} {B = B} f τ a)
   -- aux c = convC' {!λ g → g a!} {Imp A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ B ⟧} {!!} τ c
-  aux (idc ⟦f⟧) = idc (⟦f⟧ τ ⟦a⟧)
-  aux (bot t) = subst (Cover _ _ _ ) ⊥-elim-ext (bot (monNe τ t))
-  aux (node t cg ch) = {!subst (Cover _ _ _) ? (node (monNe τ t) (aux cg) (aux ch))!}
+
+  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (idc ⟦f⟧) = idc (⟦f⟧ τ ⟦a⟧)
+  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (bot t) = subst (Cover _ _ _ ) ⊥-elim-ext (bot (monNe τ t))
+  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (node t {g} cg {h} ch) =
+   subst (Cover _ _ _)
+     (caseof-kapply Ne⦅ t ⦆ g h R⦅ τ ⦆ a)
+     (node (monNe τ t)
+        (aux (lift τ) (monT A (weak id≤) ⟦a⟧) cg)
+        (aux (lift τ) (monT A (weak id≤) ⟦a⟧) ch))
 
 -- Fundamental theorem
 
@@ -316,11 +371,11 @@ orElim C f g h = paste _ C λ e → [ g (coverWk e) , h (coverWk e) ] (f e)
 -- orElim' X (right ⟦b⟧) ⟦g⟧ ⟦h⟧ = ⟦h⟧ id≤ ⟦b⟧
 
 CF : (S T : Set) (Γ : Cxt) → Set
-CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Func Δ S → Func Δ T
+CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Fun' Δ S → Fun' Δ T
 
-CovConv : ∀{S T : Set} (P : GPred S) (Q : GPred T) {Γ} (φ : CF S T Γ) → Set
+CovConv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) {Γ} (φ : CF S T Γ) → Set
 CovConv {S} {T} P Q {Γ} φ =
-  ∀{Δ} (τ : Δ ≤ Γ) {f : Func Δ S} (p : P Δ f) → Q Δ (φ τ f)
+  ∀{Δ} (τ : Δ ≤ Γ) {f : Fun' Δ S} (p : P Δ f) → Q Δ (φ τ f)
 
 CFT : (A B : Form) (Γ : Cxt) → Set
 CFT A B = CF T⦅ A ⦆ T⦅ B ⦆
