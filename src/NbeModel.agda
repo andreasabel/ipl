@@ -308,6 +308,66 @@ mutual
   reifyDisj {A} {B} (left  ⟦g⟧) = iOrI₁ (reify A ⟦g⟧)
   reifyDisj {A} {B} (right ⟦h⟧) = iOrI₂ (reify B ⟦h⟧)
 
+module BLA where
+  convCov : ∀{A B} (P : KPred A) (Q : KPred B)
+    → (φ : ∀ {Γ Δ} (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B)
+    → (P⊂Q : ∀{Γ f Δ} (τ : Δ ≤ Γ) → P Γ f → Q Δ (φ τ f))
+    → (φ-case : ∀ {Γ Δ} (τ : Δ ≤ Γ) C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
+       → caseof (f ∘ R⦅ τ ⦆) (φ (lift {A = C} τ) g) (φ (lift {A = D} τ) h) ≡ φ τ (caseof f g h))
+    → ∀{Γ f Δ} (τ : Δ ≤ Γ) → Cover A P Γ f → Cover B Q Δ (φ τ f)
+
+  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} {f} {Δ} τ (idc p) = idc (P⊂Q τ p)
+  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
+  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} {_} {Δ} τ (node {C} {D} t {g} cg {h} ch) =
+    subst (Cover _ _ _) (φ-case τ C D Ne⦅ t ⦆ g h) c'
+    where
+    τC = lift {A = C} τ
+    cg' : Cover B Q (Δ ∙ C) (φ τC g)
+    cg' = convCov P Q φ P⊂Q φ-case τC cg
+
+    τD = lift {A = D} τ
+    ch' : Cover B Q (Δ ∙ D) (φ τD h)
+    ch' = convCov P Q φ P⊂Q φ-case τD ch
+
+    c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ τC g) (φ τD h))
+    c' = node (monNe τ t) cg' ch'
+
+    lem : caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ τC g) (φ τD h) ≡ φ τ (caseof Ne⦅ t ⦆ g h)
+    lem = {!!}
+
+
+convCov : ∀ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
+
+  → (φ : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B)
+
+  → (P⊂Q : ∀{Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → P Γ f → Q Δ (φ γ δ τ f))
+
+  → (φ-case : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
+       ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
+       → caseof (f ∘ R⦅ τ ⦆) (φ (weak γ) (weak δ) (lift {A = C} τ) g)
+                            (φ (weak γ) (weak δ) (lift {A = D} τ) h) ≡ φ γ δ τ (caseof f g h))
+
+  → ∀{Γ f Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Cover A P Γ f → Cover B Q Δ (φ γ δ τ f)
+
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {f} {Δ} γ δ τ (idc p) = idc (P⊂Q γ δ τ p)
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} γ δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {_} {Δ} γ δ τ (node {C} {D} t {g} cg {h} ch) =
+  subst (Cover _ _ _) (φ-case γ δ τ C D Ne⦅ t ⦆ g h) c'
+  where
+  τC = lift {A = C} τ
+  cg' : Cover B Q (Δ ∙ C) (φ (weak γ) (weak δ) τC g)
+  cg' = convCov A B P Q τ₀ φ P⊂Q φ-case (weak γ) (weak δ) τC cg
+
+  τD = lift {A = D} τ
+  ch' : Cover B Q (Δ ∙ D) (φ (weak γ) (weak δ) τD h)
+  ch' = convCov A B P Q τ₀ φ P⊂Q φ-case (weak γ) (weak δ) τD ch
+
+  c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ (weak γ) (weak δ) τC g) (φ (weak γ) (weak δ) τD h))
+  c' = node (monNe τ t) cg' ch'
+
+  -- lem : caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ ? ? τC g) (φ τD h) ≡ φ τ (caseof Ne⦅ t ⦆ g h)
+  -- lem = {!!}
+
 -- Semantic paste
 
 paste : ∀ A {Γ f} (c : Cover A (T⟦ A ⟧) Γ f) → T⟦ A ⟧ Γ f
@@ -319,6 +379,24 @@ paste (A ∧ B)  = < paste A ∘ convC proj₁ proj₁ , paste B ∘ convC proj�
   where
   fst : ∀ Γ f → Cover (A ∧ B) (Conj A B T⟦ A ⟧ T⟦ B ⟧) Γ f → Cover A T⟦ A ⟧ Γ (proj₁ ∘ f)
   fst Γ f c = convC proj₁ {Conj A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ A ⟧} proj₁ c
+
+paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A ⇒ B) B P Q τ₀ φ P⊂Q φ-case id≤ id≤ τ₀ c)
+  where
+  P = Imp A B T⟦ A ⟧ T⟦ B ⟧
+  Q = T⟦ B ⟧
+
+  φ : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Fun Γ (A ⇒ B) → Fun Δ B
+  φ γ δ τ f = kapp {A = A} {B} f τ (a ∘ R⦅ δ ⦆)
+
+  P⊂Q : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Imp A B T⟦ A ⟧ T⟦ B ⟧ Γ f → T⟦ B ⟧ Δ (φ γ δ τ f)
+  P⊂Q {Γ} {Δ} γ δ τ {f} ⟦f⟧ = ⟦f⟧ τ (monT A δ ⟦a⟧)
+
+  φ-case : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
+           ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) (A ⇒ B)) (h : Fun (Γ ∙ D) (A ⇒ B))
+           → caseof (f ∘ R⦅ τ ⦆) (φ (weak γ) (weak δ) (lift {A = C} τ) g)
+                            (φ (weak γ) (weak δ) (lift {A = D} τ) h) ≡ φ γ δ τ (caseof f g h)
+  φ-case {Γ} {Δ} γ δ τ C D f g h = caseof-kapply f g h R⦅ τ ⦆ (a ∘ R⦅ δ ⦆)
+
 
 paste (A ⇒ B) {Γ} {f} c {Δ} τ {a} ⟦a⟧ = paste B (aux τ ⟦a⟧ c)
   where
@@ -394,6 +472,7 @@ convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ {Δ} τ (node {C} {D} t {i} ci {j} cj)
   subst (Cover _ _ _) (caseof-swap Ne⦅ t ⦆ i j (g ∘ R⦅ τ ⦆) (h ∘ R⦅ τ ⦆))  -- (funExt (aux Ne⦅ t ⦆))
     (node t (convOr X g ⟦g⟧ h ⟦h⟧ (weak τ) ci)
             (convOr X g ⟦g⟧ h ⟦h⟧ (weak τ) cj))
+
   where
   -- NOT NEEDED, use caseof-swap
   aux : ∀ (f : Fun Δ (C ∨ D)) (δ : C⦅ Δ ⦆) →
@@ -410,7 +489,31 @@ orElim : ∀ X {Γ A B}
          {g} (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
          {h} (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) →
          T⟦ X ⟧ Γ (caseof f (uncurry g) (uncurry h))
-orElim X ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X (convOr X g ⟦g⟧ h ⟦h⟧ id≤ ⟦f⟧)
+orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
+  (convCov (A ∨ B) X (Disj A B T⟦ A ⟧ T⟦ B ⟧) T⟦ X ⟧ {Γ₀} id≤ φ P⊂Q φ-case id≤ id≤ id≤ ⟦f⟧)
+
+  where
+  φ : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) → Fun Γ (A ∨ B) → Fun Δ X
+  φ {Γ} {Δ} γ δ τ f = caseof (f ∘ R⦅ τ ⦆) (uncurry (g ∘ R⦅ δ ⦆)) (uncurry (h ∘ R⦅ δ ⦆ ))
+
+  P⊂Q : ∀{Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) {f} → Disj A B T⟦ A ⟧ T⟦ B ⟧ Γ f → T⟦ X ⟧ Δ (φ γ δ τ f)
+  P⊂Q {Γ} {Δ} γ δ τ (left  ⟦a⟧) = ⟦g⟧ δ (monT A τ ⟦a⟧)
+  P⊂Q {Γ} {Δ} γ δ τ (right ⟦b⟧) = ⟦h⟧ δ (monT B τ ⟦b⟧)
+
+  φ-case : ∀ {Γ Δ} (γ : Γ ≤ Γ₀) (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) →
+    ∀ C D (k : Fun Γ (C ∨ D)) (i : Fun (Γ ∙ C) (A ∨ B)) (j : Fun (Γ ∙ D) (A ∨ B)) →
+      caseof (k ∘ R⦅ τ ⦆) (φ (weak γ) (weak δ) (lift {A = C} τ) i)
+                         (φ (weak γ) (weak δ) (lift {A = D} τ) j)
+      ≡ φ γ δ τ (caseof k i j)
+  φ-case {Γ} {Δ} γ δ τ C D k i j =
+   caseof-swap
+     (k ∘ R⦅ τ ⦆)
+     (uncurry (curry i ∘ R⦅ τ ⦆))
+     (uncurry (curry j ∘ R⦅ τ ⦆))
+     (g ∘ R⦅ δ ⦆)
+     (h ∘ R⦅ δ ⦆)
+
+-- orElim X ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X (convOr X g ⟦g⟧ h ⟦h⟧ id≤ ⟦f⟧)
 
 -- A lemma for the falseE case
 
