@@ -254,21 +254,27 @@ convCov : ∀ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ �
 
   → (φ-case : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
        ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
-       → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) g)
-                            (φ (weak δ) (lift {A = D} τ) h) ≡ φ δ τ (caseof f g h))
+       → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {C} τ) g)
+                            (φ (weak δ) (lift {D} τ) h) ≡ φ δ τ (caseof f g h))
 
   → ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Cover A P Γ f → Cover B Q Δ (φ δ τ f)
 
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (idc p) = idc (P⊂Q δ τ p)
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (node {C} {D} t {g} cg {h} ch) =
-  subst (Cover _ _ _) (φ-case δ τ C D Ne⦅ t ⦆ g h) c'
+convCov A B P Q τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (idc p) = idc (P⊂Q δ τ p)
+convCov A B P Q τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
+convCov A B P Q τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (node {C} {D} t {g} cg {h} ch) =
+  subst (Cover _ _ _)
+    (φ-case δ τ C D Ne⦅ t ⦆ g h)
+    (node (monNe τ t)
+      (convCov A B P Q τ₀ φ P⊂Q φ-case (weak δ) (lift {C} τ) cg)
+      (convCov A B P Q τ₀ φ P⊂Q φ-case (weak δ) (lift {D} τ) ch))
+
+  -- Just for documentation:
   where
-  τC = lift {A = C} τ
+  τC = lift {C} τ
   cg' : Cover B Q (Δ ∙ C) (φ (weak δ) τC g)
   cg' = convCov A B P Q τ₀ φ P⊂Q φ-case (weak δ) τC cg
 
-  τD = lift {A = D} τ
+  τD = lift {D} τ
   ch' : Cover B Q (Δ ∙ D) (φ (weak δ) τD h)
   ch' = convCov A B P Q τ₀ φ P⊂Q φ-case (weak δ) τD ch
 
@@ -300,8 +306,8 @@ paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A �
 
   φ-case : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
            ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) (A ⇒ B)) (h : Fun (Γ ∙ D) (A ⇒ B))
-           → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) g)
-                                 (φ (weak δ) (lift {A = D} τ) h) ≡ φ δ τ (caseof f g h)
+           → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {C} τ) g)
+                                 (φ (weak δ) (lift {D} τ) h) ≡ φ δ τ (caseof f g h)
 
   φ-case δ τ C D f g h = caseof-kapply f g h R⦅ τ ⦆ (a ∘ R⦅ δ ⦆)
 
@@ -345,8 +351,8 @@ orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
   φ-case : ∀ {Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) →
     ∀ C D (k : Fun Γ (C ∨ D)) (i : Fun (Γ ∙ C) (A ∨ B)) (j : Fun (Γ ∙ D) (A ∨ B)) →
 
-      caseof (k ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) i)
-                         (φ (weak δ) (lift {A = D} τ) j)
+      caseof (k ∘ R⦅ τ ⦆) (φ (weak δ) (lift {C} τ) i)
+                         (φ (weak δ) (lift {D} τ) j)
       ≡ φ δ τ (caseof k i j)
 
   φ-case δ τ C D k i j =

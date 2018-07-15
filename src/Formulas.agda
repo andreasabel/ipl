@@ -35,8 +35,8 @@ infix 3 _≤_
 
 data _≤_ : (Γ Δ : Cxt) → Set where
   id≤ : ∀{Γ} → Γ ≤ Γ
-  weak : ∀{Γ Δ A} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ
-  lift : ∀{Γ Δ A} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
+  weak : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ
+  lift : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
 
 postulate lift-id≤ : ∀{Γ A} → lift id≤ ≡ id≤ {Γ ∙ A}
 {-# REWRITE lift-id≤ #-}
