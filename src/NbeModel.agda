@@ -135,25 +135,6 @@ monCP P⊂Q (idc p) = idc (P⊂Q p)
 monCP P⊂Q (bot t) = bot t
 monCP P⊂Q (node t cg ch) = node t (monCP P⊂Q cg) (monCP P⊂Q ch)
 
-module SUB where
-
-
-  CF : (S T : Set) (Γ : Cxt) → Set
-  CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Fun' Δ S → Fun' Δ T
-
-  Conv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) → Set
-  Conv {S} {T} P Q = ∀ {Γ} (φ : CF S T Γ) →
-    ∀{Δ} (τ : Δ ≤ Γ) {f : Fun' Δ S} (p : P Δ f) → Q Δ (φ τ f)
-
-  convC : ∀{X Y} {P Q} (P⊂Q : Conv P Q) → Conv (Cover X P) (Cover Y Q)
-  convC P⊂Q φ τ (idc p) = idc (P⊂Q φ τ p)
-  convC P⊂Q φ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
-  convC P⊂Q φ τ (node t {g} cg {h} ch) = subst (Cover _ _ _) {! caseof-perm' {!φ τ!} !}
-    (node t (convC P⊂Q φ (weak τ) cg) (convC P⊂Q φ (weak τ) ch))
-    -- where
-    -- aux : ∀{X Y C A : Set} (φ : (C → X) → (C → Y) → (C × A → X) → C × A → Y
-    -- aux φ g (c , a) = IMPOSSIBLE
-
 Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
 Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
 
@@ -163,44 +144,6 @@ convC g P⊂Q (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
 convC g P⊂Q (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
   (node t (convC g P⊂Q cg) (convC g P⊂Q ch))
 
--- -- NOT THE RIGHT FORMULATION YET
--- Func : Cxt → Set → Set
--- Func Γ S = C⦅ Γ ⦆ → S
-
--- Conv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) → Set
--- Conv {S} {T} P Q = ∀ {Γ} (φ : Func Γ S → Func Γ T) {f : Func Γ S} (p : P Γ f) → Q Γ (φ f)
-
--- convC : ∀{X Y} {P Q} (P⊂Q : Conv P Q) → Conv (Cover X P) (Cover Y Q)
--- convC P⊂Q φ (idc p) = idc (P⊂Q φ p)
--- convC P⊂Q φ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
--- convC P⊂Q φ (node t {g} cg {h} ch) = subst (Cover _ _ _) {! (caseof-perm φ {Ne⦅ t ⦆}) !}
---   (node t (convC P⊂Q (λ x x₁ → {!!}) cg) (convC P⊂Q {!aux φ!} ch))
---   -- where
---   -- aux : ∀{X Y C A : Set} (φ : (C → X) → (C → Y) → (C × A → X) → C × A → Y
---   -- aux φ g (c , a) = IMPOSSIBLE
-
--- Conv : ∀{S T : Set} (g : ∀{Γ} → Func Γ S → Func Γ T) (P : KPred' S) (Q : KPred' T) → Set
--- Conv {S} g P Q = ∀ {Γ} {f : Func Γ S} (p : P Γ f) → Q Γ (g f)
-
--- convC : ∀{X Y} (φ : ∀{Γ} → Fun Γ X → Fun Γ Y) {P Q} (P⊂Q : Conv φ P Q) → Conv φ (Cover X P) (Cover Y Q)
--- convC φ P⊂Q (idc p) = idc (P⊂Q p)
--- convC φ P⊂Q (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
--- convC φ P⊂Q (node t {g} cg {h} ch) = subst (Cover _ _ _) {! (caseof-perm φ {Ne⦅ t ⦆}) !}
---   (node t (convC φ P⊂Q cg) (convC φ P⊂Q ch))
-
-{-
-DPred : (S : Cxt → Set) → Set₁
-DPred S = ∀ Γ (f : C⦅ Γ ⦆ → S Γ) → Set
-
-Conv' : ∀{S T : Cxt → Set} (g : ∀{Γ Δ} (τ : Δ ≤ Γ) → S Γ → T Δ) (P : DPred S) (Q : DPred T) → Set
-Conv' {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S Γ} {Δ} (τ : Δ ≤ Γ) (p : P Γ f) → Q Δ ((g τ ∘ f) ∘ R⦅ τ ⦆)
-
-convC' : ∀{A B} (g : ∀{Γ Δ} (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B) {P Q} (P⊂Q : Conv' g P Q) → Conv' g (Cover A P) (Cover B Q)
-convC' g P⊂Q τ (idc p) = idc (P⊂Q τ p)
-convC' g P⊂Q τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-convC' g P⊂Q τ (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆ ∘ R⦅ τ ⦆})
-  (node (monNe τ t) (convC' g P⊂Q (lift τ) cg) (convC' g P⊂Q (lift τ) ch))
--}
 -- Weakening Covers
 
 monC : ∀{X} {P : KPred X} (monP : Mon P) → Mon (Cover X P)
@@ -308,33 +251,6 @@ mutual
   reifyDisj {A} {B} (left  ⟦g⟧) = iOrI₁ (reify A ⟦g⟧)
   reifyDisj {A} {B} (right ⟦h⟧) = iOrI₂ (reify B ⟦h⟧)
 
-module BLA where
-  convCov : ∀{A B} (P : KPred A) (Q : KPred B)
-    → (φ : ∀ {Γ Δ} (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B)
-    → (P⊂Q : ∀{Γ f Δ} (τ : Δ ≤ Γ) → P Γ f → Q Δ (φ τ f))
-    → (φ-case : ∀ {Γ Δ} (τ : Δ ≤ Γ) C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
-       → caseof (f ∘ R⦅ τ ⦆) (φ (lift {A = C} τ) g) (φ (lift {A = D} τ) h) ≡ φ τ (caseof f g h))
-    → ∀{Γ f Δ} (τ : Δ ≤ Γ) → Cover A P Γ f → Cover B Q Δ (φ τ f)
-
-  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} {f} {Δ} τ (idc p) = idc (P⊂Q τ p)
-  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-  convCov {A} {B} P Q φ P⊂Q φ-case {Γ} {_} {Δ} τ (node {C} {D} t {g} cg {h} ch) =
-    subst (Cover _ _ _) (φ-case τ C D Ne⦅ t ⦆ g h) c'
-    where
-    τC = lift {A = C} τ
-    cg' : Cover B Q (Δ ∙ C) (φ τC g)
-    cg' = convCov P Q φ P⊂Q φ-case τC cg
-
-    τD = lift {A = D} τ
-    ch' : Cover B Q (Δ ∙ D) (φ τD h)
-    ch' = convCov P Q φ P⊂Q φ-case τD ch
-
-    c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ τC g) (φ τD h))
-    c' = node (monNe τ t) cg' ch'
-
-    lem : caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ τC g) (φ τD h) ≡ φ τ (caseof Ne⦅ t ⦆ g h)
-    lem = {!!}
-
 
 convCov : ∀ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
 
@@ -364,9 +280,6 @@ convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {_} {Δ} γ δ τ (n
 
   c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ (weak γ) (weak δ) τC g) (φ (weak γ) (weak δ) τD h))
   c' = node (monNe τ t) cg' ch'
-
-  -- lem : caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ ? ? τC g) (φ τD h) ≡ φ τ (caseof Ne⦅ t ⦆ g h)
-  -- lem = {!!}
 
 -- Semantic paste
 
@@ -398,22 +311,6 @@ paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A �
   φ-case {Γ} {Δ} γ δ τ C D f g h = caseof-kapply f g h R⦅ τ ⦆ (a ∘ R⦅ δ ⦆)
 
 
-paste (A ⇒ B) {Γ} {f} c {Δ} τ {a} ⟦a⟧ = paste B (aux τ ⟦a⟧ c)
-  where
-  aux : ∀{Γ f Δ} (τ : Δ ≤ Γ) {a} (⟦a⟧ : T⟦ A ⟧ Δ a)
-    → Cover (A ⇒ B) (Imp A B T⟦ A ⟧ T⟦ B ⟧) Γ f
-    → Cover B T⟦ B ⟧ Δ (kapp {A = A} {B = B} f τ a)
-  -- aux c = convC' {!λ g → g a!} {Imp A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ B ⟧} {!!} τ c
-
-  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (idc ⟦f⟧) = idc (⟦f⟧ τ ⟦a⟧)
-  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (bot t) = subst (Cover _ _ _ ) ⊥-elim-ext (bot (monNe τ t))
-  aux {Γ} {f} {Δ} τ {a} ⟦a⟧ (node t {g} cg {h} ch) =
-   subst (Cover _ _ _)
-     (caseof-kapply Ne⦅ t ⦆ g h R⦅ τ ⦆ a)
-     (node (monNe τ t)
-        (aux (lift τ) (monT A (weak id≤) ⟦a⟧) cg)
-        (aux (lift τ) (monT A (weak id≤) ⟦a⟧) ch))
-
 -- Fundamental theorem
 
 -- Extension of T⟦_⟧ to contexts
@@ -433,56 +330,6 @@ fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 
 -- orE case
-
-CF : (S T : Set) (Γ : Cxt) → Set
-CF S T Γ = ∀{Δ} (τ : Δ ≤ Γ) → Fun' Δ S → Fun' Δ T
-
-CovConv : ∀{S T : Set} (P : KPred' S) (Q : KPred' T) {Γ} (φ : CF S T Γ) → Set
-CovConv {S} {T} P Q {Γ} φ =
-  ∀{Δ} (τ : Δ ≤ Γ) {f : Fun' Δ S} (p : P Δ f) → Q Δ (φ τ f)
-
-CFT : (A B : Form) (Γ : Cxt) → Set
-CFT A B = CF T⦅ A ⦆ T⦅ B ⦆
-
-CovConvT : ∀ A B (P : KPred A) (Q : KPred B) {Γ} (φ : CFT A B Γ) → Set
-CovConvT A B = CovConv
-
-φCase : ∀ X A B {Γ} (g : Fun Γ (A ⇒ X)) (h : Fun Γ (B ⇒ X)) → CFT (A ∨ B) X Γ
-       --  ∀ {Δ} (τ : Δ ≤ Γ) (f : Fun Δ (A ∨ B)) → Fun Δ X
-φCase X A B g h τ f = (caseof f (uncurry (g ∘ R⦅ τ ⦆)) (uncurry (h ∘ R⦅ τ ⦆)))
-
-orElim' : ∀ X {Γ A B}
-         g (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
-         h (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) → CovConvT (A ∨ B) X (Disj A B T⟦ A ⟧ T⟦ B ⟧) (T⟦ X ⟧) (φCase X A B g h)
-         -- ∀{Δ} (τ : Δ ≤ Γ) {f} (⟦f⟧ : Disj A B T⟦ A ⟧ T⟦ B ⟧ Δ f) →
-         -- T⟦ X ⟧ Δ (φCase X A B g h τ f)
-orElim' X g ⟦g⟧ h ⟦h⟧ τ (left  ⟦a⟧) = ⟦g⟧ τ ⟦a⟧
-orElim' X g ⟦g⟧ h ⟦h⟧ τ (right ⟦b⟧) = ⟦h⟧ τ ⟦b⟧
-
-convOr : ∀ X {Γ A B}
-         g (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
-         h (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) →
-         CovConv (Cover (A ∨ B) (Disj A B T⟦ A ⟧ T⟦ B ⟧)) (Cover X T⟦ X ⟧) (φCase X A B g h)
-
-convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ τ {f} (idc p) = idc {f = φCase X A B g h τ f} (orElim' X g ⟦g⟧ h ⟦h⟧ τ p)
-
-convOr X g ⟦g⟧ h ⟦h⟧ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
-
-convOr X {Γ} {A} {B} g ⟦g⟧ h ⟦h⟧ {Δ} τ (node {C} {D} t {i} ci {j} cj) =
-  subst (Cover _ _ _) (caseof-swap Ne⦅ t ⦆ i j (g ∘ R⦅ τ ⦆) (h ∘ R⦅ τ ⦆))  -- (funExt (aux Ne⦅ t ⦆))
-    (node t (convOr X g ⟦g⟧ h ⟦h⟧ (weak τ) ci)
-            (convOr X g ⟦g⟧ h ⟦h⟧ (weak τ) cj))
-
-  where
-  -- NOT NEEDED, use caseof-swap
-  aux : ∀ (f : Fun Δ (C ∨ D)) (δ : C⦅ Δ ⦆) →
-      caseof f (φCase X A B g h (weak {A = C} τ) i) (φCase X A B g h (weak {A = D} τ) j) δ
-      ≡ φCase X A B g h τ (caseof f i j) δ
-  aux f δ with f δ
-  aux f δ | inj₁ a = refl
-  aux f δ | inj₂ b = refl
-
--- orElim should be a call to paste, using a converted Cover
 
 orElim : ∀ X {Γ A B}
          {f} (⟦f⟧ : T⟦ A ∨ B ⟧ Γ f)
@@ -512,8 +359,6 @@ orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
      (uncurry (curry j ∘ R⦅ τ ⦆))
      (g ∘ R⦅ δ ⦆)
      (h ∘ R⦅ δ ⦆)
-
--- orElim X ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X (convOr X g ⟦g⟧ h ⟦h⟧ id≤ ⟦f⟧)
 
 -- A lemma for the falseE case
 
