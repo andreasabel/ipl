@@ -65,8 +65,8 @@ R⦅ lift τ ⦆ = R⦅ τ ⦆ ×̇ id
 
 -- Kripke application
 
-kapp : ∀{Γ Δ A B} (f : Fun Γ (A ⇒ B)) (τ : Δ ≤ Γ) (a : Fun Δ A) → Fun Δ B
-kapp f τ a δ = f (R⦅ τ ⦆ δ) (a δ)
+kapp : ∀ A B {Γ} (f : Fun Γ (A ⇒ B)) {Δ} (τ : Δ ≤ Γ) (a : Fun Δ A) → Fun Δ B
+kapp A B f τ a δ = f (R⦅ τ ⦆ δ) (a δ)
 
 -- Naturality
 

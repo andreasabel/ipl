@@ -167,18 +167,10 @@ joinC (idc c)        = c
 joinC (bot t)        = bot t
 joinC (node t cg ch) = node t (joinC cg) (joinC ch)
 
--- Empty cover
+-- Semantic absurdity type
 
-EmptyCover : KPred False
-EmptyCover = Cover False λ _ _ → ⊥
-
--- -- Empty cover is isomorphic to a witness of inconsistency
-
--- toEmptyCover : ∀{Γ} (t : Ne Γ False) → EmptyCover Γ (⊥-elim ∘ Ne⦅ t ⦆)
--- toEmptyCover t = bot t
-
--- fromEmptyCover : ∀{Γ f} (ec : EmptyCover Γ f) → NfImg False Γ f
--- fromEmptyCover = paste' ∘ monCP λ()
+Absurd : KPred False
+Absurd _ _ = ⊥
 
 -- Semantic disjunction type
 
@@ -198,14 +190,14 @@ Conj A B ⟦A⟧ ⟦B⟧ Γ f = ⟦A⟧ Γ (proj₁ ∘ f) × ⟦B⟧ Γ (proj�
 -- Semantic implication type
 
 Imp : ∀ A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) → KPred (A ⇒ B)
-Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ : ⟦A⟧ Δ a) → ⟦B⟧ Δ (kapp {A = A} {B = B} f τ a)
+Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ : ⟦A⟧ Δ a) → ⟦B⟧ Δ (kapp A B f τ a)
 
 -- The Beth model
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) (f : Fun Γ A) → Set
 T⟦ Atom P ⟧ = NfImg (Atom P)
 T⟦ True ⟧ _ _ = ⊤
-T⟦ False ⟧ = Cover False   λ _ _ → ⊥
+T⟦ False ⟧ = Cover False   Absurd
 T⟦ A ∨ B ⟧ = Cover (A ∨ B) (Disj A B (T⟦ A ⟧) (T⟦ B ⟧))
 T⟦ A ∧ B ⟧ = Conj A B T⟦ A ⟧ T⟦ B ⟧
 T⟦ A ⇒ B ⟧ = Imp A B T⟦ A ⟧ T⟦ B ⟧
@@ -251,6 +243,8 @@ mutual
   reifyDisj {A} {B} (left  ⟦g⟧) = iOrI₁ (reify A ⟦g⟧)
   reifyDisj {A} {B} (right ⟦h⟧) = iOrI₂ (reify B ⟦h⟧)
 
+-- A general converter for covers
+-- (subsumes monC, monCP, convC).
 
 convCov : ∀ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
 
@@ -263,11 +257,11 @@ convCov : ∀ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ �
        → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) g)
                             (φ (weak δ) (lift {A = D} τ) h) ≡ φ δ τ (caseof f g h))
 
-  → ∀{Γ f Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Cover A P Γ f → Cover B Q Δ (φ δ τ f)
+  → ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Cover A P Γ f → Cover B Q Δ (φ δ τ f)
 
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {f} {Δ} δ τ (idc p) = idc (P⊂Q δ τ p)
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {_} {Δ} δ τ (node {C} {D} t {g} cg {h} ch) =
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (idc p) = idc (P⊂Q δ τ p)
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
+convCov A B P Q {Γ₀} {Δ₀} τ₀ φ P⊂Q φ-case {Γ} {Δ} δ τ (node {C} {D} t {g} cg {h} ch) =
   subst (Cover _ _ _) (φ-case δ τ C D Ne⦅ t ⦆ g h) c'
   where
   τC = lift {A = C} τ
@@ -299,16 +293,17 @@ paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A �
   Q = T⟦ B ⟧
 
   φ : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Fun Γ (A ⇒ B) → Fun Δ B
-  φ δ τ f = kapp {A = A} {B} f τ (a ∘ R⦅ δ ⦆)
+  φ δ τ f = kapp A B f τ (a ∘ R⦅ δ ⦆)
 
   P⊂Q : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Imp A B T⟦ A ⟧ T⟦ B ⟧ Γ f → T⟦ B ⟧ Δ (φ δ τ f)
-  P⊂Q {Γ} {Δ} δ τ {f} ⟦f⟧ = ⟦f⟧ τ (monT A δ ⟦a⟧)
+  P⊂Q δ τ ⟦f⟧ = ⟦f⟧ τ (monT A δ ⟦a⟧)
 
   φ-case : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
            ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) (A ⇒ B)) (h : Fun (Γ ∙ D) (A ⇒ B))
            → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) g)
                                  (φ (weak δ) (lift {A = D} τ) h) ≡ φ δ τ (caseof f g h)
-  φ-case {Γ} {Δ} δ τ C D f g h = caseof-kapply f g h R⦅ τ ⦆ (a ∘ R⦅ δ ⦆)
+
+  φ-case δ τ C D f g h = caseof-kapply f g h R⦅ τ ⦆ (a ∘ R⦅ δ ⦆)
 
 
 -- Fundamental theorem
@@ -320,7 +315,7 @@ G⟦ ε     ⟧ Δ ρ = ⊤
 G⟦ Γ ∙ A ⟧ Δ ρ = G⟦ Γ ⟧ Δ (proj₁ ∘ ρ) × T⟦ A ⟧ Δ (proj₂ ∘ ρ)
 
 monG : ∀{Γ Δ Φ ρ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ ρ → G⟦ Γ ⟧ Φ (ρ ∘ R⦅ τ ⦆)
-monG {ε} τ _ = _
+monG {ε}     τ _       = _
 monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
 -- Variable case
@@ -341,18 +336,20 @@ orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
 
   where
   φ : ∀ {Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) → Fun Γ (A ∨ B) → Fun Δ X
-  φ {Γ} {Δ} δ τ f = caseof (f ∘ R⦅ τ ⦆) (uncurry (g ∘ R⦅ δ ⦆)) (uncurry (h ∘ R⦅ δ ⦆ ))
+  φ δ τ f = caseof (f ∘ R⦅ τ ⦆) (uncurry (g ∘ R⦅ δ ⦆)) (uncurry (h ∘ R⦅ δ ⦆ ))
 
   P⊂Q : ∀{Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) {f} → Disj A B T⟦ A ⟧ T⟦ B ⟧ Γ f → T⟦ X ⟧ Δ (φ δ τ f)
-  P⊂Q {Γ} {Δ} δ τ (left  ⟦a⟧) = ⟦g⟧ δ (monT A τ ⟦a⟧)
-  P⊂Q {Γ} {Δ} δ τ (right ⟦b⟧) = ⟦h⟧ δ (monT B τ ⟦b⟧)
+  P⊂Q δ τ (left  ⟦a⟧) = ⟦g⟧ δ (monT A τ ⟦a⟧)
+  P⊂Q δ τ (right ⟦b⟧) = ⟦h⟧ δ (monT B τ ⟦b⟧)
 
   φ-case : ∀ {Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) →
     ∀ C D (k : Fun Γ (C ∨ D)) (i : Fun (Γ ∙ C) (A ∨ B)) (j : Fun (Γ ∙ D) (A ∨ B)) →
+
       caseof (k ∘ R⦅ τ ⦆) (φ (weak δ) (lift {A = C} τ) i)
                          (φ (weak δ) (lift {A = D} τ) j)
       ≡ φ δ τ (caseof k i j)
-  φ-case {Γ} {Δ} δ τ C D k i j =
+
+  φ-case δ τ C D k i j =
    caseof-swap
      (k ∘ R⦅ τ ⦆)
      (uncurry (curry i ∘ R⦅ τ ⦆))
@@ -362,7 +359,7 @@ orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
 
 -- A lemma for the falseE case
 
-falseElim : ∀ A {Γ f} (ce : EmptyCover Γ f) → T⟦ A ⟧ Γ (⊥-elim ∘ f)
+falseElim : ∀ A {Γ f} (ce : Cover False Absurd Γ f) → T⟦ A ⟧ Γ (⊥-elim ∘ f)
 falseElim A {Γ} ce = paste A (convC ⊥-elim ⊥-elim ce)
 
 -- The fundamental theorem
