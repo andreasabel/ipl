@@ -61,7 +61,7 @@ Ne' C Γ = Ne Γ C
 Nf' : (C : Form) (Γ : Cxt) → Set
 Nf' C Γ = Nf Γ C
 
-M' : (X : Cxt → Set) (Γ : Cxt)→ Set
+M' : (X : Cxt → Set) (Γ : Cxt) → Set
 M' X Γ = ∀ {C} → M (Nf' C) X Γ
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
