@@ -1,3 +1,4 @@
+{-# OPTIONS --postfix-projections #-}
 {-# OPTIONS --rewriting #-}
 
 -- A Beth model for normalization by evaluation
@@ -122,50 +123,136 @@ iFalseE' t = falseE t , ⊥-elim-ext
 -- Beth model
 
 data Cover (X : Form) (P : KPred X)  (Δ : Cxt) : (f : Fun Δ X) → Set where
-  idc  : ∀{f} (p : P Δ f) → Cover X P Δ f
-  bot  : (t : Ne Δ False) → Cover X P Δ (⊥-elim ∘ Ne⦅ t ⦆)
-  node : ∀{A B} (t : Ne Δ (A ∨ B))
-         {g} (cg : Cover X P (Δ ∙ A) g)
-         {h} (ch : Cover X P (Δ ∙ B) h) → Cover X P Δ (caseof Ne⦅ t ⦆ g h)
+  return : ∀{f} (p : P Δ f) → Cover X P Δ f
+  falseC : (t : Ne Δ False) → Cover X P Δ (⊥-elim ∘ Ne⦅ t ⦆)
+  orC    : ∀{A B} (t : Ne Δ (A ∨ B))
+           {g} (cg : Cover X P (Δ ∙ A) g)
+           {h} (ch : Cover X P (Δ ∙ B) h) → Cover X P Δ (caseof Ne⦅ t ⦆ g h)
 
 -- Cover is monotone in P
 
-monCP : ∀{A} {P Q : KPred A} (P⊂Q : Sub A P Q) → Sub A (Cover A P) (Cover A Q)
-monCP P⊂Q (idc p) = idc (P⊂Q p)
-monCP P⊂Q (bot t) = bot t
-monCP P⊂Q (node t cg ch) = node t (monCP P⊂Q cg) (monCP P⊂Q ch)
+mapC : ∀{A} {P Q : KPred A} (P⊂Q : Sub A P Q) → Sub A (Cover A P) (Cover A Q)
+mapC P⊂Q (return p)    = return (P⊂Q p)
+mapC P⊂Q (falseC t)    = falseC t
+mapC P⊂Q (orC t cg ch) = orC t (mapC P⊂Q cg) (mapC P⊂Q ch)
 
-Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
-Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
+-- Monad
 
-convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
-convC g P⊂Q (idc p) = idc (P⊂Q p)
-convC g P⊂Q (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
-convC g P⊂Q (node t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
-  (node t (convC g P⊂Q cg) (convC g P⊂Q ch))
+joinC : ∀{A} {P : KPred A} → Sub A (Cover A (Cover A P)) (Cover A P)
+joinC (return c)    = c
+joinC (falseC t)    = falseC t
+joinC (orC t cg ch) = orC t (joinC cg) (joinC ch)
 
 -- Weakening Covers
 
 monC : ∀{X} {P : KPred X} (monP : Mon P) → Mon (Cover X P)
   -- {Γ} {f : Fun Γ X} {Δ} (τ : Δ ≤ Γ) (C : Cover X Γ P f) → Cover X Δ P (f ∘ R⦅ τ ⦆)
-monC monP τ (idc p) = idc (monP τ p)
-monC monP τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-monC monP τ (node t cg ch) = node (monNe τ t) (monC monP (lift τ) cg) (monC monP (lift τ) ch)
+monC monP τ (return p)    = return (monP τ p)
+monC monP τ (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC (monNe τ t))
+monC monP τ (orC t cg ch) = orC (monNe τ t) (monC monP (lift τ) cg) (monC monP (lift τ) ch)
   -- REWRITE monD-ne natD
 
--- Syntactic paste (from Thorsten)
+-- A (simple) converter for covers (pointwise in the context)
+
+Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
+Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
+
+convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
+convC g P⊂Q (return p)    = return (P⊂Q p)
+convC g P⊂Q (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
+convC g P⊂Q (orC t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
+  (orC t (convC g P⊂Q cg) (convC g P⊂Q ch))
+
+-- A general converter for covers
+-- (subsumes mapC, monC, convC).
+
+record Converter A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀) : Set where
+  field
+    -- Conversion functional
+    φ      : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B
+
+    -- φ distributes over case
+    φ-case : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
+             ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
+             → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {C} τ) g)
+                                  (φ (weak δ) (lift {D} τ) h) ≡ φ δ τ (caseof f g h)
+
+    -- φ transports from P to Q
+    P⊂Q   : ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → P Γ f → Q Δ (φ δ τ f)
+
+-- The conversion is implemented by recursion over the case tree
+
+module _ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
+  (conv : Converter A B P Q τ₀) (open Converter conv) where
+
+  convCov : ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Cover A P Γ f → Cover B Q Δ (φ δ τ f)
+  convCov {Γ} {Δ} δ τ (return p) = return (P⊂Q δ τ p)
+  convCov {Γ} {Δ} δ τ (falseC t) = subst (Cover _ _ _) ⊥-elim-ext (falseC (monNe τ t))
+  convCov {Γ} {Δ} δ τ (orC {C} {D} t {g} cg {h} ch) =
+    subst (Cover _ _ _)
+      (φ-case δ τ C D Ne⦅ t ⦆ g h)
+      (orC (monNe τ t)
+        (convCov (weak δ) (lift {C} τ) cg)
+        (convCov (weak δ) (lift {D} τ) ch))
+
+    -- Just for documentation:
+    where
+    τC = lift {C} τ
+    cg' : Cover B Q (Δ ∙ C) (φ (weak δ) τC g)
+    cg' = convCov (weak δ) τC cg
+
+    τD = lift {D} τ
+    ch' : Cover B Q (Δ ∙ D) (φ (weak δ) τD h)
+    ch' = convCov (weak δ) τD ch
+
+    c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ (weak δ) τC g) (φ (weak δ) τD h))
+    c' = orC (monNe τ t) cg' ch'
+
+-- Implementations in terms of convCov (all need monotonicity of P)
+
+-- Cover is monotone in P
+
+mapC' : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : Sub A P Q) → Sub A (Cover A P) (Cover A Q)
+mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤ c
+  where
+  conv : Converter A A P Q id≤
+  conv = record
+    { φ      = λ δ τ f         → f ∘ R⦅ τ ⦆
+    ; φ-case = λ δ τ C D f g h → refl
+    ; P⊂Q    = λ δ τ ⟦f⟧       → P⊂Q (monP τ ⟦f⟧)
+    }
+
+-- Weakening Covers
+
+monC' : ∀{X} {P : KPred X} (monP : Mon P) → Mon (Cover X P)
+  -- {Γ} {f : Fun Γ X} {Δ} (τ : Δ ≤ Γ) (C : Cover X Γ P f) → Cover X Δ P (f ∘ R⦅ τ ⦆)
+monC' {X} {P} monP {Γ} {Δ} τ {f} c = convCov X X P P id≤ conv id≤ τ c
+  where
+  conv : Converter X X P P id≤
+  conv = record
+    { φ      = λ δ τ f         → f ∘ R⦅ τ ⦆
+    ; φ-case = λ δ τ C D f g h → refl
+    ; P⊂Q    = λ δ τ ⟦f⟧       → monP τ ⟦f⟧
+    }
+
+-- A converter for covers (pointwise in the context)
+
+convC' : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (monP : Mon P) (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
+convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv id≤ id≤ p
+  where
+  conv : Converter A B P Q id≤
+  conv = record
+    { φ      = λ δ τ f         → g₀ ∘ f ∘ R⦅ τ ⦆
+    ; φ-case = λ δ τ C D f g h → caseof-perm g₀ {f ∘ R⦅ τ ⦆}
+    ; P⊂Q    = λ δ τ ⟦f⟧       → P⊂Q (monP τ ⟦f⟧)
+    }
+
+-- Syntactic paste
 
 paste' : ∀{A Γ f} (C : Cover A (NfImg A) Γ f) → NfImg A Γ f
-paste' (idc t)        = t
-paste' (bot t)        = iFalseE (t , refl)
-paste' (node t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
-
--- Monad
-
-joinC : ∀{A} {P : KPred A} → Sub A (Cover A (Cover A P)) (Cover A P)
-joinC (idc c)        = c
-joinC (bot t)        = bot t
-joinC (node t cg ch) = node t (joinC cg) (joinC ch)
+paste' (return t)    = t
+paste' (falseC t)    = iFalseE (t , refl)
+paste' (orC t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
 
 -- Semantic absurdity type
 
@@ -220,13 +307,13 @@ mutual
   reflect : ∀{Γ} A {f} (t : NeImg A Γ f) → T⟦ A ⟧ Γ f
   reflect (Atom P) t = iNe t
   reflect True t = _
-  reflect False (t , _) = subst (Cover _ _ _) ⊥-elim-ext (bot t)
+  reflect False (t , _) = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
 
   -- x : A ∨ B  is reflected as case(x, y. inl y, z. inr z)
   -- Need a proof of caseof x inj₁ inj₂ = x
   reflect (A ∨ B) (t , refl) =  subst (Cover _ _ _) (caseof-eta Ne⦅ t ⦆)
-    (node t (idc (left  (reflect A (iHyp top))))
-            (idc (right (reflect B (iHyp top)))))
+    (orC t (return (left  (reflect A (iHyp top))))
+           (return (right (reflect B (iHyp top)))))
 
   reflect (A ∧ B) t = reflect A (iAndE₁ t) , reflect B (iAndE₂ t)
   reflect (A ⇒ B) t τ a = reflect B (iImpE (monNeImg τ t) (reify A a))
@@ -234,57 +321,14 @@ mutual
   reify : ∀{Γ} A {f} (⟦f⟧ : T⟦ A ⟧ Γ f) → NfImg A Γ f
   reify (Atom P) t      = t
   reify True _          = iTrueI
-  reify False           = paste' ∘ monCP λ()
-  reify (A ∨ B)         = paste' ∘ monCP reifyDisj
+  reify False           = paste' ∘ mapC λ()
+  reify (A ∨ B)         = paste' ∘ mapC reifyDisj
   reify (A ∧ B) (a , b) = iAndI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = iImpI (reify B (⟦f⟧ (weak id≤) (reflect A (iHyp top))))
 
   reifyDisj : ∀{A B} → Sub (A ∨ B) (Disj A B T⟦ A ⟧ T⟦ B ⟧) (NfImg (A ∨ B))
   reifyDisj {A} {B} (left  ⟦g⟧) = iOrI₁ (reify A ⟦g⟧)
   reifyDisj {A} {B} (right ⟦h⟧) = iOrI₂ (reify B ⟦h⟧)
-
--- A general converter for covers
--- (subsumes monC, monCP, convC).
-
-record Converter A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀) : Set where
-  field
-    -- Conversion functional
-    φ      : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → Fun Γ A → Fun Δ B
-
-    -- φ distributes over case
-    φ-case : ∀ {Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) →
-             ∀ C D (f : Fun Γ (C ∨ D)) (g : Fun (Γ ∙ C) A) (h : Fun (Γ ∙ D) A)
-             → caseof (f ∘ R⦅ τ ⦆) (φ (weak δ) (lift {C} τ) g)
-                                  (φ (weak δ) (lift {D} τ) h) ≡ φ δ τ (caseof f g h)
-
-    -- φ transports from P to Q
-    P⊂Q   : ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → P Γ f → Q Δ (φ δ τ f)
-
-module _ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
-  (conv : Converter A B P Q τ₀) (open Converter conv) where
-
-  convCov : ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) {f} → Cover A P Γ f → Cover B Q Δ (φ δ τ f)
-  convCov {Γ} {Δ} δ τ (idc p) = idc (P⊂Q δ τ p)
-  convCov {Γ} {Δ} δ τ (bot t) = subst (Cover _ _ _) ⊥-elim-ext (bot (monNe τ t))
-  convCov {Γ} {Δ} δ τ (node {C} {D} t {g} cg {h} ch) =
-    subst (Cover _ _ _)
-      (φ-case δ τ C D Ne⦅ t ⦆ g h)
-      (node (monNe τ t)
-        (convCov (weak δ) (lift {C} τ) cg)
-        (convCov (weak δ) (lift {D} τ) ch))
-
-    -- Just for documentation:
-    where
-    τC = lift {C} τ
-    cg' : Cover B Q (Δ ∙ C) (φ (weak δ) τC g)
-    cg' = convCov (weak δ) τC cg
-
-    τD = lift {D} τ
-    ch' : Cover B Q (Δ ∙ D) (φ (weak δ) τD h)
-    ch' = convCov (weak δ) τD ch
-
-    c' : Cover B Q Δ (caseof (Ne⦅ t ⦆ ∘ R⦅ τ ⦆) (φ (weak δ) τC g) (φ (weak δ) τD h))
-    c' = node (monNe τ t) cg' ch'
 
 -- Semantic paste
 
@@ -294,10 +338,6 @@ paste True     = _
 paste False    = joinC
 paste (A ∨ B)  = joinC
 paste (A ∧ B)  = < paste A ∘ convC proj₁ proj₁ , paste B ∘ convC proj₂ proj₂ >
-  where
-  fst : ∀ Γ f → Cover (A ∧ B) (Conj A B T⟦ A ⟧ T⟦ B ⟧) Γ f → Cover A T⟦ A ⟧ Γ (proj₁ ∘ f)
-  fst Γ f c = convC proj₁ {Conj A B T⟦ A ⟧ T⟦ B ⟧} {T⟦ A ⟧} proj₁ c
-
 paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A ⇒ B) B P Q τ₀ record{Conv} id≤ τ₀ c)
   where
   P = Imp A B T⟦ A ⟧ T⟦ B ⟧
@@ -388,8 +428,8 @@ fund (impE t u) γ = fund t γ id≤ (fund u γ)
 fund (andI t u) γ = fund t γ , fund u γ
 fund (andE₁ t) = proj₁ ∘ fund t
 fund (andE₂ t) = proj₂ ∘ fund t
-fund (orI₁ t) γ = idc (left  (fund t γ))
-fund (orI₂ t) γ = idc (right (fund t γ))
+fund (orI₁ t) γ = return (left  (fund t γ))
+fund (orI₂ t) γ = return (right (fund t γ))
 fund {A} (orE t u v) γ =  orElim A (fund t γ)
   (λ τ a → fund u (monG τ γ , a))
   (λ τ b → fund v (monG τ γ , b))
