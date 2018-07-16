@@ -33,7 +33,7 @@ Sub A P Q = ∀{Γ f} → P Γ f → Q Γ f
 _↪_ : ∀{A} (P Q : KPred A) → Set
 P ↪ Q = ∀{Γ f} → P Γ f → Q Γ f
 
--- Conv generalizes Sub to move to a new proposition.
+-- Conv generalizes _↪_ to move to a new proposition.
 
 Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
 Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
@@ -348,7 +348,7 @@ mutual
   reify (A ∧ B) (a , b) = iAndI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = iImpI (reify B (⟦f⟧ (weak id≤) (reflect A (iHyp top))))
 
-  reifyDisj : ∀{A B} → Sub (A ∨ B) (Disj A B T⟦ A ⟧ T⟦ B ⟧) (NfImg (A ∨ B))
+  reifyDisj : ∀{A B} → ⟨ A ∨ B ⟩ Disj A B T⟦ A ⟧ T⟦ B ⟧ ↪ NfImg (A ∨ B)
   reifyDisj {A} {B} (left  ⟦g⟧) = iOrI₁ (reify A ⟦g⟧)
   reifyDisj {A} {B} (right ⟦h⟧) = iOrI₂ (reify B ⟦h⟧)
 
