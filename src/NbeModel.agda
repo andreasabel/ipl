@@ -27,6 +27,19 @@ KPred A = KPred' T⦅ A ⦆
 Sub : ∀ A (P Q : KPred A) → Set
 Sub A P Q = ∀{Γ f} → P Γ f → Q Γ f
 
+⟨_⟩_↪_ : ∀ A (P Q : KPred A) → Set
+⟨ A ⟩ P ↪ Q = ∀{Γ f} → P Γ f → Q Γ f
+
+_↪_ : ∀{A} (P Q : KPred A) → Set
+P ↪ Q = ∀{Γ f} → P Γ f → Q Γ f
+
+-- Conv generalizes Sub to move to a new proposition.
+
+Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
+Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
+
+⟪_⟫_↪_ = Conv
+
 -- Statement of monotonicity for Kripke predicates
 
 Mon : ∀{S} (𝓐 : KPred' S) → Set
@@ -55,7 +68,7 @@ monNfImg τ (t , refl) = monNf τ t , natD τ nf[ t ]
 
 -- Neutrals of base type are normal
 
-iNe : ∀{Γ P f} → NeImg (Atom P) Γ f → NfImg (Atom P) Γ f
+iNe : ∀{P} → NeImg (Atom P) ↪ NfImg (Atom P)
 iNe (t , eq) =  ne t , eq
 
 -- Variables are neutral
@@ -85,18 +98,18 @@ iAndI (t , eq) (u , eq') = andI t u , cong₂ <_,_> eq eq'
 
 -- Projection of a neutral is neutral
 
-iAndE₁ : ∀{Γ A B f} → NeImg (A ∧ B) Γ f → NeImg A Γ (proj₁ ∘ f)
+iAndE₁ : ∀{A B} → ⟪ proj₁ ⟫ NeImg (A ∧ B) ↪ NeImg A
 iAndE₁ (t , eq) = andE₁ t , cong (proj₁ ∘_) eq
 
-iAndE₂ : ∀{Γ A B f} → NeImg (A ∧ B) Γ f → NeImg B Γ (proj₂ ∘ f)
+iAndE₂ : ∀{A B} → ⟪ proj₂ ⟫ NeImg (A ∧ B) ↪ NeImg B
 iAndE₂ (t , eq) = andE₂ t , cong (proj₂ ∘_) eq
 
 -- Injections operate on normal forms
 
-iOrI₁ : ∀{Γ A B f} → NfImg A Γ f → NfImg (A ∨ B) Γ (inj₁ ∘ f)
+iOrI₁ : ∀{A B} → ⟪ inj₁ ⟫ NfImg A ↪ NfImg (A ∨ B)
 iOrI₁ (t , eq) = orI₁ t , cong (inj₁ ∘_) eq
 
-iOrI₂ : ∀{Γ A B f} → NfImg B Γ f → NfImg (A ∨ B) Γ (inj₂ ∘ f)
+iOrI₂ : ∀{A B} → ⟪ inj₂ ⟫ NfImg B ↪ NfImg (A ∨ B)
 iOrI₂ (t , eq) = orI₂ t , cong (inj₂ ∘_) eq
 
 -- Case splitting forms:
@@ -132,16 +145,16 @@ data Cover (A : Form) (P : KPred A)  (Δ : Cxt) : (f : Fun Δ A) → Set where
 
 -- Cover is monotone in P
 
-mapC : ∀{A} {P Q : KPred A} (P⊂Q : Sub A P Q) → Sub A (Cover A P) (Cover A Q)
+mapC : ∀{A} {P Q : KPred A} (P⊂Q : ⟨ A ⟩ P ↪ Q) → ⟨ A ⟩ Cover A P ↪ Cover A Q
 mapC P⊂Q (return p)    = return (P⊂Q p)
 mapC P⊂Q (falseC t)    = falseC t
 mapC P⊂Q (orC t cg ch) = orC t (mapC P⊂Q cg) (mapC P⊂Q ch)
 
 -- Case trees can be composed, which makes  Cover A  a monad
 -- in the category of kripke predicates  KPred A  and  their embeddings
--- Sub A.
+-- ⟨ A ⟩.
 
-joinC : ∀{A} {P : KPred A} → Sub A (Cover A (Cover A P)) (Cover A P)
+joinC : ∀{A} {P : KPred A} → ⟨ A ⟩ Cover A (Cover A P) ↪ Cover A P
 joinC (return c)    = c
 joinC (falseC t)    = falseC t
 joinC (orC t cg ch) = orC t (joinC cg) (joinC ch)
@@ -157,14 +170,9 @@ monC monP τ (orC t cg ch) = orC (monNe τ t) (monC monP (lift τ) cg) (monC mon
 
 -- Converting covers to a new target proposition
 
--- Conv generalizes Sub to move to a new proposition.
-
-Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
-Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
-
 -- A (simple) converter for covers (pointwise in the context)
 
-convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
+convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : ⟪ g ⟫ P ↪ Q) → ⟪ g ⟫ Cover A P ↪ Cover B Q
 convC g P⊂Q (return p)    = return (P⊂Q p)
 convC g P⊂Q (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
 convC g P⊂Q (orC t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
@@ -219,7 +227,7 @@ module _ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
 
 -- Cover is monotone in P
 
-mapC' : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : Sub A P Q) → Sub A (Cover A P) (Cover A Q)
+mapC' : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : ⟨ A ⟩ P ↪ Q) → ⟨ A ⟩ Cover A P ↪ Cover A Q
 mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤ c
   where
   conv : Converter A A P Q id≤
@@ -232,7 +240,6 @@ mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤
 -- Weakening Covers
 
 monC' : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
-  -- {Γ} {f : Fun Γ A} {Δ} (τ : Δ ≤ Γ) (C : Cover A Γ P f) → Cover A Δ P (f ∘ R⦅ τ ⦆)
 monC' {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
   where
   conv : Converter A A P P id≤
@@ -244,7 +251,7 @@ monC' {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
 
 -- A converter for covers (pointwise in the context)
 
-convC' : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (monP : Mon P) (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
+convC' : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (monP : Mon P) (P⊂Q : ⟪ g ⟫ P ↪ Q) → ⟪ g ⟫ Cover A P ↪ Cover B Q
 convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv id≤ id≤ p
   where
   conv : Converter A B P Q id≤
@@ -257,7 +264,7 @@ convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv i
 -- Syntactic paste:
 -- a case tree over normal forms is a normal form.
 
-paste' : ∀{A Γ f} (C : Cover A (NfImg A) Γ f) → NfImg A Γ f
+paste' : ∀{A} → ⟨ A ⟩ Cover A (NfImg A) ↪ NfImg A
 paste' (return t)    = t
 paste' (falseC t)    = iFalseE (t , refl)
 paste' (orC t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
@@ -296,7 +303,7 @@ Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ 
 
 -- The Beth model
 
-T⟦_⟧ : (A : Form) (Γ : Cxt) (f : Fun Γ A) → Set
+T⟦_⟧ : (A : Form) → KPred A
 T⟦ Atom P ⟧ = NfImg (Atom P)
 T⟦ True   ⟧ = Truth
 T⟦ False  ⟧ = Cover False   Absurd
@@ -319,22 +326,22 @@ monT (A ⇒ B) τ f σ = f (σ • τ)
 
 mutual
 
-  reflect : ∀{Γ} A {f} (t : NeImg A Γ f) → T⟦ A ⟧ Γ f
-  reflect (Atom P) t = iNe t
-  reflect True t = _
+  reflect : ∀ A → ⟨ A ⟩ NeImg A ↪ T⟦ A ⟧
+  reflect (Atom P)      = iNe
+  reflect True          = _
   reflect False (t , _) = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
 
   -- x : A ∨ B  is reflected as case(x, y. inl y, z. inr z)
   -- Need a proof of caseof x inj₁ inj₂ = x
-  reflect (A ∨ B) (t , refl) =  subst (Cover _ _ _) (caseof-eta Ne⦅ t ⦆)
+  reflect (A ∨ B) (t , refl) = subst (Cover _ _ _) (caseof-eta Ne⦅ t ⦆)
     (orC t (return (left  (reflect A (iHyp top))))
            (return (right (reflect B (iHyp top)))))
 
-  reflect (A ∧ B) t = reflect A (iAndE₁ t) , reflect B (iAndE₂ t)
-  reflect (A ⇒ B) t τ a = reflect B (iImpE (monNeImg τ t) (reify A a))
+  reflect (A ∧ B) i     = reflect A (iAndE₁ i) , reflect B (iAndE₂ i)
+  reflect (A ⇒ B) i τ a = reflect B (iImpE (monNeImg τ i) (reify A a))
 
-  reify : ∀{Γ} A {f} (⟦f⟧ : T⟦ A ⟧ Γ f) → NfImg A Γ f
-  reify (Atom P) t      = t
+  reify : ∀ A → ⟨ A ⟩ T⟦ A ⟧ ↪ NfImg A
+  reify (Atom P)        = id
   reify True _          = iTrueI
   reify False           = paste' ∘ mapC λ()
   reify (A ∨ B)         = paste' ∘ mapC reifyDisj
@@ -347,7 +354,7 @@ mutual
 
 -- Semantic paste
 
-paste : ∀ A {Γ f} (c : Cover A (T⟦ A ⟧) Γ f) → T⟦ A ⟧ Γ f
+paste : ∀ A → ⟨ A ⟩ Cover A (T⟦ A ⟧) ↪ T⟦ A ⟧
 paste (Atom P) = paste'
 paste True     = _
 paste False    = joinC
@@ -377,7 +384,7 @@ paste (A ⇒ B) {Γ₀} {f} c {Δ₀} τ₀ {a} ⟦a⟧ = paste B (convCov (A �
 
 -- Extension of T⟦_⟧ to contexts
 
-G⟦_⟧ : ∀ (Γ Δ : Cxt) (ρ : Mor Δ Γ) → Set
+G⟦_⟧ : ∀ Γ → KPred' C⦅ Γ ⦆
 G⟦ ε     ⟧ Δ ρ = ⊤
 G⟦ Γ ∙ A ⟧ Δ ρ = G⟦ Γ ⟧ Δ (proj₁ ∘ ρ) × T⟦ A ⟧ Δ (proj₂ ∘ ρ)
 
@@ -387,8 +394,9 @@ monG {ε}     τ _       = _
 monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
 -- Variable case
+-- fundH : (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (H⦅ x ⦆ ∘ ρ)
 
-fundH : ∀{Γ Δ A ρ} (x : Hyp A Γ) (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (H⦅ x ⦆ ∘ ρ)
+fundH : ∀{Γ A} (x : Hyp A Γ) → ⟪ H⦅ x ⦆ ⟫ G⟦ Γ ⟧ ↪ T⟦ A ⟧
 fundH top     = proj₂
 fundH (pop x) = fundH x ∘ proj₁
 
@@ -432,25 +440,26 @@ orElim E {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste E
 
 -- A lemma for the falseE case
 
-falseElim : ∀ A {Γ f} (c : Cover False Absurd Γ f) → T⟦ A ⟧ Γ (⊥-elim ∘ f)
+falseElim : ∀ A → ⟪ ⊥-elim ⟫ Cover False Absurd ↪ T⟦ A ⟧
 falseElim A = paste A ∘ convC ⊥-elim ⊥-elim
 
 -- The fundamental theorem
 
-fund :  ∀{A Γ} (t : Γ ⊢ A) {Δ ρ} (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (D⦅ t ⦆ ∘ ρ)
-fund (hyp x) = fundH x
-fund (impI t) γ τ a = fund t (monG τ γ , a)
-fund (impE t u) γ = fund t γ id≤ (fund u γ)
-fund (andI t u) γ = fund t γ , fund u γ
-fund (andE₁ t) = proj₁ ∘ fund t
-fund (andE₂ t) = proj₂ ∘ fund t
-fund (orI₁ t) γ = return (left  (fund t γ))
-fund (orI₂ t) γ = return (right (fund t γ))
+-- fund :  ∀{A Γ} (t : Γ ⊢ A) {Δ ρ} (γ : G⟦ Γ ⟧ Δ ρ) → T⟦ A ⟧ Δ (D⦅ t ⦆ ∘ ρ)
+fund :  ∀{A Γ} (t : Γ ⊢ A) → ⟪ D⦅ t ⦆ ⟫ G⟦ Γ ⟧ ↪ T⟦ A ⟧
+fund (hyp x)           = fundH x
+fund (impI t) γ τ a    = fund t (monG τ γ , a)
+fund (impE t u) γ      = fund t γ id≤ (fund u γ)
+fund (andI t u)        = < fund t , fund u >
+fund (andE₁ t)         = proj₁ ∘ fund t
+fund (andE₂ t)         = proj₂ ∘ fund t
+fund (orI₁ t) γ        = return (left  (fund t γ))
+fund (orI₂ t) γ        = return (right (fund t γ))
 fund {A} (orE t u v) γ =  orElim A (fund t γ)
   (λ τ a → fund u (monG τ γ , a))
   (λ τ b → fund v (monG τ γ , b))
-fund {A} (falseE t) γ =  falseElim A (fund t γ)
-fund trueI γ = _
+fund {A} (falseE t) γ  =  falseElim A (fund t γ)
+fund trueI γ           = _
 
 -- Identity environment
 
