@@ -120,7 +120,8 @@ iFalseE' : ∀{Γ C f}
   → NfImg C Γ (⊥-elim ∘ f)
 iFalseE' t = falseE t , ⊥-elim-ext
 
--- Beth model
+-- Cover A (P : KPred A) : KPred A  is an extension of Kripke predicate P
+-- (on functions into A) by case trees (whose leaves satisfy P).
 
 data Cover (A : Form) (P : KPred A)  (Δ : Cxt) : (f : Fun Δ A) → Set where
   return : ∀{f} (p : P Δ f) → Cover A P Δ f
@@ -136,26 +137,32 @@ mapC P⊂Q (return p)    = return (P⊂Q p)
 mapC P⊂Q (falseC t)    = falseC t
 mapC P⊂Q (orC t cg ch) = orC t (mapC P⊂Q cg) (mapC P⊂Q ch)
 
--- Monad
+-- Case trees can be composed, which makes  Cover A  a monad
+-- in the category of kripke predicates  KPred A  and  their embeddings
+-- Sub A.
 
 joinC : ∀{A} {P : KPred A} → Sub A (Cover A (Cover A P)) (Cover A P)
 joinC (return c)    = c
 joinC (falseC t)    = falseC t
 joinC (orC t cg ch) = orC t (joinC cg) (joinC ch)
 
--- Weakening Covers
+-- Weakening covers (Cover preserves Kripke)
+-- (τ : Δ ≤ Γ) → Cover A Γ P f → Cover A Δ P (f ∘ R⦅ τ ⦆)
 
 monC : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
-  -- {Γ} {f : Fun Γ A} {Δ} (τ : Δ ≤ Γ) (C : Cover A Γ P f) → Cover A Δ P (f ∘ R⦅ τ ⦆)
 monC monP τ (return p)    = return (monP τ p)
 monC monP τ (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC (monNe τ t))
 monC monP τ (orC t cg ch) = orC (monNe τ t) (monC monP (lift τ) cg) (monC monP (lift τ) ch)
   -- REWRITE monD-ne natD
 
--- A (simple) converter for covers (pointwise in the context)
+-- Converting covers to a new target proposition
+
+-- Conv generalizes Sub to move to a new proposition.
 
 Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
 Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
+
+-- A (simple) converter for covers (pointwise in the context)
 
 convC : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (P⊂Q : Conv g P Q) → Conv g (Cover A P) (Cover B Q)
 convC g P⊂Q (return p)    = return (P⊂Q p)
@@ -163,7 +170,7 @@ convC g P⊂Q (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
 convC g P⊂Q (orC t cg ch) = subst (Cover _ _ _) (caseof-perm g {Ne⦅ t ⦆})
   (orC t (convC g P⊂Q cg) (convC g P⊂Q ch))
 
--- A general converter for covers
+-- A general converter going to a new target proposition and an extended context at the same time.
 -- (subsumes mapC, monC, convC).
 
 record Converter A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀) : Set where
@@ -247,19 +254,22 @@ convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv i
     ; P⊂Q    = λ δ τ ⟦f⟧       → P⊂Q (monP τ ⟦f⟧)
     }
 
--- Syntactic paste
+-- Syntactic paste:
+-- a case tree over normal forms is a normal form.
 
 paste' : ∀{A Γ f} (C : Cover A (NfImg A) Γ f) → NfImg A Γ f
 paste' (return t)    = t
 paste' (falseC t)    = iFalseE (t , refl)
 paste' (orC t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
 
--- Semantic absurdity type
+-- Bicartesian closure of KPred
+
+-- Semantic absurdity type (initial object)
 
 Absurd : KPred False
 Absurd _ _ = ⊥
 
--- Semantic disjunction type
+-- Semantic disjunction type (coproduct)
 
 data Disj A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) Γ : Fun Γ (A ∨ B) → Set where
   left  : {g : Fun Γ A} (⟦g⟧ : ⟦A⟧ Γ g) → Disj _ _ _ _ _ (inj₁ ∘ g)
@@ -269,12 +279,17 @@ monDisj : ∀{A B ⟦A⟧ ⟦B⟧} (monA : Mon ⟦A⟧) (monB : Mon ⟦B⟧) →
 monDisj monA monB τ (left  ⟦g⟧) = left  (monA τ ⟦g⟧)
 monDisj monA monB τ (right ⟦h⟧) = right (monB τ ⟦h⟧)
 
--- Semantic conjunction type
+-- Semantic truth type (terminal object)
+
+Truth : KPred True
+Truth _ _ = ⊤
+
+-- Semantic conjunction type (product)
 
 Conj : ∀ A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) → KPred (A ∧ B)
 Conj A B ⟦A⟧ ⟦B⟧ Γ f = ⟦A⟧ Γ (proj₁ ∘ f) × ⟦B⟧ Γ (proj₂ ∘ f)
 
--- Semantic implication type
+-- Semantic implication type (exponential)
 
 Imp : ∀ A B (⟦A⟧ : KPred A) (⟦B⟧ : KPred B) → KPred (A ⇒ B)
 Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ : ⟦A⟧ Δ a) → ⟦B⟧ Δ (kapp A B f τ a)
@@ -283,11 +298,11 @@ Imp A B ⟦A⟧ ⟦B⟧ Γ f = ∀{Δ} (τ : Δ ≤ Γ) {a : Fun Δ A} (⟦a⟧ 
 
 T⟦_⟧ : (A : Form) (Γ : Cxt) (f : Fun Γ A) → Set
 T⟦ Atom P ⟧ = NfImg (Atom P)
-T⟦ True ⟧ _ _ = ⊤
-T⟦ False ⟧ = Cover False   Absurd
-T⟦ A ∨ B ⟧ = Cover (A ∨ B) (Disj A B (T⟦ A ⟧) (T⟦ B ⟧))
-T⟦ A ∧ B ⟧ = Conj A B T⟦ A ⟧ T⟦ B ⟧
-T⟦ A ⇒ B ⟧ = Imp A B T⟦ A ⟧ T⟦ B ⟧
+T⟦ True   ⟧ = Truth
+T⟦ False  ⟧ = Cover False   Absurd
+T⟦ A ∨ B  ⟧ = Cover (A ∨ B) (Disj A B (T⟦ A ⟧) (T⟦ B ⟧))
+T⟦ A ∧ B  ⟧ = Conj A B T⟦ A ⟧ T⟦ B ⟧
+T⟦ A ⇒ B  ⟧ = Imp A B T⟦ A ⟧ T⟦ B ⟧
 
 -- Monotonicity of semantics
 -- (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ f → T⟦ A ⟧ Δ (f ∘ R⦅ τ ⦆)
@@ -366,7 +381,8 @@ G⟦_⟧ : ∀ (Γ Δ : Cxt) (ρ : Mor Δ Γ) → Set
 G⟦ ε     ⟧ Δ ρ = ⊤
 G⟦ Γ ∙ A ⟧ Δ ρ = G⟦ Γ ⟧ Δ (proj₁ ∘ ρ) × T⟦ A ⟧ Δ (proj₂ ∘ ρ)
 
-monG : ∀{Γ Δ Φ ρ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ ρ → G⟦ Γ ⟧ Φ (ρ ∘ R⦅ τ ⦆)
+-- monG : ∀{Γ Δ Φ ρ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ ρ → G⟦ Γ ⟧ Φ (ρ ∘ R⦅ τ ⦆)
+monG : ∀{Γ} → Mon G⟦ Γ ⟧
 monG {ε}     τ _       = _
 monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
@@ -416,8 +432,8 @@ orElim E {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste E
 
 -- A lemma for the falseE case
 
-falseElim : ∀ A {Γ f} (ce : Cover False Absurd Γ f) → T⟦ A ⟧ Γ (⊥-elim ∘ f)
-falseElim A {Γ} ce = paste A (convC ⊥-elim ⊥-elim ce)
+falseElim : ∀ A {Γ f} (c : Cover False Absurd Γ f) → T⟦ A ⟧ Γ (⊥-elim ∘ f)
+falseElim A = paste A ∘ convC ⊥-elim ⊥-elim
 
 -- The fundamental theorem
 
