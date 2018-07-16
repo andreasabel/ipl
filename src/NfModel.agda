@@ -16,40 +16,40 @@ import Derivations; open module Der  = Derivations Base
 data Cover (Γ : Cxt) : Set where
   hole   : Cover Γ
   falseC : (t : Ne Γ False) → Cover Γ
-  orC    : ∀{A B} (t : Ne Γ (A ∨ B)) (C : Cover (Γ ∙ A)) (D : Cover (Γ ∙ B)) → Cover Γ
+  orC    : ∀{A B} (t : Ne Γ (A ∨ B)) (c : Cover (Γ ∙ A)) (d : Cover (Γ ∙ B)) → Cover Γ
 
 -- Choice of names.
 -- hole  : has the same role as the hole-evaluation context (identity).
 -- falseC: basically falseE.
 -- orC   : basically orE.
 
--- Given C : Cover Γ, a path p : Δ ∈ C leads us from the root to one of the leaves (hole)
+-- Given c : Cover Γ, a path p : Δ ∈ c leads us from the root to one of the leaves (hole)
 -- of the case tree.  Δ is the context at the leaf.
 
-data _∈_ Δ : ({Γ} : Cxt) (C : Cover Γ) → Set where
+data _∈_ Δ : ({Γ} : Cxt) (c : Cover Γ) → Set where
   here  : Δ ∈ hole {Δ}
-  left  : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ C) → Δ ∈ orC t C D
-  right : ∀{Γ A B C D} {t : Ne Γ (A ∨ B)} (e : Δ ∈ D) → Δ ∈ orC t C D
+  left  : ∀{Γ A B c d} {t : Ne Γ (A ∨ B)} (e : Δ ∈ c) → Δ ∈ orC t c d
+  right : ∀{Γ A B c d} {t : Ne Γ (A ∨ B)} (e : Δ ∈ d) → Δ ∈ orC t c d
 
--- Given a case tree C : Cover Γ and a context-indexed set P,
--- f : All C P  is an assignment of things in  P Δ  to holes
--- of type Δ reached by pathes e : Δ ∈ C.
+-- Given a case tree c : Cover Γ and a context-indexed set P,
+-- f : All c P  is an assignment of things in  P Δ  to holes
+-- of type Δ reached by pathes e : Δ ∈ c.
 
-All : ∀{Γ} (C : Cover Γ) (P : (Δ : Cxt) → Set) → Set
-All C P = ∀{Δ} (e : Δ ∈ C) → P Δ
+All : ∀{Γ} (c : Cover Γ) (P : (Δ : Cxt) → Set) → Set
+All c P = ∀{Δ} (e : Δ ∈ c) → P Δ
 
--- We can also use All C P with a property P on context,
--- to express that all holes of C satify P.
+-- We can also use All c P with a property P on context,
+-- to express that all holes of c satify P.
 
--- We might want to depend on the path e : Δ ∈ C also:
+-- We might want to depend on the path e : Δ ∈ c also:
 
-All' : ∀{Γ} (C : Cover Γ) (P : ∀ {Δ} (e : Δ ∈ C) → Set) → Set
-All' C P = ∀{Δ} (e : Δ ∈ C) → P e
+All' : ∀{Γ} (c : Cover Γ) (P : ∀ {Δ} (e : Δ ∈ c) → Set) → Set
+All' c P = ∀{Δ} (e : Δ ∈ c) → P e
 
--- If  C : Cover Γ  and  e : Δ ∈ C,  then Δ must be an extension of Γ.
+-- If  c : Cover Γ  and  e : Δ ∈ C,  then Δ must be an extension of Γ.
 -- Here, we only prove that it is a thinning.
 
-coverWk : ∀{Γ} {C : Cover Γ} → All C (_≤ Γ)
+coverWk : ∀{Γ} {c : Cover Γ} → All c (_≤ Γ)
 coverWk here      = id≤
 coverWk (left  e) = coverWk e • weak id≤
 coverWk (right e) = coverWk e • weak id≤
@@ -57,96 +57,96 @@ coverWk (right e) = coverWk e • weak id≤
 -- We can substitute leaves in the case tree by case trees in turn.
 -- The following is a ``parallel substitution'' operations for covers.
 
--- If C : Cover Γ and f is a mapping from the leaves of C to case trees
--- we can graft f onto C to get a new case tree  transC C f.
+-- If c : Cover Γ and f is a mapping from the leaves of c to case trees
+-- we can graft f onto c to get a new case tree  transC c f.
 
 -- Here, the case tree substitution is given as a function from pathes
--- p : Δ ∈ C  to covers.
+-- p : Δ ∈ c  to covers.
 
-transC : ∀{Γ} (C : Cover Γ) (f : All C Cover) → Cover Γ
+transC : ∀{Γ} (c : Cover Γ) (f : All c Cover) → Cover Γ
 transC hole        f = f here
 transC (falseC t)  f = falseC t
-transC (orC t C D) f = orC t (transC C (f ∘ left)) (transC D (f ∘ right))
+transC (orC t c d) f = orC t (transC c (f ∘ left)) (transC d (f ∘ right))
 
 -- Composition of pathes.
 
--- Assume a C : Cover Γ and a substitution f : Δ ∈ C → ∁over Δ and a path e : Δ ∈ C.
--- Then any path p : Φ ∈ f e can be extended to a path q : Φ ∈ transC C f
+-- Assume a c : Cover Γ and a substitution f : Δ ∈ c → ∁over Δ and a path e : Δ ∈ c.
+-- Then any path p : Φ ∈ f e can be extended to a path q : Φ ∈ transC c f
 -- by essentially concatenating e and p.
 
 -- Note that we maintain f only for the sake of typing.
 
--- trans∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) →
---   ∀ {Δ} (e : Δ ∈ C) {Φ} → Φ ∈ f e → Φ ∈ transC C f
+-- trans∈ : ∀{Γ} (c : Cover Γ) (f : All c Cover) →
+--   ∀ {Δ} (e : Δ ∈ c) {Φ} → Φ ∈ f e → Φ ∈ transC c f
 
-trans∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) →
-  All' C λ {Δ} (e : Δ ∈ C) → All (f e) (_∈ transC C f)
+trans∈ : ∀{Γ} (c : Cover Γ) (f : All c Cover) →
+  All' c λ {Δ} (e : Δ ∈ c) → All (f e) (_∈ transC c f)
 trans∈ hole        f here      = id
 trans∈ (falseC t)  f ()
-trans∈ (orC t C D) f (left  e) = left  ∘ trans∈ C (f ∘ left ) e
-trans∈ (orC t C D) f (right e) = right ∘ trans∈ D (f ∘ right) e
+trans∈ (orC t c d) f (left  e) = left  ∘ trans∈ c (f ∘ left ) e
+trans∈ (orC t c d) f (right e) = right ∘ trans∈ d (f ∘ right) e
 
 -- Splitting of pathes.
 
 -- In a situation similar to the previous lemma:
--- If we have a path q : Φ ∈ transC C f we can split it into some
--- e : Δ ∈ C and p : Φ ∈ f e.
+-- If we have a path q : Φ ∈ transC c f we can split it into some
+-- e : Δ ∈ c and p : Φ ∈ f e.
 
-split∈ : ∀{Γ} (C : Cover Γ) (f : All C Cover) {Φ} (q : Φ ∈ transC C f)
-  → ∃ λ Δ → ∃ λ (e : Δ ∈ C) → Φ ∈ f e
+split∈ : ∀{Γ} (c : Cover Γ) (f : All c Cover) {Φ} (q : Φ ∈ transC c f)
+  → ∃ λ Δ → ∃ λ (e : Δ ∈ c) → Φ ∈ f e
 split∈ hole        f q = _ , _ , q
 split∈ (falseC t)  f ()
-split∈ (orC t C D) f (left q) with split∈ C (f ∘ left) q
+split∈ (orC t c d) f (left q) with split∈ c (f ∘ left) q
 ... | Δ , e₁ , e₂ = Δ , left e₁ , e₂
-split∈ (orC t C D) f (right q) with split∈ D (f ∘ right) q
+split∈ (orC t c d) f (right q) with split∈ d (f ∘ right) q
 ... | Δ , e₁ , e₂ = Δ , right e₁ , e₂
 
 -- Syntactic paste (from Thorsten).
 
--- If for each leave e : Δ ∈ C of a case tree C : Cover Γ we have a normal form
--- f e : Nf Δ A  of type A, grafting these nfs onto C gives us a  Nf Γ A.
+-- If for each leave e : Δ ∈ c of a case tree c : Cover Γ we have a normal form
+-- f e : Nf Δ A  of type A, grafting these nfs onto c gives us a  Nf Γ A.
 
-paste' : ∀{A Γ} (C : Cover Γ) (f : All C λ Δ → Nf Δ A) → Nf Γ A
+paste' : ∀{A Γ} (c : Cover Γ) (f : All c λ Δ → Nf Δ A) → Nf Γ A
 paste' hole        f = f here
 paste' (falseC t)  f = falseE t
-paste' (orC t C D) f = orE t (paste' C (f ∘ left)) (paste' D (f ∘ right))
+paste' (orC t c d) f = orE t (paste' c (f ∘ left)) (paste' d (f ∘ right))
 
 -- Weakening covers:  A case tree in Γ can be transported to a thinning Δ
 -- by weakening all the scrutinees.
 
--- monC : ∀{Γ Δ} (τ : Δ ≤ Γ) (C : Cover Γ) → Cover Δ
+-- monC : ∀{Γ Δ} (τ : Δ ≤ Γ) (c : Cover Γ) → Cover Δ
 monC : Mon Cover
 monC τ hole        = hole
 monC τ (falseC t)  = falseC (monNe τ t)
-monC τ (orC t C D) = orC (monNe τ t) (monC (lift τ) C) (monC (lift τ) D)
+monC τ (orC t c d) = orC (monNe τ t) (monC (lift τ) c) (monC (lift τ) d)
 
 -- Undoing a weakening on a path.
 --
--- If we have a path  e : Φ ∈ monC τ C  in a case tree  C : Cover Γ  transported
--- to Δ via thinning  τ : Δ ≤ Γ, we also get a path  e' : Ψ ∈ C  in the original
--- case tree C such that Ψ is a strenthening of Φ  (Φ ≤ Ψ).
+-- If we have a path  e : Φ ∈ monC τ c  in a case tree  c : Cover Γ  transported
+-- to Δ via thinning  τ : Δ ≤ Γ, we also get a path  e' : Ψ ∈ c  in the original
+-- case tree c such that Ψ is a strenthening of Φ  (Φ ≤ Ψ).
 
-mon∈ : ∀{Γ Δ Φ} (C : Cover Γ) (τ : Δ ≤ Γ) (e : Φ ∈ monC τ C) → ∃ λ Ψ → Ψ ∈ C × Φ ≤ Ψ
+mon∈ : ∀{Γ Δ Φ} (c : Cover Γ) (τ : Δ ≤ Γ) (e : Φ ∈ monC τ c) → ∃ λ Ψ → Ψ ∈ c × Φ ≤ Ψ
 mon∈  hole τ here = _ , here , τ
 mon∈ (falseC t)  τ ()
-mon∈ (orC t C D) τ (left e)  with mon∈ C (lift τ) e
+mon∈ (orC t c d) τ (left e)  with mon∈ c (lift τ) e
 ... | Ψ , e' , σ = Ψ , left e' , σ
-mon∈ (orC t C D) τ (right e) with mon∈ D (lift τ) e
+mon∈ (orC t c d) τ (right e) with mon∈ d (lift τ) e
 ... | Ψ , e' , σ = Ψ , right e' , σ
 
 -- Packaging a case tree with its valuation.
 
 CovExt : (Γ : Cxt) (P : Cxt → Set) → Set
-CovExt Γ P = Σ (Cover Γ) λ C → All C P
+CovExt Γ P = Σ (Cover Γ) λ c → All c P
 
-transCE : ∀ {P Γ} (C : Cover Γ) (f : All C λ Δ → CovExt Δ P) → CovExt Γ P
-transCE C f = transC C (proj₁ ∘ f) , λ e →
-  let _ , e₁ , e₂ = split∈ C (proj₁ ∘ f) e
+transCE : ∀ {P Γ} (c : Cover Γ) (f : All c λ Δ → CovExt Δ P) → CovExt Γ P
+transCE c f = transC c (proj₁ ∘ f) , λ e →
+  let _ , e₁ , e₂ = split∈ c (proj₁ ∘ f) e
   in  f e₁ .proj₂ e₂
 
 monCE : ∀{P} → Mon P → Mon λ Γ → CovExt Γ P
-monCE monP τ (C , f) = monC τ C ,  λ {Φ} e →
-  let Ψ , e' , σ = mon∈ C τ e
+monCE monP τ (c , f) = monC τ c ,  λ {Φ} e →
+  let Ψ , e' , σ = mon∈ c τ e
   in  monP σ (f {Ψ} e')
 
 -- The syntactic Beth model.
@@ -206,24 +206,24 @@ mutual
   reify : ∀{Γ} A (⟦f⟧ : T⟦ A ⟧ Γ) → Nf Γ A
   reify (Atom P) t      = t
   reify True _          = trueI
-  reify False   (C , f) = paste' C (⊥-elim ∘ f)
-  reify (A ∨ B) (C , f) = paste' C ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
+  reify False   (c , f) = paste' c (⊥-elim ∘ f)
+  reify (A ∨ B) (c , f) = paste' c ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (reflect A (hyp top))))
 
 -- Semantic paste.
 
--- This grafts semantic values f onto a case tree C : Cover Γ.
+-- This grafts semantic values f onto a case tree c : Cover Γ.
 -- For atomic propositions, this is grafting of normal forms (defined before).
 
-paste : ∀ A {Γ} (C : Cover Γ) (f : All C (T⟦ A ⟧)) → T⟦ A ⟧ Γ
+paste : ∀ A {Γ} (c : Cover Γ) (f : All c (T⟦ A ⟧)) → T⟦ A ⟧ Γ
 paste (Atom P) = paste'
 paste True     = _
 paste False    = transCE
 paste (A ∨ B)  = transCE
-paste (A ∧ B) C f = paste A C (proj₁ ∘ f) , paste B C (proj₂ ∘ f)
-paste (A ⇒ B) C f τ a = paste B (monC τ C) λ {Δ} e →
-  let Ψ , e' , σ  = mon∈ C τ e
+paste (A ∧ B) c f = paste A c (proj₁ ∘ f) , paste B c (proj₂ ∘ f)
+paste (A ⇒ B) c f τ a = paste B (monC τ c) λ {Δ} e →
+  let Ψ , e' , σ  = mon∈ c τ e
   in  f e' σ (monT A (coverWk e) a)
 
 -- Fundamental theorem
@@ -247,18 +247,18 @@ fundH (pop x) = fundH x ∘ proj₁
 
 -- A lemma for the orE case.
 
-orElim : ∀ {Γ A B X} → T⟦ A ∨ B ⟧ Γ →
-         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ X ⟧ Δ) →
-         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ B ⟧ Δ → T⟦ X ⟧ Δ) →
-         T⟦ X ⟧ Γ
-orElim (C , f) g h = paste _ C λ e → case f e of [ g (coverWk e) , h (coverWk e) ]
+orElim : ∀ {Γ A B E} → T⟦ A ∨ B ⟧ Γ →
+         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ E ⟧ Δ) →
+         (∀{Δ} (τ : Δ ≤ Γ) → T⟦ B ⟧ Δ → T⟦ E ⟧ Δ) →
+         T⟦ E ⟧ Γ
+orElim (c , f) g h = paste _ c λ e → case f e of [ g (coverWk e) , h (coverWk e) ]
 
 -- A lemma for the falseE case.
 
 -- Casts an empty cover into any semantic value (by contradiction).
 
 falseElim : ∀{Γ A} → T⟦ False ⟧ Γ → T⟦ A ⟧ Γ
-falseElim (C , f) = paste _ C (⊥-elim ∘ f)
+falseElim (c , f) = paste _ c (⊥-elim ∘ f)
 
 -- The fundamental theorem
 

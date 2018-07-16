@@ -122,12 +122,12 @@ iFalseE' t = falseE t , ⊥-elim-ext
 
 -- Beth model
 
-data Cover (X : Form) (P : KPred X)  (Δ : Cxt) : (f : Fun Δ X) → Set where
-  return : ∀{f} (p : P Δ f) → Cover X P Δ f
-  falseC : (t : Ne Δ False) → Cover X P Δ (⊥-elim ∘ Ne⦅ t ⦆)
-  orC    : ∀{A B} (t : Ne Δ (A ∨ B))
-           {g} (cg : Cover X P (Δ ∙ A) g)
-           {h} (ch : Cover X P (Δ ∙ B) h) → Cover X P Δ (caseof Ne⦅ t ⦆ g h)
+data Cover (A : Form) (P : KPred A)  (Δ : Cxt) : (f : Fun Δ A) → Set where
+  return : ∀{f} (p : P Δ f) → Cover A P Δ f
+  falseC : (t : Ne Δ False) → Cover A P Δ (⊥-elim ∘ Ne⦅ t ⦆)
+  orC    : ∀{C D} (t : Ne Δ (C ∨ D))
+           {g} (cg : Cover A P (Δ ∙ C) g)
+           {h} (ch : Cover A P (Δ ∙ D) h) → Cover A P Δ (caseof Ne⦅ t ⦆ g h)
 
 -- Cover is monotone in P
 
@@ -145,8 +145,8 @@ joinC (orC t cg ch) = orC t (joinC cg) (joinC ch)
 
 -- Weakening Covers
 
-monC : ∀{X} {P : KPred X} (monP : Mon P) → Mon (Cover X P)
-  -- {Γ} {f : Fun Γ X} {Δ} (τ : Δ ≤ Γ) (C : Cover X Γ P f) → Cover X Δ P (f ∘ R⦅ τ ⦆)
+monC : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
+  -- {Γ} {f : Fun Γ A} {Δ} (τ : Δ ≤ Γ) (C : Cover A Γ P f) → Cover A Δ P (f ∘ R⦅ τ ⦆)
 monC monP τ (return p)    = return (monP τ p)
 monC monP τ (falseC t)    = subst (Cover _ _ _) ⊥-elim-ext (falseC (monNe τ t))
 monC monP τ (orC t cg ch) = orC (monNe τ t) (monC monP (lift τ) cg) (monC monP (lift τ) ch)
@@ -224,11 +224,11 @@ mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤
 
 -- Weakening Covers
 
-monC' : ∀{X} {P : KPred X} (monP : Mon P) → Mon (Cover X P)
-  -- {Γ} {f : Fun Γ X} {Δ} (τ : Δ ≤ Γ) (C : Cover X Γ P f) → Cover X Δ P (f ∘ R⦅ τ ⦆)
-monC' {X} {P} monP {Γ} {Δ} τ {f} c = convCov X X P P id≤ conv id≤ τ c
+monC' : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
+  -- {Γ} {f : Fun Γ A} {Δ} (τ : Δ ≤ Γ) (C : Cover A Γ P f) → Cover A Δ P (f ∘ R⦅ τ ⦆)
+monC' {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
   where
-  conv : Converter X X P P id≤
+  conv : Converter A A P P id≤
   conv = record
     { φ      = λ δ τ f         → f ∘ R⦅ τ ⦆
     ; φ-case = λ δ τ C D f g h → refl
@@ -378,21 +378,21 @@ fundH (pop x) = fundH x ∘ proj₁
 
 -- orE case
 
-orElim : ∀ X {Γ A B}
+orElim : ∀ E {Γ A B}
          {f} (⟦f⟧ : T⟦ A ∨ B ⟧ Γ f)
-         {g} (⟦g⟧ : T⟦ A ⇒ X ⟧ Γ g)
-         {h} (⟦h⟧ : T⟦ B ⇒ X ⟧ Γ h) →
-         T⟦ X ⟧ Γ (caseof f (uncurry g) (uncurry h))
-orElim X {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste X
-  (convCov (A ∨ B) X P Q {Γ₀} id≤ record{Conv} id≤ id≤ ⟦f⟧)
+         {g} (⟦g⟧ : T⟦ A ⇒ E ⟧ Γ g)
+         {h} (⟦h⟧ : T⟦ B ⇒ E ⟧ Γ h) →
+         T⟦ E ⟧ Γ (caseof f (uncurry g) (uncurry h))
+orElim E {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste E
+  (convCov (A ∨ B) E P Q {Γ₀} id≤ record{Conv} id≤ id≤ ⟦f⟧)
   where
 
   P = Disj A B T⟦ A ⟧ T⟦ B ⟧
-  Q = T⟦ X ⟧
+  Q = T⟦ E ⟧
 
   module Conv where
 
-    φ : ∀ {Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) → Fun Γ (A ∨ B) → Fun Δ X
+    φ : ∀ {Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) → Fun Γ (A ∨ B) → Fun Δ E
     φ δ τ f = caseof (f ∘ R⦅ τ ⦆) (uncurry (g ∘ R⦅ δ ⦆)) (uncurry (h ∘ R⦅ δ ⦆ ))
 
     P⊂Q : ∀{Γ Δ} (δ : Δ ≤ Γ₀) (τ : Δ ≤ Γ) {f} → P Γ f → Q Δ (φ δ τ f)
