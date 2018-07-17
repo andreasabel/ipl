@@ -366,7 +366,7 @@ not give a presheaf because of the contravariant occurrence of
 presheaf $\den A$.  Instead, we force monotonicity by quantifying over
 all OPEs of $\Gamma$:
 \[
-  \den{A \imp B}_\Gamma = \prod_{\tau : \Delta \leq \Gamma} (\den A
+  \den{A \imp B}_\Gamma = \prod_{\Delta : \Cxt} \prod_{\tau : \Delta \leq \Gamma} (\den A
   _\Delta \to \den B _\Delta)
 \]
 Reification is also challenging.  Let $f : \den{A \imp B}_\Gamma$ and
@@ -429,6 +429,91 @@ Now, we can complete the story for implication.  Let $\tau : \Delta
 
 
 \subsection{Evaluation}
+
+Evaluation is turning an expression $t : \TmG A$ into a value in
+$\den A$.  However, a direct definition $\teval^A : \Tm A \todot \den A$
+by induction on the expression fails in case $\timpI$:
+\[
+\begin{array}{lll}
+   \teval^{A \imp B}_\Gamma & : & \TmG A \to \den {A \imp B} _\Gamma \\
+   \teval^{A \imp B}\,(\impI t)\;\Delta\;a & = & ? \\
+\end{array}
+\]
+To be able to pass the argument $a$ to the function $\teval\,(\impI
+t)$, we have to generalize evaluation to take an valuation of the
+context into account.
+\[
+  \teval^{A \imp B}_\Gamma  : \den \Gamma \todot \den {A \imp B}
+\]
+Here, $\den \Gamma$ is the presheaf obtained as the product of the
+hypotheses contained in $\Gamma$:
+\[
+\begin{array}{lll}
+  \den{\cempty} & = & \hatone \\
+  \den{\Gamma.A} & = & \den\Gamma \hattimes \den A \\
+\end{array}
+\]
+Looking up values in the environment is the following family of
+natural transformations:
+\[
+\begin{array}{l@{~}lcl}
+  \multicolumn 2 l {\tlookup^A_\Gamma} & : & \HypG A \to (\den \Gamma \todot \den A) \\
+  \lookup[\Gamma.A]A \ttop    & \Delta\,(\gamma,a) & = & a \\
+  \lookup[\Gamma.B]A {\pop x} &\Delta\,(\gamma,a) & = & \lookup[\Gamma]A x\, \Delta\, \gamma \\
+\end{array}
+\]
+\begin{exercise}
+  Express $\tlookup$ via the projections
+  $\pi_i : \A_1 \hattimes \A_2 \todot \A_i$
+  out of the presheaf product.
+\end{exercise}
+We are ready to define evaluation:
+\[
+\begin{array}{lll}
+  \evalG A {\hyp x} & = & \lookupG A x \\
+  \evalG {A \imp B} {\impI t}\,\Delta\,\gamma\,\Delta'\,(\tau : \Delta' \leq \Delta)\,a
+    & = & \eval[\Gamma.A]B t\,\Delta'\,(\den\Gamma_\tau\gamma,a) \\
+  \evalG {B} {\impE t u}\,\Delta\,\gamma & = &
+    \evalG {A \imp B} t\,\Delta\,\gamma\,\Delta\,\id[\Delta]\,
+      (\evalG A u\,\Delta\,\gamma) \\
+\end{array}
+\]
+\begin{exercise}
+  Complete the definition of $\teval$ for conjunctions.
+\end{exercise}
+\begin{exercise}
+  Express $\teval$ in terms of the operations of the CCC of
+  presheaves!
+\end{exercise}
+
+\subsection{Digression: The CCC of reifyable presheaves}
+
+Instead of defining the semantics $\den A$ of formula $A$ by induction
+on $A$, we can consider a category whose objects are interpretations
+of formulas, and show that this category is cartesian closed.
+
+An object in this category would be a quadruple consisting of:
+\[
+\begin{array}{lll@{\qquad}l}
+  \A & : & \PSh  & \mbox{a presheaf} \\
+  A  & : & \Form & \mbox{a formula} \\
+  \treflect^A & : & \Ne A \todot \A
+    & \mbox{a method to reflect neutrals into $\A$} \\
+  \treify^A & : & \A \todot \Nf A
+    & \mbox{a method to reify values of $\A$} \\
+\end{array}
+\]
+\begin{exercise}
+  Complete this definition by a suitable notion of morphism.
+\end{exercise}
+\begin{exercise}
+  Show that this category is cartesian closed.
+\end{exercise}
+
+
+\section{Extension to the positive connectives}
+
+
 
 
 \bibliographystyle{abbrvnat}

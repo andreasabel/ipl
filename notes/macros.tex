@@ -248,6 +248,7 @@
 \newcommand{\thyp}{\mathsf{hyp}}
 \newcommand{\hyp}[1]{\thyp\;#1}
 \newcommand{\hypP}[1]{\thyp\,(#1)}
+\newcommand{\HypG}{\Hyp[\Gamma]}
 \newcommand{\TmG}{\Tm[\Gamma]}
 \newcommand{\NeG}{\Ne[\Gamma]}
 \newcommand{\NfG}{\Nf[\Gamma]}
@@ -288,9 +289,14 @@
 
 %NbE
 \newcommand{\tnorm}{\mathsf{norm}}
+\newcommand{\tlookup}{\mathsf{lookup}}
 \newcommand{\teval}{\mathsf{eval}}
 \newcommand{\treify}{\mathsf{reify}}
 \newcommand{\treflect}{\mathsf{reflect}}
+\newcommand{\lookup}[3][]{\tlookup_{#1}^{#2}(#3)}
+\newcommand{\lookupG}{\lookup[\Gamma]}
+\newcommand{\eval}[3][]{\teval_{#1}^{#2}(#3)}
+\newcommand{\evalG}{\eval[\Gamma]}
 \newcommand{\reify}[3][]{\treify_{#1}^{#2}\,#3}
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
@@ -625,7 +631,6 @@
 \newcommand{\tcons}{\mathsf{cons}}
 \newcommand{\vas}{\mathit{as}}
 \newcommand{\tlength}{\mathsf{length}}
-\newcommand{\tlookup}{\mathsf{lookup}}
 \newcommand{\String}{\mathsf{String}}
 \newcommand{\tVec}{\mathsf{Vec}}
 \newcommand{\Fin}{\mathsf{Fin}}
@@ -707,7 +712,6 @@
 \newcommand{\eqclass}[1]{\overline{#1}}
 
 \newcommand{\idenv}[1]{\sid_{#1}}
-\newcommand{\eval}[2]{\dent{#2}{\idenv{#1}}}
 \newcommand{\evall}[2]{\clost{#2}{\idenv{#1}}} % lazy
 \newcommand{\evalsto}{\searrow}
 \newcommand{\at}{\mathrel{@}}
