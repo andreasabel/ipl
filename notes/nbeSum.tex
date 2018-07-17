@@ -1,0 +1,437 @@
+\nonstopmode
+\documentclass[a4paper]{article}
+\usepackage{natbib}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{amsmath}
+%\usepackage{dsfont}
+
+\input{macros}
+
+\newtheorem{theorem}{Theorem}
+%\newtheorem*{theorem*}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+
+%\newcommand{\qed}{\hfill\ensuremath{\Box}}
+% from llncs.cls
+%\def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\squareforqed{\ensuremath{\Box}}
+\def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\squareforqed
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+
+\newenvironment{proof}[1][]{\noindent\ifthenelse{\equal{#1}{}}{{\it
+      Proof.}}{{\it Proof #1.}}\hspace{2ex}}{\qed\bigskip}
+\newenvironment{proof*}[1][]{\noindent\ifthenelse{\equal{#1}{}}{{\it
+      Proof.}}{{\it Proof #1.}}\hspace{2ex}}{\bigskip}
+
+\newcommand{\wk}{\mathord{\uparrow}}
+\newcommand{\WW}{\mathbb{W}}
+\newcommand{\tAr}{\mathsf{Ar}}
+\newcommand{\Ar}[1]{\tAr(#1)}
+
+\title{Normalization by Evaluation for \\ Intuitionistic Propositional Logic}
+\author{Andreas Abel}
+\date{July 2018}
+
+\begin{document}
+\maketitle
+
+\section{Intuitionistic Propositional Logic (IPL)}
+
+\para{Formulas} and hypotheses lists (contexts).
+\[
+\begin{array}{lllrll}
+  \Atom & \ni & P,Q & & & \mbox{atomic propositions} \\
+  \Form & \ni & A,B,C,\dots
+     & ::= & \top \mid A \land B \mid A \imp B
+       & \mbox{negative formulas} \\
+     &&& \mid & \bot \mid A \lor B \mid P
+       & \mbox{positive formulas} \\
+\\[1ex]
+  \Cxt & \ni & \Gamma,\Delta & ::= & \cempty & \mbox{empty context}
+\\ &&& \mid & \Gamma.A & \mbox{context extension}
+\end{array}
+\]
+Indices $x$ into the context $\Gamma$ of hypothesis, locating hypothesis
+$A$, are written $x : \Hyp[\Gamma]A$ and defined inductively by the
+following constructors:
+\[
+  \ru{}{\ttop : \Hyp[\Gamma.A]A}
+\qquad
+  \ru{x : \Hyp[\Gamma]A
+    }{\pop[B] x : \Hyp[\Gamma.B]A}
+\]
+Deriviations $t$ of the truth of a formula $A$ under assumptions
+$\Gamma$ (judgement $\Gamma \der A$)
+are written $t : \Tm[\Gamma]A$ and defined inductively as follows:
+
+\paradot{Implication and hypotheses}
+\begin{gather*}
+  \ru{x : \Hyp[\Gamma]A}{\hyp x : \TmG A}
+\qquad
+  \ru{t : \Tm[\Gamma.A]B}{\impI t : \TmG{A \imp B}}
+\qquad
+  \ru{t : \TmG{A \imp B} \qquad
+      u : \TmG A
+    }{\impE t u : \TmG B}
+\end{gather*}
+
+\paradot{Truth and conjunction}
+\begin{gather*}
+  \ru{}{\trueI : \TmG\top}
+\qquad
+  \ru{t : \TmG A \qquad
+      u : \TmG B
+    }{\andI t u : \TmG{A \land B}
+    }
+\\[1ex]
+  \ru{t : \TmG{A \land B}
+    }{\andE1 t : \TmG A
+    }
+\qquad
+  \ru{t : \TmG{A \land B}
+    }{\andE2 t : \TmG B
+    }
+\end{gather*}
+
+\paradot{Absurdity and disjunction}
+\begin{gather*}
+  \ru{t : \TmG A
+    }{\orI1 t : \TmG {A \lor B}
+    }
+\qquad
+  \ru{t : \TmG B
+    }{\orI2 t : \TmG {A \lor B}
+    }
+\\[1ex]
+  \ru{t : \TmG \bot
+    }{\falseE t : \TmG C}
+\qquad
+  \ru{t : \TmG {A \lor B} \qquad
+      u : \Tm[\Gamma.A]C  \qquad
+      v : \Tm[\Gamma.B]C
+    }{\orE t u v : \TmG C}
+\end{gather*}
+
+\section{Subformula property and normal derivations}
+
+For every derivable judgement $\Gamma \der A$ there are infinitely
+many derivations $t : \TmG A$, since arbitrary detours are allowed.
+For instance to prove $\top$ we can also proceed very indirectly by
+introducing a hypothesis $\top$ and then eliminating it by proof
+$\trueI$:
+\[\impEP{\impIP{\hyp{\ttop}}}{\trueI} : \Tm[\cempty]\top.\]
+A sensible restriction is that the proof rules guarantee that only
+\emph{subformulas} of $A$ and the hypotheses in $\Gamma$ are mentioned when
+deriving $\Gamma \der A$.
+
+The following indexed grammar for \emph{normal} derivations $\NfG A$ of
+judgement $\Gamma \der A$ ensures the subformula property.  It is
+defined mutually with a grammar $\NeG A$ of \emph{neutral} derivations.
+Neutral derivations are ``straightline'' consequences of hypotheses
+(without case distinction or absurdity elimination).
+
+\paradot{Implication and hypotheses}
+\begin{gather*}
+  \ru{x : \Hyp[\Gamma]A}{\hyp x : \NeG A}
+\qquad
+  \ru{t : \Nf[\Gamma.A]B}{\impI t : \NfG{A \imp B}}
+\qquad
+  \ru{t : \NeG{A \imp B} \qquad
+      u : \NfG A
+    }{\impE t u : \NeG B}
+\end{gather*}
+
+\paradot{Truth and conjunction}
+\begin{gather*}
+  \ru{}{\trueI : \NfG\top}
+\qquad
+  \ru{t : \NfG A \qquad
+      u : \NfG B
+    }{\andI t u : \NfG{A \land B}
+    }
+\\[1ex]
+  \ru{t : \NeG{A \land B}
+    }{\andE1 t : \NeG A
+    }
+\qquad
+  \ru{t : \NeG{A \land B}
+    }{\andE2 t : \NeG B
+    }
+\end{gather*}
+
+\paradot{Absurdity and disjunction}
+\begin{gather*}
+  \ru{t : \NfG A
+    }{\orI1 t : \NfG {A \lor B}
+    }
+\qquad
+  \ru{t : \NfG B
+    }{\orI2 t : \NfG {A \lor B}
+    }
+\\[1ex]
+  \ru{t : \NeG \bot
+    }{\falseE t : \NfG C}
+\qquad
+  \ru{t : \NeG {A \lor B} \qquad
+      u : \Nf[\Gamma.A]C  \qquad
+      v : \Nf[\Gamma.B]C
+    }{\orE t u v : \NfG C}
+\end{gather*}
+
+\paradot{Embedding}
+\[
+  \ru{t : \NeG P
+    }{\neu t : \NfG P}
+\]
+
+The introduction rules generate normal forms ($\tNf$s) from $\tNf$s.  The elimination
+rules for negative formulas generate neutrals ($\tNe$s) from $\tNe$s, where
+$\timpE$ requires a side argument in normal form.
+
+Some care is needed with  the elimination rules for
+positive formulas which are $\tfalseE$ and $\torE$.
+These prove an arbitrary formula $C$, which, for the sake of the
+subformula property, should not be subject to
+further elimination but directly prove the goal.
+Thus, in addition to restriction the elimination to neutrals
+(perform case distinction only on neutrals),
+we require them to produce a normal form
+in case of $\torE$ from normal branches.
+
+Any neutral derivation at atomic proposition $P$ is considered normal.
+The restriction on atoms is not needed for the subformula property,
+but forces derivations to be $\eta$-long.
+We could drop the restriction, but even with this restriction, the
+calculus is complete, meaning that for every derivation ($\tTm$) there
+exists a normal derivation ($\tNf$).  This statement is called
+\emph{normalization} and we will prove it constructively in the
+following.
+
+
+\section{Categories and Presheaves}
+
+We define order-preserving embeddings (OPEs) $\tau : (\Delta \leq \Gamma)$ of a
+context $\Gamma$ into a larger context $\Delta$ inductively by the
+following constructors.
+\begin{gather*}
+  \ru{}{\id[\Gamma] : \Gamma \leq \Gamma}
+\qquad
+  \ru{\tau : \Delta \leq \Gamma
+    }{\weak[A] \tau : \Delta.A \leq \Gamma}
+\qquad
+  \ru{\tau : \Delta \leq \Gamma
+    }{\lift[A] \tau : \Delta.A \leq \Gamma.A}
+\end{gather*}
+For example $\weak [D] (\lift[C] (\weak[B] \id[A])) : A.B.C.D \leq
+A.C$.  OPEs let us introduce extra, unused hypotheses into the
+context.  Derivations of $\Gamma \der A$ can be weakened to
+derivations $\Delta \der A$ for $\Delta \leq \Gamma$.
+
+OPEs are closed under composition:  If $\tau : \Delta \leq \Gamma$ and
+$\tau' : \Phi \leq \Delta$ then $\tau \comp \tau' : \Phi \leq \Delta$.
+Let $\OPE$ be the category of contexts (as objects) and OPEs (as morphisms).
+\begin{exercise}
+  Define composition of OPEs by induction and show that $\OPE$ is
+  indeed a category.
+\end{exercise}
+
+The context-indexed sets $\Hyp A$, $\Tm A$, $\Nf A$, and $\Ne A$ are
+closed under weakening. \Eg{} $\tHyp$: for each $\tau : \Delta \leq \Gamma$
+we have a function
+\[
+  \Hyp[\tau]A : \Hyp[\Gamma] A \to \Hyp[\Delta] A,
+\]
+\ie, a morphism in the category $\SET$ of sets and functions.
+The collection $\Hyp A : (\tau : \Delta \leq \Gamma) \to
+(\Hyp[\Gamma]A \to \Hyp[\Delta]A)$ of these function constitutes a
+contravariant functor $\Hyp A : \OPE \to \SET$ mapping OPEs to
+functions.  In other words, $\Hyp A$ is a \emph{presheaf} over $\OPE$
+for each $A$, and so are $\Tm A$, $\Nf A$, and $\Ne A$.
+
+\begin{exercise}
+  Prove that $\Hyp A$, $\Tm A$, $\Nf A$, and $\Ne A$ are presheaves
+  over $\OPE$ by defining the map functions and proving the functor laws!
+\end{exercise}
+
+A function $f$ between presheaves $\A$ and $\B$ is defined pointwise;
+we write $f : \A \todot \B$ for the $\Cxt$-indexed collection
+\[
+  f_\Gamma : \A_\Gamma \to \B_\Gamma
+\]
+of functions (morphisms in $\SET$). Presheaves and functions between
+them make a category by virtue of pointwise identity and composition.
+However, typically the functions we consider are \emph{natural} in the
+context index, \ie, they are \emph{natural transformations} between
+presheaves, which means that they commute with OPEs.  Given $\tau :
+\Delta \leq \Gamma$ and $f : \A \todot \B$, naturality means
+\[
+  f_\Delta \comp \A_\tau = \B_\tau \comp f_\Gamma .
+\]
+In words, first weakening with $\tau$ and then applying $f$ has the
+same effect as applying $f$ first and perform the weakening later.
+This guarantees some form of \emph{parametricity} of $f$ in the
+context, in particular, $f$ cannot make decisions based on the length
+of the context or its precise contents.
+
+Presheaves over $\OPE$ and natural transformations form a category
+$\PSh$, traditionally called $\widehat{\OPE}$.
+
+\begin{exercise}
+  Prove that $\PSh$ is indeed a category.
+\end{exercise}
+
+\begin{exercise}
+  Prove that the following functions are morphisms in $\PSh$:
+\[
+\begin{array}{lllll}
+  \thyp & : & \Hyp A & \todot & \Ne A \\
+  \tandE1 & : & \Ne{A \land B} & \todot & \Ne A \\
+  \torI1  & : & \Nf A & \todot & \Nf{A \lor B} \\
+  \tfalseE & : & \Ne \bot & \todot & \Nf C \\
+\end{array}
+\]
+  Find other examples of presheaf morphisms.
+\end{exercise}
+
+
+\section{NbE for the negative fragment}
+
+We wish to define a normalization function for derivations of any
+formula $A$
+\[
+  \tnorm^A : \Tm A \todot \Nf A .
+\]
+Normalization by evaluation (NbE) achieves normalization by first
+evaluating terms, obtaining values and functions that compute by means
+of the computation in the meta language, i.e., in $\SET$.  As a second
+step, these values are reified back into syntax, yielding a normal
+form.  Technically, we define a suitable presheaf $\den A$ for each
+formula $A$ and two functions
+\[
+\begin{array}{lllll}
+  \teval^A & : & \Tm A  & \todot & \den A \\
+  \treify^A  & : & \den A & \todot & \Nf A \\
+\end{array}
+\]
+which compose to $\tnorm$.
+
+\subsection{Semantics, reflection and reification}
+
+For now, let us focus on the negative
+formulas $\top$, $A \land B$, $A \imp B$ and atoms $P$.
+\[
+\begin{array}{lll@{\qquad}lll}
+  \den P & = & \Nf P
+    & \reify[\Gamma] P t & = & t \\
+  \den \top & = & \hatone
+    & \reify[\Gamma] \top \_ & = & \trueI \\
+  \den{A \land B} & = & \den A \hattimes \den B
+    & \reify[\Gamma]{A \land B} {(a,b)} & = & \andIPP {\reify[\Gamma] A a} {\reify[\Gamma] B b} \\
+\end{array}
+\]
+Herein, we use the unit presheaf $\hatone_\Gamma = 1$ where $1$ is the
+unit set, and the pointwise product of presheaves
+$(\A \hattimes \B)_\Gamma = \A_\Gamma \times \B_\Gamma$.  We note that
+by these definitions, the category $\PSh$ has products, with the
+pointwise terminal morphisms:
+\[
+\begin{array}{lll@{\qquad}lll}
+   ! & : & \A \todot \hatone &
+     [\_,\_] & : & (f : \C \todot \A) (g : \C \todot \B) \to (\C
+                   \todot \A \hattimes \B) \\
+   !_\Gamma(a) & = & ()       &
+     [f,g]_\Gamma(c) & = & (f(c),g(c)) \\
+\end{array}
+\]
+
+
+The interpretation $\den{A \imp B}$ of implication will follow the
+Brouwer-Heyting-Kolmogorov (BHK) interpretation of intuitionistic
+logic:
+\begin{center}\itshape
+  A proof of $A \imp B$ is a method turning any proof of $A$ into a
+  proof of $B$.
+\end{center}
+However, the direct lifting of the functions space $\den{A \imp
+  B}_\Gamma = \den A_\Gamma \to \den B_\Gamma$ does not work.  It does
+not give a presheaf because of the contravariant occurrence of
+presheaf $\den A$.  Instead, we force monotonicity by quantifying over
+all OPEs of $\Gamma$:
+\[
+  \den{A \imp B}_\Gamma = \prod_{\tau : \Delta \leq \Gamma} (\den A
+  _\Delta \to \den B _\Delta)
+\]
+Reification is also challenging.  Let $f : \den{A \imp B}_\Gamma$ and
+attempt
+%$\tau : \Delta \leq \Gamma$
+\[
+  \reify[\Gamma]{A \imp B} f %\;\Delta\;\tau =
+    = \impIP {\reify[\Gamma.A]B{(f\;(\weak[A]{\id[\Gamma]})}\;\mbox{?})}
+\]
+where hole ``?'' should be filled with an element of $\den B_{\Gamma.A}$
+which intuitively should represent the new hypothesis $\top :
+\Hyp[\Gamma.A]A$ introduced by $\timpI$.  Thus we need a natural
+transformation $\Hyp A \todot \den A$ which \emph{reflects} variables
+into the semantics.  In order to define it by
+induction on $A$, we need to generalize it to
+\[
+  \treflect^A : \Ne A \todot \den A
+  .
+\]
+Let us make sure we can define it at atoms and conjunctions:
+\[
+\begin{array}{lllll}
+  \treflect^P & = & \tne & : & \Ne P \todot \Nf P \\
+  \treflect^\top & = & !  & : & \Ne \top \todot \hatone \\
+  \treflect^{A \land B} & = & [\, \treflect^A \comp \andE1  , \;
+                             \treflect^B \comp \andE2 ]
+    & : & \Ne{A \land B} \todot \den A \hattimes \den B \\
+\end{array}
+\]
+Observe the eliminations $\andE i$ introduced to reflect conjunctive hypotheses!
+
+Now, we can complete the story for implication.  Let $\tau : \Delta
+\leq \Gamma$ and $a : \den A_\Delta$ and set:
+\[
+\begin{array}{lll}
+  \treflect^{A \imp B} & : & \Ne{A \imp B} \todot \den{A \imp B} \\
+  \reflect[\Gamma]{A \imp B} t\;\Delta\;\tau\;a & = &
+    \reflect[\Delta]B{(\impEP {\Ne[\tau] B t} {(\reify[\Delta] A a)})}
+\\[1ex]
+  \treify^{A \imp B} & : & \den{A \imp B} \todot \Nf{A \imp B} \\
+  \reify[\Gamma]{A \imp B} f & = &
+    \impIP {\reify[\Gamma.A]B{(f\;(\weak[A]{\id[\Gamma]})}\;(\reflect[\Gamma.A]A{(\hyp\ttop)})}
+\end{array}
+\]
+
+\begin{exercise}
+  Let $A = ((P \imp Q) \land (Q \imp \top)) \imp Q$ for some atoms
+  $P,Q$.  Compute $\reflect[A]A{(\hyp \ttop)}$.
+\end{exercise}
+
+\begin{exercise}
+  Let $A = (P \imp Q) \imp (P \imp Q)$ for some atoms $P,Q$.
+  Compute $\treify^A \comp \treflect^A$.
+\end{exercise}
+
+\begin{exercise}
+  Using the constructions in this section, show that the category of
+  presheaves and natural transformations is cartesian closed.
+\end{exercise}
+
+
+\subsection{Evaluation}
+
+
+\bibliographystyle{abbrvnat}
+\bibliography{auto-nbeSum}
+
+\end{document}
