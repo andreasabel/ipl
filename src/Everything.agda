@@ -6,6 +6,7 @@ import Derivations
 import Interpretation
 import TermModel
 import NfModel
+import NfModelCaseTree
 import NbeModel
 import DanvyShiftReset
 import DanvyShiftResetLiftable

@@ -23,7 +23,7 @@ data _⊢_ (Γ : Cxt) : (A : Form) → Set where
   orI₁   : ∀{A B} (t : Γ ⊢ A) → Γ ⊢ A ∨ B
   orI₂   : ∀{A B} (t : Γ ⊢ B) → Γ ⊢ A ∨ B
   orE    : ∀{A B C} (t : Γ ⊢ A ∨ B) (u : Γ ∙ A ⊢ C) (v : Γ ∙ B ⊢ C) → Γ ⊢ C
-  falseE : ∀{A} (t : Γ ⊢ False) → Γ ⊢ A
+  falseE : ∀{C} (t : Γ ⊢ False) → Γ ⊢ C
   trueI  : Γ ⊢ True
 
 -- Example derivation
@@ -33,7 +33,9 @@ andComm = impI (andI (andE₂ (hyp top)) (andE₁ (hyp top)))
 
 -- Weakening
 
-monD : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Γ ⊢ A) → Δ ⊢ A
+Tm = λ A Γ → Γ ⊢ A
+
+monD : ∀{A} → Mon (Tm A)
 monD τ (hyp x)     = hyp (monH τ x)
 monD τ (impI t)    = impI (monD (lift τ) t)
 monD τ (impE t u)  = impE (monD τ t) (monD τ u)
@@ -102,22 +104,29 @@ mutual
     falseE : ∀{A} (t : Ne Γ False) → Nf Γ A
     trueI  : Nf Γ True
 
+-- Presheaf-friendly argument order
+
+Ne' = λ A Γ → Ne Γ A
+Nf' = λ A Γ → Nf Γ A
+
 -- Admissible false-Elimination from a normal proof of false (using case splits)
 
-falseE! : ∀{A Γ} (t : Nf Γ False) → Nf Γ A
+falseE! : ∀{A} → Nf' False →̇ Nf' A
 -- falseE! (ne t)       = falseE t  -- only for η-short
 falseE! (orE t t₁ t₂) = orE t (falseE! t₁) (falseE! t₂)
 falseE! (falseE t)   = falseE t
 
+-- Ne' and Nf' are presheaves over (Cxt, ≤)
+
 mutual
 
-  monNe : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Ne Γ A) → Ne Δ A
+  monNe : ∀{A} → Mon (Ne' A)
   monNe τ (hyp x)     = hyp (monH τ x)
   monNe τ (impE t u)  = impE (monNe τ t) (monNf τ u)
   monNe τ (andE₁ t)   = andE₁ (monNe τ t)
   monNe τ (andE₂ t)   = andE₂ (monNe τ t)
 
-  monNf : ∀{Γ Δ A} (τ : Δ ≤ Γ) (t : Nf Γ A) → Nf Δ A
+  monNf : ∀{A} → Mon (Nf' A)
   monNf τ (ne t)     = ne (monNe τ t)
   monNf τ (impI t)    = impI (monNf (lift τ) t)
   monNf τ (andI t u)  = andI (monNf τ t) (monNf τ u)

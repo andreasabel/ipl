@@ -80,9 +80,6 @@ reset m .run σ k = k id≤ (m .run σ λ τ → id)
 
 -- We use a continuation monad with answer type Nf.
 
-Nf' : (C : Form) (Γ : Cxt) → Set
-Nf' C Γ = Nf Γ C
-
 M' : (X : Cxt → Set) (Γ : Cxt)→ Set
 M' X Γ = ∀ {C} → M (Nf' C) (Nf' C) X Γ
 
