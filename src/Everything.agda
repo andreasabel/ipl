@@ -21,15 +21,20 @@ import NfModel
 import NfModelCaseTree
 import NfModelCaseTreeConv
 
--- SET-interpretation and soundness of NbE
+-- A generalization to any CoverMonad which includes the
+-- continuation monad used in Danvy's algorithm
 
-import Interpretation
-import NbeModel
+import NfModelMonad
 
 -- A monadic interpreter using shift/reset and an optimization
 
 import DanvyShiftReset
 import DanvyShiftResetLiftable
+
+-- SET-interpretation and soundness of NbE
+
+import Interpretation
+import NbeModel
 
 -- A general theory of sheaves over preorders
 
