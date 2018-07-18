@@ -106,10 +106,10 @@ split∈ (orC t c d) f (right q) with split∈ d (f ∘ right) q
 -- If for each leave e : Δ ∈ c of a case tree c : Cover Γ we have a normal form
 -- f e : Nf Δ A  of type A, grafting these nfs onto c gives us a  Nf Γ A.
 
-paste' : ∀{A Γ} (c : Cover Γ) (f : All c λ Δ → Nf Δ A) → Nf Γ A
-paste' hole        f = f here
-paste' (falseC t)  f = falseE t
-paste' (orC t c d) f = orE t (paste' c (f ∘ left)) (paste' d (f ∘ right))
+pasteNf : ∀{A Γ} (c : Cover Γ) (f : All c λ Δ → Nf Δ A) → Nf Γ A
+pasteNf hole        f = f here
+pasteNf (falseC t)  f = falseE t
+pasteNf (orC t c d) f = orE t (pasteNf c (f ∘ left)) (pasteNf d (f ∘ right))
 
 -- Weakening covers:  A case tree in Γ can be transported to a thinning Δ
 -- by weakening all the scrutinees.
@@ -206,8 +206,8 @@ mutual
   reify : ∀{Γ} A (⟦f⟧ : T⟦ A ⟧ Γ) → Nf Γ A
   reify (Atom P) t      = t
   reify True _          = trueI
-  reify False   (c , f) = paste' c (⊥-elim ∘ f)
-  reify (A ∨ B) (c , f) = paste' c ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
+  reify False   (c , f) = pasteNf c (⊥-elim ∘ f)
+  reify (A ∨ B) (c , f) = pasteNf c ([ orI₁ ∘ reify A , orI₂ ∘ reify B ] ∘ f)
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (reflect A (hyp top))))
 
@@ -217,7 +217,7 @@ mutual
 -- For atomic propositions, this is grafting of normal forms (defined before).
 
 paste : ∀ A {Γ} (c : Cover Γ) (f : All c (T⟦ A ⟧)) → T⟦ A ⟧ Γ
-paste (Atom P) = paste'
+paste (Atom P) = pasteNf
 paste True     = _
 paste False    = transCE
 paste (A ∨ B)  = transCE

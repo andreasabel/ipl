@@ -264,10 +264,10 @@ convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv i
 -- Syntactic paste:
 -- a case tree over normal forms is a normal form.
 
-paste' : ∀{A} → ⟨ A ⟩ Cover A (NfImg A) ↪ NfImg A
-paste' (return t)    = t
-paste' (falseC t)    = iFalseE (t , refl)
-paste' (orC t cg ch) = iOrE (t , refl) (paste' cg) (paste' ch)
+pasteNf : ∀{A} → ⟨ A ⟩ Cover A (NfImg A) ↪ NfImg A
+pasteNf (return t)    = t
+pasteNf (falseC t)    = iFalseE (t , refl)
+pasteNf (orC t cg ch) = iOrE (t , refl) (pasteNf cg) (pasteNf ch)
 
 -- Bicartesian closure of KPred
 
@@ -343,8 +343,8 @@ mutual
   reify : ∀ A → ⟨ A ⟩ T⟦ A ⟧ ↪ NfImg A
   reify (Atom P)        = id
   reify True _          = iTrueI
-  reify False           = paste' ∘ mapC λ()
-  reify (A ∨ B)         = paste' ∘ mapC reifyDisj
+  reify False           = pasteNf ∘ mapC λ()
+  reify (A ∨ B)         = pasteNf ∘ mapC reifyDisj
   reify (A ∧ B) (a , b) = iAndI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = iImpI (reify B (⟦f⟧ (weak id≤) (reflect A (iHyp top))))
 
@@ -355,7 +355,7 @@ mutual
 -- Semantic paste
 
 paste : ∀ A → ⟨ A ⟩ Cover A (T⟦ A ⟧) ↪ T⟦ A ⟧
-paste (Atom P) = paste'
+paste (Atom P) = pasteNf
 paste True     = _
 paste False    = joinC
 paste (A ∨ B)  = joinC

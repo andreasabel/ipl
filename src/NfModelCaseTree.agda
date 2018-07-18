@@ -18,10 +18,10 @@ data Cover (P : Cxt → Set) (Γ : Cxt) : Set where
 
 -- Syntactic paste
 
-paste' : ∀{A} → Cover (Nf' A) →̇ Nf' A
-paste' (returnC p) = p
-paste' (falseC t)  = falseE t
-paste' (orC t c d) = orE t (paste' c) (paste' d)
+pasteNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
+pasteNf (returnC p) = p
+pasteNf (falseC t)  = falseE t
+pasteNf (orC t c d) = orE t (pasteNf c) (pasteNf d)
 
 -- Weakening covers:  A case tree in Γ can be transported to a thinning Δ
 -- by weakening all the scrutinees.
@@ -111,15 +111,15 @@ mutual
   reify : ∀ A → T⟦ A ⟧ →̇ Nf' A
   reify (Atom P) t      = t
   reify True _          = trueI
-  reify False           = paste' ∘  mapC ⊥-elim
-  reify (A ∨ B)         = paste' ∘  mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
+  reify False           = pasteNf ∘  mapC ⊥-elim
+  reify (A ∨ B)         = pasteNf ∘  mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
   reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
   reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (fresh A)))
 
 -- Semantic paste.
 
 paste : ∀ A → Cover T⟦ A ⟧ →̇ T⟦ A ⟧
-paste (Atom P) = paste'
+paste (Atom P) = pasteNf
 paste True     = _
 paste False    = joinC
 paste (A ∨ B)  = joinC
