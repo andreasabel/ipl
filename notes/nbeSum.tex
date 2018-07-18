@@ -471,7 +471,7 @@ natural transformations:
 \end{exercise}
 We are ready to define evaluation:
 \[
-\begin{array}{lll}
+\begin{array}{lcl}
   \evalG A {\hyp x} & = & \lookupG A x \\
   \evalG {A \imp B} {\impI t}\,\Delta\,\gamma\,\Delta'\,(\tau : \Delta' \leq \Delta)\,a
     & = & \eval[\Gamma.A]B t\,\Delta'\,(\den\Gamma_\tau\gamma,a) \\
@@ -487,6 +487,27 @@ We are ready to define evaluation:
   Express $\teval$ in terms of the operations of the CCC of
   presheaves!
 \end{exercise}
+
+\subsection{Normalization}
+
+Normalization is reification after evaluation in the identity
+environment:
+\[
+\begin{array}{lcl}
+\tnorm^A & : & \Tm A \todot \Nf A \\
+\norm[\Gamma] A t & = & \reify[\Gamma]A {(\eval[\Gamma] A t \,\Gamma\, \env[\Gamma])}
+\end{array}
+\]
+The identity environment $\env[\Gamma]$ is defined by induction on
+$\Gamma$ as follows:
+\[
+\begin{array}{lcl}
+  \env[\Gamma] & : & \den \Gamma _\Gamma \\
+  \env[\cempty] & = & () \\
+  \env[\Gamma.A] & = & (\den\Gamma_{\weak[A] \id[\Gamma]}(\env[\Gamma]), \;
+                          \reflect[\Gamma.A] A {(\hyp \ttop)})
+\end{array}
+\]
 
 \subsection{Digression: The CCC of reifiable presheaves}
 
@@ -634,7 +655,78 @@ $\eta$-normal form if applied to variables (\ie, hypotheses).
 
 \subsection{Evaluation}
 
-Evaluation poses one more challenge.
+Evaluation poses one more challenge. Consider the term:
+\[
+\ru{x : \HypG {C \lor D} \qquad
+    f : \Tm[\Gamma.C]{A \imp B} \qquad
+    g : \Tm[\Gamma.D.A]{B} \qquad
+    a : \TmG A
+  }{\impEP{\orE {(\hyp x)} f {(\impI g)}} a : \TmG B}
+\]
+There is a redex $\impEP {\impI g} a$ separated by a $\torE$.  The latter
+would naturally evaluate to a case tree with functions in the
+leaves.  To apply it to the evaluation of $a$, we have to apply each
+leaf to that argument.  We facilitate this by implementing
+\[
+  \tpaste^{A \imp B} : \Cover{\den{A \imp B}} \todot \den{A \imp B}
+\]
+that turns a case tree of functions into a function, which expects an
+argument that will then be passed to all the functions in the case
+tree.  In fact, we need pasting at all formulas $A$:
+\[
+\begin{array}{lcl}
+\tpaste^A & : & \Cover{\den A} \todot \den A \\[1ex]
+\tpaste^P & = & \tpasteNf \\
+\tpaste^\bot & = & \tjoinC \\
+\tpaste^{A \lor B} & = & \tjoinC \\
+\tpaste^{A \land B} & = & \langle\,
+  \tpaste^A \comp \Cover{\pi_1} \, , \;
+  \tpaste^B \comp \Cover{\pi_2} \,\rangle \\[1ex]
+\multicolumn 3 {l} {\paste[\Gamma]{A \imp B} c \;
+  \Delta \; (\tau : \Delta{\leq}\Gamma) \; (a : \den A _\Delta) \, = \,
+  (\tpaste^B \comp \mapC \phi \comp \Cover{\den {A \imp B}_\tau}\, c)
+}
+\end{array}
+\]
+Here, we need a stronger version of functoriality of $\tCover$ which
+only requires an
+\[
+  \phi : \prod_{\Phi} \prod_{\delta : \Phi \leq \Delta} \A_\Phi
+             \to \B_\Phi
+\]
+to produce a $\tmapC_\Delta t\; \phi : \Cover\A_\Delta \to \Cover\B_\Delta$.
+In our case, $\A = \den{A \imp B}$ and $\B = \den{B}$ and
+\[
+  \phi\;\Phi\;\delta\;f = f\;\id[\Phi]\;(\den A _\delta\, a)
+  .
+\]
+Pasting allows us to complete the definition of evaluation.
+\[
+\begin{array}{lcl}
+  \teval_\Gamma^A & : & \TmG A \to \den \Gamma \todot \den A \\[1ex]
+  \evalG C {\orE t u v} \Delta \; \gamma & = &
+    \tpaste^C \;
+     (\mapC {(\lambda \Phi\, (\tau  : \Phi \leq \Delta) \to [f,g])}\;c) \\[1ex]
+  \multicolumn 1 r {\mbox{ where } c} & = &
+      \evalG{A \lor B} t\;\Delta\;\gamma \\
+  \multicolumn 1 r {f\;a} & = &
+    \eval[\Gamma.A] C u \;\Phi\;(\den\Gamma_\tau\,\gamma, a) \\
+  \multicolumn 1 r {g\;b} & = &
+    \eval[\Gamma.B] C v \;\Phi\;(\den\Gamma_\tau\,\gamma, b) \\
+  \\
+\end{array}
+\]
+\begin{exercise}
+  Really complete the definition of $\teval$ (all missing cases).
+\end{exercise}
+That's it!
+
+
+\section{Conclusion}
+
+\paradot{Acknowledgments}  The presentation of this NbE proof and its
+Agda formalization benefitted greately from discussions with Christian
+Sattler.  Thanks to Jesper Cockx for listening to a prerun of the talk.
 
 \bibliographystyle{abbrvnat}
 \bibliography{auto-nbeSum}

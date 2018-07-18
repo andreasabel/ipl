@@ -300,9 +300,12 @@
 \newcommand{\evalG}{\eval[\Gamma]}
 \newcommand{\reify}[3][]{\treify_{#1}^{#2}\,#3}
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
+\newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
 \newcommand{\hattimes}{\mathrel{\hat{\times}}}
 \newcommand{\hatplus}{\mathrel{\hat{+}}}
+\newcommand{\tenv}{\mathsf{env}}
+\newcommand{\env}[1][]{\tenv_{#1}}
 
 % Sums
 \newcommand{\tinj}{\mathsf{inj}}
@@ -329,6 +332,8 @@
 \newcommand{\tpasteNf}{\mathsf{pasteNf}}
 \newcommand{\pasteNf}{\tpasteNf\;}
 \newcommand{\botelim}{\bot\mathsf{-elim}}
+\newcommand{\tpaste}{\mathsf{paste}}
+\newcommand{\paste}[3][]{\tpaste_{#1}^{#2}\;#3}
 
 
 % colonized judgements
