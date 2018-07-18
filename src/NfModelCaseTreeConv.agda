@@ -2,7 +2,7 @@
 
 open import Library
 
-module NfModelCaseTree (Base : Set) where
+module NfModelCaseTreeConv (Base : Set) where
 
 import Formulas   ; open module Form = Formulas    Base
 import Derivations; open module Der  = Derivations Base
@@ -44,13 +44,26 @@ joinC (returnC p) = p
 joinC (falseC t)  = falseC t
 joinC (orC t c d) = orC t (joinC c) (joinC d)
 
--- Version of mapC with f relativized to thinnings of Γ
+-- Version of mapC with f relativized to subcontexts of Γ
 
 mapC' : ∀{P Q Γ} → KFun P Q Γ → Cover P Γ → Cover Q Γ
 mapC' f (returnC p) = returnC (f id≤ p)
 mapC' f (falseC t)  = falseC t
 mapC' f (orC t c d) = orC t (mapC' (λ τ → f (τ • weak id≤)) c)
                             (mapC' (λ τ → f (τ • weak id≤)) d)
+
+Conv : (Δ₀ : Cxt) (P Q : Cxt → Set) → Set
+Conv Δ₀ P Q = ∀{Γ Δ} (δ : Δ ≤ Δ₀) (τ : Δ ≤ Γ) → P Γ → Q Δ
+
+convC : ∀{Δ₀} {P Q}
+  → Conv Δ₀ P Q
+  → Conv Δ₀ (Cover P) (Cover Q)
+convC {Δ₀} {P} {Q} f {Γ} {Δ} δ τ (returnC p) = returnC (f δ τ p)
+convC {Δ₀} {P} {Q} f {Γ} {Δ} δ τ (falseC t) = falseC (monNe τ t)
+convC {Δ₀} {P} {Q} f {Γ} {Δ} δ τ (orC t c d) = orC (monNe τ t)
+  (convC {Δ₀} f (weak δ) (lift τ) c)
+  (convC {Δ₀} f (weak δ) (lift τ) d)
+
 
 -- The syntactic Beth model.
 
@@ -124,7 +137,7 @@ paste True     = _
 paste False    = joinC
 paste (A ∨ B)  = joinC
 paste (A ∧ B)  = < paste A ∘ mapC proj₁ , paste B ∘ mapC proj₂  >
-paste (A ⇒ B) c τ a = paste B $ mapC' (λ δ f → f id≤ (monT A δ a)) $ monC (monT (A ⇒ B)) τ c
+paste (A ⇒ B) c τ a = paste B (convC (λ δ τ' f → f τ' (monT A δ a)) id≤ τ c)
 
 -- Fundamental theorem
 -- Extension of T⟦_⟧ to contexts
