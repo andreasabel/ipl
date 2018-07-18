@@ -59,6 +59,8 @@
 \\ &&& \mid & \Gamma.A & \mbox{context extension}
 \end{array}
 \]
+We write just $A$ for the singleton context $\cempty.A$.
+
 Indices $x$ into the context $\Gamma$ of hypothesis, locating hypothesis
 $A$, are written $x : \Hyp[\Gamma]A$ and defined inductively by the
 following constructors:
@@ -391,8 +393,8 @@ Let us make sure we can define it at atoms and conjunctions:
 \begin{array}{lllll}
   \treflect^P & = & \tne & : & \Ne P \todot \Nf P \\
   \treflect^\top & = & !  & : & \Ne \top \todot \hatone \\
-  \treflect^{A \land B} & = & [\, \treflect^A \comp \andE1  , \;
-                             \treflect^B \comp \andE2 ]
+  \treflect^{A \land B} & = & \langle\, \treflect^A \comp \andE1  , \;
+                             \treflect^B \comp \andE2 \rangle
     & : & \Ne{A \land B} \todot \den A \hattimes \den B \\
 \end{array}
 \]
@@ -486,7 +488,7 @@ We are ready to define evaluation:
   presheaves!
 \end{exercise}
 
-\subsection{Digression: The CCC of reifyable presheaves}
+\subsection{Digression: The CCC of reifiable presheaves}
 
 Instead of defining the semantics $\den A$ of formula $A$ by induction
 on $A$, we can consider a category whose objects are interpretations
@@ -511,10 +513,128 @@ An object in this category would be a quadruple consisting of:
 \end{exercise}
 
 
-\section{Extension to the positive connectives}
+%\section{Extension to the positive connectives}
+\section{Disjunction and absurdity}
+
+For sets $S_1,S_2 : \SET$ let $S_1 + S_2$ denote the disjoint union with
+injections $\inj{i} : S_i \to S_1 + S_2$ and case distinction
+distinction $[f_1,f_2] : S_1 + S_2 \to T$ for $f_i : S_i \to T$
+such that $[f_1,f_2] \comp \inj i = f_i$.
+
+Presheaf coproduct is given pointwise by $(\A \hatplus \B)_\Gamma = \A_\Gamma + \B_\Gamma$.
+\begin{exercise}
+  Show that $\hatplus$ is indeed a coproduct in $\PSh$.
+\end{exercise}
+
+
+\subsection{Semantics, reflection and reification}
+
+The first idea how to model disjunction,
+$\den{A \lor B}_\Gamma = \den{A}_\Gamma + \den{B}_\Gamma$, fails
+because we cannot reflect disjunctive hypotheses.  \Eg, an element of
+$\den{A \lor B}_{A \lor B}$ should be of the form $\inj1\,a$ or
+$\inj2\,b$, but the decision on first or second injection cannot be
+made here;  it depends on the hypothesis $A \lor B$.  The solution is
+to extend the semantics to allow case distinction on variables (and
+neutrals) before making the decisions needed for disjunctions.
+
+Given a presheaf $\A$, we define a new presheaf $\Cover \A$
+inductively by the following constructors:
+\begin{gather*}
+  \ru{a : \A_\Gamma}{\returnC a : \Cover\A_\Gamma}
+\qquad
+  \ru{t : \NeG \bot}{\falseC t : \Cover\A_\Gamma}
+\\[1ex]
+  \ru{t : \NeG{C \lor D} \qquad
+      c : \Cover\A_{\Gamma.C} \qquad
+      d : \Cover\A_{\Gamma.D}
+    }{\orC t c d : \Cover\A_\Gamma}
+\end{gather*}
+\begin{exercise}
+  Show that $\Cover\A$ is indeed a presheaf.
+\end{exercise}
+We can think of $c : \Cover\A_\Gamma$ as a decision tree with leaves in $\A$
+and nodes labelled by terms we case on.  Nodes of type $\tfalseC$ have
+no subtrees since \emph{ex falsum quod libet}, and $\torC$ nodes
+casing on $t : \NeG{C \lor D}$ have
+two subtrees, one having a new hypothesis $C$, and one having a new
+hypothesis $C$.
+
+We can replace all the leaves according to a function $f : \A \todot \B$,
+this makes $\tCover$ a \emph{functor} in the category of presheaves.  We can
+also replace all the leaves by new case trees via a natural transformation
+\[
+   \tjoinC ~:~ \Cover{\Cover\A} \todot \Cover\A
+\]
+which makes $\tCover$ a \emph{monad} in $\PSh$.
+\begin{exercise}
+  Define the functorial action $\Cover f$ and $\tjoinC$ and prove the
+  monad laws.
+\end{exercise}
+Further, if the leaves of a case tree are normal forms, we can turn it into one big
+normal form via:
+\[
+  \tpasteNf ~:~ \Cover{\Nf A} \todot \Nf A
+\]
+\begin{exercise}
+  Define $\tpasteNf$.
+\end{exercise}
+
+\noindent
+We have everything now to model disjunction:
+\[
+\begin{array}{lcl}
+\den{A \lor B} & = & \Cover{\den A \hatplus \den B}
+\\[2ex]
+\treflect^{A \lor B} & : & \Ne{A \lor B} \todot \den{A \lor B} \\
+\reflect[\Gamma]{A \lor B}t & = & \orC t
+  {(\returnCP {\injP1 {\reflect[\Gamma.A]A{(\hyp \ttop)}}})}
+  {\\ && \qquad\ (\returnCP {\injP2 {\reflect[\Gamma.B]B{(\hyp \ttop)}}})}
+\\[2ex]
+\treifyOr^{A \lor B} & : & \den{A} \hatplus \den{B} \todot \Nf{A \lor B} \\
+\reifyOr[\Gamma]{A \lor B}(\inj1\, a) & = & \orIP1 {\reify[\Gamma]A a} \\
+\reifyOr[\Gamma]{A \lor B}(\inj2\, b) & = & \orIP2 {\reify[\Gamma]B b}
+\\[1.5ex]
+\treify^{A \lor B} & : & \den{A \lor B} \todot \Nf{A \lor B} \\
+\treify^{A \lor B} & = & \tpasteNf \comp \Cover{\treifyOr^{A \lor B}} \\
+\end{array}
+\]
+Reification works by first reifying the leaves of the case tree using
+$\treifyOr$, and then turning the whole tree into a normal form using $\tpasteNf$.
+\begin{exercise}
+  Compute $\reify[P \lor Q]{P \lor Q} (\reflect[P \lor Q]{P \lor Q}
+  (\hyp \ttop))$.
+\end{exercise}
+For absurdity, we use the presheaf $\hat0_\Gamma = \{\}$ with initial
+morphism $\botelim : \hat0 \todot \C$.
+\[
+\begin{array}{lcl}
+\den{\bot} & = & \Cover{\hat0}
+\\[2ex]
+\treflect^{\bot} & : & \Ne{\bot} \todot \den{\bot} \\
+\reflect[\Gamma]{\bot}t & = & \falseC t
+\\[2ex]
+\treify^{\bot} & : & \den{\bot} \todot \Nf{\bot} \\
+\treify^{\bot} & = & \tpasteNf \comp \Cover{\botelim} \\
+\end{array}
+\]
+To reify a value $c : \den\bot$, observe that because $\hat0$ is
+empty, $c$ can only be a case tree without leaves, \ie, all branches
+end in $\tfalseC$ nodes.  Thus, the mapping
+$\Cover{\botelim} : \Cover{\hat0} \todot \Cover{\Nf\bot}$ is merely a
+type cast.  The subsequent $\tpasteNf$ will turn the leafless tree $c$
+into a normal form consisting entirely of splits $\torE$ and $\tfalseE$.
+
+\begin{exercise}
+Prove that $\treify^{A} \comp \treflect^{A}$ produces the long
+$\eta$-normal form if applied to variables (\ie, hypotheses).
+\end{exercise}
 
 
 
+\subsection{Evaluation}
+
+Evaluation poses one more challenge.
 
 \bibliographystyle{abbrvnat}
 \bibliography{auto-nbeSum}

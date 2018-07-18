@@ -275,6 +275,7 @@
 \newcommand{\impEP}[2]{\timpE\;(#1)\;#2}
 \newcommand{\torI}[1]{\mathsf{orI}_{#1}}
 \newcommand{\orI}[2]{\torI{#1}\,#2}
+\newcommand{\orIP}[2]{\torI{#1}\,(#2)}
 \newcommand{\torE}{\mathsf{orE}}
 \newcommand{\orE}[3]{\torE\;#1\;#2\;#3}
 \newcommand{\tfalseE}{\mathsf{falseE}}
@@ -301,6 +302,34 @@
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
 \newcommand{\hattimes}{\mathrel{\hat{\times}}}
+\newcommand{\hatplus}{\mathrel{\hat{+}}}
+
+% Sums
+\newcommand{\tinj}{\mathsf{inj}}
+\newcommand{\inj}[1]{\tinj_{#1}}
+\newcommand{\injP}[2]{\tinj_{#1}(#2)}
+
+\newcommand{\tCover}{\mathsf{Cover}}
+\newcommand{\Cover}[1]{\tCover\,(#1)}
+
+\newcommand{\treturnC}{\mathsf{returnC}}
+\newcommand{\returnC}{\treturnC\;}
+\newcommand{\returnCP}[1]{\treturnC\;(#1)}
+\newcommand{\torC}{\mathsf{orC}}
+\newcommand{\orC}[3]{\torC\;#1\;#2\;#3}
+\newcommand{\orCPP}[3]{\torC\;#1\;(#2)\;(#3)}
+\newcommand{\tfalseC}{\mathsf{falseC}}
+\newcommand{\falseC}[1]{\tfalseC\;#1}
+\newcommand{\tmapC}{\mathsf{mapC}}
+\newcommand{\mapC}{\tmapC\;}
+\newcommand{\tjoinC}{\mathsf{joinC}}
+\newcommand{\joinC}{\joinC\;}
+\newcommand{\treifyOr}{\mathsf{reifyOr}}
+\newcommand{\reifyOr}[3][]{\treifyOr_{#1}^{#2}\,#3}
+\newcommand{\tpasteNf}{\mathsf{pasteNf}}
+\newcommand{\pasteNf}{\tpasteNf\;}
+\newcommand{\botelim}{\bot\mathsf{-elim}}
+
 
 % colonized judgements
 \newcommand{\colonize}[1]{\mathrel{{:}{#1}{:}}}
