@@ -73,7 +73,7 @@ following constructors:
   \ru{x : \Hyp[\Gamma]A
     }{\pop[B] x : \Hyp[\Gamma.B]A}
 \]
-Deriviations $t$ of the truth of a formula $A$ under assumptions
+Derivations $t$ of the truth of a formula $A$ under assumptions
 $\Gamma$ (judgement $\Gamma \der A$)
 are written $t : \Tm[\Gamma]A$ and defined inductively as follows:
 
@@ -140,7 +140,7 @@ deriving $\Gamma \der A$.
 The following indexed grammar for \emph{normal} derivations $\NfG A$ of
 judgement $\Gamma \der A$ ensures the subformula property.  It is
 defined mutually with a grammar $\NeG A$ of \emph{neutral} derivations.
-Neutral derivations are ``straightline'' consequences of hypotheses
+Neutral derivations are ``straight-line'' consequences of hypotheses
 (without case distinction or absurdity elimination).
 
 \paradot{Implication and hypotheses}
@@ -429,7 +429,7 @@ Now, we can complete the story for implication.  Let $\tau : \Delta
 
 \begin{exercise}
   Using the constructions in this section, show that the category of
-  presheaves and natural transformations is cartesian closed.
+  presheaves and natural transformations is Cartesian closed.
 \end{exercise}
 
 
@@ -516,7 +516,7 @@ $\Gamma$ as follows:
 
 Instead of defining the semantics $\den A$ of formula $A$ by induction
 on $A$, we can consider a category whose objects are interpretations
-of formulas, and show that this category is cartesian closed.
+of formulas, and show that this category is Cartesian closed.
 
 An object in this category would be a quadruple consisting of:
 \[
@@ -533,7 +533,7 @@ An object in this category would be a quadruple consisting of:
   Complete this definition by a suitable notion of morphism.
 \end{exercise}
 \begin{exercise}
-  Show that this category is cartesian closed.
+  Show that this category is Cartesian closed.
 \end{exercise}
 
 
@@ -578,7 +578,7 @@ inductively by the following constructors:
   Show that $\Cover\A$ is indeed a presheaf.
 \end{exercise}
 We can think of $c : \Cover\A_\Gamma$ as a decision tree with leaves in $\A$
-and nodes labelled by terms we case on.  Nodes of type $\tfalseC$ have
+and nodes labeled by terms we case on.  Nodes of type $\tfalseC$ have
 no subtrees since \emph{ex falsum quod libet}, and $\torC$ nodes
 casing on $t : \NeG{C \lor D}$ have
 two subtrees, one having a new hypothesis $C$, and one having a new
@@ -784,7 +784,7 @@ disjoint sums:
 \section{Conclusion}
 
 \paradot{Acknowledgments}  The presentation of this NbE proof and its
-Agda formalization benefitted greately from discussions with Christian
+Agda formalization benefited greatly from discussions with Christian
 Sattler.  Thanks to Jesper Cockx for listening to a prerun of the talk.
 
 \bibliographystyle{abbrvnat}
