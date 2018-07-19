@@ -4,6 +4,7 @@
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{amsmath}
 %\usepackage{dsfont}
+\usepackage{bibentry}
 
 \input{macros}
 
@@ -42,6 +43,8 @@
 
 \begin{document}
 \maketitle
+
+\nobibliography{auto-nbeSum}
 
 \section{Intuitionistic Propositional Logic (IPL)}
 
@@ -630,7 +633,7 @@ For absurdity, we use the presheaf $\hat0_\Gamma = \{\}$ with initial
 morphism $\botelim : \hat0 \todot \C$.
 \[
 \begin{array}{lcl}
-\den{\bot} & = & \Cover{\hat0}
+\den{\bot} & = & \tCover\,{\hat0}
 \\[2ex]
 \treflect^{\bot} & : & \Ne{\bot} \todot \den{\bot} \\
 \reflect[\Gamma]{\bot}t & = & \falseC t
@@ -675,7 +678,7 @@ argument that will then be passed to all the functions in the case
 tree.  In fact, we need pasting at all formulas $A$:
 \[
 \begin{array}{lcl}
-\tpaste^A & : & \Cover{\den A} \todot \den A \\[1ex]
+\tpaste^A & : & \tCover\,{\den A} \todot \den A \\[1ex]
 \tpaste^P & = & \tpasteNf \\
 \tpaste^\bot & = & \tjoinC \\
 \tpaste^{A \lor B} & = & \tjoinC \\
@@ -721,6 +724,62 @@ Pasting allows us to complete the definition of evaluation.
 \end{exercise}
 That's it!
 
+\newcommand{\citeentry}[1]{\item\nocite{#1}\bibentry{#1}}
+
+\section{Literature}
+
+Further reading on normalization by evaluation in general:
+\begin{enumerate}
+
+\citeentry{bergerSchwichtenberg:lics91}
+
+\citeentry{jungTiuryn:tlca93}
+
+\citeentry{altenkirchHofmannStreicher:ctcs95}
+
+\citeentry{abel:habil}
+
+\end{enumerate}
+
+% \begin{itemize}
+% \item \citet{bergerSchwichtenberg:lics91}
+% \item \citet{jungTiuryn:tlca93}
+% \item \citet{altenkirchHofmannStreicher:ctcs95}
+% \item \citet{abel:habil}
+% \end{itemize}
+\noindent
+Literature dealing in particular with the case of disjunction /
+disjoint sums:
+
+\begin{enumerate}
+
+\citeentry{danvy:popl96}
+
+\citeentry{fioreSimpson:tlca99}
+
+\citeentry{altenkirchDybjerHofmannScott:lics01}
+
+\citeentry{balatDiCosmoFiore:popl04}
+
+\citeentry{altenkirchUustalu:flops04}
+
+\citeentry{barral:PhD}
+
+\citeentry{scherer:popl17}
+
+\end{enumerate}
+
+% \begin{itemize}
+% \item \citet{danvy:popl96}
+% \item \citet{fioreSimpson:tlca99}
+% \item \citet{altenkirchDybjerHofmannScott:lics01}
+% \item \citet{balatDiCosmoFiore:popl04}
+% \item \citet{altenkirchUustalu:flops04}
+
+% \item \citet{barral:PhD}
+% \item \citet{scherer:popl17}
+% \end{itemize}
+
 
 \section{Conclusion}
 
@@ -729,6 +788,6 @@ Agda formalization benefitted greately from discussions with Christian
 Sattler.  Thanks to Jesper Cockx for listening to a prerun of the talk.
 
 \bibliographystyle{abbrvnat}
-\bibliography{auto-nbeSum}
+%\bibliography{auto-nbeSum}
 
 \end{document}

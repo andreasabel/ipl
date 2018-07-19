@@ -16,12 +16,15 @@ bibtool=bibtool -- 'preserve.key.case = ON' \
 	  -- 'delete.field = { isbn }' \
 	  -- 'delete.field = { doi }' \
 	  -- 'delete.field = { url }' \
-	  -- 'delete.field = { note }'
-#	  -- 'delete.field = { editor }'
+	  -- 'delete.field = { note }' \
+	  -- 'delete.field = { editor }' \
+	  -- 'delete.field = { publisher }' \
+	  -- 'delete.field = { pages }'
+
 catcfg=sed -e "s/%.*//g" <
 latex=latex
 pdflatex=pdflatex
-bibliography=medium.bib
+bibliography=short.bib
 
 # stdlib=$(HOME)/agda/std-lib/src
 
