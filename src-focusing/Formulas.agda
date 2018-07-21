@@ -39,22 +39,26 @@ infixl 8 _∧_
 infixl 7 _∨_
 infixr 6 _⇒_
 
+-- Generic hypotheses
+
+module _ (S : Set) where
+
+  data Cxt' : Set where
+    ε : Cxt'
+    _∙_ : (Γ : Cxt') (A : S) → Cxt'
+
+  data Hyp' (A : S) : (Γ : Cxt') → Set where
+    top : ∀{Γ} → Hyp' A (Γ ∙ A)
+    pop : ∀{B Γ} (x : Hyp' A Γ) → Hyp' A (Γ ∙ B)
+
+  infixl 4 _∙_
+
 -- Contexts only contain negative formulas
 
-data Cxt : Set where
-  ε : Cxt
-  _∙_ : (Γ : Cxt) (A : Form -) → Cxt
-
-infixl 4 _∙_
-
--- Hypotheses (negative)
-
-data Hyp (A : Form -) :  (Γ : Cxt)→ Set where
-  top : ∀{Γ} → Hyp A (Γ ∙ A)
-  pop : ∀{B Γ} (x : Hyp A Γ) → Hyp A (Γ ∙ B)
+Cxt = Cxt' (Form -)
+Hyp = Hyp' (Form -)
 
 -- Positive atoms in hypotheses
-
 Atom- = λ P → Sw +- (Atom P)
 HypAtom = λ P → Hyp (Atom- P)
 
@@ -100,9 +104,9 @@ addHyp (A ∨ B)   j = orE (addHyp A j) (addHyp B j)
 
 module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
 
-  data Cover' (Γ : Cxt) (J : Cxt → Set) : Set where
-    returnC : (t : J Γ) → Cover' Γ J
-    caseC   : ∀{A} (t : Ne Γ A) (c : AddHyp Γ A λ Γ' → Cover' Γ' J) → Cover' Γ J
+  data Cover' (J : Cxt → Set) (Γ : Cxt) : Set where
+    returnC : (t : J Γ) → Cover' J Γ
+    caseC   : ∀{A} (t : Ne Γ A) (c : AddHyp Γ A (Cover' J)) → Cover' J Γ
 
 -- Left focusing (break a negative hypothesis A down into something positive)
 -- "spine"
@@ -111,7 +115,7 @@ mutual
 
   Ne = λ A Γ → Ne' RFoc Γ A
   Cover = Cover' λ Δ A → Ne (Sw +- A) Δ
-  Foc = λ Γ C → Cover Γ λ Γ' → RFoc Γ' C
+  Foc = λ Γ C → Cover (flip RFoc C) Γ
 
   -- LFoc' = λ Γ A C → LFoc Γ C A
 
@@ -179,9 +183,16 @@ mapAddHyp f (andE t) = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types
 mapAddHyp f (orE t u) = orE (mapAddHyp f t) (mapAddHyp f u)
 
 {-# TERMINATING #-}
-mapCover :  ∀{P Q} (f : P →̇ Q) → ∀{Γ} → Cover Γ P → Cover Γ Q
+mapCover :  ∀{P Q} (f : P →̇ Q) → Cover P →̇ Cover Q
 mapCover f (returnC t) = returnC (f t)
 mapCover f (caseC t c) = caseC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
+
+-- Cover monad
+
+{-# TERMINATING #-}
+joinCover : ∀{P} → Cover (Cover P) →̇ Cover P
+joinCover (returnC t) = t
+joinCover (caseC t c) = caseC t (mapAddHyp joinCover c)
 
 -- Context extension (thinning)
 
@@ -261,7 +272,7 @@ mutual
   monNe = monNe' monRFoc
 
   {-# TERMINATING #-}
-  monCover : ∀{P} (monP : Mon P) → Mon (λ Γ → Cover Γ P)
+  monCover : ∀{P} (monP : Mon P) → Mon (Cover P)
   monCover monP τ (returnC t) = returnC (monP τ t)
   monCover monP τ (caseC t c) = caseC (monNe τ t) (monAddHyp (monCover monP) τ c)
 
@@ -279,6 +290,22 @@ mutual
   monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
   monRInv τ (impI t) = impI (monAddHyp monRInv τ t)
 
+KFun : (P Q : Cxt → Set) (Γ : Cxt) → Set
+KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
+
+mapAddHyp' : ∀{P Q Γ} (f : KFun P Q Γ) → ∀{A} → AddHyp Γ A P → AddHyp Γ A Q
+mapAddHyp' f (addAtom t) = addAtom (f (weak id≤) t)
+mapAddHyp' f (addNeg t) = addNeg (f (weak id≤) t)
+mapAddHyp' f (trueE t) = trueE (f id≤ t)
+mapAddHyp' f falseE = falseE
+mapAddHyp' f (andE t) = andE (mapAddHyp' (λ τ → mapAddHyp' λ τ' → f (τ' • τ)) t) -- By induction on types!
+mapAddHyp' f (orE t u) = orE (mapAddHyp' f t) (mapAddHyp' f u)
+
+{-# TERMINATING #-}
+mapCover' :  ∀{P Q Γ} (f : KFun P Q Γ) (c : Cover P Γ) → Cover Q Γ
+mapCover' f (returnC t) = returnC (f id≤ t)
+mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover should be sized!
+
 -- Semantics
 
 ⟦_⟧ : ∀{p} (A : Form p) (Γ : Cxt) → Set
@@ -287,10 +314,10 @@ mutual
 ⟦ A ∨ B ⟧   Γ = ⟦ A ⟧ Γ ⊎ ⟦ B ⟧ Γ
 ⟦ True ⟧    Γ = ⊤
 ⟦ A ∧ B ⟧   Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
-⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → ⟦ B ⟧ Δ
+⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) (a : ⟦ A ⟧ Δ) → ⟦ B ⟧ Δ
 
-⟦ Sw +- A ⟧ Γ = Cover Γ ⟦ A ⟧  -- values to computations
-⟦ Sw -+ A ⟧ Γ = ⟦ A ⟧ Γ
+⟦ Sw +- A ⟧ = Cover ⟦ A ⟧  -- values to computations
+⟦ Sw -+ A ⟧ = ⟦ A ⟧
 
 mon⟦_⟧ : ∀{p} (A : Form p) → Mon ⟦ A ⟧
 mon⟦ True ⟧ τ _ = _
@@ -356,7 +383,7 @@ mutual
 
   -- Since we only have negative hypotheses, we only need to reflect these
 
-  reflect : ∀ (A : Form -) {Γ} → Ne A Γ → ⟦ A ⟧ Γ
+  reflect : ∀ (A : Form -) → Ne A →̇ ⟦ A ⟧
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify+ A a))  -- need monNe
@@ -371,11 +398,162 @@ mutual
     -- reflectHyp (A ∨ B)  k = orE (reflectHyp A (λ τ a → k τ (inj₁ a))) {!!}  -- need monotonicity of AddHyp / Cover
     -- reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
 
-paste : ∀ (A : Form -) {Γ} → Cover Γ ⟦ A ⟧ → ⟦ A ⟧ Γ
-paste True c = _
+-- Negative propositions are comonadic
+
+paste : ∀ (A : Form -) → Cover ⟦ A ⟧ →̇ ⟦ A ⟧
+paste True _ = _
 paste (A ∧ B) c = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
-paste (A ⇒ B) c = {!!}
-paste (Sw +- A) c = {!!}
+paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
+paste (Sw +- A) = joinCover
+
+-- impIntro : ∀ {A B Γ} (f : KFun (Cover ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
+-- impIntro f τ a = f τ (returnC a)
+
+-- impElim : ∀ B {A Γ} → (f : ⟦ A ⇒ B ⟧ Γ) (c : Cover ⟦ A ⟧ Γ) → ⟦ B ⟧ Γ
+-- impElim B f = paste B ∘ mapCover' f
+
+data IPL : Set where
+  Atom : (P : Atoms) → IPL
+  True False : IPL
+  _∨_ _∧_ _⇒_ : (A B : IPL) → IPL
+
+mutual
+
+  _⁺ : IPL → Form +
+  Atom P ⁺ = Atom P
+  True ⁺ = True
+  False ⁺ = False
+  (A ∨ B) ⁺ = A ⁺ ∨ B ⁺
+  (A ∧ B) ⁺ = A ⁺ ∧ B ⁺
+  (A ⇒ B) ⁺ = Sw -+ (A ⁺ ⇒ B ⁻)
+
+  _⁻ : IPL → Form -
+  Atom P ⁻ = Atom- P
+  True ⁻ = True
+  False ⁻ = Sw +- False
+  (A ∨ B) ⁻ = Sw +- (A ⁺ ∨ B ⁺)
+  (A ∧ B) ⁻ = A ⁻ ∧ B ⁻
+  (A ⇒ B) ⁻ = A ⁺ ⇒ B ⁻
+
+-- Derivations
+
+infix 2 _⊢_
+
+data _⊢_ (Γ : Cxt' IPL) : (A : IPL) → Set where
+  hyp    : ∀{A} (x : Hyp' IPL A Γ) → Γ ⊢ A
+  impI   : ∀{A B} (t : Γ ∙ A ⊢ B) → Γ ⊢ A ⇒ B
+  impE   : ∀{A B} (t : Γ ⊢ A ⇒ B) (u : Γ ⊢ A) → Γ ⊢ B
+  andI   : ∀{A B} (t : Γ ⊢ A) (u : Γ ⊢ B) → Γ ⊢ A ∧ B
+  andE₁  : ∀{A B} (t : Γ ⊢ A ∧ B) → Γ ⊢ A
+  andE₂  : ∀{A B} (t : Γ ⊢ A ∧ B) → Γ ⊢ B
+  orI₁   : ∀{A B} (t : Γ ⊢ A) → Γ ⊢ A ∨ B
+  orI₂   : ∀{A B} (t : Γ ⊢ B) → Γ ⊢ A ∨ B
+  orE    : ∀{A B C} (t : Γ ⊢ A ∨ B) (u : Γ ∙ A ⊢ C) (v : Γ ∙ B ⊢ C) → Γ ⊢ C
+  falseE : ∀{C} (t : Γ ⊢ False) → Γ ⊢ C
+  trueI  : Γ ⊢ True
+
+Tm = λ A Γ → Γ ⊢ A
+
+-- Call-by value evaluation
+
+module CBV where
+
+  V⟦_⟧ = λ A → ⟦ A ⁺ ⟧
+  C⟦_⟧ = λ A → ⟦ A ⁻ ⟧
+
+  return : ∀ A → V⟦ A ⟧ →̇ C⟦ A ⟧
+  return (Atom P) v = returnC v
+  return True v = v
+  return False v = returnC v
+  return (A ∨ B) v = returnC v
+  return (A ∧ B) (a , b) = return A a , return B b
+  return (A ⇒ B) v = v
+
+  run : ∀ A → C⟦ A ⟧ →̇ Cover V⟦ A ⟧
+  run (Atom P) c = c
+  run True c = returnC c
+  run False c = c
+  run (A ∨ B) c = c
+  run (A ∧ B) c = joinCover (mapCover' (λ τ a → mapCover' (λ τ' b → (mon⟦ A ⁺ ⟧ τ' a , b)) (run B (mon⟦ B ⁻ ⟧ τ (proj₂ c)))) (run A (proj₁ c)))
+  run (A ⇒ B) c = returnC c
+
+  -- Fundamental theorem
+  -- Extension of ⟦_⟧ to contexts
+
+  G⟦_⟧ : ∀ (Γ : Cxt' IPL) (Δ : Cxt) → Set
+  G⟦ ε     ⟧ Δ = ⊤
+  G⟦ Γ ∙ A ⟧ Δ = G⟦ Γ ⟧ Δ × V⟦ A ⟧ Δ
+
+  -- monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
+
+  monG : ∀{Γ} → Mon G⟦ Γ ⟧
+  monG {ε} τ _ = _
+  monG {Γ ∙ A} τ (γ , a) = monG τ γ , mon⟦ A ⁺ ⟧ τ a
+
+  -- Variable case.
+
+  lookup : ∀{Γ A} (x : Hyp' IPL A Γ) → G⟦ Γ ⟧ →̇ V⟦ A ⟧
+  lookup top     = proj₂
+  lookup (pop x) = lookup x ∘ proj₁
+
+  impIntro : ∀ {A B Γ} (f : KFun (Cover ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
+  impIntro f τ a = f τ (returnC a)
+
+  -- impElim : ∀ A B {Γ} → (f : C⟦ A ⇒ B ⟧ Γ) (a : C⟦ A ⟧ Γ) → C⟦ B ⟧ Γ
+  -- impElim (Atom P) B f = paste (B ⁻) ∘ mapCover' f
+  -- impElim False B f = paste (B ⁻) ∘ mapCover' f
+  -- impElim True B f = f id≤
+  -- impElim (A ∨ A₁) B f = paste (B ⁻) ∘ mapCover' f
+  -- impElim (A ∧ A₁) B f = {!paste (B ⁻) ∘ mapCover' f!}
+  -- impElim (A ⇒ A₁) B f = f id≤
+
+  impElim : ∀ A B {Γ} → (f : C⟦ A ⇒ B ⟧ Γ) (a : C⟦ A ⟧ Γ) → C⟦ B ⟧ Γ
+  impElim A B f a = paste (B ⁻) (mapCover' f (run A a))
+
+  -- A lemma for the orE case.
+
+  orElim : ∀ A B C {Γ} → C⟦ A ∨ B ⟧ Γ → C⟦ A ⇒ C ⟧ Γ → C⟦ B ⇒ C ⟧ Γ → C⟦ C ⟧ Γ
+  orElim A B C c g h = paste (C ⁻) (mapCover' (λ τ → [ g τ , h τ ]) c)
+
+  -- A lemma for the falseE case.
+
+  -- Casts an empty cover into any semantic value (by contradiction).
+
+  falseElim : ∀ C → C⟦ False ⟧ →̇ C⟦ C ⟧
+  falseElim C = paste (C ⁻) ∘ mapCover ⊥-elim
+
+  -- The fundamental theorem
+  eval :  ∀{A Γ} (t : Γ ⊢ A) → G⟦ Γ ⟧ →̇ C⟦ A ⟧
+  eval {A} (hyp x)           = return A ∘ lookup x
+  eval (impI t)    γ τ a     = eval t (monG τ γ , a)
+  eval (impE {A} {B} t u)  γ = impElim A B (eval t γ) (eval u γ)
+  eval (andI t u)  γ         = eval t γ , eval u γ
+  eval (andE₁ t)             = proj₁ ∘ eval t
+  eval (andE₂ t)             = proj₂ ∘ eval t
+  eval (orI₁ {A} {B} t) γ    = mapCover inj₁ (run A (eval t γ))
+  eval (orI₂ {A} {B} t) γ    = mapCover inj₂ (run B (eval t γ))
+  eval (orE {A} {B} {C} t u v) γ = orElim A B C (eval t γ)
+    (λ τ a → eval u (monG τ γ , a))
+    (λ τ b → eval v (monG τ γ , b))
+  eval {C} (falseE t) γ      = falseElim C (eval t γ)
+  eval trueI       γ         = _
+
+  _⁺⁺ : (Γ : Cxt' IPL) → Cxt
+  ε ⁺⁺ = ε
+  (Γ ∙ A) ⁺⁺ = Γ ⁺⁺ ∙ A ⁻
+
+  -- Identity environment
+
+  ide : ∀ Γ → Cover G⟦ Γ ⟧ (Γ ⁺⁺)
+  ide ε = returnC _
+  ide (Γ ∙ A) = {!!}
+    -- monG (weak id≤) (ide Γ) , {! reflectHyp (A ⁺) (λ τ a → a) !}
+{-
+  -- Normalization
+
+  norm : ∀{A : IPL} {Γ : Cxt' IPL} → Tm A Γ → RInv (Γ ⁺⁺) (A ⁻)
+  norm t = reify- _ (eval t (ide _))
+
 
 -- -}
 -- -}
