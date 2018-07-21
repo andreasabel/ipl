@@ -1,4 +1,6 @@
 
+-- Focusing proofs
+
 -- parametrized by positive and negative atoms
 -- module Formulas (PosAt NegAt : Set) where
 
@@ -22,7 +24,7 @@ data Form : Pol → Set where
   ⊤    : ∀{p} → Form p
   _∧_  : ∀{p} (A B : Form p) → Form p
   -- only positive
-  Atom : Atoms → Form +
+  Atom : (P : Atoms) → Form +
   ⊥    : Form +
   _∨_  : (A B : Form +) → Form +
   -- only negative
@@ -40,18 +42,50 @@ data Hyp (A : Form -) :  (Γ : Cxt)→ Set where
   top : ∀{Γ} → Hyp A (Γ ∙ A)
   pop : ∀{B Γ} (x : Hyp A Γ) → Hyp A (Γ ∙ B)
 
--- Focusing proofs
+
+-- Break up a positive formula and add the bits as hypotheses
+-- "case tree" / "cover"
+
+-- Produces a cover of Γ.A
 
 mutual
 
-  -- Focusing proof: either left focusing or right focusing
+  AddHyp = λ Γ A J → AddHyp' Γ J A
 
-  data Foc (Γ : Cxt) (C : Form +) : Set where
-    rFoc : (t : RFoc Γ C) → Foc Γ C
-    lFoc : ∀{A} (x : Hyp A Γ) (t : LFoc Γ C A) → Foc Γ C
-      -- lFoc is unproductive if A is an atom.
-      -- This could be fixed by having a separated store of proven atoms,
-      -- which can only be used in RFoc
+  data AddHyp' (Γ : Cxt) (J : Cxt → Set) : (A : Form +) → Set where
+    addAtom : ∀{P} (t : J (Γ ∙ Sw +- (Atom P))) → AddHyp' Γ J (Atom P)
+    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp' Γ J (Sw -+ A)
+    trueE   : (t : J Γ) → AddHyp' Γ J ⊤
+    andE    : ∀{A B} (t : AddHyp Γ A (λ Γ' → AddHyp Γ' B J)) → AddHyp' Γ J (A ∧ B)
+    orE     : ∀{A B} (t : AddHyp Γ A J) (u : AddHyp Γ B J) → AddHyp' Γ J (A ∨ B)
+    falseE  : AddHyp' Γ J ⊥
+
+addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp' Γ J A
+addHyp ⊤         j = trueE j
+addHyp (A ∧ B)   j = andE (addHyp A (addHyp B j))
+addHyp (Atom P)  j = addAtom j
+addHyp ⊥         j = falseE
+addHyp (A ∨ B)   j = orE (addHyp A j) (addHyp B j)
+addHyp (Sw -+ A) j = addNeg j
+
+
+-- Left focusing (break a hypothesis A down and add it)
+-- "neutral"
+
+mutual
+
+  LFoc' = λ Γ A J → LFoc Γ J A
+
+  data LFoc (Γ : Cxt) (J : Cxt → Set) : (A : Form -) → Set where
+    -- Left focusing ends with new hypothesis
+    swE : ∀{A} (t : AddHyp' Γ J A) → LFoc Γ J (Sw +- A)
+    -- Left focusing ends trivially (no progress)
+    trueE : (t : J Γ) → LFoc Γ J ⊤
+    -- Jhoice
+    andE₁ : ∀{B A} (t : LFoc Γ J A) → LFoc Γ J (A ∧ B)
+    andE₂ : ∀{A B} (t : LFoc Γ J B) → LFoc Γ J (A ∧ B)
+    impE  : ∀{A B} (u : RFoc Γ A) (t : LFoc Γ J B) → LFoc Γ J (A ⇒ B)
+
 
   -- Right focusing (proof of a positive goal by decisions)
   -- "normal"
@@ -67,18 +101,15 @@ mutual
     orI₁  : ∀{B A} (t : RFoc Γ A) → RFoc Γ (A ∨ B)
     orI₂  : ∀{A B} (u : RFoc Γ B) → RFoc Γ (A ∨ B)
 
-  -- Left focusing (break a hypothesis A down, does not solve goal C)
-  -- "neutral"
+  -- Focusing proof: after possibly some rounds of left focusing
+  -- eventually right focusing
 
-  data LFoc (Γ : Cxt) (C : Form +) : (A : Form -) → Set where
-    -- Left focusing ends with new hypothesis
-    swE : ∀{A} (t : LInv Γ C A) → LFoc Γ C (Sw +- A)
-    -- Left focusing ends trivially (no progress)
-    trueE : (t : Foc Γ C) → LFoc Γ C ⊤
-    -- Choice
-    andE₁ : ∀{B A} (t : LFoc Γ C A) → LFoc Γ C (A ∧ B)
-    andE₂ : ∀{A B} (t : LFoc Γ C B) → LFoc Γ C (A ∧ B)
-    impE  : ∀{A B} (u : RFoc Γ A) (t : LFoc Γ C B) → LFoc Γ C (A ⇒ B)
+  data Foc (Γ : Cxt) (C : Form +) : Set where
+    rFoc : (t : RFoc Γ C) → Foc Γ C
+    lFoc : ∀{A} (x : Hyp A Γ) (t : LFoc' Γ A λ Γ' → Foc Γ' C) → Foc Γ C
+      -- lFoc is unproductive if A is an atom.
+      -- This could be fixed by having a separated store of proven atoms,
+      -- which can only be used in RFoc
 
   -- Right inversion: break a goal into subgoals
   -- "eta"
@@ -90,23 +121,3 @@ mutual
     trueI : RInv Γ ⊤
     andI  : ∀{A B} (t : RInv Γ A) (u : RInv Γ B) → RInv Γ (A ∧ B)
     impI  : ∀{A B} (t : AddHyp Γ A (λ Γ' → RInv Γ' B)) → RInv Γ (A ⇒ B)
-
-  -- Left inversion: add a hypothesis and continue in base state
-
-  LInv : (Γ : Cxt) (C : Form +) (A : Form +) → Set
-  LInv Γ C A = AddHyp Γ A (λ Γ' → Foc Γ' C)
-
-  AddHyp = λ Γ A J → AddHyp' Γ J A
-
-  -- Break up a positive formula and add the bits as hypotheses
-  -- "case tree" / "cover"
-
-  data AddHyp' (Γ : Cxt) (J : Cxt → Set) : (A : Form +) → Set where
-    addAtom : ∀{P} (t : J (Γ ∙ Sw +- (Atom P))) → AddHyp' Γ J (Atom P)
-    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp' Γ J (Sw -+ A)
-    trueE : (t : J Γ) → AddHyp' Γ J ⊤
-    andE  : ∀{A B} (t : AddHyp Γ A (λ Γ' → AddHyp Γ' B J)) → AddHyp' Γ J (A ∧ B)
-    orE   : ∀{A B} (t : AddHyp Γ A J) (u : AddHyp Γ B J) → AddHyp' Γ J (A ∨ B)
-
-
-  -- data LInv (Γ : Cxt) (C : Form +) : (A : Form +) → Set where
