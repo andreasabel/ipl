@@ -40,6 +40,9 @@ Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f
 
 ⟪_⟫_↪_ = Conv
 
+⟪_⟫₂_↪_↪_ : ∀{R S T : Set} (f : R → S → T) (𝓡 : KPred' R) (𝓢 : KPred' S) (𝓣 : KPred' T) → Set
+⟪ f ⟫₂ 𝓡 ↪ 𝓢 ↪ 𝓣 = ∀{Γ g h} → 𝓡 Γ g → 𝓢 Γ h → 𝓣 Γ (λ γ → f (g γ) (h γ))
+
 -- Statement of monotonicity for Kripke predicates
 
 Mon : ∀{S} (𝓐 : KPred' S) → Set
@@ -82,8 +85,9 @@ iImpI : ∀{Γ A B f} → NfImg B (Γ ∙ A) f → NfImg (A ⇒ B) Γ (curry f)
 iImpI (t , eq) = impI t , cong curry eq
 
 -- Application of a neutral is neutral
+-- iImpE : NeImg (A ⇒ B) Γ f → NfImg A Γ g → NeImg B Γ (apply f g)
 
-iImpE : ∀{Γ A B f g} → NeImg (A ⇒ B) Γ f → NfImg A Γ g → NeImg B Γ (apply f g)
+iImpE : ∀{A B} → ⟪ _$_ ⟫₂ NeImg (A ⇒ B) ↪ NfImg A ↪ NeImg B
 iImpE (t , eq) (u , eq') = (impE t u , cong₂ apply eq eq')
 
 -- Empty tuple is normal
@@ -93,7 +97,7 @@ iTrueI = trueI , refl
 
 -- Pairing operates on normal forms
 
-iAndI : ∀{Γ A B f g} → NfImg A Γ f → NfImg B Γ g → NfImg (A ∧ B) Γ < f , g >
+iAndI : ∀{A B} → ⟪ _,_ ⟫₂ NfImg A ↪ NfImg B ↪ NfImg (A ∧ B)
 iAndI (t , eq) (u , eq') = andI t u , cong₂ <_,_> eq eq'
 
 -- Projection of a neutral is neutral
@@ -121,9 +125,7 @@ iOrE : ∀{Γ A B C f g h}
   → NfImg C Γ (caseof f g h)
 iOrE (t , eqt) (u , equ) (v , eqv) = orE t u v , cong₃ caseof eqt equ eqv
 
-iFalseE : ∀{Γ C f}
-  → NeImg False Γ f
-  → NfImg C Γ (⊥-elim ∘ f)
+iFalseE : ∀{C} → ⟪ ⊥-elim ⟫ NeImg False ↪ NfImg C
 iFalseE (t , eq) = falseE t , cong (⊥-elim ∘_) eq
 
 -- For falseE, we can get the stronger:
@@ -227,8 +229,8 @@ module _ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
 
 -- Cover is monotone in P
 
-mapC' : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : ⟨ A ⟩ P ↪ Q) → ⟨ A ⟩ Cover A P ↪ Cover A Q
-mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤ c
+mapCᶜ : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : ⟨ A ⟩ P ↪ Q) → ⟨ A ⟩ Cover A P ↪ Cover A Q
+mapCᶜ {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤ c
   where
   conv : Converter A A P Q id≤
   conv = record
@@ -239,8 +241,8 @@ mapC' {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤
 
 -- Weakening Covers
 
-monC' : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
-monC' {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
+monCᶜ : ∀{A} {P : KPred A} (monP : Mon P) → Mon (Cover A P)
+monCᶜ {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
   where
   conv : Converter A A P P id≤
   conv = record
@@ -251,8 +253,8 @@ monC' {A} {P} monP {Γ} {Δ} τ {f} c = convCov A A P P id≤ conv id≤ τ c
 
 -- A converter for covers (pointwise in the context)
 
-convC' : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (monP : Mon P) (P⊂Q : ⟪ g ⟫ P ↪ Q) → ⟪ g ⟫ Cover A P ↪ Cover B Q
-convC' {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv id≤ id≤ p
+convCᶜ : ∀{A B} (g : T⦅ A ⦆ → T⦅ B ⦆) {P Q} (monP : Mon P) (P⊂Q : ⟪ g ⟫ P ↪ Q) → ⟪ g ⟫ Cover A P ↪ Cover B Q
+convCᶜ {A} {B} g₀ {P} {Q} monP P⊂Q {Γ} {f} p = convCov A B P Q id≤ conv id≤ id≤ p
   where
   conv : Converter A B P Q id≤
   conv = record
@@ -440,7 +442,7 @@ orElim E {Γ₀} {A} {B} ⟦f⟧ {g} ⟦g⟧ {h} ⟦h⟧ = paste E
 
 -- A lemma for the falseE case
 
-falseElim : ∀ A → ⟪ ⊥-elim ⟫ Cover False Absurd ↪ T⟦ A ⟧
+falseElim : ∀ A → ⟪ ⊥-elim ⟫ T⟦ False ⟧ ↪ T⟦ A ⟧
 falseElim A = paste A ∘ convC ⊥-elim ⊥-elim
 
 -- The fundamental theorem
