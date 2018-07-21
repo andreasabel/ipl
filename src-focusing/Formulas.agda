@@ -165,6 +165,23 @@ mutual
     impI  : ∀{A B} (t : AddHyp Γ A (λ Γ' → RInv Γ' B)) → RInv Γ (A ⇒ B)
 
 
+-- Pointwise mapping
+
+_→̇_ : (P Q : Cxt → Set) → Set
+P →̇ Q = ∀{Γ} → P Γ → Q Γ
+
+mapAddHyp : ∀{P Q} (f : P →̇ Q) → ∀{A Γ} → AddHyp Γ A P → AddHyp Γ A Q
+mapAddHyp f (addAtom t) = addAtom (f t)
+mapAddHyp f (addNeg t) = addNeg (f t)
+mapAddHyp f (trueE t) = trueE (f t)
+mapAddHyp f falseE = falseE
+mapAddHyp f (andE t) = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types!
+mapAddHyp f (orE t u) = orE (mapAddHyp f t) (mapAddHyp f u)
+
+{-# TERMINATING #-}
+mapCover :  ∀{P Q} (f : P →̇ Q) → ∀{Γ} → Cover Γ P → Cover Γ Q
+mapCover f (returnC t) = returnC (f t)
+mapCover f (caseC t c) = caseC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
 
 -- Context extension (thinning)
 
@@ -194,6 +211,76 @@ lift τ • lift σ = lift (τ • σ)
 
 {-# REWRITE •-id #-}
 
+-- Monotonicity
+
+Mon : (P : Cxt → Set) → Set
+Mon P = ∀{Γ Δ} (τ : Γ ≤ Δ) → P Δ → P Γ
+
+-- Monotonicity of hypotheses
+
+monH : ∀{A} → Mon (Hyp A)
+monH id≤      x       = x
+monH (weak τ) x       = pop (monH τ x)
+monH (lift τ) top     = top
+monH (lift τ) (pop x) = pop (monH τ x)
+
+monH• : ∀{Γ Δ Φ A} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) (x : Hyp A Φ) → monH (τ • σ) x ≡ monH τ (monH σ x)
+monH• id≤      σ        x       = refl
+monH• (weak τ) σ        x       = cong pop (monH• τ σ x)
+monH• (lift τ) id≤      x       = refl
+monH• (lift τ) (weak σ) x       = cong pop (monH• τ σ x)
+monH• (lift τ) (lift σ) top     = refl
+monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
+
+{-# REWRITE monH• #-}
+
+-- Monotonicity of neutrals
+
+monNe' : ∀{P : Form + → Cxt → Set}
+  (monP : ∀{A} → Mon (P A)) →
+  ∀{A} → Mon (flip (Ne' (flip P)) A)
+monNe' monP τ (hyp x)    = hyp (monH τ x)
+monNe' monP τ (impE t u) = impE (monNe' monP τ t) (monP τ u)
+monNe' monP τ (andE₁ t)  = andE₁ (monNe' monP τ t)
+monNe' monP τ (andE₂ t)  = andE₂ (monNe' monP τ t)
+
+-- Monotonicity of covers
+
+monAddHyp : ∀{P} (monP : Mon P) → ∀{A} → Mon (λ Γ → AddHyp Γ A P)
+monAddHyp monP τ (addAtom t) = addAtom (monP (lift τ) t)
+monAddHyp monP τ (addNeg t) = addNeg (monP (lift τ) t)
+monAddHyp monP τ (trueE t) = trueE (monP τ t)
+monAddHyp monP τ falseE = falseE
+monAddHyp monP τ (andE t) = andE (monAddHyp (monAddHyp monP) τ t)
+monAddHyp monP τ (orE t u) = orE (monAddHyp monP τ t) (monAddHyp monP τ u)
+
+-- Monotonicity of derivations
+
+mutual
+  monNe : ∀{A} → Mon (Ne A)
+  monNe = monNe' monRFoc
+
+  {-# TERMINATING #-}
+  monCover : ∀{P} (monP : Mon P) → Mon (λ Γ → Cover Γ P)
+  monCover monP τ (returnC t) = returnC (monP τ t)
+  monCover monP τ (caseC t c) = caseC (monNe τ t) (monAddHyp (monCover monP) τ c)
+
+  monRFoc : ∀{A} → Mon (flip RFoc A)
+  monRFoc τ (sw t) = sw (monRInv τ t)
+  monRFoc τ (hyp x) = hyp (monH τ x)
+  monRFoc τ trueI = trueI
+  monRFoc τ (andI t t₁) = andI (monRFoc τ t) (monRFoc τ t₁)
+  monRFoc τ (orI₁ t) = orI₁ (monRFoc τ t)
+  monRFoc τ (orI₂ t) = orI₂ (monRFoc τ t)
+
+  monRInv : ∀{A} → Mon (flip RInv A)
+  monRInv τ (sw t) = sw (monCover monRFoc τ t)
+  monRInv τ trueI = trueI
+  monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
+  monRInv τ (impI t) = impI (monAddHyp monRInv τ t)
+
+-- Semantics
+
 ⟦_⟧ : ∀{p} (A : Form p) (Γ : Cxt) → Set
 ⟦ Atom P ⟧  Γ = HypAtom P Γ
 ⟦ False ⟧   Γ = ⊥
@@ -202,8 +289,18 @@ lift τ • lift σ = lift (τ • σ)
 ⟦ A ∧ B ⟧   Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
 ⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → ⟦ B ⟧ Δ
 
-⟦ Sw +- A ⟧ Γ = Cover Γ ⟦ A ⟧
+⟦ Sw +- A ⟧ Γ = Cover Γ ⟦ A ⟧  -- values to computations
 ⟦ Sw -+ A ⟧ Γ = ⟦ A ⟧ Γ
+
+mon⟦_⟧ : ∀{p} (A : Form p) → Mon ⟦ A ⟧
+mon⟦ True ⟧ τ _ = _
+mon⟦ A ∧ B ⟧ τ (a , b) = mon⟦ A ⟧ τ a , mon⟦ B ⟧ τ b
+mon⟦ Atom P ⟧ = monH
+mon⟦ False ⟧ τ ()
+mon⟦ A ∨ B ⟧ τ = map-⊎ (mon⟦ A ⟧ τ) (mon⟦ B ⟧ τ)
+mon⟦ A ⇒ B ⟧ τ f δ = f (δ • τ)
+mon⟦ Sw +- A ⟧ = monCover mon⟦ A ⟧
+mon⟦ Sw -+ A ⟧ = mon⟦ A ⟧
 
 -- ⟦_⟧ { - } (A ∧ B) Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
 
@@ -215,10 +312,10 @@ trueNf : ∀{p Γ} → Nf (True {p}) Γ
 trueNf { + } = trueI
 trueNf { - } = trueI
 
--- NOT NEEDED:
-pasteNf : ∀ {A : Form +} {Γ} → Cover Γ (Nf A) → Nf A Γ
-pasteNf (returnC t) = t
-pasteNf (caseC t c) = {!!}
+-- -- NOT NEEDED:
+-- pasteNf : ∀ {A : Form +} {Γ} → Cover Γ (Nf A) → Nf A Γ
+-- pasteNf (returnC t) = t
+-- pasteNf (caseC t c) = {!!}
 
 mutual
   reify : ∀{p} (A : Form p) {Γ} → ⟦ A ⟧ Γ → Nf A Γ
@@ -230,32 +327,38 @@ mutual
   reify False ()
   reify (A ∨ B) (inj₁ a) = orI₁ (reify A a)
   reify (A ∨ B) (inj₂ b) = orI₂ (reify B b)
-  reify (A ⇒ B) {Γ} f₀ = impI (reifyWithHyp A f₀)
-    where
-    reifyWithHyp : ∀ A {Γ} (f : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → ⟦ B ⟧ Δ) → AddHyp Γ A (Nf B)
-    reifyWithHyp True f = trueE (reify B (f id≤ _))
-    reifyWithHyp (A₁ ∧ A₂) f = andE {!reifyWithHyp A₁ !}  -- need CPS version
-    reifyWithHyp (Atom P) f = addAtom (reify B (f (weak id≤) top))
-    reifyWithHyp False f = falseE
-    reifyWithHyp (A ∨ B) f = orE (reifyWithHyp A (λ τ a → f τ (inj₁ a)))
-                                   (reifyWithHyp B (λ τ b → f τ (inj₂ b)))
-    reifyWithHyp (Sw -+ A) f = addNeg (reify B (f (weak id≤) (reflect A (hyp top))))
-
-  reify (Sw +- A) c = sw {!mapC (reify A) c!} -- {!sw (pasteNf {! reify A c!})!}
+  reify (A ⇒ B) f = impI (reflectHyp A λ τ a → reify B (f τ a))
+  reify (Sw +- A) c = sw (mapCover (reify A) c)
   reify (Sw -+ A) a = sw (reify A a)
+
+  reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J
+  reflectHyp True      k = trueE (k id≤ _)
+  reflectHyp (A ∧ B)   k = andE (reflectHyp A λ τ a →
+                                 reflectHyp B λ τ' b → k (τ' • τ) (mon⟦ A ⟧ τ' a , b))  -- need monT
+  reflectHyp (Atom P)  k = addAtom (k (weak id≤) top)
+  reflectHyp False     k = falseE
+  reflectHyp (A ∨ B)   k = orE (reflectHyp A (λ τ a → k τ (inj₁ a)))
+                                 (reflectHyp B (λ τ b → k τ (inj₂ b)))
+  reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
 
   -- Since we only have negative hypotheses, we only need to reflect these
 
   reflect : ∀ (A : Form -) {Γ} → Ne A Γ → ⟦ A ⟧ Γ
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
-  reflect (A ⇒ B) t τ a = reflect B (impE {!!} (reify A a))  -- need monNe
-  reflect (Sw +- A) t = caseC t {! reflectHyp A !}
-    where
-    reflectHyp : ∀ (A : Form +) {Γ : Cxt} → AddHyp Γ A λ Γ' → Cover Γ' ⟦ A ⟧
-    reflectHyp True = trueE (returnC _)
-    reflectHyp (A₁ ∧ A₂) = andE {!reflectHyp A₁!}  -- need CPS version of reflectHyp
-    reflectHyp (Atom P) = addAtom (returnC top)
-    reflectHyp False = falseE
-    reflectHyp (A₁ ∨ A₂) = orE {!reflectHyp A₁!} {!!}  -- need monotonicity of AddHyp / Cover
-    reflectHyp (Sw -+ A₁) = addNeg (returnC (reflect A₁ (hyp top)))
+  reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify A a))  -- need monNe
+  reflect (Sw +- A) t = caseC t (reflectHyp A λ τ a → returnC a)
+
+    -- where
+    -- reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J -- (λ Γ' → Cover Γ' ⟦ A ⟧)
+    -- reflectHyp True       k = trueE (k id≤ _)
+    -- reflectHyp (A₁ ∧ A₂)  k = andE {!reflectHyp A₁!}  -- need CPS version of reflectHyp
+    -- reflectHyp (Atom P)   k = addAtom (k (weak id≤) top)
+    -- reflectHyp False      k = falseE
+    -- reflectHyp (A ∨ B)  k = orE (reflectHyp A (λ τ a → k τ (inj₁ a))) {!!}  -- need monotonicity of AddHyp / Cover
+    -- reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
+
+
+-- -}
+-- -}
+-- -}
