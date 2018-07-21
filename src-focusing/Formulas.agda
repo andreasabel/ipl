@@ -302,15 +302,13 @@ mon⟦ A ⇒ B ⟧ τ f δ = f (δ • τ)
 mon⟦ Sw +- A ⟧ = monCover mon⟦ A ⟧
 mon⟦ Sw -+ A ⟧ = mon⟦ A ⟧
 
--- ⟦_⟧ { - } (A ∧ B) Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
+-- Nf : ∀{p} (A : Form p) (Γ : Cxt) → Set
+-- Nf { - } A Γ = RInv Γ A
+-- Nf { + } A Γ = RFoc Γ A
 
-Nf : ∀{p} (A : Form p) (Γ : Cxt) → Set
-Nf { - } A Γ = RInv Γ A
-Nf { + } A Γ = RFoc Γ A
-
-trueNf : ∀{p Γ} → Nf (True {p}) Γ
-trueNf { + } = trueI
-trueNf { - } = trueI
+-- trueNf : ∀{p Γ} → Nf (True {p}) Γ
+-- trueNf { + } = trueI
+-- trueNf { - } = trueI
 
 -- -- NOT NEEDED:
 -- pasteNf : ∀ {A : Form +} {Γ} → Cover Γ (Nf A) → Nf A Γ
@@ -318,18 +316,33 @@ trueNf { - } = trueI
 -- pasteNf (caseC t c) = {!!}
 
 mutual
-  reify : ∀{p} (A : Form p) {Γ} → ⟦ A ⟧ Γ → Nf A Γ
-  reify { + } True _ = trueI
-  reify { - } True _ = trueI
-  reify { + } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  reify { - } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  reify (Atom P) x = hyp x
-  reify False ()
-  reify (A ∨ B) (inj₁ a) = orI₁ (reify A a)
-  reify (A ∨ B) (inj₂ b) = orI₂ (reify B b)
-  reify (A ⇒ B) f = impI (reflectHyp A λ τ a → reify B (f τ a))
-  reify (Sw +- A) c = sw (mapCover (reify A) c)
-  reify (Sw -+ A) a = sw (reify A a)
+  -- reify : ∀{p} (A : Form p) {Γ} → ⟦ A ⟧ Γ → Nf A Γ
+  -- reify { + } True _ = trueI
+  -- reify { - } True _ = trueI
+  -- reify { + } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
+  -- reify { - } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
+  -- reify (Atom P) x = hyp x
+  -- reify False ()
+  -- reify (A ∨ B) (inj₁ a) = orI₁ (reify A a)
+  -- reify (A ∨ B) (inj₂ b) = orI₂ (reify B b)
+  -- reify (A ⇒ B) f = impI (reflectHyp A λ τ a → reify B (f τ a))
+  -- reify (Sw +- A) c = sw (mapCover (reify A) c)
+  -- reify (Sw -+ A) a = sw (reify A a)
+
+  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv Γ A
+  reify- True _ = trueI
+  reify- (A ∧ B) (a , b) = andI (reify- A a) (reify- B b)
+  reify- (A ⇒ B) f = impI (reflectHyp A λ τ a → reify- B (f τ a))
+  reify- (Sw +- A) c = sw (mapCover (reify+ A) c)
+
+  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc Γ A
+  reify+ True _ = trueI
+  reify+ (A ∧ B) (a , b) = andI (reify+ A a) (reify+ B b)
+  reify+ (Atom P) x = hyp x
+  reify+ False ()
+  reify+ (A ∨ B) (inj₁ a) = orI₁ (reify+ A a)
+  reify+ (A ∨ B) (inj₂ b) = orI₂ (reify+ B b)
+  reify+ (Sw -+ A) a = sw (reify- A a)
 
   reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J
   reflectHyp True      k = trueE (k id≤ _)
@@ -338,7 +351,7 @@ mutual
   reflectHyp (Atom P)  k = addAtom (k (weak id≤) top)
   reflectHyp False     k = falseE
   reflectHyp (A ∨ B)   k = orE (reflectHyp A (λ τ a → k τ (inj₁ a)))
-                                 (reflectHyp B (λ τ b → k τ (inj₂ b)))
+                               (reflectHyp B (λ τ b → k τ (inj₂ b)))
   reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
 
   -- Since we only have negative hypotheses, we only need to reflect these
@@ -346,7 +359,7 @@ mutual
   reflect : ∀ (A : Form -) {Γ} → Ne A Γ → ⟦ A ⟧ Γ
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
-  reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify A a))  -- need monNe
+  reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify+ A a))  -- need monNe
   reflect (Sw +- A) t = caseC t (reflectHyp A λ τ a → returnC a)
 
     -- where
@@ -358,6 +371,11 @@ mutual
     -- reflectHyp (A ∨ B)  k = orE (reflectHyp A (λ τ a → k τ (inj₁ a))) {!!}  -- need monotonicity of AddHyp / Cover
     -- reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
 
+paste : ∀ (A : Form -) {Γ} → Cover Γ ⟦ A ⟧ → ⟦ A ⟧ Γ
+paste True c = _
+paste (A ∧ B) c = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
+paste (A ⇒ B) c = {!!}
+paste (Sw +- A) c = {!!}
 
 -- -}
 -- -}
