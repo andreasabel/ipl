@@ -2,6 +2,9 @@
 sudo: required
 language: generic
 
+services:
+  - docker
+
 before_install:
   - sudo apt-get -q update
   - sudo apt-get install -y texlive-latex-extra texlive-math-extra
