@@ -6,9 +6,10 @@ services:
   - docker
 
 before_install:
-  - sudo apt-get -q update
-  - sudo apt-get install -y texlive-latex-extra texlive-math-extra
+  # - sudo apt-get -q update
+  # - sudo apt-get install -y texlive-latex-extra texlive-math-extra
   - docker pull jlimperg/agda-stdlib
+  - docker pull sumdoc/texlive-2017
 
 script:
   - make docs
