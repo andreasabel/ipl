@@ -379,7 +379,7 @@ attempt
 %$\tau : \Delta \leq \Gamma$
 \[
   \reify[\Gamma]{A \imp B} f %\;\Delta\;\tau =
-    = \impIP {\reify[\Gamma.A]B{(f\;(\weak[A]{\id[\Gamma]})}\;\mbox{?})}
+    = \impIP {\reify[\Gamma.A]B{(f_{\Gamma.A}\;(\weak[A]{\id[\Gamma]})}\;\mbox{?})}
 \]
 where hole ``?'' should be filled with an element of $\den B_{\Gamma.A}$
 which intuitively should represent the new hypothesis $\top :
@@ -413,7 +413,7 @@ Now, we can complete the story for implication.  Let $\tau : \Delta
 \\[1ex]
   \treify^{A \imp B} & : & \den{A \imp B} \todot \Nf{A \imp B} \\
   \reify[\Gamma]{A \imp B} f & = &
-    \impIP {\reify[\Gamma.A]B{(f\;(\weak[A]{\id[\Gamma]})}\;(\reflect[\Gamma.A]A{(\hyp\ttop)})}
+    \impIP {\reify[\Gamma.A]B{(f_{\Gamma.A}\;(\weak[A]{\id[\Gamma]})}\;(\reflect[\Gamma.A]A{(\hyp\ttop)})}
 \end{array}
 \]
 
@@ -439,16 +439,16 @@ Evaluation is turning an expression $t : \TmG A$ into a value in
 $\den A$.  However, a direct definition $\teval^A : \Tm A \todot \den A$
 by induction on the expression fails in case $\timpI$:
 \[
-\begin{array}{lll}
+\begin{array}{lcl}
    \teval^{A \imp B}_\Gamma & : & \TmG A \to \den {A \imp B} _\Gamma \\
-   \teval^{A \imp B}\,(\impI t)\;\Delta\;a & = & ? \\
+   \teval^{A \imp B}\,(\impI t)\,_\Delta\,a & = & ? \\
 \end{array}
 \]
 To be able to pass the argument $a$ to the function $\teval\,(\impI
 t)$, we have to generalize evaluation to take an valuation of the
 context into account.
 \[
-  \teval^{A \imp B}_\Gamma  : \den \Gamma \todot \den {A \imp B}
+  \evalG{A \imp B}t  ~:~ \den \Gamma \todot \den {A \imp B}
 \]
 Here, $\den \Gamma$ is the presheaf obtained as the product of the
 hypotheses contained in $\Gamma$:
@@ -463,8 +463,8 @@ natural transformations:
 \[
 \begin{array}{l@{~}lcl}
   \multicolumn 2 l {\tlookup^A_\Gamma} & : & \HypG A \to (\den \Gamma \todot \den A) \\
-  \lookup[\Gamma.A]A \ttop    & \Delta\,(\gamma,a) & = & a \\
-  \lookup[\Gamma.B]A {\pop x} &\Delta\,(\gamma,a) & = & \lookup[\Gamma]A x\, \Delta\, \gamma \\
+  \lookup[\Gamma.A]A \ttop    &_\Delta\,(\gamma,a) & = & a \\
+  \lookup[\Gamma.B]A {\pop x} &_\Delta\,(\gamma,a) & = & \lookup[\Gamma]A x\,_\Delta\, \gamma \\
 \end{array}
 \]
 \begin{exercise}
@@ -476,11 +476,11 @@ We are ready to define evaluation:
 \[
 \begin{array}{lcl}
   \evalG A {\hyp x} & = & \lookupG A x \\
-  \evalG {A \imp B} {\impI t}\,\Delta\,\gamma\,\Delta'\,(\tau : \Delta' \leq \Delta)\,a
-    & = & \eval[\Gamma.A]B t\,\Delta'\,(\den\Gamma_\tau\gamma,a) \\
-  \evalG {B} {\impE t u}\,\Delta\,\gamma & = &
-    \evalG {A \imp B} t\,\Delta\,\gamma\,\Delta\,\id[\Delta]\,
-      (\evalG A u\,\Delta\,\gamma) \\
+  \evalG {A \imp B} {\impI t}\,_\Delta\,\gamma\,_{\Delta'}\,(\tau : \Delta' \leq \Delta)\,a
+    & = & \eval[\Gamma.A]B t\,_{\Delta'}\,(\den\Gamma_\tau\gamma,a) \\
+  \evalG {B} {\impE t u}\,_\Delta\,\gamma & = &
+    \evalG {A \imp B} t\,_\Delta\,\gamma\,_\Delta\,\id[\Delta]\,
+      (\evalG A u\,_\Delta\,\gamma) \\
 \end{array}
 \]
 \begin{exercise}
@@ -498,7 +498,7 @@ environment:
 \[
 \begin{array}{lcl}
 \tnorm^A & : & \Tm A \todot \Nf A \\
-\norm[\Gamma] A t & = & \reify[\Gamma]A {(\eval[\Gamma] A t \,\Gamma\, \env[\Gamma])}
+\norm[\Gamma] A t & = & \reify[\Gamma]A {(\eval[\Gamma] A t \,_\Gamma\, \env[\Gamma])}
 \end{array}
 \]
 The identity environment $\env[\Gamma]$ is defined by induction on
@@ -582,7 +582,7 @@ and nodes labeled by terms we case on.  Nodes of type $\tfalseC$ have
 no subtrees since \emph{ex falsum quod libet}, and $\torC$ nodes
 casing on $t : \NeG{C \lor D}$ have
 two subtrees, one having a new hypothesis $C$, and one having a new
-hypothesis $C$.
+hypothesis $D$.
 
 We can replace all the leaves according to a function $f : \A \todot \B$,
 this makes $\tCover$ a \emph{functor} in the category of presheaves.  We can
@@ -666,14 +666,15 @@ Evaluation poses one more challenge. Consider the term:
     a : \TmG A
   }{\impEP{\orE {(\hyp x)} f {(\impI g)}} a : \TmG B}
 \]
-There is a redex $\impEP {\impI g} a$ separated by a $\torE$.  The latter
+There is a redex $\impEP {\impI g} a$ separated by an $\torE$.
+The function term $\orE {(\hyp x)} f {(\impI g)}$
 would naturally evaluate to a case tree with functions in the
 leaves.  To apply it to the evaluation of $a$, we have to apply each
 leaf to that argument.  We facilitate this by implementing
 \[
   \tpaste^{A \imp B} : \Cover{\den{A \imp B}} \todot \den{A \imp B}
 \]
-that turns a case tree of functions into a function, which expects an
+that turns a case tree of functions into a function which expects an
 argument that will then be passed to all the functions in the case
 tree.  In fact, we need pasting at all formulas $A$:
 \[
@@ -686,36 +687,37 @@ tree.  In fact, we need pasting at all formulas $A$:
   \tpaste^A \comp \Cover{\pi_1} \, , \;
   \tpaste^B \comp \Cover{\pi_2} \,\rangle \\[1ex]
 \multicolumn 3 {l} {\paste[\Gamma]{A \imp B} c \;
-  \Delta \; (\tau : \Delta{\leq}\Gamma) \; (a : \den A _\Delta) \, = \,
-  (\tpaste^B \comp \mapC \phi \comp \Cover{\den {A \imp B}_\tau}\, c)
+  _\Delta \; (\tau : \Delta{\leq}\Gamma) \; (a : \den A _\Delta) \, = \,
+  (\paste[\Delta]B \comp \mapC[\Delta] \varphi \comp \Cover{\den {A \imp B}_\tau})\, c
 }
 \end{array}
 \]
-Here, we need a stronger version of functoriality of $\tCover$ which
-only requires an
+In the case of implication $A \imp B$,
+we need a stronger version of functoriality of $\tCover$ which
+only requires a
 \[
-  \phi : \prod_{\Phi} \prod_{\delta : \Phi \leq \Delta} \A_\Phi
+  \varphi : \prod_{\Phi} \prod_{\delta : \Phi \leq \Delta} \A_\Phi
              \to \B_\Phi
 \]
-to produce a $\tmapC_\Delta t\; \phi : \Cover\A_\Delta \to \Cover\B_\Delta$.
+to produce a $\mapC[\Delta]\varphi : \Cover\A_\Delta \to \Cover\B_\Delta$.
 In our case, $\A = \den{A \imp B}$ and $\B = \den{B}$ and
 \[
-  \phi\;\Phi\;\delta\;f = f\;\id[\Phi]\;(\den A _\delta\, a)
+  \varphi\,_\Phi\;\delta\;f = f\;\id[\Phi]\;(\den A _\delta\, a)
   .
 \]
 Pasting allows us to complete the definition of evaluation.
 \[
 \begin{array}{lcl}
   \teval_\Gamma^A & : & \TmG A \to \den \Gamma \todot \den A \\[1ex]
-  \evalG C {\orE t u v} \Delta \; \gamma & = &
-    \tpaste^C \;
-     (\mapC {(\lambda \Phi\, (\tau  : \Phi \leq \Delta) \to [f,g])}\;c) \\[1ex]
+  \evalG C {\orE t u v} _\Delta \; \gamma & = &
+    \paste[\Delta]C
+     {(\mapC[\Delta]{\lambda\, _\Phi\, (\tau  : \Phi \leq \Delta) \to [f,g]}\;c)} \\[1ex]
   \multicolumn 1 r {\mbox{ where } c} & = &
-      \evalG{A \lor B} t\;\Delta\;\gamma \\
+      \evalG{A \lor B} t\;_\Delta\;\gamma \\
   \multicolumn 1 r {f\;a} & = &
-    \eval[\Gamma.A] C u \;\Phi\;(\den\Gamma_\tau\,\gamma, a) \\
+    \eval[\Gamma.A] C u \;_\Phi\;(\den\Gamma_\tau\,\gamma, a) \\
   \multicolumn 1 r {g\;b} & = &
-    \eval[\Gamma.B] C v \;\Phi\;(\den\Gamma_\tau\,\gamma, b) \\
+    \eval[\Gamma.B] C v \;_\Phi\;(\den\Gamma_\tau\,\gamma, b) \\
   \\
 \end{array}
 \]
