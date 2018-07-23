@@ -17,16 +17,16 @@ docs : deploy clean
 
 # Make contents on travis
 
-# Mount local dir in docker image as /home and set this as working directory
-mnt=/home
-docker=docker run -v $(PWD):$(mnt) -w $(mnt)
-deploy :
-	$(docker) sumdoc/texlive-2017  make -C notes
-	$(docker) jlimperg/agda-stdlib make -C src
-
+# # Mount local dir in docker image as /home and set this as working directory
+# mnt=/home
+# docker=docker run -v $(PWD):$(mnt) -w $(mnt)
 # deploy :
-# 	make -C notes deploy
-# 	make -C src deploy
+# 	$(docker) sumdoc/texlive-2017  make -C notes   # this image has no "make"
+# 	$(docker) jlimperg/agda-stdlib make -C src
+
+deploy :
+	make -C notes deploy
+	make -C src deploy
 
 # Provide empty docs folder
 clean :

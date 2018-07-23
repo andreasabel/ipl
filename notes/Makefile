@@ -43,13 +43,15 @@ stlcagda = \
 
 # END stlcagda
 
-.PHONY : all debugMake html
+.PHONY : all debugMake html default deploy pack
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
 
-
 default : nbeSum.pdf
-deploy  : nbeSum.pdf
+
+mnt=/home
+deploy :
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) sumdoc/texlive-2017 latexmk nbeSum.tex
 
 pack : nbeSum.zip
 
