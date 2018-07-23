@@ -1,4 +1,4 @@
--- Normalization for Intuitionistic Predicate Logic (IPL)
+-- Normalization by Evaluation for Intuitionistic Predicate Logic (IPL)
 
 module Everything where
 
@@ -18,7 +18,7 @@ import NfModel
 
 -- A variant where Cover : PSh → PSh
 
-import NfModelCaseTree
+import NfModelCaseTree        -- Presented at ITC 2018-07-19
 import NfModelCaseTreeConv
 
 -- A generalization to any CoverMonad which includes the

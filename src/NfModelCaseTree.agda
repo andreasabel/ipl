@@ -1,4 +1,5 @@
 -- A Beth model of normal forms
+-- Version presented at the Initial Types Club, 2018-07-19
 
 open import Library
 
