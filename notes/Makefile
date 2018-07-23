@@ -51,7 +51,7 @@ default : nbeSum.pdf
 
 mnt=/home
 deploy :
-	docker run -v $(shell pwd):$(mnt) -w $(mnt) sumdoc/texlive-2017 latexmk nbeSum.tex
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) sumdoc/texlive-2017 latexmk -pdf nbeSum.tex
 
 pack : nbeSum.zip
 
