@@ -1,14 +1,29 @@
 # Makefile to create docs
 
+.PHONY: default deploy clean
+
+# Make contents locally
 default :
 	make -C notes
+	make -C src
 
-docs : default clean
+# Main goal:
+# - make contents
+# - copy contents to docs folder
+
+docs : deploy clean
 	cp notes/*.pdf docs/
+	cp -r src/html docs/
 
-.PHONY: clean
+# Make contents on travis
+deploy :
+	make -C notes deploy
+	make -C src deploy
+
+# Provide empty docs folder
 clean :
 	mkdir -p docs/
 	rm -f docs/*.pdf
+	rm -rf docs/html
 
 # EOF

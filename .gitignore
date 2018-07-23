@@ -245,7 +245,10 @@ TSWLatexianTemp*
 
 # generated if using elsarticle.cls
 *.spl
+
 /notes/all.bib
 /notes/medium.bib
 /notes/short.bib
 /github-pages-token.txt
+/src/Bug-Local-Module-Where.agda
+/src/html/

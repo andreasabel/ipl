@@ -1,4 +1,4 @@
-# Makefile for lf-definability
+# Makefile for IPL
 # Author : Andreas Abel
 # Created: 2008-05-09, 2010-03-29, 2010-11-23, 2018-05-xx
 
@@ -49,6 +49,7 @@ stlcagda = \
 
 
 default : nbeSum.pdf
+deploy  : nbeSum.pdf
 
 pack : nbeSum.zip
 
