@@ -113,9 +113,9 @@ addHyp (A ∨ B)   j = orE (addHyp A j) (addHyp B j)
 
 module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
 
-  data Cover' (J : Cxt → Set) (Γ : Cxt) : Set where
-    returnC : (t : J Γ) → Cover' J Γ
-    caseC   : ∀{A} (t : Ne Γ A) (c : AddHyp Γ A (Cover' J)) → Cover' J Γ
+  data Cover' (i : Size) (J : Cxt → Set) (Γ : Cxt) : Set where
+    returnC : (t : J Γ) → Cover' i J Γ
+    caseC   : ∀{j : Size< i} {A} (t : Ne Γ A) (c : AddHyp Γ A (Cover' j J)) → Cover' i J Γ
 
 -- Left focusing (break a negative hypothesis A down into something positive)
 -- "spine"
@@ -124,7 +124,7 @@ mutual
 
   Ne = λ A Γ → Ne' RFoc Γ A
   Cover = Cover' λ Δ A → Ne (Comp A) Δ
-  Foc = λ Γ C → Cover (flip RFoc C) Γ
+  Foc   = λ Γ C → Cover ∞ (flip RFoc C) Γ
 
   -- LFoc' = λ Γ A C → LFoc Γ C A
 
@@ -191,15 +191,13 @@ mapAddHyp f falseE      = falseE
 mapAddHyp f (andE t)    = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types!
 mapAddHyp f (orE t u)   = orE (mapAddHyp f t) (mapAddHyp f u)
 
-{-# TERMINATING #-}
-mapCover :  ∀{P Q} (f : P →̇ Q) → Cover P →̇ Cover Q
+mapCover :  ∀{P Q} (f : P →̇ Q) {i} → Cover i P →̇ Cover i Q
 mapCover f (returnC t) = returnC (f t)
 mapCover f (caseC t c) = caseC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
 
 -- Cover monad
 
-{-# TERMINATING #-}
-joinCover : ∀{P} → Cover (Cover P) →̇ Cover P
+joinCover : ∀{i P} → Cover i (Cover ∞ P) →̇ Cover ∞ P
 joinCover (returnC t) = t
 joinCover (caseC t c) = caseC t (mapAddHyp joinCover c)
 
@@ -281,9 +279,9 @@ mutual
   monNe = monNe' monRFoc
 
   {-# TERMINATING #-}
-  monCover : ∀{P} (monP : Mon P) → Mon (Cover P)
-  monCover monP τ (returnC t) = returnC (monP τ t)
-  monCover monP τ (caseC t c) = caseC (monNe τ t) (monAddHyp (monCover monP) τ c)
+  monCover : ∀{i P} (monP : Mon P) → Mon (Cover i P)
+  monCover monP τ (returnC t)     = returnC (monP τ t)
+  monCover monP τ (caseC {j} t c) = caseC (monNe τ t) (monAddHyp (monCover {j} monP) τ c)
 
   monRFoc : ∀{A} → Mon (flip RFoc A)
   monRFoc τ (sw t)      = sw (monRInv τ t)
@@ -310,8 +308,7 @@ mapAddHyp' f falseE      = falseE
 mapAddHyp' f (andE t)    = andE (mapAddHyp' (λ τ → mapAddHyp' λ τ' → f (τ' • τ)) t) -- By induction on types!
 mapAddHyp' f (orE t u)   = orE (mapAddHyp' f t) (mapAddHyp' f u)
 
-{-# TERMINATING #-}
-mapCover' :  ∀{P Q Γ} (f : KFun P Q Γ) (c : Cover P Γ) → Cover Q Γ
+mapCover' :  ∀{P Q Γ} (f : KFun P Q Γ) {i} (c : Cover i P Γ) → Cover i Q Γ
 mapCover' f (returnC t) = returnC (f id≤ t)
 mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover should be sized!
 
@@ -325,7 +322,7 @@ mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f 
 ⟦ A ∧ B ⟧   Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
 ⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) (a : ⟦ A ⟧ Δ) → ⟦ B ⟧ Δ
 
-⟦ Comp A ⟧ = Cover ⟦ A ⟧  -- values to computations
+⟦ Comp A ⟧ = Cover ∞ ⟦ A ⟧  -- values to computations
 ⟦ Thunk A ⟧ = ⟦ A ⟧
 
 -- Monotonicity of semantics
@@ -379,7 +376,7 @@ mutual
 
 -- Negative propositions are comonadic
 
-paste : ∀ (A : Form -) → Cover ⟦ A ⟧ →̇ ⟦ A ⟧
+paste : ∀ (A : Form -) → Cover ∞ ⟦ A ⟧ →̇ ⟦ A ⟧
 paste True    _     = _
 paste (A ∧ B) c     = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
 paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
@@ -444,7 +441,7 @@ module CBV where
   return (A ∧ B) (a , b) = return A a , return B b
   return (A ⇒ B) v = v
 
-  run : ∀ A → C⟦ A ⟧ →̇ Cover V⟦ A ⟧
+  run : ∀ A → C⟦ A ⟧ →̇ Cover ∞ V⟦ A ⟧
   run (Atom P) c = c
   run True c = returnC c
   run False c = c
@@ -471,7 +468,7 @@ module CBV where
   lookup top     = proj₂
   lookup (pop x) = lookup x ∘ proj₁
 
-  impIntro : ∀ {A B Γ} (f : KFun (Cover ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
+  impIntro : ∀ {A B Γ} (f : KFun (Cover ∞ ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
   impIntro f τ a = f τ (returnC a)
 
   -- impElim : ∀ A B {Γ} → (f : C⟦ A ⇒ B ⟧ Γ) (a : C⟦ A ⟧ Γ) → C⟦ B ⟧ Γ
@@ -519,7 +516,7 @@ module CBV where
 
   -- Identity environment
 
-  ide : ∀ Γ → Cover G⟦ Γ ⟧ (Γ ⁺⁺)
+  ide : ∀ Γ → Cover ∞ G⟦ Γ ⟧ (Γ ⁺⁺)
   ide ε = returnC _
   ide (Γ ∙ A) = {!!}
     -- monG (weak id≤) (ide Γ) , {! reflectHyp (A ⁺) (λ τ a → a) !}

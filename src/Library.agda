@@ -5,6 +5,8 @@
 
 module Library where
 
+open import Size         public
+
 open import Data.Unit    public using (⊤)
 open import Data.Empty   public using (⊥; ⊥-elim)
 open import Data.Product public using (Σ; ∃; _×_; _,_; proj₁; proj₂; <_,_>; curry; uncurry) renaming (map to map-×)
