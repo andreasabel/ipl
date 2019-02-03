@@ -43,7 +43,7 @@ infixl 8 _∧_
 infixl 7 _∨_
 infixr 6 _⇒_
 
--- Generic hypotheses
+-- Generic hypotheses, taken from a set S.
 
 module _ (S : Set) where
 
@@ -62,7 +62,7 @@ module _ (S : Set) where
 Cxt = Cxt' (Form -)
 Hyp = Hyp' (Form -)
 
--- Positive atoms in hypotheses
+-- Positive atoms in hypotheses via switching.
 Atom- = λ P → Sw +- (Atom P)
 HypAtom = λ P → Hyp (Atom- P)
 
@@ -180,11 +180,11 @@ P →̇ Q = ∀{Γ} → P Γ → Q Γ
 
 mapAddHyp : ∀{P Q} (f : P →̇ Q) → ∀{A Γ} → AddHyp Γ A P → AddHyp Γ A Q
 mapAddHyp f (addAtom t) = addAtom (f t)
-mapAddHyp f (addNeg t) = addNeg (f t)
-mapAddHyp f (trueE t) = trueE (f t)
-mapAddHyp f falseE = falseE
-mapAddHyp f (andE t) = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types!
-mapAddHyp f (orE t u) = orE (mapAddHyp f t) (mapAddHyp f u)
+mapAddHyp f (addNeg t)  = addNeg (f t)
+mapAddHyp f (trueE t)   = trueE (f t)
+mapAddHyp f falseE      = falseE
+mapAddHyp f (andE t)    = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types!
+mapAddHyp f (orE t u)   = orE (mapAddHyp f t) (mapAddHyp f u)
 
 {-# TERMINATING #-}
 mapCover :  ∀{P Q} (f : P →̇ Q) → Cover P →̇ Cover Q
@@ -203,7 +203,7 @@ joinCover (caseC t c) = caseC t (mapAddHyp joinCover c)
 infix 3 _≤_
 
 data _≤_ : (Γ Δ : Cxt) → Set where
-  id≤ : ∀{Γ} → Γ ≤ Γ
+  id≤  : ∀{Γ} → Γ ≤ Γ
   weak : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ
   lift : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
 
@@ -213,14 +213,14 @@ postulate lift-id≤ : ∀{Γ A} → lift id≤ ≡ id≤ {Γ ∙ A}
 -- Category of thinnings
 
 _•_ : ∀{Γ Δ Φ} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) → Γ ≤ Φ
-id≤ • σ = σ
-weak τ • σ = weak (τ • σ)
-lift τ • id≤ = lift τ
+id≤    • σ      = σ
+weak τ • σ      = weak (τ • σ)
+lift τ • id≤    = lift τ
 lift τ • weak σ = weak (τ • σ)
 lift τ • lift σ = lift (τ • σ)
 
 •-id : ∀{Γ Δ} (τ : Γ ≤ Δ) → τ • id≤ ≡ τ
-•-id id≤ = refl
+•-id id≤      = refl
 •-id (weak τ) = cong weak (•-id τ)
 •-id (lift τ) = refl
 
@@ -263,11 +263,11 @@ monNe' monP τ (andE₂ t)  = andE₂ (monNe' monP τ t)
 
 monAddHyp : ∀{P} (monP : Mon P) → ∀{A} → Mon (λ Γ → AddHyp Γ A P)
 monAddHyp monP τ (addAtom t) = addAtom (monP (lift τ) t)
-monAddHyp monP τ (addNeg t) = addNeg (monP (lift τ) t)
-monAddHyp monP τ (trueE t) = trueE (monP τ t)
-monAddHyp monP τ falseE = falseE
-monAddHyp monP τ (andE t) = andE (monAddHyp (monAddHyp monP) τ t)
-monAddHyp monP τ (orE t u) = orE (monAddHyp monP τ t) (monAddHyp monP τ u)
+monAddHyp monP τ (addNeg t)  = addNeg (monP (lift τ) t)
+monAddHyp monP τ (trueE t)   = trueE (monP τ t)
+monAddHyp monP τ falseE      = falseE
+monAddHyp monP τ (andE t)    = andE (monAddHyp (monAddHyp monP) τ t)
+monAddHyp monP τ (orE t u)   = orE (monAddHyp monP τ t) (monAddHyp monP τ u)
 
 -- Monotonicity of derivations
 
@@ -281,29 +281,29 @@ mutual
   monCover monP τ (caseC t c) = caseC (monNe τ t) (monAddHyp (monCover monP) τ c)
 
   monRFoc : ∀{A} → Mon (flip RFoc A)
-  monRFoc τ (sw t) = sw (monRInv τ t)
-  monRFoc τ (hyp x) = hyp (monH τ x)
-  monRFoc τ trueI = trueI
+  monRFoc τ (sw t)      = sw (monRInv τ t)
+  monRFoc τ (hyp x)     = hyp (monH τ x)
+  monRFoc τ trueI       = trueI
   monRFoc τ (andI t t₁) = andI (monRFoc τ t) (monRFoc τ t₁)
-  monRFoc τ (orI₁ t) = orI₁ (monRFoc τ t)
-  monRFoc τ (orI₂ t) = orI₂ (monRFoc τ t)
+  monRFoc τ (orI₁ t)    = orI₁ (monRFoc τ t)
+  monRFoc τ (orI₂ t)    = orI₂ (monRFoc τ t)
 
   monRInv : ∀{A} → Mon (flip RInv A)
-  monRInv τ (sw t) = sw (monCover monRFoc τ t)
-  monRInv τ trueI = trueI
+  monRInv τ (sw t)      = sw (monCover monRFoc τ t)
+  monRInv τ trueI       = trueI
   monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
-  monRInv τ (impI t) = impI (monAddHyp monRInv τ t)
+  monRInv τ (impI t)    = impI (monAddHyp monRInv τ t)
 
 KFun : (P Q : Cxt → Set) (Γ : Cxt) → Set
 KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
 
 mapAddHyp' : ∀{P Q Γ} (f : KFun P Q Γ) → ∀{A} → AddHyp Γ A P → AddHyp Γ A Q
 mapAddHyp' f (addAtom t) = addAtom (f (weak id≤) t)
-mapAddHyp' f (addNeg t) = addNeg (f (weak id≤) t)
-mapAddHyp' f (trueE t) = trueE (f id≤ t)
-mapAddHyp' f falseE = falseE
-mapAddHyp' f (andE t) = andE (mapAddHyp' (λ τ → mapAddHyp' λ τ' → f (τ' • τ)) t) -- By induction on types!
-mapAddHyp' f (orE t u) = orE (mapAddHyp' f t) (mapAddHyp' f u)
+mapAddHyp' f (addNeg t)  = addNeg (f (weak id≤) t)
+mapAddHyp' f (trueE t)   = trueE (f id≤ t)
+mapAddHyp' f falseE      = falseE
+mapAddHyp' f (andE t)    = andE (mapAddHyp' (λ τ → mapAddHyp' λ τ' → f (τ' • τ)) t) -- By induction on types!
+mapAddHyp' f (orE t u)   = orE (mapAddHyp' f t) (mapAddHyp' f u)
 
 {-# TERMINATING #-}
 mapCover' :  ∀{P Q Γ} (f : KFun P Q Γ) (c : Cover P Γ) → Cover Q Γ
@@ -323,42 +323,21 @@ mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f 
 ⟦ Sw +- A ⟧ = Cover ⟦ A ⟧  -- values to computations
 ⟦ Sw -+ A ⟧ = ⟦ A ⟧
 
+-- Monotonicity of semantics
+
 mon⟦_⟧ : ∀{p} (A : Form p) → Mon ⟦ A ⟧
-mon⟦ True ⟧ τ _ = _
-mon⟦ A ∧ B ⟧ τ (a , b) = mon⟦ A ⟧ τ a , mon⟦ B ⟧ τ b
-mon⟦ Atom P ⟧ = monH
-mon⟦ False ⟧ τ ()
-mon⟦ A ∨ B ⟧ τ = map-⊎ (mon⟦ A ⟧ τ) (mon⟦ B ⟧ τ)
-mon⟦ A ⇒ B ⟧ τ f δ = f (δ • τ)
-mon⟦ Sw +- A ⟧ = monCover mon⟦ A ⟧
-mon⟦ Sw -+ A ⟧ = mon⟦ A ⟧
+mon⟦ True    ⟧ τ _       = _
+mon⟦ A ∧ B   ⟧ τ (a , b) = mon⟦ A ⟧ τ a , mon⟦ B ⟧ τ b
+mon⟦ Atom P  ⟧           = monH
+mon⟦ False   ⟧ τ ()
+mon⟦ A ∨ B   ⟧ τ         = map-⊎ (mon⟦ A ⟧ τ) (mon⟦ B ⟧ τ)
+mon⟦ A ⇒ B   ⟧ τ f δ     = f (δ • τ)
+mon⟦ Sw +- A ⟧           = monCover mon⟦ A ⟧
+mon⟦ Sw -+ A ⟧           = mon⟦ A ⟧
 
--- Nf : ∀{p} (A : Form p) (Γ : Cxt) → Set
--- Nf { - } A Γ = RInv Γ A
--- Nf { + } A Γ = RFoc Γ A
-
--- trueNf : ∀{p Γ} → Nf (True {p}) Γ
--- trueNf { + } = trueI
--- trueNf { - } = trueI
-
--- -- NOT NEEDED:
--- pasteNf : ∀ {A : Form +} {Γ} → Cover Γ (Nf A) → Nf A Γ
--- pasteNf (returnC t) = t
--- pasteNf (caseC t c) = {!!}
+-- Reflection and reification.
 
 mutual
-  -- reify : ∀{p} (A : Form p) {Γ} → ⟦ A ⟧ Γ → Nf A Γ
-  -- reify { + } True _ = trueI
-  -- reify { - } True _ = trueI
-  -- reify { + } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  -- reify { - } (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-  -- reify (Atom P) x = hyp x
-  -- reify False ()
-  -- reify (A ∨ B) (inj₁ a) = orI₁ (reify A a)
-  -- reify (A ∨ B) (inj₂ b) = orI₂ (reify B b)
-  -- reify (A ⇒ B) f = impI (reflectHyp A λ τ a → reify B (f τ a))
-  -- reify (Sw +- A) c = sw (mapCover (reify A) c)
-  -- reify (Sw -+ A) a = sw (reify A a)
 
   reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv Γ A
   reify- True _ = trueI
@@ -409,12 +388,6 @@ paste True _ = _
 paste (A ∧ B) c = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
 paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
 paste (Sw +- A) = joinCover
-
--- impIntro : ∀ {A B Γ} (f : KFun (Cover ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
--- impIntro f τ a = f τ (returnC a)
-
--- impElim : ∀ B {A Γ} → (f : ⟦ A ⇒ B ⟧ Γ) (c : Cover ⟦ A ⟧ Γ) → ⟦ B ⟧ Γ
--- impElim B f = paste B ∘ mapCover' f
 
 data IPL : Set where
   Atom : (P : Atoms) → IPL
