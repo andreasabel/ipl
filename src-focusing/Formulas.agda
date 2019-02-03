@@ -16,11 +16,11 @@ postulate Atoms : Set
 data Pol : Set where
   + - : Pol
 
--- Opposite polarities
+-- -- Opposite polarities
 
-data Op : (p q : Pol) → Set where
-  +- : Op + -
-  -+ : Op - +
+-- data Op : (p q : Pol) → Set where
+--   +- : Op + -
+--   -+ : Op - +
 
 -- Atoms : Pol → Set
 -- Atoms + = PosAt
@@ -29,7 +29,7 @@ data Op : (p q : Pol) → Set where
 data Form : Pol → Set where
   -- Atom : ∀{p} → Atoms p → Form p
   True : ∀{p} → Form p
-  _∧_  : ∀{p} (A B : Form p) → Form p
+  _∧_  : ∀{p} (A B : Form p) → Form p   -- +: tensor (strict tuple), -: record types (lazy tuple)
   -- only positive
   Atom : (P : Atoms) → Form +
   False : Form +
@@ -37,7 +37,10 @@ data Form : Pol → Set where
   -- only negative
   _⇒_  : (A : Form +) (B : Form -) → Form -
   -- embedding (switching)
-  Sw   : ∀{p q} (op : Op p q) (A : Form p) → Form q
+  Comp  : (A : Form +) → Form -   -- The F of CBPV.
+  Thunk : (A : Form -) → Form +   -- The U of CBPV.
+
+  -- Sw   : ∀{p q} (op : Op p q) (A : Form p) → Form q
 
 infixl 8 _∧_
 infixl 7 _∨_
@@ -57,13 +60,15 @@ module _ (S : Set) where
 
   infixl 4 _∙_
 
--- Contexts only contain negative formulas
+-- Contexts only contain negative formulas.
+-- This is because we eagerly split positive ones.
+-- In CBPV, hypotheses are positive (values).
 
 Cxt = Cxt' (Form -)
 Hyp = Hyp' (Form -)
 
 -- Positive atoms in hypotheses via switching.
-Atom- = λ P → Sw +- (Atom P)
+Atom- = λ P → Comp (Atom P)
 HypAtom = λ P → Hyp (Atom- P)
 
 -- Non-invertible left rules:
@@ -90,7 +95,7 @@ mutual
   data AddHyp' (Γ : Cxt) (J : Cxt → Set) : (A : Form +) → Set where
 
     addAtom : ∀{P} (t : J (Γ ∙ Atom- P)) → AddHyp' Γ J (Atom P)
-    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp' Γ J (Sw -+ A)
+    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp' Γ J (Thunk A)
     trueE   : (t : J Γ) → AddHyp' Γ J True
 
     falseE  : AddHyp' Γ J False
@@ -99,7 +104,7 @@ mutual
 
 addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp' Γ J A
 addHyp (Atom P)  j = addAtom j
-addHyp (Sw -+ A) j = addNeg j
+addHyp (Thunk A) j = addNeg j
 addHyp True      j = trueE j
 addHyp False     j = falseE
 addHyp (A ∧ B)   j = andE (addHyp A (addHyp B j))
@@ -118,14 +123,14 @@ module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
 mutual
 
   Ne = λ A Γ → Ne' RFoc Γ A
-  Cover = Cover' λ Δ A → Ne (Sw +- A) Δ
+  Cover = Cover' λ Δ A → Ne (Comp A) Δ
   Foc = λ Γ C → Cover (flip RFoc C) Γ
 
   -- LFoc' = λ Γ A C → LFoc Γ C A
 
   -- data LFoc (Γ : Cxt) (C : Form +) : (A : Form -) → Set where
   --   -- Left focusing ends with new hypothesis
-  --   swE : ∀{A} → LFoc Γ A (Sw +- A)
+  --   swE : ∀{A} → LFoc Γ A (Comp A)
   --   -- Choice
   --   andE₁ : ∀{B A} (t : LFoc Γ C A) → LFoc Γ C (A ∧ B)
   --   andE₂ : ∀{A B} (t : LFoc Γ C B) → LFoc Γ C (A ∧ B)
@@ -139,7 +144,7 @@ mutual
 
   data RFoc (Γ : Cxt) : (A : Form +) → Set where
     -- Right focusing stops at a negative formulas
-    sw    : ∀{A} (t : RInv Γ A) → RFoc Γ (Sw -+ A)
+    sw    : ∀{A} (t : RInv Γ A) → RFoc Γ (Thunk A)
     -- Success:
     hyp  : ∀{P} (x : HypAtom P Γ) → RFoc Γ (Atom P)
     trueI : RFoc Γ True
@@ -153,7 +158,7 @@ mutual
 
 --   data Foc (Γ : Cxt) (C : Form +) : Set where
 --     rFoc : (t : RFoc Γ C) → Foc Γ C
---     lFoc : ∀{A} (u : Ne' RFoc Γ (Sw +- A)) (t : AddHyp Γ A λ Γ' → Foc Γ' C) → Foc Γ C
+--     lFoc : ∀{A} (u : Ne' RFoc Γ (Comp A)) (t : AddHyp Γ A λ Γ' → Foc Γ' C) → Foc Γ C
 -- --    lFoc : ∀{A B} (x : Hyp A Γ) (e : LFoc' Γ A B) (t : AddHyp Γ B λ Γ' → Foc Γ' C) → Foc Γ C
 --       -- lFoc is unproductive if A is an atom.
 --       -- This could be fixed by having a separated store of proven atoms,
@@ -166,7 +171,7 @@ mutual
 
   data RInv (Γ : Cxt) : (A : Form -) → Set where
     -- Right inversion ends at a positive formula
-    sw  : ∀{A} (t : Foc Γ A) → RInv Γ (Sw +- A)
+    sw  : ∀{A} (t : Foc Γ A) → RInv Γ (Comp A)
     -- Goal splitting
     trueI : RInv Γ True
     andI  : ∀{A B} (t : RInv Γ A) (u : RInv Γ B) → RInv Γ (A ∧ B)
@@ -320,8 +325,8 @@ mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f 
 ⟦ A ∧ B ⟧   Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
 ⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) (a : ⟦ A ⟧ Δ) → ⟦ B ⟧ Δ
 
-⟦ Sw +- A ⟧ = Cover ⟦ A ⟧  -- values to computations
-⟦ Sw -+ A ⟧ = ⟦ A ⟧
+⟦ Comp A ⟧ = Cover ⟦ A ⟧  -- values to computations
+⟦ Thunk A ⟧ = ⟦ A ⟧
 
 -- Monotonicity of semantics
 
@@ -332,8 +337,8 @@ mon⟦ Atom P  ⟧           = monH
 mon⟦ False   ⟧ τ ()
 mon⟦ A ∨ B   ⟧ τ         = map-⊎ (mon⟦ A ⟧ τ) (mon⟦ B ⟧ τ)
 mon⟦ A ⇒ B   ⟧ τ f δ     = f (δ • τ)
-mon⟦ Sw +- A ⟧           = monCover mon⟦ A ⟧
-mon⟦ Sw -+ A ⟧           = mon⟦ A ⟧
+mon⟦ Comp A ⟧           = monCover mon⟦ A ⟧
+mon⟦ Thunk A ⟧           = mon⟦ A ⟧
 
 -- Reflection and reification.
 
@@ -343,7 +348,7 @@ mutual
   reify- True _ = trueI
   reify- (A ∧ B) (a , b) = andI (reify- A a) (reify- B b)
   reify- (A ⇒ B) f = impI (reflectHyp A λ τ a → reify- B (f τ a))
-  reify- (Sw +- A) c = sw (mapCover (reify+ A) c)
+  reify- (Comp A) c = sw (mapCover (reify+ A) c)
 
   reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc Γ A
   reify+ True _ = trueI
@@ -352,7 +357,7 @@ mutual
   reify+ False ()
   reify+ (A ∨ B) (inj₁ a) = orI₁ (reify+ A a)
   reify+ (A ∨ B) (inj₂ b) = orI₂ (reify+ B b)
-  reify+ (Sw -+ A) a = sw (reify- A a)
+  reify+ (Thunk A) a = sw (reify- A a)
 
   reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J
   reflectHyp True      k = trueE (k id≤ _)
@@ -362,7 +367,7 @@ mutual
   reflectHyp False     k = falseE
   reflectHyp (A ∨ B)   k = orE (reflectHyp A (λ τ a → k τ (inj₁ a)))
                                (reflectHyp B (λ τ b → k τ (inj₂ b)))
-  reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
+  reflectHyp (Thunk A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
 
   -- Since we only have negative hypotheses, we only need to reflect these
 
@@ -370,45 +375,38 @@ mutual
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify+ A a))  -- need monNe
-  reflect (Sw +- A) t = caseC t (reflectHyp A λ τ a → returnC a)
-
-    -- where
-    -- reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J -- (λ Γ' → Cover Γ' ⟦ A ⟧)
-    -- reflectHyp True       k = trueE (k id≤ _)
-    -- reflectHyp (A₁ ∧ A₂)  k = andE {!reflectHyp A₁!}  -- need CPS version of reflectHyp
-    -- reflectHyp (Atom P)   k = addAtom (k (weak id≤) top)
-    -- reflectHyp False      k = falseE
-    -- reflectHyp (A ∨ B)  k = orE (reflectHyp A (λ τ a → k τ (inj₁ a))) {!!}  -- need monotonicity of AddHyp / Cover
-    -- reflectHyp (Sw -+ A) k = addNeg (k (weak id≤) (reflect A (hyp top)))
+  reflect (Comp A) t = caseC t (reflectHyp A λ τ a → returnC a)
 
 -- Negative propositions are comonadic
 
 paste : ∀ (A : Form -) → Cover ⟦ A ⟧ →̇ ⟦ A ⟧
-paste True _ = _
-paste (A ∧ B) c = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
+paste True    _     = _
+paste (A ∧ B) c     = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
 paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
-paste (Sw +- A) = joinCover
+paste (Comp A)      = joinCover
+
+-- Intuitionistic propositional logic
 
 data IPL : Set where
-  Atom : (P : Atoms) → IPL
-  True False : IPL
+  Atom        : (P : Atoms) → IPL
+  True False  : IPL
   _∨_ _∧_ _⇒_ : (A B : IPL) → IPL
 
 mutual
 
   _⁺ : IPL → Form +
-  Atom P ⁺ = Atom P
-  True ⁺ = True
-  False ⁺ = False
+  Atom P ⁺  = Atom P
+  True ⁺    = True
+  False ⁺   = False
   (A ∨ B) ⁺ = A ⁺ ∨ B ⁺
   (A ∧ B) ⁺ = A ⁺ ∧ B ⁺
-  (A ⇒ B) ⁺ = Sw -+ (A ⁺ ⇒ B ⁻)
+  (A ⇒ B) ⁺ = Thunk (A ⁺ ⇒ B ⁻)
 
   _⁻ : IPL → Form -
-  Atom P ⁻ = Atom- P
-  True ⁻ = True
-  False ⁻ = Sw +- False
-  (A ∨ B) ⁻ = Sw +- (A ⁺ ∨ B ⁺)
+  Atom P ⁻  = Atom- P
+  True ⁻    = True
+  False ⁻   = Comp False
+  (A ∨ B) ⁻ = Comp (A ⁺ ∨ B ⁺)
   (A ∧ B) ⁻ = A ⁻ ∧ B ⁻
   (A ⇒ B) ⁻ = A ⁺ ⇒ B ⁻
 
