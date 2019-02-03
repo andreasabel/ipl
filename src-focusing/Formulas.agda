@@ -7,7 +7,11 @@ open import Library
 -- parametrized by positive and negative atoms
 -- module Formulas (PosAt NegAt : Set) where
 
-module Formulas (Atoms : Set) where
+-- module Formulas (Atoms : Set) where
+
+postulate Atoms : Set
+
+-- Polarity + (positive formulas) are those whose introduction requires
 
 data Pol : Set where
   + - : Pol
