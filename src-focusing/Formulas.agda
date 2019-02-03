@@ -73,11 +73,11 @@ HypAtom = λ P → Hyp (Atom- P)
 
 -- Non-invertible left rules:
 
-module _ (Nf : (Γ : Cxt) (A : Form +) → Set) where
+module _ (Nf : (A : Form +) (Γ : Cxt) → Set) where
 
   data Ne' (C : Form -) (Γ : Cxt) : Set where
     hyp    : ∀    (x : Hyp C Γ) → Ne' C Γ
-    impE   : ∀{A} (t : Ne' (A ⇒ C) Γ) (u : Nf Γ A) → Ne' C Γ
+    impE   : ∀{A} (t : Ne' (A ⇒ C) Γ) (u : Nf A Γ) → Ne' C Γ
     andE₁  : ∀{D} (t : Ne' (C ∧ D) Γ) → Ne' C Γ
     andE₂  : ∀{D} (t : Ne' (D ∧ C) Γ) → Ne' C Γ
 
@@ -111,11 +111,11 @@ addHyp (A ∧ B)   j = andE (addHyp A (addHyp B j))
 addHyp (A ∨ B)   j = orE (addHyp A j) (addHyp B j)
 
 
-module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
+module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
 
   data Cover' (i : Size) (J : Cxt → Set) (Γ : Cxt) : Set where
     returnC : (t : J Γ) → Cover' i J Γ
-    caseC   : ∀{j : Size< i} {A} (t : Ne Γ A) (c : AddHyp Γ A (Cover' j J)) → Cover' i J Γ
+    caseC   : ∀{j : Size< i} {A} (t : Ne A Γ) (c : AddHyp Γ A (Cover' j J)) → Cover' i J Γ
 
 -- Left focusing (break a negative hypothesis A down into something positive)
 -- "spine"
@@ -123,59 +123,37 @@ module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
 mutual
 
   Ne    = Ne' RFoc
-  Cover = Cover' λ Δ A → Ne (Comp A) Δ
-  Foc   = λ Γ C → Cover ∞ (flip RFoc C) Γ
-
-  -- LFoc' = λ Γ A C → LFoc Γ C A
-
-  -- data LFoc (Γ : Cxt) (C : Form +) : (A : Form -) → Set where
-  --   -- Left focusing ends with new hypothesis
-  --   swE : ∀{A} → LFoc Γ A (Comp A)
-  --   -- Choice
-  --   andE₁ : ∀{B A} (t : LFoc Γ C A) → LFoc Γ C (A ∧ B)
-  --   andE₂ : ∀{A B} (t : LFoc Γ C B) → LFoc Γ C (A ∧ B)
-  --   impE  : ∀{A B} (u : RFoc Γ A) (t : LFoc Γ C B) → LFoc Γ C (A ⇒ B)
-
+  Cover = Cover' λ A → Ne (Comp A)
+  Foc   = λ C → Cover ∞ (RFoc C)
 
   -- Non-invertible right rules:
 
   -- Right focusing (proof of a positive goal by decisions)
   -- "normal"
 
-  data RFoc (Γ : Cxt) : (A : Form +) → Set where
+  data RFoc : (A : Form +) (Γ : Cxt) → Set where
     -- Right focusing stops at a negative formulas
-    sw    : ∀{A} (t : RInv Γ A) → RFoc Γ (Thunk A)
+    sw    : ∀{Γ A} (t : RInv A Γ) → RFoc (Thunk A) Γ
     -- Success:
-    hyp  : ∀{P} (x : HypAtom P Γ) → RFoc Γ (Atom P)
-    trueI : RFoc Γ True
+    hyp   : ∀{Γ P} (x : HypAtom P Γ) → RFoc (Atom P) Γ
+    trueI : ∀{Γ} → RFoc True Γ
     -- Choices:
-    andI  : ∀{A B} (t : RFoc Γ A) (u : RFoc Γ B) → RFoc Γ (A ∧ B)
-    orI₁  : ∀{B A} (t : RFoc Γ A) → RFoc Γ (A ∨ B)
-    orI₂  : ∀{A B} (u : RFoc Γ B) → RFoc Γ (A ∨ B)
-
-  -- Focusing proof: after possibly some rounds of left focusing
-  -- eventually right focusing
-
---   data Foc (Γ : Cxt) (C : Form +) : Set where
---     rFoc : (t : RFoc Γ C) → Foc Γ C
---     lFoc : ∀{A} (u : Ne' RFoc Γ (Comp A)) (t : AddHyp Γ A λ Γ' → Foc Γ' C) → Foc Γ C
--- --    lFoc : ∀{A B} (x : Hyp A Γ) (e : LFoc' Γ A B) (t : AddHyp Γ B λ Γ' → Foc Γ' C) → Foc Γ C
---       -- lFoc is unproductive if A is an atom.
---       -- This could be fixed by having a separated store of proven atoms,
---       -- which can only be used in RFoc
+    andI  : ∀{Γ A B} (t : RFoc A Γ) (u : RFoc B Γ) → RFoc (A ∧ B) Γ
+    orI₁  : ∀{Γ B A} (t : RFoc A Γ) → RFoc (A ∨ B) Γ
+    orI₂  : ∀{Γ A B} (u : RFoc B Γ) → RFoc (A ∨ B) Γ
 
   -- Invertible right rules:
 
   -- Right inversion: break a goal into subgoals
   -- "eta"
 
-  data RInv (Γ : Cxt) : (A : Form -) → Set where
+  data RInv : (A : Form -) (Γ : Cxt) → Set where
     -- Right inversion ends at a positive formula
-    sw  : ∀{A} (t : Foc Γ A) → RInv Γ (Comp A)
+    sw  : ∀{Γ A} (t : Foc A Γ) → RInv (Comp A) Γ
     -- Goal splitting
-    trueI : RInv Γ True
-    andI  : ∀{A B} (t : RInv Γ A) (u : RInv Γ B) → RInv Γ (A ∧ B)
-    impI  : ∀{A B} (t : AddHyp Γ A (λ Γ' → RInv Γ' B)) → RInv Γ (A ⇒ B)
+    trueI : ∀{Γ} → RInv True Γ
+    andI  : ∀{Γ A B} (t : RInv A Γ) (u : RInv B Γ) → RInv (A ∧ B) Γ
+    impI  : ∀{Γ A B} (t : AddHyp Γ A (RInv B)) → RInv (A ⇒ B) Γ
 
 
 -- Pointwise mapping
@@ -256,7 +234,7 @@ monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 
 monNe' : ∀{P : Form + → Cxt → Set}
   (monP : ∀{A} → Mon (P A)) →
-  ∀{A} → Mon (Ne' (flip P) A)
+  ∀{A} → Mon (Ne' P A)
 monNe' monP τ (hyp x)    = hyp (monH τ x)
 monNe' monP τ (impE t u) = impE (monNe' monP τ t) (monP τ u)
 monNe' monP τ (andE₁ t)  = andE₁ (monNe' monP τ t)
@@ -283,7 +261,7 @@ mutual
   monCover monP τ (returnC t)     = returnC (monP τ t)
   monCover monP τ (caseC {j} t c) = caseC (monNe τ t) (monAddHyp (monCover {j} monP) τ c)
 
-  monRFoc : ∀{A} → Mon (flip RFoc A)
+  monRFoc : ∀{A} → Mon (RFoc A)
   monRFoc τ (sw t)      = sw (monRInv τ t)
   monRFoc τ (hyp x)     = hyp (monH τ x)
   monRFoc τ trueI       = trueI
@@ -291,7 +269,7 @@ mutual
   monRFoc τ (orI₁ t)    = orI₁ (monRFoc τ t)
   monRFoc τ (orI₂ t)    = orI₂ (monRFoc τ t)
 
-  monRInv : ∀{A} → Mon (flip RInv A)
+  monRInv : ∀{A} → Mon (RInv A)
   monRInv τ (sw t)      = sw (monCover monRFoc τ t)
   monRInv τ trueI       = trueI
   monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
@@ -341,13 +319,13 @@ mon⟦ Thunk A ⟧           = mon⟦ A ⟧
 
 mutual
 
-  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv Γ A
+  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv A Γ
   reify- True _ = trueI
   reify- (A ∧ B) (a , b) = andI (reify- A a) (reify- B b)
   reify- (A ⇒ B) f = impI (reflectHyp A λ τ a → reify- B (f τ a))
   reify- (Comp A) c = sw (mapCover (reify+ A) c)
 
-  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc Γ A
+  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc A Γ
   reify+ True _ = trueI
   reify+ (A ∧ B) (a , b) = andI (reify+ A a) (reify+ B b)
   reify+ (Atom P) x = hyp x
