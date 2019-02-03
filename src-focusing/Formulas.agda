@@ -68,18 +68,18 @@ Cxt = Cxt' (Form -)
 Hyp = Hyp' (Form -)
 
 -- Positive atoms in hypotheses via switching.
-Atom- = λ P → Comp (Atom P)
+Atom-   = λ P → Comp (Atom P)
 HypAtom = λ P → Hyp (Atom- P)
 
 -- Non-invertible left rules:
 
 module _ (Nf : (Γ : Cxt) (A : Form +) → Set) where
 
-  data Ne'  (Γ : Cxt) (A : Form -) : Set where
-    hyp    : ∀    (x : Hyp A Γ) → Ne' Γ A
-    impE   : ∀{B} (t : Ne' Γ (B ⇒ A)) (u : Nf Γ B) → Ne' Γ A
-    andE₁  : ∀{B} (t : Ne' Γ (A ∧ B)) → Ne' Γ A
-    andE₂  : ∀{B} (t : Ne' Γ (B ∧ A)) → Ne' Γ A
+  data Ne' (C : Form -) (Γ : Cxt) : Set where
+    hyp    : ∀    (x : Hyp C Γ) → Ne' C Γ
+    impE   : ∀{A} (t : Ne' (A ⇒ C) Γ) (u : Nf Γ A) → Ne' C Γ
+    andE₁  : ∀{D} (t : Ne' (C ∧ D) Γ) → Ne' C Γ
+    andE₂  : ∀{D} (t : Ne' (D ∧ C) Γ) → Ne' C Γ
 
 -- Invertible left rules:
 
@@ -122,7 +122,7 @@ module _ (Ne : (Γ : Cxt) (A : Form +) → Set) where
 
 mutual
 
-  Ne = λ A Γ → Ne' RFoc Γ A
+  Ne    = Ne' RFoc
   Cover = Cover' λ Δ A → Ne (Comp A) Δ
   Foc   = λ Γ C → Cover ∞ (flip RFoc C) Γ
 
@@ -256,7 +256,7 @@ monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 
 monNe' : ∀{P : Form + → Cxt → Set}
   (monP : ∀{A} → Mon (P A)) →
-  ∀{A} → Mon (flip (Ne' (flip P)) A)
+  ∀{A} → Mon (Ne' (flip P) A)
 monNe' monP τ (hyp x)    = hyp (monH τ x)
 monNe' monP τ (impE t u) = impE (monNe' monP τ t) (monP τ u)
 monNe' monP τ (andE₁ t)  = andE₁ (monNe' monP τ t)
