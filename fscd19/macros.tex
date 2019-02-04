@@ -99,17 +99,6 @@
 \newcommand{\Teq}[4]{#1#2 = #3#4 \in \TYPE}
 %\newcommand{\Teq}[4]{\Tef{#1}{#2} = \Tef{#3}{#4}}
 
-% normalization by evaluation
-\newcommand{\twhnf}{\mathsf{whnf}}
-\newcommand{\tnf}{\mathsf{nf}}
-\newcommand{\nfraw}{\mathsf{nf}}
-\newcommand{\nf}[3]{\nfraw(#1 \!\der\! #2 \!:\! #3)}
-\newcommand{\nbe}[2]{\mathsf{nbe}_{#1}^{#2}}
-\newcommand{\Nbe}[1]{\mathsf{Nbe}_{#1}}
-\newcommand{\rhog}{\rho_\Gamma}
-\newcommand{\rhogu}{\rho_{\cext\Gamma U}}
-\newcommand{\rhogup}{\rho_{\cext\Gamma {U'}}}
-
 % latin etc. abbrev
 \newcommand{\abbrev}[1]{#1} % alternative: \emph{#1}
 \newcommand{\cf}{\abbrev{cf.}\ }
@@ -240,6 +229,44 @@
 \newcommand{\contr}{\mapsto}
 \newcommand{\contract}[2]{\tmcol{#1} \contr \tmcol{#2}}
 
+% FSCD 19
+\newcommand{\tmc}{\mathsf}
+\newcommand{\tmcol}{\mathsf}
+\newcommand{\cext}[2]{#1.#2}
+\newcommand{\cempty}{\varepsilon}
+\newcommand{\sublist}{\subseteq}
+\newcommand{\tdone}{\varepsilon}
+\newcommand{\op}{^{\mathsf{op}}}
+\newcommand{\treindex}{\mathsf{reindex}}
+% \newcommand{\bone}{\mathds{1}}
+% \newcommand{\bzero}{\mathds{O}}
+\newcommand{\bone}{\ensuremath{\mbox{\textbf{1}}}}
+\newcommand{\bzero}{\ensuremath{\mbox{\textbf{0}}}}
+\newcommand{\from}{\dashv}
+\newcommand{\tvar}{\mathsf{var}}
+\newcommand{\tabs}{\mathsf{abs}}
+\newcommand{\tapp}{\mathsf{app}}
+\newcommand{\tunit}{\mathsf{unit}}
+\newcommand{\tpair}{\mathsf{pair}}
+\newcommand{\tprj}{\mathsf{prj}}
+\newcommand{\prj}[2]{\tprj_{#1}\;#2}
+\newcommand{\tinj}{\mathsf{inj}}
+\newcommand{\inj}[2]{\tinj_{#1}\;#2}
+\newcommand{\tabort}{\mathsf{abort}}
+\newcommand{\tren}{\mathsf{ren}}
+
+
+% normalization by evaluation
+\newcommand{\twhnf}{\mathsf{whnf}}
+\newcommand{\tnf}{\mathsf{nf}}
+\newcommand{\nfraw}{\mathsf{nf}}
+\newcommand{\nf}[3]{\nfraw(#1 \!\der\! #2 \!:\! #3)}
+\newcommand{\nbe}[2]{\mathsf{nbe}_{#1}^{#2}}
+\newcommand{\Nbe}[1]{\mathsf{Nbe}_{#1}}
+\newcommand{\rhog}{\rho_\Gamma}
+\newcommand{\rhogu}{\rho_{\cext\Gamma U}}
+\newcommand{\rhogup}{\rho_{\cext\Gamma {U'}}}
+
 % IPL
 \newcommand{\imp}{\Rightarrow}
 \newcommand{\ttop}{\mathsf{top}}
@@ -308,9 +335,9 @@
 \newcommand{\env}[1][]{\tenv_{#1}}
 
 % Sums
-\newcommand{\tinj}{\mathsf{inj}}
-\newcommand{\inj}[1]{\tinj_{#1}}
-\newcommand{\injP}[2]{\tinj_{#1}(#2)}
+% \newcommand{\tinj}{\mathsf{inj}}
+% \newcommand{\inj}[1]{\tinj_{#1}}
+% \newcommand{\injP}[2]{\tinj_{#1}(#2)}
 
 \newcommand{\tCover}{\mathsf{Cover}}
 \newcommand{\Cover}[1]{\tCover\,(#1)}
@@ -398,7 +425,7 @@
 \newcommand{\tcase}{\tmc{case}}
 \newcommand{\tfix}{\mathsf{fix}}
 
-\newcommand{\suc}[1]{\tmcol{\tsuc\,#1}}
+\newcommand{\suc}[1]{\tmcol{\tsuc\;#1}}
 \newcommand{\fix}[2][]{\tfix_{#1}\,#2\,}
 \newcommand{\case}[6]{\tcase^{#1,#2}_{#3,#4}\,#5\,#6}
 
@@ -670,9 +697,9 @@
 \newcommand{\Fin}{\mathsf{Fin}}
 \newcommand{\tfzero}{\mathsf{fzero}}
 \newcommand{\tfsuc}{\mathsf{fsuc}}
-\newcommand{\tabort}{\mathsf{abort}}
+%\newcommand{\tabort}{\mathsf{abort}}
 \newcommand{\abort}[1]{\tabort_{#1\,}}
-\newcommand{\tunit}{\langle\rangle}%{()}
+%\newcommand{\tunit}{\langle\rangle}%{()}
 \newcommand{\Natrec}{\mathsf{Natrec}}
 \newcommand{\tnatrec}{\mathsf{natrec}}
 \newcommand{\natrec}[3]{\tnatrec_{#1\,}#2\,#3\,}
@@ -902,7 +929,7 @@
 \newcommand{\Sort}{\mathsf{Sort}}
 \newcommand{\tkind}{\Box}
 \newcommand{\Base}{\mathsf{Base}}
-\newcommand{\Form}{\mathsf{Form}}
+%\newcommand{\Form}{\mathsf{Form}}
 \newcommand{\Ty}{\mathsf{Ty}}
 \newcommand{\Exp}{\mathsf{Exp}}
 \newcommand{\Ann}{\mathsf{Ann}}
@@ -1279,7 +1306,7 @@
 %\newcommand{\cempty}{\mathord{\triangledown}}
 %\newcommand{\cempty}{\mathord{\diamond}}
 %\newcommand{\cempty}{()}
-\newcommand{\cempty}{\emptyset}
+%\newcommand{\cempty}{\emptyset}
 \newcommand{\cxt}{\ \mathsf{cxt}}
 
 % calligraphic capital letters
@@ -1770,5 +1797,5 @@
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "nbeSum"
+%%% TeX-master: "fscd19"
 %%% End:

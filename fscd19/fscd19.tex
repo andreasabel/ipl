@@ -8,6 +8,9 @@
 %for enabling cleveref support, use "cleveref"
 %for enabling cleveref support, use "autoref"
 
+% \usepackage{dsfont} % black-board bold numbers, package doublestroke
+% LACKS: \mathds{0}
+
 % Disallowed packages:
 % - enumitem
 % - paralist
@@ -47,6 +50,8 @@
 
 
 %\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\input{macros}
 
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
@@ -164,6 +169,116 @@ Sattler.}%optional
 \section{Normalization by Evaluation for the Simply-Typed Lambda
   Calculus with Sums}
 \label{sec:lambda}
+
+In this section, we review the normalization by evaluation (NbE)
+argument for the simply-typed lambda calculus with weak sums, setting
+the stage for the later sections.
+%
+We work in a type-theoretic meta-language, with the basic judgement
+$t : T$ meaning that object $t$ is an inhabitant of type $T$.
+Meta-theoretic types can be thought of as sets, thus, the colon $:$
+replaces the standard notion of elementhood $\in$, and we are free to
+reuse $\in$ for other purposes.
+
+%\paradot{Contexts and indices}
+We adapt a categorical aka de Bruijn style for the abstract syntax of
+terms, which we conceive as intrinsically well-typed.  In de Bruijn
+style, a context $\Gamma$ is just a snoc list of simple types $A$,
+meaning we write context extension as $\cext \Gamma A$, and the empty
+context as $\cempty$.  Membership \fbox{$A \in \Gamma$} and sublist
+relations \fbox{$\Gamma \sublist \Delta$} are given inductively by the
+following rules:
+\begin{gather*}
+  \nru{\tzero}{}{A \in \cext \Gamma A}
+\qquad
+  \nru{\tsuc}{A \in \Gamma}{A \in \cext \Gamma B}
+\qquad
+  \nru{\tdone}{}{\cempty \sublist \cempty}
+\qquad
+  \nru{\tlift}
+    {\Gamma \sublist \Delta}
+    {\cext \Gamma A \sublist \cext \Delta A}
+\qquad
+  \nru{\tweak}
+    {\Gamma \sublist \Delta}
+    {\Gamma \sublist \cext \Delta A}
+\end{gather*}
+We consider the rules as introductions of the indexed types
+$\_{\in}\_$ and $\_{\sublist}\_$ and the rule names as constructors.
+For instance, $\suc \tzero : A \in \cext {\cext \Gamma A} B$ for any
+$\Gamma$, $A$, and $B$; and if we read $\tsuc^n\,\tzero$ as unary
+number $n$, then $x : A \in \Gamma$ is exactly the (de Bruijn) index
+of $A$ in $\Gamma$.
+
+We can define
+\fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\comp}\_ : \Gamma
+\sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
+by recursion, meaning that the (proof-relevant)
+sublist relation is reflexive and transitive.
+% The sublist relation is reflexive and transitive, the witnesses
+% \fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\comp}\_ : \Gamma
+% \sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
+% have easy recursive definitions.
+Thus, lists $\Gamma$ form a category
+$\Cxt$ with morphisms $\tau : \Gamma \sublist \Delta$, and the category laws
+hold propositionally, e.g., we have $\id \comp \tau \equiv \tau$ in
+propositional equality for all morphisms $\tau$.
+
+The category $\Cxt$ allows us to consider $A{\in}\_$ as a presheaf over
+$\Cxt\op$ for any $A$, witnessed by \fbox{$\treindex : \Gamma \sublist
+  \Delta \to A \in \Gamma \to A \in \Delta$}, which is the morphism
+part of functor from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
+set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
+
+Simple types shall be given by the grammar
+\fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \bone \mid S + T
+  \mid \bzero$}.
+Intrinsically well-typed lambda-terms, in abstract syntax,
+are just inhabitants $t$ of the type $A \dashv \Gamma$,
+inductively defined by the following rules.
+\begin{gather*}
+  \nru{\tvar}{A \in \Gamma}{A \dashv \Gamma}
+\qquad
+  \nru{\tabs}{B \from \cext \Gamma A}{A \To B \from \Gamma}
+\qquad
+  \nru{\tapp}
+    {A \To B \from \Gamma \qquad A \from \Gamma}
+    {B \from \Gamma}
+\\[2ex]
+  \nru{\tunit}{}{\bone \from \Gamma}
+\qquad
+  \nru{\tpair}
+    {A_1 \from \Gamma \qquad A_2 \from \Gamma}
+    {A_1 \times A_2 \from \Gamma}
+\qquad
+  \nru{\tprj_i}
+    {A_1 \times A_2 \from \Gamma}
+    {A_i \from \Gamma}
+\\[2ex]
+  \nru{\tinj_i}
+    {A_i \from \Gamma}
+    {A_1 + A_2 \from \Gamma}
+\qquad
+  \nru{\tcase}
+    {A_1 + A_2 \from \Gamma
+      \qquad C \from \cext \Gamma A_1
+      \qquad C \from \cext \Gamma A_2
+    }{C \from \Gamma}
+\qquad
+  \nru{\tabort}
+    {\bzero \from \Gamma}
+    {C \from \Gamma}
+\end{gather*}
+The skilled eye of the reader will immediately recognize the proof
+rules of intuitionistic propositional logic (IPL) under the
+Curry-Howard isomorphism.  Terms of type $A$ form a presheaf
+$A{\from}\_$ as witnessed by the standard weakening operation%
+\footnote{Here, $\tren$ is short for \emph{renaming}, but in a nameless
+calculus we should better speak of \emph{reindexing}, which could, a
+bit clumsily, also abbreviated to $\tren$.}
+\fbox{$\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta$}
+defined by recursion over $t : A \from \Gamma$.
+
 
 \section{Call-By-Push Value}
 \label{sec:cbpv}
