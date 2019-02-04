@@ -1,0 +1,181 @@
+
+\documentclass[a4paper,USenglish,cleveref, autoref]{lipics-v2019}
+%This is a template for producing LIPIcs articles.
+%See lipics-manual.pdf for further information.
+%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+%for section-numbered lemmas etc., use "numberwithinsect"
+%for enabling cleveref support, use "cleveref"
+%for enabling cleveref support, use "autoref"
+
+% Disallowed packages:
+% - enumitem
+% - paralist
+% - natbib
+% - wrapfig
+
+% Disallowed:
+% - conditional inclusion of content
+% - splitting over several files
+
+% LIPICS enumerations
+% - itemize
+% - enumerate 1.
+% - alphaenumerate (a)
+% - romanenumerate (i)
+% - bracketenumerate (1)
+
+% LIPICS environments
+% - lstlisting
+% - theorem
+% - lemma
+% - corollary
+% - proposition
+% - exercise
+% - definition
+% - example
+% - note and note*
+% - remark and remark*
+% - claim and claim*
+% - proof and claimproof
+
+% Features
+% - env: claim and claimproof inside proof
+
+% References to lemmata
+% - \cref and \autoref (includes name, like Corollary 3)
+
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{Normalization by Evaluation for Call-by-Push-Value and Focused Lambda-Calculus}
+
+\titlerunning{NbE for CBPV and Focusing}%optional, please use if title is longer than one line
+
+\author{Andreas Abel}
+  {Department of Computer Science and Engineering,
+    Chalmers and Gothenburg University,
+    Sweden \and
+    \url{www.cse.chalmers.se/~abela}
+  }
+  {andreas.abel@gu.se}
+  {https://orcid.org/0000-0003-0420-4492}
+  {VR Grant 2014-04864 \emph{Termination
+      Certificates for Dependently-Typed Programs and Proofs via
+      Refinement Types}
+  }
+% TODO mandatory, please use full name;
+% only 1 author per \author macro;
+% first two parameters are mandatory, other parameters can be empty.
+% Please provide at least the name of the affiliation and the country.
+% The full address is optional
+
+\author{Frederik Folkmar Ramcke}
+  {Department of Computer Science and Engineering,
+    Chalmers and Gothenburg University,
+    Sweden
+  }
+  {}%email
+  {}%orcid
+  {}%funding
+
+\authorrunning{A. Abel and F. F. Ramcke}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+\Copyright{Andreas Abel and Frederik F. Ramcke}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+\ccsdesc[100]{General and reference~General literature}
+\ccsdesc[100]{General and reference}%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+
+\keywords{Evaluation, Intuitionistc Propositional Logic,
+  Lambda-Calculus, Monad, Normalization,
+  Polarized Logic, Semantics}%TODO mandatory; please add comma-separated list of keywords
+
+\category{}%optional, e.g. invited paper
+
+\relatedversion{}%optional, e.g. full version hosted on arXiv, HAL, or other respository/website
+%\relatedversion{A full version of the paper is available at \url{...}.}
+
+\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+
+%\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+
+\acknowledgements{ The presentation of this NbE proof and its
+Agda formalization benefited greatly from discussions with Christian
+Sattler.}%optional
+
+%\nolinenumbers %uncomment to disable line numbering
+
+%\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EventEditors{Jakob Rehof and XXX}
+\EventNoEds{2}
+\EventLongTitle{Formal Structures for Computation and Deduction}
+\EventShortTitle{FSCD 2019}
+\EventAcronym{FSCD}
+\EventYear{2019}
+\EventDate{June 24--30, 2019}
+\EventLocation{Dortmund, Germany}
+\EventLogo{}
+\SeriesVolume{}
+\ArticleNo{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  We extend normalization by evaluation (NbE) to call-by-push-value
+  (CBPV) and focused intutitionistic propositional logic.
+  The developments have been partially formalized in Agda.
+\end{abstract}
+
+
+\section{Introduction}
+\label{sec:intro}
+
+
+\nocite{bergerSchwichtenberg:lics91}
+
+\nocite{jungTiuryn:tlca93}
+
+\nocite{altenkirchHofmannStreicher:ctcs95}
+
+\nocite{abel:habil}
+
+\nocite{danvy:popl96}
+
+\nocite{fioreSimpson:tlca99}
+
+\nocite{altenkirchDybjerHofmannScott:lics01}
+
+\nocite{balatDiCosmoFiore:popl04}
+
+\nocite{altenkirchUustalu:flops04}
+
+\nocite{barral:PhD}
+
+\nocite{scherer:popl17}
+
+
+\section{Normalization by Evaluation for the Simply-Typed Lambda
+  Calculus with Sums}
+\label{sec:lambda}
+
+\section{Call-By-Push Value}
+\label{sec:cbpv}
+
+\section{Focused Intuitionistic Propositional Logic}
+\label{sec:fipl}
+
+\section{Conclusion}
+\label{sec:concl}
+
+\bibliography{auto-fscd19}
+
+% \appendix
+
+\end{document}
