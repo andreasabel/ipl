@@ -254,6 +254,13 @@
 \newcommand{\inj}[2]{\tinj_{#1}\;#2}
 \newcommand{\tabort}{\mathsf{abort}}
 \newcommand{\tren}{\mathsf{ren}}
+\newcommand{\tm}[1]{\ulcorner#1\urcorner}
+\newcommand{\tnorm}{\mathsf{norm}}
+\newcommand{\norm}{\tnorm\;}
+\newcommand{\tNE}{\mathsf{NE}}
+\newcommand{\tNF}{\mathsf{NF}}
+\newcommand{\NE}{\tNE\;}
+\newcommand{\NF}{\tNF\;}
 
 
 % normalization by evaluation
@@ -316,7 +323,7 @@
 \newcommand{\todot}{\stackrel{\cdot}{\to}}
 
 %NbE
-\newcommand{\tnorm}{\mathsf{norm}}
+%\newcommand{\tnorm}{\mathsf{norm}}
 \newcommand{\tlookup}{\mathsf{lookup}}
 \newcommand{\teval}{\mathsf{eval}}
 \newcommand{\treify}{\mathsf{reify}}
@@ -327,7 +334,7 @@
 \newcommand{\evalG}{\eval[\Gamma]}
 \newcommand{\reify}[3][]{\treify_{#1}^{#2}\,#3}
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
-\newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
+%\newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
 \newcommand{\hattimes}{\mathrel{\hat{\times}}}
 \newcommand{\hatplus}{\mathrel{\hat{+}}}
@@ -533,7 +540,7 @@
 % \newcommand{\enf}[2]{\overline{\mathsf{eq}}(#1 \der #2)}
 % \newcommand{\ene}[2]{\underline{\mathsf{eq}}(#1 \der #2)}
 \newcommand{\sem}[3][]{\mathsf{sem}(#2)_{#1}^{#3}}
-\newcommand{\tm}[2]{\mathsf{tm}(#2)_{#1}}
+%\newcommand{\tm}[2]{\mathsf{tm}(#2)_{#1}}
 \newcommand{\enf}[2]{\overline{\mathsf{eq}}(#2)_{#1}}
 \newcommand{\ene}[2]{\underline{\mathsf{eq}}(#2)_{#1}}
 \newcommand{\sort}[1]{\mathsf{sort}(#1)}
@@ -966,7 +973,8 @@
 \newcommand{\Hyp}[2][]{\tHyp(#2)_{#1}}
 \newcommand{\tNe}{\mathsf{Ne}}
 %\newcommand{\Ne}[2]{\tNe\;#1\;#2}
-\newcommand{\Ne}[2][]{\tNe(#2)_{#1}}
+\newcommand{\Ne}[2]{\tNe\;#1\;#2}
+\newcommand{\NeP}[2]{\tNe\,(#1)\,#2}
 \newcommand{\NeExp}{\mathsf{NeExp}}
 \newcommand{\Null}{\emptyset}
 \newcommand{\Unit}{()}
@@ -974,7 +982,9 @@
 \newcommand{\DNe}{\mathsf{DNe}}
 \newcommand{\tNf}{\mathsf{Nf}}
 %\newcommand{\Nf}[2]{\tNf\;#1\;#2}
-\newcommand{\Nf}[2][]{\tNf(#2)_{#1}}
+\newcommand{\Nf}[2]{\tNf\;#1\;#2}
+\newcommand{\NfP}[2]{\tNf\,(#1)\,#2}
+\newcommand{\NfC}[2]{\tNf\;#1\;(#2)}
 \newcommand{\DNf}{\mathsf{DNf}}
 \newcommand{\Neut}{\mathsf{Neut}}
 \newcommand{\Norm}{\mathsf{Norm}}
@@ -1568,8 +1578,8 @@
 \renewcommand{\S}{\mathcal{S}}
 \newcommand{\T}{\mathcal{T}}
 \newcommand{\NEE}{\mathcal{N}\!\mathcal{E}}
-\newcommand{\NE}{\mathcal{N}\!\mathit{e}}
-\newcommand{\NF}{\mathcal{N}\!\mathit{f}}
+%\newcommand{\NE}{\mathcal{N}\!\mathit{e}}
+%\newcommand{\NF}{\mathcal{N}\!\mathit{f}}
 \newcommand{\ELIM}{\mathcal{E}\!\mathit{lim}}
 \newcommand{\TY}{\mathcal{T}\!\mathit{y}}
 \newcommand{\Index}{\mathsf{Index}}

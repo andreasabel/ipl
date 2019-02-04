@@ -171,10 +171,10 @@ Sattler.}%optional
 \label{sec:lambda}
 
 In this section, we review the normalization by evaluation (NbE)
-argument for the simply-typed lambda calculus with weak sums, setting
+argument for the simply-typed lambda calculus (STLC) with weak sums, setting
 the stage for the later sections.
 %
-We work in a type-theoretic meta-language, with the basic judgement
+We work in a constructive type-theoretic meta-language, with the basic judgement
 $t : T$ meaning that object $t$ is an inhabitant of type $T$.
 Meta-theoretic types can be thought of as sets, thus, the colon $:$
 replaces the standard notion of elementhood $\in$, and we are free to
@@ -229,15 +229,19 @@ $\Cxt\op$ for any $A$, witnessed by \fbox{$\treindex : \Gamma \sublist
   \Delta \to A \in \Gamma \to A \in \Delta$}, which is the morphism
 part of functor from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
+The associated naturality laws \fbox{$\treindex\,\tid\,x \equiv x$}
+and \fbox{$\treindex\,\tau_2\,(\treindex\,(\tau_1\,x)) \equiv
+\treindex\,(\tau_1 \comp \tau_2)\,x$} hold propositionally.
+
 
 Simple types shall be given by the grammar
 \fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \bone \mid S + T
   \mid \bzero$}.
 Intrinsically well-typed lambda-terms, in abstract syntax,
-are just inhabitants $t$ of the type $A \dashv \Gamma$,
+are just inhabitants $t$ of the type \fbox{$A \from \Gamma$},
 inductively defined by the following rules.
 \begin{gather*}
-  \nru{\tvar}{A \in \Gamma}{A \dashv \Gamma}
+  \nru{\tvar}{A \in \Gamma}{A \from \Gamma}
 \qquad
   \nru{\tabs}{B \from \cext \Gamma A}{A \To B \from \Gamma}
 \qquad
@@ -271,15 +275,117 @@ inductively defined by the following rules.
 \end{gather*}
 The skilled eye of the reader will immediately recognize the proof
 rules of intuitionistic propositional logic (IPL) under the
-Curry-Howard isomorphism.  Terms of type $A$ form a presheaf
+Curry-Howard isomorphism.  A term such as
+\(
+  \tabs\,(\tabs\,(\tpair\,
+    (\tvar\,(\tsuc\,\tzero))\,
+    (\tabs\,(\tapp\,(\tvar\,(\tsuc\,\tzero))\,(\tvar\,\tzero)))))
+\)
+could in concrete syntax be rendered as
+\(
+  \lambda x.\,\lambda y.\,(x,\,\lambda z.\,y\,z)
+  .
+\)
+We leave the exact connection to a printable
+syntax of the STLC to imagination of the reader,
+as we shall not be concerned with considering
+concrete terms in this article.
+
+Terms of type $A$ form a presheaf
 $A{\from}\_$ as witnessed by the standard weakening operation%
 \footnote{Here, $\tren$ is short for \emph{renaming}, but in a nameless
 calculus we should better speak of \emph{reindexing}, which could, a
 bit clumsily, also abbreviated to $\tren$.}
 \fbox{$\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta$}
-defined by recursion over $t : A \from \Gamma$.
+defined by recursion over $t : A \from \Gamma$,
+and naturality laws for $\tren$ analogously to $\treindex$.
 
 
+Normal forms%
+\footnote{
+There is also a stronger
+notion of normal form, requiring that two \emph{extensionally equal}
+lambda-terms, \ie, those that denote the
+same set-theoretical function, have the same normal form
+\cite{mitchell:foundations,altenkirchDybjerHofmannScott:lics01,scherer:popl17}.
+Such normal forms do not have a simple inductive definition, and we
+shall not consider them in this article.
+}
+are logically characterized as those fulfilling the
+\emph{subformula} property \cite{prawitz:natded,matthes:shortproofs}.
+Normal forms \fbox{$t : \Nf A \Gamma$} are mutually defined with
+\emph{neutral} normal forms \fbox{$t : \Ne A \Gamma$}.
+In the following inductive definition, we reuse the rule names from the
+term constructors.
+\begin{gather*}
+  \nru{\tvar}{A \in \Gamma}{\Ne A \Gamma}
+\qquad
+  \nru{\tabs}{\NfC B {\cext \Gamma A}}{\NfP {A \To B} \Gamma}
+\qquad
+  \nru{\tapp}
+    {\NeP {A \To B} \Gamma \qquad \Nf A \Gamma}
+    {\Ne B \Gamma}
+\qquad
+  \nru{\tne}{\Ne A \Gamma}{\Nf A \Gamma}
+\\[2ex]
+  \nru{\tunit}{}{\Nf \bone \Gamma}
+\qquad
+  \nru{\tpair}
+    {\Nf {A_1} \Gamma \qquad \Nf {A_2} \Gamma}
+    {\NfP {A_1 \times A_2} \Gamma}
+\qquad
+  \nru{\tprj_i}
+    {\NeP {A_1 \times A_2} \Gamma}
+    {\Ne {A_i} \Gamma}
+\\[2ex]
+  \nru{\tinj_i}
+    {\Nf {A_i} \Gamma}
+    {\NfP {A_1 + A_2} \Gamma}
+\quad
+  \nru{\tcase}
+    {\NeP {A_1 + A_2} \Gamma
+      \quad \NfC C {\cext \Gamma A_1}
+      \quad \NfC C {\cext \Gamma A_2}
+    }{\Nf C \Gamma}
+\quad
+  \nru{\tabort}
+    {\Ne \bzero \Gamma}
+    {\Nf C \Gamma}
+\end{gather*}
+The new rule $\tne$ embeds $\tNe$ into $\tNf$,
+\ie, allows us to forget neutrality.  Needless to say, $\tNe\,A$ and
+$\tNf\,A$ are presheaves, \ie, support reindexing with $\tren$ just as terms do.
+From a normal form we can extract the term via a overloaded function
+\fbox{$\tm\_ : \Nf A \Gamma \to A \from \Gamma$} and
+\fbox{$\tm\_ : \Ne A \Gamma \to A \from \Gamma$}
+that discards constructor $\tne$ but keeps all other constructors.
+This erasure function naturally commutes with reindexing, making it a
+natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
+resp.) and $A{\from}\_$.  We shall simply write, for instance,
+\fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
+
+\emph{Proof normalization} is concerned with finding a normal form
+$u : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
+\emph{term normalization} additionally requires that $\tm u \cong t$
+with respect to a equational theory $\cong$ on terms.  Defining
+\fbox{$\NF t = \exists u \of \tNf A\,\Gamma.\; \tm u \cong t$}
+% for $t : A \from \Gamma$,
+we aim to construct a normalization function
+\[
+  \tnorm : (t : A \from \Gamma) \to \NF t
+\]
+that gives us for each term $t$ a $\cong$-equal normal form $u$.
+%\footnote{
+A more accurate presentation of $\tNF$ would have been
+$\sum_{u : \tNf A\,\Gamma} (\tm u \cong t)$ to make absolutely clear that we
+want get hold of the witness $u$ of the existential statement;
+however, we shall only use constructive
+existentials\footnote{Constructive existence in
+  contrast to classical existence and
+  \emph{mere existence} from Homotopy Type Theory which
+  requires propositional truncation.}
+in this article and thus stick to the notation $\exists$.
+%}
 \section{Call-By-Push Value}
 \label{sec:cbpv}
 
