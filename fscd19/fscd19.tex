@@ -180,7 +180,8 @@ Meta-theoretic types can be thought of as sets, thus, the colon $:$
 replaces the standard notion of elementhood $\in$, and we are free to
 reuse $\in$ for other purposes.
 
-%\paradot{Contexts and indices}
+\subsection{Contexts and indices}
+
 We adapt a categorical aka de Bruijn style for the abstract syntax of
 terms, which we conceive as intrinsically well-typed.  In de Bruijn
 style, a context $\Gamma$ is just a snoc list of simple types $A$,
@@ -211,17 +212,17 @@ number $n$, then $x : A \in \Gamma$ is exactly the (de Bruijn) index
 of $A$ in $\Gamma$.
 
 We can define
-\fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\comp}\_ : \Gamma
+\fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\rcomp}\_ : \Gamma
 \sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
 by recursion, meaning that the (proof-relevant)
 sublist relation is reflexive and transitive.
 % The sublist relation is reflexive and transitive, the witnesses
-% \fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\comp}\_ : \Gamma
+% \fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\rcomp}\_ : \Gamma
 % \sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
 % have easy recursive definitions.
 Thus, lists $\Gamma$ form a category
 $\Cxt$ with morphisms $\tau : \Gamma \sublist \Delta$, and the category laws
-hold propositionally, e.g., we have $\id \comp \tau \equiv \tau$ in
+hold propositionally, e.g., we have $\id \rcomp \tau \equiv \tau$ in
 propositional equality for all morphisms $\tau$.
 
 The category $\Cxt$ allows us to consider $A{\in}\_$ as a presheaf over
@@ -231,12 +232,13 @@ part of functor from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
 The associated naturality laws \fbox{$\treindex\,\tid\,x \equiv x$}
 and \fbox{$\treindex\,\tau_2\,(\treindex\,(\tau_1\,x)) \equiv
-\treindex\,(\tau_1 \comp \tau_2)\,x$} hold propositionally.
+\treindex\,(\tau_1 \rcomp \tau_2)\,x$} hold propositionally.
 
+\subsection{STLC and its normal forms}
 
 Simple types shall be given by the grammar
-\fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \bone \mid S + T
-  \mid \bzero$}.
+\fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \tyone \mid S + T
+  \mid \tyzero$}.
 Intrinsically well-typed lambda-terms, in abstract syntax,
 are just inhabitants $t$ of the type \fbox{$A \from \Gamma$},
 inductively defined by the following rules.
@@ -249,7 +251,7 @@ inductively defined by the following rules.
     {A \To B \from \Gamma \qquad A \from \Gamma}
     {B \from \Gamma}
 \\[2ex]
-  \nru{\tunit}{}{\bone \from \Gamma}
+  \nru{\tunit}{}{\tyone \from \Gamma}
 \qquad
   \nru{\tpair}
     {A_1 \from \Gamma \qquad A_2 \from \Gamma}
@@ -270,7 +272,7 @@ inductively defined by the following rules.
     }{C \from \Gamma}
 \qquad
   \nru{\tabort}
-    {\bzero \from \Gamma}
+    {\tyzero \from \Gamma}
     {C \from \Gamma}
 \end{gather*}
 The skilled eye of the reader will immediately recognize the proof
@@ -300,9 +302,8 @@ bit clumsily, also abbreviated to $\tren$.}
 defined by recursion over $t : A \from \Gamma$,
 and naturality laws for $\tren$ analogously to $\treindex$.
 
-
 Normal forms%
-\footnote{
+\footnote{%
 There is also a stronger
 notion of normal form, requiring that two \emph{extensionally equal}
 lambda-terms, \ie, those that denote the
@@ -328,7 +329,7 @@ term constructors.
 \qquad
   \nru{\tne}{\Ne A \Gamma}{\Nf A \Gamma}
 \\[2ex]
-  \nru{\tunit}{}{\Nf \bone \Gamma}
+  \nru{\tunit}{}{\Nf \tyone \Gamma}
 \qquad
   \nru{\tpair}
     {\Nf {A_1} \Gamma \qquad \Nf {A_2} \Gamma}
@@ -349,7 +350,7 @@ term constructors.
     }{\Nf C \Gamma}
 \quad
   \nru{\tabort}
-    {\Ne \bzero \Gamma}
+    {\Ne \tyzero \Gamma}
     {\Nf C \Gamma}
 \end{gather*}
 The new rule $\tne$ embeds $\tNe$ into $\tNf$,
@@ -367,7 +368,62 @@ resp.) and $A{\from}\_$.  We shall simply write, for instance,
 \emph{Proof normalization} is concerned with finding a normal form
 $u : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
 \emph{term normalization} additionally requires that $\tm u \cong t$
-with respect to a equational theory $\cong$ on terms.  Defining
+with respect to a equational theory $\cong$ on terms.
+
+\subsection{Proof normalization}
+
+For didactical purposes, let us first focus on the simpler task of
+constructing a normalization function
+\fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
+that does not guarantee any relation between its input term $t$ and
+output normal form $u$.
+% \emph{Normalization by evaluation} (NbE) decomposes normalization as
+% \fbox{\(
+%   \norm[\Gamma] A (t : A \from \Gamma)
+%   = \down[\Gamma] A \dent t {\idenv\Gamma}
+% \)}
+% which is
+% \emph{evaluation}
+% \nofbox{$\dent \_ \_ : (t : A \from \Gamma) \to \Den \Gamma \Delta \to
+%   \Den A \Delta$}
+% in the identity environment \nofbox{$\idenv\Gamma : \Den \Gamma \Gamma$}
+% followed by
+% \emph{reification}
+% \nofbox{$\downG A : \Den A \Gamma \to \Nf A \Gamma$}.
+\emph{Normalization by evaluation} (NbE) decomposes normalization as
+\fbox{\(
+%  \norm[\Gamma] A (t : A \from \Gamma)
+  \tnorm\, (t : A \from \Gamma)
+  = \down A \dent t {\idenv\Gamma}
+\)}
+which is
+\emph{evaluation}
+\nofbox{$\dent \_ \_ : (t : A \from \Gamma) \to \den \Gamma \todot
+  \den A$}
+in the identity environment \nofbox{$\idenv\Gamma : \den \Gamma \Gamma$}
+followed by
+\emph{reification}
+\nofbox{$\down A : \den A \todot \tNf A$}.
+
+
+\clearpage
+
+\subsection{Term normalization}
+
+Defining%
+\footnote{%
+A more accurate presentation of $\tNF$ would be
+$\sum_{u : \tNf A\,\Gamma} (\tm u \cong t)$
+in order to make absolutely clear that we
+want get hold of the witness $u$ of the existential statement;
+however, we shall only use constructive
+existentials
+in this article and thus stick to the notation $\exists$.
+We mean \emph{constructive existence} in
+  contrast to classical existence and
+  \emph{mere existence} from Homotopy Type Theory which
+  requires propositional truncation.
+}
 \fbox{$\NF t = \exists u \of \tNf A\,\Gamma.\; \tm u \cong t$}
 % for $t : A \from \Gamma$,
 we aim to construct a normalization function
@@ -375,17 +431,7 @@ we aim to construct a normalization function
   \tnorm : (t : A \from \Gamma) \to \NF t
 \]
 that gives us for each term $t$ a $\cong$-equal normal form $u$.
-%\footnote{
-A more accurate presentation of $\tNF$ would have been
-$\sum_{u : \tNf A\,\Gamma} (\tm u \cong t)$ to make absolutely clear that we
-want get hold of the witness $u$ of the existential statement;
-however, we shall only use constructive
-existentials\footnote{Constructive existence in
-  contrast to classical existence and
-  \emph{mere existence} from Homotopy Type Theory which
-  requires propositional truncation.}
-in this article and thus stick to the notation $\exists$.
-%}
+
 \section{Call-By-Push Value}
 \label{sec:cbpv}
 

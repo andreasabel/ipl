@@ -230,6 +230,7 @@
 \newcommand{\contract}[2]{\tmcol{#1} \contr \tmcol{#2}}
 
 % FSCD 19
+\newcommand{\nofbox}[1]{#1}
 \newcommand{\tmc}{\mathsf}
 \newcommand{\tmcol}{\mathsf}
 \newcommand{\cext}[2]{#1.#2}
@@ -238,10 +239,13 @@
 \newcommand{\tdone}{\varepsilon}
 \newcommand{\op}{^{\mathsf{op}}}
 \newcommand{\treindex}{\mathsf{reindex}}
+\newcommand{\rcomp}{\fatsemi}%\bullet}
 % \newcommand{\bone}{\mathds{1}}
 % \newcommand{\bzero}{\mathds{O}}
 \newcommand{\bone}{\ensuremath{\mbox{\textbf{1}}}}
 \newcommand{\bzero}{\ensuremath{\mbox{\textbf{0}}}}
+\newcommand{\tyone}{1}
+\newcommand{\tyzero}{0}
 \newcommand{\from}{\dashv}
 \newcommand{\tvar}{\mathsf{var}}
 \newcommand{\tabs}{\mathsf{abs}}
@@ -256,7 +260,7 @@
 \newcommand{\tren}{\mathsf{ren}}
 \newcommand{\tm}[1]{\ulcorner#1\urcorner}
 \newcommand{\tnorm}{\mathsf{norm}}
-\newcommand{\norm}{\tnorm\;}
+%\newcommand{\norm}{\tnorm\;}
 \newcommand{\tNE}{\mathsf{NE}}
 \newcommand{\tNF}{\mathsf{NF}}
 \newcommand{\NE}{\tNE\;}
@@ -330,11 +334,12 @@
 \newcommand{\treflect}{\mathsf{reflect}}
 \newcommand{\lookup}[3][]{\tlookup_{#1}^{#2}(#3)}
 \newcommand{\lookupG}{\lookup[\Gamma]}
-\newcommand{\eval}[3][]{\teval_{#1}^{#2}(#3)}
+%\newcommand{\eval}[3][]{\teval_{#1}^{#2}(#3)}
+\newcommand{\eval}[3][]{\teval_{#1}\;#2\;#3}
 \newcommand{\evalG}{\eval[\Gamma]}
 \newcommand{\reify}[3][]{\treify_{#1}^{#2}\,#3}
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
-%\newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
+\newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
 \newcommand{\hattimes}{\mathrel{\hat{\times}}}
 \newcommand{\hatplus}{\mathrel{\hat{+}}}
@@ -1370,13 +1375,14 @@
 %\newcommand{\UP}{\mathop{\upuparrows}\nolimits}
 \newcommand{\Up}[1]{\mathop{\Uparrow}\nolimits^{#1}}
 %\newcommand{\up}[1]{\mathop{\uparrow}\nolimits^{#1}}
-\newcommand{\up}[1]{\mathord{\uparrow^{#1}}}
+\newcommand{\up}[2][1]{\mathord{\uparrow_{#1}^{#2}}}
 %\newcommand{\upPi}[2]{\up{\piV{#1}{#2}}}
 
 %\newcommand{\DOWN}{\mathop{\Downarrow}\nolimits^{\tkind}}
 \newcommand{\DOWN}{\mathop{\downarrow}\nolimits}%\downdownarrows
 \newcommand{\Down}[1]{\mathop{\Downarrow}\nolimits^{#1}}
-\newcommand{\down}[1]{\mathord{\downarrow^{#1}}}
+\newcommand{\down}[2][]{\mathord{\downarrow_{#1}^{#2}}}
+\newcommand{\downG}{\down[\Gamma]}
 %\newcommand{\down}[1]{\mathop{\downarrow}\nolimits^{#1}}
 \newcommand{\downPi}[2]{\down{\piV{#1}{#2}}}
 
