@@ -94,21 +94,22 @@ mutual
 
   data AddHyp' (Γ : Cxt) (J : Cxt → Set) : (A : Form +) → Set where
 
-    addAtom : ∀{P} (t : J (Γ ∙ Atom- P)) → AddHyp (Atom P) J Γ
-    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp (Thunk A) J Γ
-    trueE   : (t : J Γ) → AddHyp True J Γ
+    addAtom : ∀{P} (t : J (Γ ∙ Atom- P)) → AddHyp (Atom P)  J Γ
+    addNeg  : ∀{A} (t : J (Γ ∙ A))       → AddHyp (Thunk A) J Γ
 
-    falseE  : AddHyp False J Γ
+    trueE   :        (t : J Γ)                     → AddHyp True    J Γ
     andE    : ∀{A B} (t : AddHyp A (AddHyp B J) Γ) → AddHyp (A ∧ B) J Γ
+
+    falseE  :                                                AddHyp False   J Γ
     orE     : ∀{A B} (t : AddHyp A J Γ) (u : AddHyp B J Γ) → AddHyp (A ∨ B) J Γ
 
 addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp A J Γ
 addHyp (Atom P)  j = addAtom j
 addHyp (Thunk A) j = addNeg j
 addHyp True      j = trueE j
-addHyp False     j = falseE
-addHyp (A ∧ B)   j = andE (addHyp A (addHyp B j))
-addHyp (A ∨ B)   j = orE (addHyp A j) (addHyp B j)
+addHyp False   _ = falseE
+addHyp (A ∧ B) j = andE (addHyp A (addHyp B j))
+addHyp (A ∨ B) j = orE (addHyp A j) (addHyp B j)
 
 
 module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
@@ -365,6 +366,26 @@ data IPL : Set where
   Atom        : (P : Atoms) → IPL
   True False  : IPL
   _∨_ _∧_ _⇒_ : (A B : IPL) → IPL
+
+module CallByName where
+
+  _⁻ : IPL → Form -
+  Atom P ⁻  = Atom- P
+  True ⁻    = True
+  False ⁻   = Comp False
+  (A ∨ B) ⁻ = Comp (Thunk (A ⁻) ∨ Thunk (B ⁻))
+  (A ∧ B) ⁻ = A ⁻ ∧ B ⁻
+  (A ⇒ B) ⁻ = Thunk (A ⁻) ⇒ B ⁻
+
+module CallByValue where
+
+  _⁺ : IPL → Form +
+  Atom P ⁺  = Atom P
+  True ⁺    = True
+  False ⁺   = False
+  (A ∨ B) ⁺ = A ⁺ ∨ B ⁺
+  (A ∧ B) ⁺ = A ⁺ ∧ B ⁺
+  (A ⇒ B) ⁺ = Thunk (A ⁺ ⇒ Comp (B ⁺))
 
 mutual
 
