@@ -90,19 +90,19 @@ module _ (Nf : (A : Form +) (Γ : Cxt) → Set) where
 
 mutual
 
-  AddHyp = λ Γ A J → AddHyp' Γ J A
+  AddHyp = λ A J Γ → AddHyp' Γ J A
 
   data AddHyp' (Γ : Cxt) (J : Cxt → Set) : (A : Form +) → Set where
 
-    addAtom : ∀{P} (t : J (Γ ∙ Atom- P)) → AddHyp' Γ J (Atom P)
-    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp' Γ J (Thunk A)
-    trueE   : (t : J Γ) → AddHyp' Γ J True
+    addAtom : ∀{P} (t : J (Γ ∙ Atom- P)) → AddHyp (Atom P) J Γ
+    addNeg  : ∀{A} (t : J (Γ ∙ A)) → AddHyp (Thunk A) J Γ
+    trueE   : (t : J Γ) → AddHyp True J Γ
 
-    falseE  : AddHyp' Γ J False
-    andE    : ∀{A B} (t : AddHyp Γ A (λ Γ' → AddHyp Γ' B J)) → AddHyp' Γ J (A ∧ B)
-    orE     : ∀{A B} (t : AddHyp Γ A J) (u : AddHyp Γ B J) → AddHyp' Γ J (A ∨ B)
+    falseE  : AddHyp False J Γ
+    andE    : ∀{A B} (t : AddHyp A (AddHyp B J) Γ) → AddHyp (A ∧ B) J Γ
+    orE     : ∀{A B} (t : AddHyp A J Γ) (u : AddHyp B J Γ) → AddHyp (A ∨ B) J Γ
 
-addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp' Γ J A
+addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp A J Γ
 addHyp (Atom P)  j = addAtom j
 addHyp (Thunk A) j = addNeg j
 addHyp True      j = trueE j
@@ -115,7 +115,7 @@ module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
 
   data Cover' (i : Size) (J : Cxt → Set) (Γ : Cxt) : Set where
     returnC : (t : J Γ) → Cover' i J Γ
-    caseC   : ∀{j : Size< i} {A} (t : Ne A Γ) (c : AddHyp Γ A (Cover' j J)) → Cover' i J Γ
+    caseC   : ∀{j : Size< i} {A} (t : Ne A Γ) (c : AddHyp A (Cover' j J) Γ) → Cover' i J Γ
 
 -- Left focusing (break a negative hypothesis A down into something positive)
 -- "spine"
@@ -153,7 +153,7 @@ mutual
     -- Goal splitting
     trueI : ∀{Γ} → RInv True Γ
     andI  : ∀{Γ A B} (t : RInv A Γ) (u : RInv B Γ) → RInv (A ∧ B) Γ
-    impI  : ∀{Γ A B} (t : AddHyp Γ A (RInv B)) → RInv (A ⇒ B) Γ
+    impI  : ∀{Γ A B} (t : AddHyp A (RInv B) Γ) → RInv (A ⇒ B) Γ
 
 
 -- Pointwise mapping
@@ -161,7 +161,7 @@ mutual
 _→̇_ : (P Q : Cxt → Set) → Set
 P →̇ Q = ∀{Γ} → P Γ → Q Γ
 
-mapAddHyp : ∀{P Q} (f : P →̇ Q) → ∀{A Γ} → AddHyp Γ A P → AddHyp Γ A Q
+mapAddHyp : ∀{P Q} (f : P →̇ Q) → ∀{A} → AddHyp A P →̇ AddHyp A Q
 mapAddHyp f (addAtom t) = addAtom (f t)
 mapAddHyp f (addNeg t)  = addNeg (f t)
 mapAddHyp f (trueE t)   = trueE (f t)
@@ -242,7 +242,7 @@ monNe' monP τ (andE₂ t)  = andE₂ (monNe' monP τ t)
 
 -- Monotonicity of covers
 
-monAddHyp : ∀{P} (monP : Mon P) → ∀{A} → Mon (λ Γ → AddHyp Γ A P)
+monAddHyp : ∀{P} (monP : Mon P) → ∀{A} → Mon (AddHyp A P)
 monAddHyp monP τ (addAtom t) = addAtom (monP (lift τ) t)
 monAddHyp monP τ (addNeg t)  = addNeg (monP (lift τ) t)
 monAddHyp monP τ (trueE t)   = trueE (monP τ t)
@@ -254,9 +254,8 @@ monAddHyp monP τ (orE t u)   = orE (monAddHyp monP τ t) (monAddHyp monP τ u)
 
 mutual
   monNe : ∀{A} → Mon (Ne A)
-  monNe = monNe' monRFoc
+  monNe τ t = {! monNe' monRFoc τ t !}
 
-  {-# TERMINATING #-}
   monCover : ∀{i P} (monP : Mon P) → Mon (Cover i P)
   monCover monP τ (returnC t)     = returnC (monP τ t)
   monCover monP τ (caseC {j} t c) = caseC (monNe τ t) (monAddHyp (monCover {j} monP) τ c)
@@ -278,7 +277,7 @@ mutual
 KFun : (P Q : Cxt → Set) (Γ : Cxt) → Set
 KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
 
-mapAddHyp' : ∀{P Q Γ} (f : KFun P Q Γ) → ∀{A} → AddHyp Γ A P → AddHyp Γ A Q
+mapAddHyp' : ∀{P Q Γ} (f : KFun P Q Γ) → ∀{A} → AddHyp A P Γ → AddHyp A Q Γ
 mapAddHyp' f (addAtom t) = addAtom (f (weak id≤) t)
 mapAddHyp' f (addNeg t)  = addNeg (f (weak id≤) t)
 mapAddHyp' f (trueE t)   = trueE (f id≤ t)
@@ -334,7 +333,7 @@ mutual
   reify+ (A ∨ B) (inj₂ b) = orI₂ (reify+ B b)
   reify+ (Thunk A) a = sw (reify- A a)
 
-  reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp Γ A J
+  reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp A J Γ
   reflectHyp True      k = trueE (k id≤ _)
   reflectHyp (A ∧ B)   k = andE (reflectHyp A λ τ a →
                                  reflectHyp B λ τ' b → k (τ' • τ) (mon⟦ A ⟧ τ' a , b))  -- need monT
