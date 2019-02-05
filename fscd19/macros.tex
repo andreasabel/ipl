@@ -265,6 +265,14 @@
 \newcommand{\tNF}{\mathsf{NF}}
 \newcommand{\NE}{\tNE\;}
 \newcommand{\NF}{\tNF\;}
+\newcommand{\tybase}{o}
+\newcommand{\tmagic}{\mathsf{magic}}
+\newcommand{\btimes}{\bm{\times}}
+\newcommand{\bplus}{\boldsymbol{+}}
+\newcommand{\hatto}{\mathbin{\hat\To}}
+\newcommand{\hatplus}{\mathbin{\hat+}}
+\newcommand{\hattimes}{\mathbin{\hat\times}}
+
 
 
 % normalization by evaluation
@@ -341,8 +349,8 @@
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
 \newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
-\newcommand{\hattimes}{\mathrel{\hat{\times}}}
-\newcommand{\hatplus}{\mathrel{\hat{+}}}
+% \newcommand{\hattimes}{\mathrel{\hat{\times}}}
+% \newcommand{\hatplus}{\mathrel{\hat{+}}}
 \newcommand{\tenv}{\mathsf{env}}
 \newcommand{\env}[1][]{\tenv_{#1}}
 
@@ -1375,7 +1383,7 @@
 %\newcommand{\UP}{\mathop{\upuparrows}\nolimits}
 \newcommand{\Up}[1]{\mathop{\Uparrow}\nolimits^{#1}}
 %\newcommand{\up}[1]{\mathop{\uparrow}\nolimits^{#1}}
-\newcommand{\up}[2][1]{\mathord{\uparrow_{#1}^{#2}}}
+\newcommand{\up}[2][]{\mathord{\uparrow_{#1}^{#2}}}
 %\newcommand{\upPi}[2]{\up{\piV{#1}{#2}}}
 
 %\newcommand{\DOWN}{\mathop{\Downarrow}\nolimits^{\tkind}}

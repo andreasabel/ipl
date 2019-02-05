@@ -8,6 +8,7 @@
 %for enabling cleveref support, use "cleveref"
 %for enabling cleveref support, use "autoref"
 
+\usepackage{bm} % bold math
 % \usepackage{dsfont} % black-board bold numbers, package doublestroke
 % LACKS: \mathds{0}
 
@@ -176,9 +177,11 @@ the stage for the later sections.
 %
 We work in a constructive type-theoretic meta-language, with the basic judgement
 $t : T$ meaning that object $t$ is an inhabitant of type $T$.
-Meta-theoretic types can be thought of as sets, thus, the colon $:$
-replaces the standard notion of elementhood $\in$, and we are free to
-reuse $\in$ for other purposes.
+However, to avoid confusion with object-level types such as the simple
+types of lambda calculus, we will refer to meta-level types as
+\emph{sets}.  Consequently, the colon $:$
+takes the role of elementhood $\in$ in set-theory, and we are free to
+reuse the symbol $\in$ for other purposes.
 
 \subsection{Contexts and indices}
 
@@ -236,9 +239,26 @@ and \fbox{$\treindex\,\tau_2\,(\treindex\,(\tau_1\,x)) \equiv
 
 \subsection{STLC and its normal forms}
 
-Simple types shall be given by the grammar
-\fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \tyone \mid S + T
-  \mid \tyzero$}.
+Simple types shall be distinguished into positive types $P$ and
+negative types $N$, depending on their root type former.  Function
+($\To$) and product types ($\times$ and $\tyone$) are negative,
+while base types ($\tybase$) and sum types ($+$ and $\tyzero$) are positive.
+\[
+\begin{array}{lrl@{\qquad}l}
+  A,B,C & ::= & P \mid N & \mbox{simple types} \\
+  P     & ::= & \tyzero \mid A + B \mid \tybase & \mbox{positive types} \\
+  N     & ::= & \tyone \mid A \times B \mid A \To B
+  % P     & ::= & a \mid A + B \mid \tyzero & \mbox{positive types} \\
+  % N     & ::= & A \To B \mid A \times B \mid \tyone
+    & \mbox{negative types} \\
+\end{array}
+\]
+% Simple types shall be given by the grammar
+% % \fbox{$S,T ::= P \mid S \To T \mid S \times T \mid \tyone \mid S + T
+% %   \mid \tyzero$}.
+% \fbox{$A,B,C ::= a \mid A \To B \mid A \times B \mid \tyone \mid A + B
+%   \mid \tyzero$}.
+% Herein, $a$ ranges over atomic types aka base types.
 Intrinsically well-typed lambda-terms, in abstract syntax,
 are just inhabitants $t$ of the type \fbox{$A \from \Gamma$},
 inductively defined by the following rules.
@@ -314,7 +334,7 @@ shall not consider them in this article.
 }
 are logically characterized as those fulfilling the
 \emph{subformula} property \cite{prawitz:natded,matthes:shortproofs}.
-Normal forms \fbox{$t : \Nf A \Gamma$} are mutually defined with
+Normal forms \fbox{$t : \tNf A\, \Gamma$} are mutually defined with
 \emph{neutral} normal forms \fbox{$t : \Ne A \Gamma$}.
 In the following inductive definition, we reuse the rule names from the
 term constructors.
@@ -327,7 +347,7 @@ term constructors.
     {\NeP {A \To B} \Gamma \qquad \Nf A \Gamma}
     {\Ne B \Gamma}
 \qquad
-  \nru{\tne}{\Ne A \Gamma}{\Nf A \Gamma}
+  \nru{\tne}{\Ne \tybase \Gamma}{\Nf \tybase \Gamma}
 \\[2ex]
   \nru{\tunit}{}{\Nf \tyone \Gamma}
 \qquad
@@ -345,18 +365,33 @@ term constructors.
 \quad
   \nru{\tcase}
     {\NeP {A_1 + A_2} \Gamma
-      \quad \NfC C {\cext \Gamma A_1}
-      \quad \NfC C {\cext \Gamma A_2}
-    }{\Nf C \Gamma}
+      \quad \NfC P {\cext \Gamma A_1}
+      \quad \NfC P {\cext \Gamma A_2}
+    }{\Nf P \Gamma}
 \quad
   \nru{\tabort}
     {\Ne \tyzero \Gamma}
-    {\Nf C \Gamma}
+    {\Nf P \Gamma}
 \end{gather*}
+These rules only allow the elimination of neutrals; guarantees
+the subformula property and prevents any kind of computational
+($\beta$) redex.
 The new rule $\tne$ embeds $\tNe$ into $\tNf$,
-\ie, allows us to forget neutrality.  Needless to say, $\tNe\,A$ and
+but only at base types $\tybase$.
+Further, case distintion via $\tcase$ and $\tabort$
+is restricted to positive types $P$.
+As a consequence, our normal forms are
+\emph{$\eta$-long}, meaning that any normal inhabitant of a negative
+type is a respective introduction ($\tabs$, $\tunit$, or $\tpair$).
+This justifies the attribute \emph{negative} for these types:
+the construction of their inhabitants proceeds mechanically, without
+any choices.  In contrast, to construct an inhabitant of a
+\emph{positive} type choice is required: whether case distinction is
+required, and which introduction to pick in the end ($\tinj_1$ or $\tinj_2$).
+
+Needless to say, $\tNe\,A$ and
 $\tNf\,A$ are presheaves, \ie, support reindexing with $\tren$ just as terms do.
-From a normal form we can extract the term via a overloaded function
+From a normal form we can extract the term via an overloaded function
 \fbox{$\tm\_ : \Nf A \Gamma \to A \from \Gamma$} and
 \fbox{$\tm\_ : \Ne A \Gamma \to A \from \Gamma$}
 that discards constructor $\tne$ but keeps all other constructors.
@@ -364,6 +399,7 @@ This erasure function naturally commutes with reindexing, making it a
 natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
 resp.) and $A{\from}\_$.  We shall simply write, for instance,
 \fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
+(The point on the arrow is mnemoic for \emph{pointwise}.)
 
 \emph{Proof normalization} is concerned with finding a normal form
 $u : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
@@ -404,7 +440,36 @@ in the identity environment \nofbox{$\idenv\Gamma : \den \Gamma \Gamma$}
 followed by
 \emph{reification}
 \nofbox{$\down A : \den A \todot \tNf A$}.
+The role of evaluation is to produce from a term the corresponding
+semantic (\ie, meta-theoretic) function, which is finally reified to a normal form.
+Since we are evaluating open terms $t$, we need to supply an environment
+$\idenv\Gamma$ which will map the free indices of $t$ to corresponding
+\emph{unknowns}.  To accomodate unknowns in the semantics, types $A$
+are mapped to presheaves $\den A$ (rather than just sets), and in
+particular each base type $\tybase$ is mapped to the presheaf
+$\tNe\,\tybase$ with the intention that the neutrals take the role of
+the unknowns.  The mapping $\up A : \tNe\,A \todot \den A$ from
+neutrals to unknowns is called \emph{reflection}, and defined mutually
+with reification by induction on type $A$.
 
+At this point, let us fix some notation for sets to prepare for some
+constructions of presheaves.  Let $\bone$ denote the unit set and
+$()$ its unique inhabitant, $\bzero$ the empty set and
+$\tmagic : \bzero \to T$ the \emph{ex falsum quod libet} elimination
+into any set $T$.  Given sets $S_1$ and $S_2$, their Cartesian product
+is written $S_1 \btimes S_2$ with projections $\pi_i : S_1 \btimes S_2
+\to S_i$, and their disjoint sum $S_1 \bplus S_2$ with injections
+$\iota_i : S_i \to S_1 \bplus S_2$ and elimination $[f_1,f_2] : S_1 \bplus
+S_2 \to T$ for arbitrary $f_i : S_i \to T$.
+
+Presheafs (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
+constructed pointwise, \eg, $\hat0\,\Gamma = \bzero$, and given two
+presheaves $\A$ and $\B$,
+$(\A \hatplus \B)\,\Gamma = \A\,\Gamma \bplus \B\,\Gamma$.  For the
+exponential of preasheaves, however, we need the \emph{Kripke function
+  space}
+$(\A \hatto \B)\,\Gamma = \forall \Delta.\, \Gamma \sublist \Delta
+\to \A\,\Delta \to \B\,\Delta$.
 
 \clearpage
 
