@@ -454,7 +454,7 @@ with reification by induction on type $A$.
 
 At this point, let us fix some notation for sets to prepare for some
 constructions of presheaves.  Let $\bone$ denote the unit set and
-$()$ its unique inhabitant, $\bzero$ the empty set and
+$\ttempty$ its unique inhabitant, $\bzero$ the empty set and
 $\tmagic : \bzero \to T$ the \emph{ex falsum quod libet} elimination
 into any set $T$.  Given sets $S_1$ and $S_2$, their Cartesian product
 is written $S_1 \btimes S_2$ with projections $\pi_i : S_1 \btimes S_2
@@ -466,10 +466,86 @@ Presheafs (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
 constructed pointwise, \eg, $\hat0\,\Gamma = \bzero$, and given two
 presheaves $\A$ and $\B$,
 $(\A \hatplus \B)\,\Gamma = \A\,\Gamma \bplus \B\,\Gamma$.  For the
-exponential of preasheaves, however, we need the \emph{Kripke function
+exponential of presheaves, however, we need the \emph{Kripke function
   space}
 $(\A \hatto \B)\,\Gamma = \forall \Delta.\, \Gamma \sublist \Delta
 \to \A\,\Delta \to \B\,\Delta$.
+
+We will interpret simple types $A$ as corresponding presheaves
+$\den A$.  Let us start with the negative types, defining
+reflection $\up A : \tNe\, A \todot \den A$
+and reification $\down A : \den A \todot \tNf A$ along the way.
+\begin{gather*}
+\begin{array}{lcl}
+  \den   \tyone          & = & \hatone \\
+  \upG   \tyone \; u     & = & \ttempty \\
+  \downG \tyone \ttempty & = & \tunit \\
+\end{array}
+\qquad\qquad\qquad
+\begin{array}{lcl}
+  \den   {A \times B}       & = & \den A \hattimes \den B \\
+  \upG   {A \times B} \; u  & = & (\upG A (\prj1 u),\;\upG B (\prj2 u)) \\
+  \downG {A \times B} (a,b) & = & \tpair\,(\downG A a)\,(\downG B b) \\
+\end{array}
+\\[2ex]
+\begin{array}{lcl}
+  \den {A \To B}    & = & \den A \hatto \den B \\
+  \upG   {A \To B}    \; u \; (\tau : \Gamma \sublist \Delta) \; (a : \den A \Delta)
+     & = & \up[\Delta] B (\tapp\;(\tren\,\tau\, u)\;(\down[\Delta] A a)) \\
+  \downG {A \To B}    f        & = & \tabs\,(\down[\cext \Gamma A] B
+    (f\;\twk^A_\Gamma\;\tfresh^A_\Gamma))
+\end{array}
+\end{gather*}
+% We will interpret simple types $A$ as corresponding presheaves
+% $\den A$.  Let us start with the negative types:
+% \[
+% \begin{array}{lcl}
+%   \den \tyone       & = & \hatone \\
+%   \den {A \times B} & = & \den A \hattimes \den B \\
+%   \den {A \To B}    & = & \den A \hatto \den B \\
+% \end{array}
+% \]
+% Reflection $\up A : \tNe\, A \todot \den A$
+% and reification $\down A : \den A \todot \tNf A$
+% are defined mutually by induction on type $A$.
+% \begin{gather*}
+% \begin{array}{lcl@{\qquad}lcl}
+%   \upG   \tyone       u        & = & \ttempty &
+%   \downG \tyone       \ttempty & = & \tunit \\
+%   \upG   {A \times B} u        & = & (\upG A (\prj1 u),\;\upG B (\prj2 u)) &
+%   \downG {A \times B} (a,b)    & = & \tpair\,(\downG A a)\,(\downG B b) \\
+% \end{array}
+% \\
+% \begin{array}{lcl@{\qquad}lcl}
+%   \upG   {A \To B}    u \; (\tau : \Gamma \sublist \Delta) \; (a : \den A \Delta)
+%      & = & \up[\Delta] B (\tapp\;(\tren\;\tau\; u)\;(\down[\Delta] A a)) \\
+%   \downG {A \To B}    f        & = & \tabs\,(\down[\cext \Gamma A] B
+%     (f\,(\twk^A)\,(\tfresh^A_\Gamma)))
+% \end{array}
+% \end{gather*}
+In the equation for $\down{A \To B}$,
+the renaming $\twk : \Gamma \sublist \cext \Gamma A$,
+defined by $\twk = \tweak\,\tid$, makes room
+for a new variable of type $A$, which is reflected into $\den A$ by
+\[
+\begin{array}{lcl@{\qquad}lcl}
+  \tfresh : \den A (\cext \Gamma A) \\
+  \tfresh = \up[\cext \Gamma A] A (\tvar\;\tzero)
+  . \\
+\end{array}
+\]
+The ability to introduce fresh variables into a context, and to use
+semantic objects such as $f : \den{A \To B}\Gamma$ in a such extended
+context, is the reason for utilizing presheaves instead of just sets.
+
+Note also that in the equation for $\up{A \To B}$,
+the neutral $u : \Ne A \Gamma$ is
+transported into $\Ne A \Gamma$ via reindexing with
+$\tau : \Gamma \sublist \Delta$, in order to be applicable to the normal form
+$\down[\Delta]A a$
+reified from the semantic value $a$.
+
+A direct extension of our presheaf semantics to positive types cannot work.
 
 \clearpage
 
