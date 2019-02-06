@@ -545,7 +545,25 @@ $\tau : \Gamma \sublist \Delta$, in order to be applicable to the normal form
 $\down[\Delta]A a$
 reified from the semantic value $a$.
 
-A direct extension of our presheaf semantics to positive types cannot work.
+A direct extension of our presheaf semantics to positive types cannot
+work.  For instance, with $\den \tyzero = \hat0$, simply
+$\up[\tyzero] \tyzero (\tvar\,\tzero) : \bzero$ would give us an
+inhabitant of the empty set, which means that reflection at the empty
+type would not be definable.  Similarily, the setting
+$\den{A + B} = \den A \hatplus \den B$ is refuted by
+% $\up[\tyone + \tyone]^{\tyone + \tyone} (\tvar\,\tzero) : \bone \bplus \bone$
+$\up[A + B]{A + B} (\tvar\,\tzero) : \den A (A+B) \bplus \den B (A+B)$
+which would require us to make a decision of whether $A$ holds or $B$ holds
+while only be given a hypothesis of type $A + B$.
+Not even the usual interpretation of base types $\den o = \tNe\,o$
+works in the presence of sums, as we would not be able to interpret
+the term
+$\tabs\,(\tcase\,(\tvar\,\tzero)\,(\tvar\,\tzero)\,(\tvar\,\tzero)) :
+(o+o) \To o$ in our semantics, as $\Ne o (o+o)$ is empty.
+What is needed are case distinctions on neutrals in the semantics,
+allowing us the elimination of positive hypotheses before producing a
+semantic value,
+and we shall capture this capability in a monad $\Cov$.
 
 \clearpage
 
