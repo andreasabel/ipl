@@ -1,6 +1,7 @@
 -- A Beth model of normal forms
 
 {-# OPTIONS --postfix-projections #-}
+{-# OPTIONS -v rewriting:90 #-}
 
 open import Library
 
@@ -12,12 +13,17 @@ import Derivations; open module Der  = Derivations Base
 -- Beth model
 
 record CoverMonad : Set₁ where
-  -- Bifunctor
+
+  -- Presheaf transformer
 
   field
     Cover   : (P : Cxt → Set) (Γ : Cxt) → Set
     monC    : ∀{P} → (monP : Mon P) → Mon (Cover P)
-    mapC'   : ∀{P Q Γ} → KFun P Q Γ → Cover P Γ → Cover Q Γ
+
+  -- Strong functor
+
+  field
+    mapC'   : ∀{P Q} → ⟨ P ⇒̂ Q ⊙ Cover P ⟩→̇ Cover Q
 
   mapC : ∀{P Q} → (P →̇ Q) → (Cover P →̇ Cover Q)
   mapC f = mapC' λ τ → f
@@ -28,10 +34,17 @@ record CoverMonad : Set₁ where
     return : ∀{P} (monP : Mon P) → P →̇ Cover P
     joinC : ∀{P} → Cover (Cover P) →̇ Cover P
 
-  bindC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
-  bindC f = joinC ∘ mapC f
+  -- Kleisli extension
 
-  -- Syntactic stuff
+  extC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
+  extC f = joinC ∘ mapC f
+
+  -- Strong bind
+
+  bindC' : ∀{P Q} (monP : Mon P) → Cover P →̇ (P ⇒̂ Cover Q) ⇒̂ Cover Q
+  bindC' monP c τ k = joinC (mapC' k (monC monP τ c))
+
+  -- Services
 
   field
     falseC  : ∀{P} → Ne' False →̇ Cover P
@@ -40,6 +53,12 @@ record CoverMonad : Set₁ where
                 (d : Cover P (Γ ∙ D)) → Cover P Γ
   field
     runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
+
+  -- A continuation version of runNf
+
+  runNf' : ∀ {A P} (monP : Mon P) → Cover P →̇ (P ⇒̂ Nf' A) ⇒̂ Nf' A
+  runNf' monP c τ k = runNf (mapC' k (monC monP τ c))
+
 
 module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
@@ -67,6 +86,9 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   -- using monotonicity of covers and the built-in monotonicity at implication.
 
   -- monT : ∀ A {Γ Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Γ → T⟦ A ⟧ Δ
+
+  monFalse : Mon (λ Γ → ⊥)
+  monFalse τ ()
 
   mutual
     monT : ∀ A → Mon T⟦ A ⟧
@@ -109,8 +131,8 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
     reify : ∀ A → T⟦ A ⟧ →̇ Nf' A
     reify (Atom P) t      = t
     reify True _          = trueI
-    reify False           = runNf ∘  mapC ⊥-elim
-    reify (A ∨ B)         = runNf ∘  mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
+    reify False           = runNf ∘ mapC ⊥-elim
+    reify (A ∨ B)         = runNf ∘ mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
     reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
     reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (fresh A)))
 
@@ -124,16 +146,14 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   run (A ∧ B)  = < run A ∘ mapC proj₁ , run B ∘ mapC proj₂  >
   run (A ⇒ B) c τ a = run B $ mapC' (λ δ f → f id≤ (monT A δ a)) $ monC (monT (A ⇒ B)) τ c
 
-  runNf' : ∀ {A P} (monP : Mon P) → Cover P →̇ KFun (KFun P (Nf' A)) (Nf' A)
-  runNf' monP c τ k = runNf (mapC' k (monC monP τ c))
+  run' : ∀ {P} (monP : Mon P) A → Cover P →̇ (P ⇒̂ T⟦ A ⟧) ⇒̂ T⟦ A ⟧
+  run' monP (Atom p) = runNf' monP
+  run' monP True     = λ _ _ _ → _
+  run' monP False    = bindC' monP
+  run' monP (A ∨ B)  = bindC' monP
+  run' monP (A ∧ B) c τ k     = run' monP A c τ (λ σ → proj₁ ∘ k σ) , run' monP B c τ (λ σ → proj₂ ∘ k σ)
+  run' monP (A ⇒ B) c τ k σ a = run' monP B c (σ • τ) λ σ' p → k (σ' • σ) p id≤ (monT A σ' a)
 
-  runS : ∀ {P} (monP : Mon P) A → Cover P →̇ KFun (KFun P T⟦ A ⟧) T⟦ A ⟧
-  runS monP (Atom p) c = runNf' monP c
-  runS monP True     c τ _ = _
-  runS monP False    c τ k = {!!}
-  runS monP (A ∨ B)  c = {!!}
-  runS monP (A ∧ B)  c = {!!}
-  runS monP (A ⇒ B)  c τ k σ a = runS monP B c (σ • τ) λ σ' p → k (σ' • σ) p id≤ (monT A σ' a)
   -- Fundamental theorem
   -- Extension of T⟦_⟧ to contexts
 
@@ -155,8 +175,11 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
   -- A lemma for the orE case.
 
-  orElim : ∀ A B C {Γ} → T⟦ A ∨ B ⟧ Γ → T⟦ A ⇒ C ⟧ Γ → T⟦ B ⇒ C ⟧ Γ → T⟦ C ⟧ Γ
+  orElim : ∀ A B C → ⟨ T⟦ A ∨ B ⟧ ⊙ T⟦ A ⇒ C ⟧ ⊙ T⟦ B ⇒ C ⟧ ⟩→̇ T⟦ C ⟧
   orElim A B C c g h = run C (mapC' (λ τ → [ g τ , h τ ]) c)
+
+  orElim' : ∀ A B C → ⟨ T⟦ A ∨ B ⟧ ⊙ T⟦ A ⇒ C ⟧ ⊙ T⟦ B ⇒ C ⟧ ⟩→̇ T⟦ C ⟧
+  orElim' A B C c g h = run' (monOr A B) C c id≤ λ τ → [ g τ , h τ ]
 
   -- A lemma for the falseE case.
 
@@ -164,6 +187,9 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
   falseElim : ∀ C → T⟦ False ⟧ →̇ T⟦ C ⟧
   falseElim C = run C ∘ mapC ⊥-elim
+
+  falseElim' : ∀ C → T⟦ False ⟧ →̇ T⟦ C ⟧
+  falseElim' C c =  run' monFalse C c id≤ λ τ → ⊥-elim
 
   -- The fundamental theorem
 
@@ -235,7 +261,7 @@ module CaseTree where
   joinC (falseC t)  = falseC t
   joinC (orC t c d) = orC t (joinC c) (joinC d)
 
-  -- Version of mapC with f relativized to thinnings of Γ
+  -- Strong functoriality
 
   mapC' : ∀{P Q Γ} → KFun P Q Γ → Cover P Γ → Cover Q Γ
   mapC' f (returnC p) = returnC (f id≤ p)
@@ -246,10 +272,12 @@ module CaseTree where
 caseTreeMonad : CoverMonad
 caseTreeMonad = record {CaseTree}
 
+-- Continuation instance of cover monad
+
 module Continuation where
 
   record Cover (P : Cxt → Set) (Γ : Cxt) : Set where
-    field runNf' : ∀ {A} → KFun (KFun P (Nf' A)) (Nf' A) Γ
+    field runNf' : ∀ {A} → ((P ⇒̂ Nf' A) ⇒̂ Nf' A) Γ
   open Cover
 
   runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
@@ -269,7 +297,7 @@ module Continuation where
   monC : ∀{P} → (monP : Mon P) → Mon (Cover P)
   monC monP τ c .runNf' τ₁ k = c .runNf' (τ₁ • τ) k
 
-  mapC' : ∀{P Q Γ} → KFun P Q Γ → Cover P Γ → Cover Q Γ
+  mapC' : ∀{P Q} → ⟨ P ⇒̂ Q ⊙ Cover P ⟩→̇ Cover Q
   mapC' k c .runNf' τ l = c .runNf' τ λ δ p → l δ (k (δ • τ) p)
 
   mapC : ∀{P Q} → (P →̇ Q) → (Cover P →̇ Cover Q)
@@ -281,8 +309,11 @@ module Continuation where
   joinC : ∀{P} → Cover (Cover P) →̇ Cover P
   joinC c .runNf' τ k = c .runNf' τ λ δ c' → c' .runNf' id≤ λ δ' → k (δ' • δ)
 
-  bindC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
-  bindC f = joinC ∘ mapC f
+  extC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
+  extC f = joinC ∘ mapC f
+
+  bindC' : ∀{P Q} → Cover P →̇ (P ⇒̂ Cover Q) ⇒̂ Cover Q
+  bindC' c τ k .runNf' τ' k' = c .runNf' (τ' • τ) λ σ p → k (σ • τ') p .runNf' id≤ λ σ' → k' (σ' • σ)
 
 continuationMonad : CoverMonad
 continuationMonad = record{Continuation}
