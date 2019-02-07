@@ -114,7 +114,7 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
     reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
     reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (fresh A)))
 
-  -- Semantic paste.
+  -- Semantic paste.  (Sheaf condition -- algorithmic part.)
 
   run : ∀ A → Cover T⟦ A ⟧ →̇ T⟦ A ⟧
   run (Atom P) = runNf
@@ -124,6 +124,16 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   run (A ∧ B)  = < run A ∘ mapC proj₁ , run B ∘ mapC proj₂  >
   run (A ⇒ B) c τ a = run B $ mapC' (λ δ f → f id≤ (monT A δ a)) $ monC (monT (A ⇒ B)) τ c
 
+  runNf' : ∀ {A P} (monP : Mon P) → Cover P →̇ KFun (KFun P (Nf' A)) (Nf' A)
+  runNf' monP c τ k = runNf (mapC' k (monC monP τ c))
+
+  runS : ∀ {P} (monP : Mon P) A → Cover P →̇ KFun (KFun P T⟦ A ⟧) T⟦ A ⟧
+  runS monP (Atom p) c = runNf' monP c
+  runS monP True     c τ _ = _
+  runS monP False    c τ k = {!!}
+  runS monP (A ∨ B)  c = {!!}
+  runS monP (A ∧ B)  c = {!!}
+  runS monP (A ⇒ B)  c τ k σ a = runS monP B c (σ • τ) λ σ' p → k (σ' • σ) p id≤ (monT A σ' a)
   -- Fundamental theorem
   -- Extension of T⟦_⟧ to contexts
 
