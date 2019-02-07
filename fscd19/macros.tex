@@ -276,6 +276,8 @@
 \newcommand{\twk}{\mathsf{wk}}
 \newcommand{\tfresh}{\mathsf{fresh}}
 \newcommand{\Cov}{\mathsf{Cov}}
+\newcommand{\trun}{\mathsf{run}}
+\newcommand{\trunNf}[1][]{\mathsf{runNf}^{#1}}
 
 % normalization by evaluation
 \newcommand{\twhnf}{\mathsf{whnf}}
@@ -364,6 +366,7 @@
 \newcommand{\tCover}{\mathsf{Cover}}
 \newcommand{\Cover}[1]{\tCover\,(#1)}
 
+\newcommand{\treturn}[1][]{\mathsf{return}^{#1}}
 \newcommand{\treturnC}{\mathsf{returnC}}
 \newcommand{\returnC}{\treturnC\;}
 \newcommand{\returnCP}[1]{\treturnC\;(#1)}
@@ -372,8 +375,11 @@
 \newcommand{\orCPP}[3]{\torC\;#1\;(#2)\;(#3)}
 \newcommand{\tfalseC}{\mathsf{falseC}}
 \newcommand{\falseC}[1]{\tfalseC\;#1}
+\newcommand{\tmap}[1][]{\mathsf{map}^{#1}}
+%\newcommand{\map}[1]
 \newcommand{\tmapC}{\mathsf{mapC}}
 \newcommand{\mapC}[2][]{\tmapC_{#1}(#2)}
+\newcommand{\tjoin}[1][]{\mathsf{join}^{#1}}
 \newcommand{\tjoinC}{\mathsf{joinC}}
 \newcommand{\joinC}{\joinC\;}
 \newcommand{\treifyOr}{\mathsf{reifyOr}}
@@ -638,7 +644,7 @@
 % DTP talk
 \newcommand{\texI}{\mathsf{exI}}
 \newcommand{\tsubI}{\mathsf{subI}}
-\newcommand{\tmap}{\mathsf{map}}
+%\newcommand{\tmap}{\mathsf{map}}
 
 
 % JFLA talk
@@ -794,7 +800,7 @@
 % weak normalization
 \newcommand{\eqclass}[1]{\overline{#1}}
 
-\newcommand{\idenv}[1]{\sid_{#1}}
+\newcommand{\idenv}[1]{\rho_{#1}}
 \newcommand{\evall}[2]{\clost{#2}{\idenv{#1}}} % lazy
 \newcommand{\evalsto}{\searrow}
 \newcommand{\at}{\mathrel{@}}

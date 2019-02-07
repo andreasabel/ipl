@@ -78,6 +78,7 @@
 % Please provide at least the name of the affiliation and the country.
 % The full address is optional
 
+
 \author{Frederik Folkmar Ramcke}
   {Department of Computer Science and Engineering,
     Chalmers and Gothenburg University,
@@ -87,9 +88,19 @@
   {}%orcid
   {}%funding
 
-\authorrunning{A. Abel and F. F. Ramcke}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
 
-\Copyright{Andreas Abel and Frederik F. Ramcke}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+\author{Christian Sattler}
+  {Department of Computer Science and Engineering,
+    Chalmers and Gothenburg University,
+    Sweden
+  }
+  {}%email
+  {}%orcid
+  {}%funding
+
+\authorrunning{A. Abel and F. F. Ramcke and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+\Copyright{Andreas Abel and Frederik F. Ramcke and Christian Sattler}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
 
 \ccsdesc[100]{General and reference~General literature}
 \ccsdesc[100]{General and reference}%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
@@ -143,6 +154,27 @@ Sattler.}%optional
 \section{Introduction}
 \label{sec:intro}
 
+Weak coproducts.
+Weak sheaf (non-unique pasting).
+
+Contributions:
+\begin{enumerate}
+\item Abstract cover monad.
+\item NbE for CBPV and polarized lambda-calculus.
+\end{enumerate}
+
+CBPV differs from PolLambda in that hypotheses can be arbitrary
+positive formulas in CBPV, but only positive atoms or negative
+formulas in PolLambda.  This means that in CBPV, there is more choice
+on when and how to decompose a hypothesis into ones of smaller
+positive type, whereas in PolLambda there is no freedom: mandatory
+maximal splitting is dictated by the left inversion phase.
+
+Normal forms of CBPV thus retain individual shallow pattern matching
+constructs, while PolLambda has only deep, maximal pattern matching.
+
+Agda formalization:
+Sized types, nested data types.
 
 \nocite{bergerSchwichtenberg:lics91}
 
@@ -234,7 +266,7 @@ $\Cxt\op$ for any $A$, witnessed by \fbox{$\treindex : \Gamma \sublist
 part of functor from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
 The associated naturality laws \fbox{$\treindex\,\tid\,x \equiv x$}
-and \fbox{$\treindex\,\tau_2\,(\treindex\,(\tau_1\,x)) \equiv
+and \fbox{$\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
 \treindex\,(\tau_1 \rcomp \tau_2)\,x$} hold propositionally.
 
 \subsection{STLC and its normal forms}
@@ -563,7 +595,70 @@ $\tabs\,(\tcase\,(\tvar\,\tzero)\,(\tvar\,\tzero)\,(\tvar\,\tzero)) :
 What is needed are case distinctions on neutrals in the semantics,
 allowing us the elimination of positive hypotheses before producing a
 semantic value,
-and we shall capture this capability in a monad $\Cov$.
+and we shall capture this capability in a monad $\C$.
+
+To recapitulate, a monad $\C$ on presheaves is first an endofunctor,
+i.e., it maps any presheaf $\A$ to the presheaf $\C\,\A$ and any
+presheaf morphism $f : \A \todot \B$ to the morphism
+$\tmap[\C]f: \C\,A \todot \C\,\B$ satisfying the functor laws for
+identity and composition.  Then, there are natural transformations
+$\treturn[\C] : \A \todot \C\,\A$ (unit) and
+$\tjoin[\C] : \C\,(\C\,A) \todot \C\,\A$ (concatenation) satisfying
+the monad laws.
+
+We are looking for a monad $\C$ that
+offers us these services:
+% \begin{enumerate}
+% \item Elimination of absurd neutrals
+% $\tabort^\C : \tNe\, \tyzero \todot \C\,\A$.
+% \item Case distinction on neutrals of sum type
+% $\tcase^\C_\Gamma : \Ne {(A + B)} \Gamma
+%   \to \C\,\A\,(\cext \Gamma A)
+%   \to \C\,\A\,(\cext \Gamma B)
+%   \to \C\,\A\,\Gamma$.
+% \item Run the monad to produce a normal form
+% $\trun^\C : \C\,(\Nf A) \todot \Nf A$.
+% \end{enumerate}
+\[
+\begin{array}{lcl@{\quad}l}
+\tabort^\C & : & \tNe\, \tyzero \todot \C\,\A
+  & \mbox{case on absurd neutral} \\
+\tcase^\C_\Gamma & : & \Ne {(A + B)} \Gamma
+  \to \C\,\A\,(\cext \Gamma A)
+  \to \C\,\A\,(\cext \Gamma B)
+  \to \C\,\A\,\Gamma
+  & \mbox{case on neutral} \\
+\trunNf[\C] & : & \C\,(\tNf A) \todot \tNf A
+  & \mbox{run the monad ($\tNf$ only)} \\
+\end{array}
+\]
+Using these services, we can complete our semantics:
+%\begin{gather*}
+\[
+\begin{array}{lcl}
+  \den \tybase & = & \C\,(\tNe\,\tybase) \\
+  \upG \tybase \; u & = & \treturn[\C]\,u \\
+  \downG \tybase \; m & = & \trunNf[\C]\,(\tmap[\C]\tne\;m) \\
+\end{array}
+\qquad
+\begin{array}{lcl}
+  \den \tyzero & = & \C\,\hat0 \\
+  \upG \tyzero \; u & = & \tabort^\C\,u \\
+  \downG \tyzero \; m & = & \trunNf[\C]\,(\tmap[\C]\tmagic\;m) \\
+\end{array}
+\]
+\[
+\begin{array}{lcl}
+  \den {A+B} & = & \C\,(\den A \hatplus \den B) \\
+  \upG {A+B} \; u & = & \tcase^\C\,u
+    \,(\treturn[\C]\,(\iota_1\,\tfresh^A_\Gamma))
+    \,(\treturn[\C]\,(\iota_2\,\tfresh^B_\Gamma))
+    \\
+  \downG {A+B} \; m & = & \trunNf[\C]\,
+    (\tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B]\;m) \\
+\end{array}
+\]
+%\end{gather*}
 
 \clearpage
 
