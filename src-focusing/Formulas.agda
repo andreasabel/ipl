@@ -134,7 +134,7 @@ mutual
 
   data RFoc : (A : Form +) (Γ : Cxt) → Set where
     -- Right focusing stops at a negative formulas
-    sw    : ∀{Γ A} (t : RInv A Γ) → RFoc (Thunk A) Γ
+    thunk : ∀{Γ A} (t : RInv A Γ) → RFoc (Thunk A) Γ
     -- Success:
     hyp   : ∀{Γ P} (x : HypAtom P Γ) → RFoc (Atom P) Γ
     trueI : ∀{Γ} → RFoc True Γ
@@ -150,7 +150,7 @@ mutual
 
   data RInv : (A : Form -) (Γ : Cxt) → Set where
     -- Right inversion ends at a positive formula
-    sw  : ∀{Γ A} (t : Foc A Γ) → RInv (Comp A) Γ
+    ret  : ∀{Γ A} (t : Foc A Γ) → RInv (Comp A) Γ
     -- Goal splitting
     trueI : ∀{Γ} → RInv True Γ
     andI  : ∀{Γ A B} (t : RInv A Γ) (u : RInv B Γ) → RInv (A ∧ B) Γ
@@ -262,7 +262,7 @@ mutual
   monCover monP τ (caseC {j} t c) = caseC (monNe τ t) (monAddHyp (monCover {j} monP) τ c)
 
   monRFoc : ∀{A} → Mon (RFoc A)
-  monRFoc τ (sw t)      = sw (monRInv τ t)
+  monRFoc τ (thunk t)   = thunk (monRInv τ t)
   monRFoc τ (hyp x)     = hyp (monH τ x)
   monRFoc τ trueI       = trueI
   monRFoc τ (andI t t₁) = andI (monRFoc τ t) (monRFoc τ t₁)
@@ -270,7 +270,7 @@ mutual
   monRFoc τ (orI₂ t)    = orI₂ (monRFoc τ t)
 
   monRInv : ∀{A} → Mon (RInv A)
-  monRInv τ (sw t)      = sw (monCover monRFoc τ t)
+  monRInv τ (ret t)      = ret (monCover monRFoc τ t)
   monRInv τ trueI       = trueI
   monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
   monRInv τ (impI t)    = impI (monAddHyp monRInv τ t)
@@ -320,19 +320,19 @@ mon⟦ Thunk A ⟧           = mon⟦ A ⟧
 mutual
 
   reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv A Γ
-  reify- True _ = trueI
-  reify- (A ∧ B) (a , b) = andI (reify- A a) (reify- B b)
-  reify- (A ⇒ B) f = impI (reflectHyp A λ τ a → reify- B (f τ a))
-  reify- (Comp A) c = sw (mapCover (reify+ A) c)
+  reify- True     _       = trueI
+  reify- (A ∧ B)  (a , b) = andI (reify- A a) (reify- B b)
+  reify- (A ⇒ B)  f       = impI (reflectHyp A λ τ a → reify- B (f τ a))
+  reify- (Comp A) c       = ret (mapCover (reify+ A) c)
 
   reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc A Γ
-  reify+ True _ = trueI
-  reify+ (A ∧ B) (a , b) = andI (reify+ A a) (reify+ B b)
-  reify+ (Atom P) x = hyp x
+  reify+ True _           = trueI
+  reify+ (A ∧ B) (a , b)  = andI (reify+ A a) (reify+ B b)
+  reify+ (Atom P) x       = hyp x
   reify+ False ()
   reify+ (A ∨ B) (inj₁ a) = orI₁ (reify+ A a)
   reify+ (A ∨ B) (inj₂ b) = orI₂ (reify+ B b)
-  reify+ (Thunk A) a = sw (reify- A a)
+  reify+ (Thunk A) a      = thunk (reify- A a)
 
   reflectHyp : ∀ A {Γ} {J} (k : ∀ {Δ} (τ : Δ ≤ Γ) → ⟦ A ⟧ Δ → J Δ) → AddHyp A J Γ
   reflectHyp True      k = trueE (k id≤ _)
