@@ -35,8 +35,8 @@ P ↪ Q = ∀{Γ f} → P Γ f → Q Γ f
 
 -- Conv generalizes _↪_ to move to a new proposition.
 
-Conv : ∀{S T : Set} (g : S → T) (P : KPred' S) (Q : KPred' T) → Set
-Conv {S} g P Q = ∀ {Γ} {f : C⦅ Γ ⦆ → S} (p : P Γ f) → Q Γ (g ∘ f)
+Conv : ∀{S T : Set} (f : S → T) (P : KPred' S) (Q : KPred' T) → Set
+Conv {S} f P Q = ∀ {Γ} {g : C⦅ Γ ⦆ → S} (p : P Γ g) → Q Γ (f ∘ g)
 
 ⟪_⟫_↪_ = Conv
 

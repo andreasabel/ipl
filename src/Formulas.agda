@@ -132,11 +132,31 @@ monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 mon□ : ∀{P} → Mon (□ P)
 mon□ τ x τ′ = x (τ′ • τ)
 
+infix 1 _→̇_
+infixr 2 _⇒̂_
+
+-- Presheaf morphism
+
 _→̇_ : (P Q : Cxt → Set) → Set
 P →̇ Q = ∀{Γ} → P Γ → Q Γ
+
+⟨_⊙_⟩→̇_ : (P Q R : Cxt → Set) → Set
+⟨ P ⊙ Q ⟩→̇ R = ∀{Γ} → P Γ → Q Γ → R Γ
+
+⟨_⊙_⊙_⟩→̇_ : (P Q R S : Cxt → Set) → Set
+⟨ P ⊙ Q ⊙ R ⟩→̇ S = ∀{Γ} → P Γ → Q Γ → R Γ → S Γ
+
+-- Pointwise presheaf arrow (not a presheaf)
 
 CFun : (P Q : Cxt → Set) → Cxt → Set
 CFun P Q Γ = P Γ → Q Γ
 
+-- Presheaf exponentional (Kripke function space)
+
 KFun : (P Q : Cxt → Set) → Cxt → Set
 KFun P Q = □ (CFun P Q)
+
+-- Again, in expanded form.
+
+_⇒̂_  : (P Q : Cxt → Set) → Cxt → Set
+P ⇒̂ Q = λ Γ → ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ

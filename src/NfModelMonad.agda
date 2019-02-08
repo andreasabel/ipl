@@ -148,7 +148,7 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
   run' : ∀ {P} (monP : Mon P) A → Cover P →̇ (P ⇒̂ T⟦ A ⟧) ⇒̂ T⟦ A ⟧
   run' monP (Atom p) = runNf' monP
-  run' monP True     = λ _ _ _ → _
+  run' monP True     = _
   run' monP False    = bindC' monP
   run' monP (A ∨ B)  = bindC' monP
   run' monP (A ∧ B) c τ k     = run' monP A c τ (λ σ → proj₁ ∘ k σ) , run' monP B c τ (λ σ → proj₂ ∘ k σ)
