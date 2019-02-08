@@ -1,0 +1,20 @@
+We observe that normalization by evaluation for simply-typed
+lambda-calculus with weak coproducts can be carried out in a weak
+bi-cartesian closed category of presheaves equipped with a monad that
+allows us to perform case distinction on neutral terms of sum type.
+The placement of the monad influences the normal forms we obtain: for
+instance, placing the monad on coproducts gives us eta-long beta-pi
+normal forms where pi refers to permutation of case distinctions out
+of elimination positions.  We further observe that placing the monad
+on every coproduct is rather wasteful, and an optimal placement of the
+monad can be determined by considering polarized simple types inspired
+by focalization.  Polarization classifies types into positive and
+negative, and it is sufficient to place the monad at the embedding of
+positive types into negative ones.  We consider two calculi based on
+polarized types: pure call-by-push-value (CBPV) and polarized
+lambda-calculus, the natural deduction calculus corresponding to
+focalized sequent calculus.  For these two calculi, we present
+algorithms for normalization by evaluation.  We further discuss
+different implementations of the monad and their relation to existing
+normalization proofs for lambda-calculus with sums.  Our developments
+have been partially formalized in the Agda proof assistant.

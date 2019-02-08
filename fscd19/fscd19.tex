@@ -56,7 +56,7 @@
 
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
-\title{Normalization by Evaluation for Call-by-Push-Value and Focused Lambda-Calculus}
+\title{Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus}
 
 \titlerunning{NbE for CBPV and Focusing}%optional, please use if title is longer than one line
 
@@ -79,14 +79,14 @@
 % The full address is optional
 
 
-\author{Frederik Folkmar Ramcke}
-  {Department of Computer Science and Engineering,
-    Chalmers and Gothenburg University,
-    Sweden
-  }
-  {}%email
-  {}%orcid
-  {}%funding
+% \author{Frederik Folkmar Ramcke}
+%   {Department of Computer Science and Engineering,
+%     Chalmers and Gothenburg University,
+%     Sweden
+%   }
+%   {}%email
+%   {}%orcid
+%   {}%funding
 
 
 \author{Christian Sattler}
@@ -98,14 +98,16 @@
   {}%orcid
   {}%funding
 
-\authorrunning{A. Abel and F. F. Ramcke and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+\authorrunning{A. Abel %and F. F. Ramcke
+and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
 
-\Copyright{Andreas Abel and Frederik F. Ramcke and Christian Sattler}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+\Copyright{Andreas Abel %and Frederik F. Ramcke
+ and Christian Sattler}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
 
 \ccsdesc[100]{General and reference~General literature}
 \ccsdesc[100]{General and reference}%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
 
-\keywords{Evaluation, Intuitionistc Propositional Logic,
+\keywords{Evaluation, Intuitionistic Propositional Logic,
   Lambda-Calculus, Monad, Normalization,
   Polarized Logic, Semantics}%TODO mandatory; please add comma-separated list of keywords
 
@@ -151,9 +153,7 @@ Coquand.}
 \maketitle
 
 \begin{abstract}
-  We extend normalization by evaluation (NbE) to call-by-push-value
-  (CBPV) and focused intutitionistic propositional logic.
-  The developments have been partially formalized in Agda.
+\input{abstract.txt}
 \end{abstract}
 
 
@@ -776,8 +776,10 @@ For the case of function types $A \To B$, we require the monad $\C$ to be
 \emph{strong}, which amounts to having
 $\stmap[\C]_\Gamma\, \ell : \C\A\,\Gamma \to \C\,\B\,\Gamma$ already for
 a local presheaf morphism $\ell : (\A \hatto \B)\Gamma$.
-The typings are $c : \C \den{A \To B} \Gamma$, $\tau : \Gamma \sublist
-\Delta$, $a : \den A \Delta$, and now we want to apply every function
+The typings are
+$c : \C \den{A \To B} \Gamma$ and
+$\tau : \Gamma \sublist \Delta$ and
+$a : \den A \Delta$, and now we want to apply every function
 $f : \den{A \To B}$ in the cover $c$ to argument $a$.  Clearly,
 $\tmap[\C]$ is not applicable since it would expect a
 global presheaf morphism
@@ -811,16 +813,20 @@ and obtain a natural projection function from the semantic enironments:
 % \end{array}
 \]
 The evaluation function
-\fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
+\fbox{$\denty {t : A \from \Gamma}  : \den \Gamma \todot \den A$}
+% \fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
 can now be defined by recursion on $t$.
 Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 % Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 \[
 \begin{array}{lcl}
   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
-  \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
-     \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
+  \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma \;
+     (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi) & = &
         \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+  % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
+  %    \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
+  %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
   \dent{\tapp\,t\,u} \gamma & = &
      \dent t \gamma\;\tid\;\dent u \gamma \\
   % \dent{\tapp\,(t : A \To B \from \Gamma)\,u} \gamma & = &
@@ -830,10 +836,50 @@ Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \g
     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
-  \dent{\tcase\,t\,u\,v}\gamma & = & \\
-  \dent{\tabort\,t}\gamma & = & \\
+  \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
+  \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
+     \dencase\;\dent u \gamma\;f_1\;f_2
+    \ \mbox{ \textbf{where}} \\
+    \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
+        & = &
+        \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
+   % \
+   %  (\lambda\; (\tau : \Delta \sublist \Phi)\,(b : \den A \Phi).\
+   %      \dent v {(\tren\;\tau\;\gamma,\ b)})
+    \\
 \end{array}
 \]
+The coproduct eliminations $\denabort$ and $\dencase$
+targeting an arbitrary semantic type $\den B$ are definable thanks to
+the weak sheaf property, \ie, the presence of pasting via $\trun^B$
+for any type $B$, and strong functoriality of $\C$.
+\[
+\begin{array}{lcl}
+  \denabort^B & : & \den \tyzero \todot \den B \\
+  \denabort^B & = & \trun^B \comp \tmap[\C]\,\tmagic
+\\[2ex]
+  \dencase^B_\Gamma  & : & \den{A_1 + A_2}\Gamma
+    \to \den{A_1 \To B}\Gamma
+    \to \den{A_2 \To B}\Gamma
+    \to \den{B}\Gamma \\
+  \dencase^B_\Gamma\;c\;f_1\;f_2 & = &
+    \trun^B (\stmap[\C]\;(\lambda\,\tau.\ [f_1\,\tau,\ f_2\,\tau])\;c) \\
+\end{array}
+\]
+To complete the normalization function
+$\tnorm\,(t : A \from \Gamma) = \downG A \dent t {\idenv \Gamma}$
+we define the identity environment $\idenv \Gamma : \den \Gamma \Gamma$,
+which maps each free index to its corresponding unknown in the
+semantics, by recursion on $\Gamma$:
+\[
+\begin{array}{lcl}
+  \idenv \cempty & = & \ttempty \\
+  \idenv {\cext \Gamma A} & = & (\tren\;\twk^A\,\idenv\Gamma, \  \tfresh^A_\Gamma)\\
+\end{array}
+\]
+
+\subsection{Continuation monad}
+
 
 
 \clearpage

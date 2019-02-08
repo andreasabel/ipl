@@ -32,7 +32,7 @@ bibliography=medium.bib
 
 agda=agda
 
-files=fscd19.tex Makefile macros.tex
+files=fscd19.tex Makefile macros.tex abstract.txt
 
 stlcagda = \
   src/Everything.agda \
