@@ -654,7 +654,8 @@ offers us these services:
   & \mbox{run the monad ($\tNf$ only)} \\
 \end{array}
 \]
-We shall immediatly construct an instance of such a cover monad,
+To make things concrete,
+we shall immediately construct an instance of such a cover monad:
 the free cover monad
 $\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^\Cov$, and
 $\tcase^\Cov$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
@@ -791,6 +792,49 @@ $(\lambda \; \tau'\, f. \  f\;\tid\;a') :
 \Delta \sublist \Phi \to  \den{A \To B}\Phi \to \den B \Phi$
 % (\tau' : \Delta \sublist \Phi) (f : \den{A \To B}\Phi) \to \den B \Phi$
 and the transported cover $\tren\;\tau\;c : \C\den{A \To B}\Delta$.
+
+
+We extend the type interpretation pointwise to contexts, \ie,
+$\den \cempty = \hatone$ and
+$\den{\cext \Gamma A} = \den \Gamma \hattimes \den A$
+and obtain a natural projection function from the semantic enironments:
+\[
+\begin{array}{lcl}
+  \tlookup\,(x : A \in \Gamma) & : &  \den \Gamma \todot \den A \\
+  \tlookup\;\tzero     & = & \pi_2 \\
+  \tlookup\;(\tsuc\,x) & = & \tlookup\;x \comp \pi_1 \\
+\end{array}
+% \begin{array}{lcl}
+%   \tlookup & : & A \in \Gamma \to \den \Gamma \todot \den A \\
+%   \tlookup\;\tzero     & = & \pi_2 \\
+%   \tlookup\;(\tsuc\,x) & = & \tlookup\;x \comp \pi_1 \\
+% \end{array}
+\]
+The evaluation function
+\fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
+can now be defined by recursion on $t$.
+Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
+% Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
+\[
+\begin{array}{lcl}
+  \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+  \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
+     \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
+        \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+  \dent{\tapp\,t\,u} \gamma & = &
+     \dent t \gamma\;\tid\;\dent u \gamma \\
+  % \dent{\tapp\,(t : A \To B \from \Gamma)\,u} \gamma & = &
+  %    \dent t \gamma\;\tid\;\dent u \gamma \\
+  \dent{\tunit}\gamma & = & \ttempty \\
+  \dent{\tpair\,t_1\,t_2}\gamma & = &
+    (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+  \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+  \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
+  \dent{\tcase\,t\,u\,v}\gamma & = & \\
+  \dent{\tabort\,t}\gamma & = & \\
+\end{array}
+\]
+
 
 \clearpage
 

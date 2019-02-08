@@ -64,7 +64,7 @@
 \def\rv{\mathclose{{]\kern-0.14em]}}}   % closing ]] value delimiter
 \newcommand{\den}[1]{\lv #1 \rv}
 \newcommand{\Den}[2]{\den{#1}_{#2}}
-\newcommand{\dent}[2]{\llparenthesis#1\rrparenthesis_{#2}}
+\newcommand{\dent}[2]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis_{#2}}
 \newcommand{\denty}[1]{\llparenthesis#1\rrparenthesis}
   % banana brackets, need stmaryrd.sty
 % for computer modern
@@ -279,6 +279,7 @@
 \newcommand{\trun}{\mathsf{run}}
 \newcommand{\trunNf}[1][]{\mathsf{runNf}^{#1}}
 \newcommand{\stmap}[1][]{\widehat{\mathsf{map}}^{#1}}
+\newcommand{\Ge}{\varepsilon}
 
 % normalization by evaluation
 \newcommand{\twhnf}{\mathsf{whnf}}
