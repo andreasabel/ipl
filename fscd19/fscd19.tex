@@ -118,9 +118,15 @@
 
 %\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
 
-\acknowledgements{ The presentation of this NbE proof and its
-Agda formalization benefited greatly from discussions with Christian
-Sattler.}%optional
+\acknowledgements{The first author took inspiration from some
+  unpublished notes by Thorsten Altenkirch titled
+\emph{Another topological completeness proof for intuitionistic logic}
+received by email on 16th March 2000.
+Thorsten in turn credits his inspiration to an ALF proof by Thierry
+Coquand.}
+% \acknowledgements{ The presentation of this NbE proof and its
+% Agda formalization benefited greatly from discussions with Christian
+% Sattler.}%optional
 
 %\nolinenumbers %uncomment to disable line numbering
 
@@ -433,6 +439,21 @@ resp.) and $A{\from}\_$.  We shall simply write, for instance,
 \fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
 (The point on the arrow is mnemoic for \emph{pointwise}.)
 
+While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
+normal forms of positive types $P$, their extension to negative types
+is admissible.
+\[
+\begin{array}{l@{~}lcl}
+  \multicolumn 4 l {\tabort^B ~:~ \tNe\, 0 \todot \tNf\,B} \\
+  \tabort^{\tyone}     & u & = & \tunit \\
+  \tabort^{A \times B} & u & = & \tpair\,(\tabort^A\,u)\,(\tabort^B\,u) \\
+  \tabort^{A \To B}    & u & = & \tabs\,(\tabort^B\,(\tren\,\twk^A\,u)) \\
+  \tabort^P           & u & = & \tabort\;u \\
+\end{array}
+\]
+$\tcase$ generalizes analogously, with a bit of care when weakening
+the branches.
+
 \emph{Proof normalization} is concerned with finding a normal form
 $u : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
 \emph{term normalization} additionally requires that $\tm u \cong t$
@@ -595,18 +616,19 @@ $\tabs\,(\tcase\,(\tvar\,\tzero)\,(\tvar\,\tzero)\,(\tvar\,\tzero)) :
 What is needed are case distinctions on neutrals in the semantics,
 allowing us the elimination of positive hypotheses before producing a
 semantic value,
-and we shall capture this capability in a monad $\C$.
+and we shall capture this capability in a strong monad $\C$
+which can \emph{cover} the cases.
 
 To recapitulate, a monad $\C$ on presheaves is first an endofunctor,
 i.e., it maps any presheaf $\A$ to the presheaf $\C\,\A$ and any
 presheaf morphism $f : \A \todot \B$ to the morphism
-$\tmap[\C]f: \C\,A \todot \C\,\B$ satisfying the functor laws for
+$\tmap[\C]f: \C\,\A \todot \C\;\B$ satisfying the functor laws for
 identity and composition.  Then, there are natural transformations
 $\treturn[\C] : \A \todot \C\,\A$ (unit) and
-$\tjoin[\C] : \C\,(\C\,A) \todot \C\,\A$ (concatenation) satisfying
+$\tjoin[\C] : \C\,(\C\,\A) \todot \C\,\A$ (concatenation) satisfying
 the monad laws.
 
-We are looking for a monad $\C$ that
+We are looking for a cover monad $\C$ that
 offers us these services:
 % \begin{enumerate}
 % \item Elimination of absurd neutrals
@@ -632,21 +654,56 @@ offers us these services:
   & \mbox{run the monad ($\tNf$ only)} \\
 \end{array}
 \]
-Using these services, we can complete our semantics:
+We shall immediatly construct an instance of such a cover monad,
+the free cover monad
+$\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^\Cov$, and
+$\tcase^\Cov$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
+binary case tree whose inner nodes ($\tcase$) are labeled by a neutral term
+of sum type $A+B$ and its two branches by the context extensions $A$
+and $B$, resp.  Leaves are either ($\tabort$)
+labeled by a neutral term of empty type $\tyzero$,
+or ($\treturn$) by an element of $\A$.  Functoriality amounts to
+replacing the labels of the $\treturn$-leaves, and the monadic bind replaces
+these leaves by further case trees.  (The uninspiring $\tjoin[\Cov]$
+flattens a 2-level case tree into a single one.)
+Finally $\trunNf[\Cov]$ is a simple recursion, replacing $\tcase^\Cov$
+and $\tabort^\Cov$
+by the $\tcase$ and $\tabort$ constructions on normal forms, and
+$\treturn[\Cov]$ by the identity.
+
+% the following constructions:
+% \begin{gather*}
+%   \nru{\treturn[\Cov]}{\A\,\Gamma}{\Cov\,\A\,\Gamma}
+% \end{gather*}
+
+Using the services of a generic cover monad $\C$, we can complete our semantics:
 %\begin{gather*}
 \[
 \begin{array}{lcl}
-  \den \tybase & = & \C\,(\tNe\,\tybase) \\
-  \upG \tybase \; u & = & \treturn[\C]\,u \\
-  \downG \tybase \; m & = & \trunNf[\C]\,(\tmap[\C]\tne\;m) \\
+  \den   \tybase & = & \C\,(\tNe\,\tybase) \\
+  \upG   \tybase & = & \treturn[\C] \\
+  \downG \tybase & = & \trunNf[\C] \comp \tmap[\C]\tne \\
 \end{array}
 \qquad
 \begin{array}{lcl}
-  \den \tyzero & = & \C\,\hat0 \\
-  \upG \tyzero \; u & = & \tabort^\C\,u \\
-  \downG \tyzero \; m & = & \trunNf[\C]\,(\tmap[\C]\tmagic\;m) \\
+  \den   \tyzero & = & \C\,\hat0 \\
+  \upG   \tyzero & = & \tabort^\C \\
+  \downG \tyzero & = & \trunNf[\C] \comp \tmap[\C]\tmagic \\
 \end{array}
 \]
+% \[
+% \begin{array}{lcl}
+%   \den \tybase & = & \C\,(\tNe\,\tybase) \\
+%   \upG \tybase \; u & = & \treturn[\C]\,u \\
+%   \downG \tybase \; m & = & \trunNf[\C]\,(\tmap[\C]\tne\;m) \\
+% \end{array}
+% \qquad
+% \begin{array}{lcl}
+%   \den \tyzero & = & \C\,\hat0 \\
+%   \upG \tyzero \; u & = & \tabort^\C\,u \\
+%   \downG \tyzero \; m & = & \trunNf[\C]\,(\tmap[\C]\tmagic\;m) \\
+% \end{array}
+% \]
 \[
 \begin{array}{lcl}
   \den {A+B} & = & \C\,(\den A \hatplus \den B) \\
@@ -654,11 +711,86 @@ Using these services, we can complete our semantics:
     \,(\treturn[\C]\,(\iota_1\,\tfresh^A_\Gamma))
     \,(\treturn[\C]\,(\iota_2\,\tfresh^B_\Gamma))
     \\
-  \downG {A+B} \; m & = & \trunNf[\C]\,
-    (\tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B]\;m) \\
+  \downG {A+B} & = & \trunNf[\C] \comp
+    \tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B] \\
 \end{array}
 \]
+% \[
+% \begin{array}{lcl}
+%   \den {A+B} & = & \C\,(\den A \hatplus \den B) \\
+%   \upG {A+B} \; u & = & \tcase^\C\,u
+%     \,(\treturn[\C]\,(\iota_1\,\tfresh^A_\Gamma))
+%     \,(\treturn[\C]\,(\iota_2\,\tfresh^B_\Gamma))
+%     \\
+%   \downG {A+B} \; m & = & \trunNf[\C]\,
+%     (\tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B]\;m) \\
+% \end{array}
+% \]
 %\end{gather*}
+
+All semantic types fulfill the weak sheaf condition aka weak pasting,
+meaning there is
+a natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
+type $A$.  In other words, we can \emph{run} the monad, pushing its
+effects into $\den A$.  We proceed by induction on $A$.
+Positive types $P$ are already monadic,
+and $\trun^P$ is simply the $\tjoin$ of monad $\C$.
+At negative types we can recurse pointwise at a smaller type,
+exploiting that values of negative types are essentially
+(finite or infinite) tuples.
+\[
+\begin{array}{l@{~}l@{~~}c@{~~}l@{\qquad}l@{~~}c@{~~}l}
+  \multicolumn 7 l {\trun^A ~:~ \C \den A \todot \den A} \\
+  \trun^{\tyone} & c & = & \ttempty
+    &
+  \trun^{\tyzero} & = & \tjoin[\C]
+    \\
+  \trun^{A \times B} & c & = &
+      (\trun^A\,(\tmap[\C]\;\pi_1\;c),\
+       \trun^B\,(\tmap[\C]\;\pi_2\;c))
+    &
+  \trun^{A + B}   & = & \tjoin[\C]
+  \\
+  \trun^{A \To B} & c \; \tau \; a & = & \trun^B\,
+      (\stmap[\C]\;(\lambda\;\tau'\,f.\;f\;\tid\;(\tren\;\tau'\;a))\;(\tren\;\tau\;c))
+    &
+  \trun^{o}      & = & \tjoin[\C]
+\\
+\end{array}
+% \begin{array}{lcl@{\quad}l@{~}lcl}
+%   \trun^A & : & \C \den A \todot \den A \\
+%   \trun^{\tyzero} & = & \tjoin[\C]
+%     & \trun^{\tyone} & c & = & \ttempty \\
+%   \trun^{A + B}   & = & \tjoin[\C]
+%     & \trun^{A \times B} & c & = &
+%       (\trun^A\,(\tmap[\C]\;\pi_1\;c),\
+%        \trun^B\,(\tmap[\C]\;\pi_2\;c))\\
+%   \trun^{o}      & = & \tjoin[\C]
+%     & \trun^{A \To B} & c \; \tau \; a & = & \trun^B\,
+%       (\stmap[\C]\;(\lambda\;\tau'\,f.\;f\;\tid\;(\tren\;\tau'\;a))\;(\tren\;\tau\;c))
+% \\
+% \end{array}
+\]
+For the case of function types $A \To B$, we require the monad $\C$ to be
+\emph{strong}, which amounts to having
+$\stmap[\C]_\Gamma\, \ell : \C\A\,\Gamma \to \C\,\B\,\Gamma$ already for
+a local presheaf morphism $\ell : (\A \hatto \B)\Gamma$.
+The typings are $c : \C \den{A \To B} \Gamma$, $\tau : \Gamma \sublist
+\Delta$, $a : \den A \Delta$, and now we want to apply every function
+$f : \den{A \To B}$ in the cover $c$ to argument $a$.  Clearly,
+$\tmap[\C]$ is not applicable since it would expect a
+global presheaf morphism
+$\den{A \to B} \todot \den B$, \ie, something that works in \emph{any}
+context.  However, applying to $a : \den A \Delta$ can only work in
+context $\Delta$ or any extension $\tau' : \Delta \sublist \Phi$,
+since we can transport $a$ to such a $\Phi$ via
+$a' := \tren\; \tau'\; a : \den A \Phi$ but not to a context unrelated to
+$\Delta$.  We obtain our input to $\trun^B$ of type $\C \den B \Gamma$
+as an instance of $\stmap[\C]_\Gamma$ applied to the local presheaf morphism
+$(\lambda \; \tau'\, f. \  f\;\tid\;a') :
+\Delta \sublist \Phi \to  \den{A \To B}\Phi \to \den B \Phi$
+% (\tau' : \Delta \sublist \Phi) (f : \den{A \To B}\Phi) \to \den B \Phi$
+and the transported cover $\tren\;\tau\;c : \C\den{A \To B}\Delta$.
 
 \clearpage
 
