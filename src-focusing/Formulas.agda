@@ -103,13 +103,15 @@ mutual
     falseE  :                                                AddHyp False   J Γ
     orE     : ∀{A B} (t : AddHyp A J Γ) (u : AddHyp B J Γ) → AddHyp (A ∨ B) J Γ
 
-addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp A J Γ
-addHyp (Atom P)  j = addAtom j
-addHyp (Thunk A) j = addNeg j
-addHyp True      j = trueE j
-addHyp False   _ = falseE
-addHyp (A ∧ B) j = andE (addHyp A (addHyp B j))
-addHyp (A ∨ B) j = orE (addHyp A j) (addHyp B j)
+module UNUSED where
+
+  addHyp : ∀ (A : Form +) {Γ} {J : Cxt → Set} (j : ∀{Δ} → J Δ) → AddHyp A J Γ
+  addHyp (Atom P)  j = addAtom j
+  addHyp (Thunk A) j = addNeg j
+  addHyp True      j = trueE j
+  addHyp False   _ = falseE
+  addHyp (A ∧ B) j = andE (addHyp A (addHyp B j))
+  addHyp (A ∨ B) j = orE (addHyp A j) (addHyp B j)
 
 
 module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
@@ -123,38 +125,48 @@ module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
 
 mutual
 
-  Ne    = Ne' RFoc
-  Cover = Cover' λ A → Ne (Comp A)
-  Foc   = λ C → Cover ∞ (RFoc C)
+  -- Neutrals, containing values (RFoc) as arguments to functions.
+
+  Ne : (i : Size) (C : Form -) (Γ : Cxt) → Set
+  Ne  i = Ne' (RFoc i)
+
+  -- Cover monad, containing neutrals of type (Comp A) as scrutinees.
+
+  Cover : (i j : Size) (J : Cxt → Set) (Γ : Cxt) → Set
+  Cover i j = Cover' (λ A → Ne j (Comp A)) i
+
+  --
+  Foc : (i : Size) (A : Form +) (Γ : Cxt) → Set
+  Foc i A = Cover ∞ i (RFoc i A)
 
   -- Non-invertible right rules:
 
   -- Right focusing (proof of a positive goal by decisions)
   -- "normal"
 
-  data RFoc : (A : Form +) (Γ : Cxt) → Set where
+  data RFoc : (i : Size) (A : Form +) (Γ : Cxt) → Set where
     -- Right focusing stops at a negative formulas
-    thunk : ∀{Γ A} (t : RInv A Γ) → RFoc (Thunk A) Γ
+    thunk : ∀{i Γ A} (t : RInv i A Γ) → RFoc (↑ i) (Thunk A) Γ
     -- Success:
-    hyp   : ∀{Γ P} (x : HypAtom P Γ) → RFoc (Atom P) Γ
-    trueI : ∀{Γ} → RFoc True Γ
+    hyp   : ∀{i Γ P} (x : HypAtom P Γ) → RFoc (↑ i) (Atom P) Γ
+    trueI : ∀{i Γ} → RFoc (↑ i) True Γ
     -- Choices:
-    andI  : ∀{Γ A B} (t : RFoc A Γ) (u : RFoc B Γ) → RFoc (A ∧ B) Γ
-    orI₁  : ∀{Γ B A} (t : RFoc A Γ) → RFoc (A ∨ B) Γ
-    orI₂  : ∀{Γ A B} (u : RFoc B Γ) → RFoc (A ∨ B) Γ
+    andI  : ∀{i Γ A B} (t : RFoc i A Γ) (u : RFoc i B Γ) → RFoc (↑ i) (A ∧ B) Γ
+    orI₁  : ∀{i Γ B A} (t : RFoc i A Γ) → RFoc (↑ i) (A ∨ B) Γ
+    orI₂  : ∀{i Γ A B} (u : RFoc i B Γ) → RFoc (↑ i) (A ∨ B) Γ
 
   -- Invertible right rules:
 
   -- Right inversion: break a goal into subgoals
   -- "eta"
 
-  data RInv : (A : Form -) (Γ : Cxt) → Set where
+  data RInv : (i : Size) (A : Form -) (Γ : Cxt) → Set where
     -- Right inversion ends at a positive formula
-    ret  : ∀{Γ A} (t : Foc A Γ) → RInv (Comp A) Γ
+    ret  : ∀{i Γ A} (t : Foc i A Γ) → RInv (↑ i) (Comp A) Γ
     -- Goal splitting
-    trueI : ∀{Γ} → RInv True Γ
-    andI  : ∀{Γ A B} (t : RInv A Γ) (u : RInv B Γ) → RInv (A ∧ B) Γ
-    impI  : ∀{Γ A B} (t : AddHyp A (RInv B) Γ) → RInv (A ⇒ B) Γ
+    trueI : ∀{i Γ} → RInv (↑ i) True Γ
+    andI  : ∀{i Γ A B} (t : RInv i A Γ) (u : RInv i B Γ) → RInv (↑ i) (A ∧ B) Γ
+    impI  : ∀{i Γ A B} (t : AddHyp A (RInv i B) Γ) → RInv (↑ i) (A ⇒ B) Γ
 
 
 -- Pointwise mapping
@@ -170,13 +182,13 @@ mapAddHyp f falseE      = falseE
 mapAddHyp f (andE t)    = andE (mapAddHyp (mapAddHyp f) t) -- By induction on types!
 mapAddHyp f (orE t u)   = orE (mapAddHyp f t) (mapAddHyp f u)
 
-mapCover :  ∀{P Q} (f : P →̇ Q) {i} → Cover i P →̇ Cover i Q
+mapCover :  ∀{P Q} (f : P →̇ Q) {i j} → Cover i j P →̇ Cover i j Q
 mapCover f (returnC t) = returnC (f t)
 mapCover f (caseC t c) = caseC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
 
 -- Cover monad
 
-joinCover : ∀{i P} → Cover i (Cover ∞ P) →̇ Cover ∞ P
+joinCover : ∀{i j P} → Cover i j (Cover ∞ j P) →̇ Cover ∞ j P
 joinCover (returnC t) = t
 joinCover (caseC t c) = caseC t (mapAddHyp joinCover c)
 
@@ -254,31 +266,35 @@ monAddHyp monP τ (orE t u)   = orE (monAddHyp monP τ t) (monAddHyp monP τ u)
 -- Monotonicity of derivations
 
 mutual
-  monNe : ∀{A} → Mon (Ne A)
-  monNe τ t = {! monNe' monRFoc τ t !}
+  monNe : ∀{i A} → Mon (Ne i A)
+  monNe {i} τ t =  monNe' (monRFoc {i}) τ t
 
-  monCover : ∀{i P} (monP : Mon P) → Mon (Cover i P)
-  monCover monP τ (returnC t)     = returnC (monP τ t)
-  monCover monP τ (caseC {j} t c) = caseC (monNe τ t) (monAddHyp (monCover {j} monP) τ c)
+  monCover : ∀{i j P} (monP : Mon P) → Mon (Cover i j P)
+  monCover         monP τ (returnC t)      = returnC (monP τ t)
+  monCover {i} {j} monP τ (caseC {i'} t c) = caseC (monNe τ t)
+    (monAddHyp (monCover {i'} {j} monP) τ c)
 
-  monRFoc : ∀{A} → Mon (RFoc A)
+  monRFoc : ∀{i A} → Mon (RFoc i A)
   monRFoc τ (thunk t)   = thunk (monRInv τ t)
-  monRFoc τ (hyp x)     = hyp (monH τ x)
+  monRFoc τ (hyp x)     = hyp   (monH τ x)
   monRFoc τ trueI       = trueI
   monRFoc τ (andI t t₁) = andI (monRFoc τ t) (monRFoc τ t₁)
   monRFoc τ (orI₁ t)    = orI₁ (monRFoc τ t)
   monRFoc τ (orI₂ t)    = orI₂ (monRFoc τ t)
 
-  monRInv : ∀{A} → Mon (RInv A)
-  monRInv τ (ret t)      = ret (monCover monRFoc τ t)
+  monRInv : ∀{i A} → Mon (RInv i A)
+  monRInv τ (ret {i} t)     = ret (monCover (monRFoc {i}) τ t)
   monRInv τ trueI       = trueI
   monRInv τ (andI t t₁) = andI (monRInv τ t) (monRInv τ t₁)
-  monRInv τ (impI t)    = impI (monAddHyp monRInv τ t)
+  monRInv τ (impI {i} t)    = impI (monAddHyp (monRInv {i}) τ t)
 
 KFun : (P Q : Cxt → Set) (Γ : Cxt) → Set
 KFun P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
 
-mapAddHyp' : ∀{P Q Γ} (f : KFun P Q Γ) → ∀{A} → AddHyp A P Γ → AddHyp A Q Γ
+_⇒̂_ : (P Q : Cxt → Set) (Γ : Cxt) → Set
+_⇒̂_ P Q Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
+
+mapAddHyp' : ∀{P Q Γ} (f : (P ⇒̂ Q) Γ) → ∀{A} → AddHyp A P Γ → AddHyp A Q Γ
 mapAddHyp' f (addAtom t) = addAtom (f (weak id≤) t)
 mapAddHyp' f (addNeg t)  = addNeg (f (weak id≤) t)
 mapAddHyp' f (trueE t)   = trueE (f id≤ t)
@@ -286,9 +302,9 @@ mapAddHyp' f falseE      = falseE
 mapAddHyp' f (andE t)    = andE (mapAddHyp' (λ τ → mapAddHyp' λ τ' → f (τ' • τ)) t) -- By induction on types!
 mapAddHyp' f (orE t u)   = orE (mapAddHyp' f t) (mapAddHyp' f u)
 
-mapCover' :  ∀{P Q Γ} (f : KFun P Q Γ) {i} (c : Cover i P Γ) → Cover i Q Γ
+mapCover' :  ∀{P Q Γ} (f : (P ⇒̂ Q) Γ) {i j} (c : Cover i j P Γ) → Cover i j Q Γ
 mapCover' f (returnC t) = returnC (f id≤ t)
-mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover should be sized!
+mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover is sized!
 
 -- Semantics
 
@@ -300,7 +316,7 @@ mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f 
 ⟦ A ∧ B ⟧   Γ = ⟦ A ⟧ Γ × ⟦ B ⟧ Γ
 ⟦ A ⇒ B ⟧   Γ = ∀ {Δ} (τ : Δ ≤ Γ) (a : ⟦ A ⟧ Δ) → ⟦ B ⟧ Δ
 
-⟦ Comp A ⟧ = Cover ∞ ⟦ A ⟧  -- values to computations
+⟦ Comp A ⟧ = Cover ∞ ∞ ⟦ A ⟧  -- values to computations
 ⟦ Thunk A ⟧ = ⟦ A ⟧
 
 -- Monotonicity of semantics
@@ -319,13 +335,13 @@ mon⟦ Thunk A ⟧           = mon⟦ A ⟧
 
 mutual
 
-  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv A Γ
+  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv ∞ A Γ
   reify- True     _       = trueI
   reify- (A ∧ B)  (a , b) = andI (reify- A a) (reify- B b)
   reify- (A ⇒ B)  f       = impI (reflectHyp A λ τ a → reify- B (f τ a))
   reify- (Comp A) c       = ret (mapCover (reify+ A) c)
 
-  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc A Γ
+  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc ∞ A Γ
   reify+ True _           = trueI
   reify+ (A ∧ B) (a , b)  = andI (reify+ A a) (reify+ B b)
   reify+ (Atom P) x       = hyp x
@@ -346,7 +362,7 @@ mutual
 
   -- Since we only have negative hypotheses, we only need to reflect these
 
-  reflect : ∀ (A : Form -) → Ne A →̇ ⟦ A ⟧
+  reflect : ∀ (A : Form -) → Ne ∞ A →̇ ⟦ A ⟧
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify+ A a))  -- need monNe
@@ -354,7 +370,7 @@ mutual
 
 -- Negative propositions are comonadic
 
-paste : ∀ (A : Form -) → Cover ∞ ⟦ A ⟧ →̇ ⟦ A ⟧
+paste : ∀ (A : Form -) → Cover ∞ ∞ ⟦ A ⟧ →̇ ⟦ A ⟧
 paste True    _     = _
 paste (A ∧ B) c     = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
 paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
@@ -439,7 +455,7 @@ module CBV where
   return (A ∧ B) (a , b) = return A a , return B b
   return (A ⇒ B) v = v
 
-  run : ∀ A → C⟦ A ⟧ →̇ Cover ∞ V⟦ A ⟧
+  run : ∀ A → C⟦ A ⟧ →̇ Cover ∞ ∞ V⟦ A ⟧
   run (Atom P) c = c
   run True c = returnC c
   run False c = c
@@ -466,7 +482,7 @@ module CBV where
   lookup top     = proj₂
   lookup (pop x) = lookup x ∘ proj₁
 
-  impIntro : ∀ {A B Γ} (f : KFun (Cover ∞ ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
+  impIntro : ∀ {A B Γ} (f : KFun (Cover ∞ ∞ ⟦ A ⟧) ⟦ B ⟧ Γ) → ⟦ A ⇒ B ⟧ Γ
   impIntro f τ a = f τ (returnC a)
 
   -- impElim : ∀ A B {Γ} → (f : C⟦ A ⇒ B ⟧ Γ) (a : C⟦ A ⟧ Γ) → C⟦ B ⟧ Γ
@@ -514,7 +530,7 @@ module CBV where
 
   -- Identity environment
 
-  ide : ∀ Γ → Cover ∞ G⟦ Γ ⟧ (Γ ⁺⁺)
+  ide : ∀ Γ → Cover ∞ ∞ G⟦ Γ ⟧ (Γ ⁺⁺)
   ide ε = returnC _
   ide (Γ ∙ A) = {!!}
     -- monG (weak id≤) (ide Γ) , {! reflectHyp (A ⁺) (λ τ a → a) !}
