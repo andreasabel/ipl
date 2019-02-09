@@ -438,6 +438,9 @@ natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
 resp.) and $A{\from}\_$.  We shall simply write, for instance,
 \fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
 (The point on the arrow is mnemoic for \emph{pointwise}.)
+Slightly abusive, we shall extend this notation to $n$-ary
+morphisms, \eg, write $\A \todot \B \todot \C$ for
+$\forall \Gamma.\ \A\,\Gamma \to (\B\,\Gamma \to \C\,\Gamma)$.
 
 While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
 normal forms of positive types $P$, their extension to negative types
@@ -858,11 +861,11 @@ for any type $B$, and strong functoriality of $\C$.
   \denabort^B & : & \den \tyzero \todot \den B \\
   \denabort^B & = & \trun^B \comp \tmap[\C]\,\tmagic
 \\[2ex]
-  \dencase^B_\Gamma  & : & \den{A_1 + A_2}\Gamma
-    \to \den{A_1 \To B}\Gamma
-    \to \den{A_2 \To B}\Gamma
-    \to \den{B}\Gamma \\
-  \dencase^B_\Gamma\;c\;f_1\;f_2 & = &
+  \dencase^B  & : & \den{A_1 + A_2}
+    \todot \den{A_1 \To B}
+    \todot \den{A_2 \To B}
+    \todot \den{B} \\
+  \dencase^B\;c\;f_1\;f_2 & = &
     \trun^B (\stmap[\C]\;(\lambda\,\tau.\ [f_1\,\tau,\ f_2\,\tau])\;c) \\
 \end{array}
 \]
