@@ -657,8 +657,8 @@ offers us these services:
 To make things concrete,
 we shall immediately construct an instance of such a cover monad:
 the free cover monad
-$\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^\Cov$, and
-$\tcase^\Cov$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
+$\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^{\Cov}$, and
+$\tcase^{\Cov}$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
 binary case tree whose inner nodes ($\tcase$) are labeled by a neutral term
 of sum type $A+B$ and its two branches by the context extensions $A$
 and $B$, resp.  Leaves are either ($\tabort$)
@@ -667,8 +667,8 @@ or ($\treturn$) by an element of $\A$.  Functoriality amounts to
 replacing the labels of the $\treturn$-leaves, and the monadic bind replaces
 these leaves by further case trees.  (The uninspiring $\tjoin[\Cov]$
 flattens a 2-level case tree into a single one.)
-Finally $\trunNf[\Cov]$ is a simple recursion, replacing $\tcase^\Cov$
-and $\tabort^\Cov$
+Finally $\trunNf[\Cov]$ is a simple recursion, replacing $\tcase^{\Cov}$
+and $\tabort^{\Cov}$
 by the $\tcase$ and $\tabort$ constructions on normal forms, and
 $\treturn[\Cov]$ by the identity.
 
@@ -913,6 +913,169 @@ that gives us for each term $t$ a $\cong$-equal normal form $u$.
 
 \section{Focused Intuitionistic Propositional Logic}
 \label{sec:fipl}
+
+Polarized lambda calculus \cite{espiritoSanto:entcs17}
+divides types deeply into positive and negative.
+
+\[
+\begin{array}{lllrl@{\qquad}l}
+  \PTy & \ni & P,Q & ::= & \patom
+    \mid \tyzero \mid P_1 + P_2
+    \mid \tyone \mid P_1 \times P_2
+    \mid \Thunk N
+  & \mbox{positive type}
+\\
+  \NTy & \ni & N,M & ::= & \natom
+    \mid \top \mid N_1 \ntimes N_2
+    \mid P \To N
+    \mid \Comp P
+  & \mbox{negative type}
+\\
+  \HTy & \ni & X,Y & ::= & \patom \mid P
+  & \mbox{hypothesis type}
+\\
+\end{array}
+\]
+Espirito Santo's version actually does not contain the positive
+product $\times$, however, it appears in Zeilberger
+\cite{zeilberger:PhD}.
+
+Polarized lambda-calculus is a focused calculus, it eagerly employs
+invertible rules: the introduction rules for negative types and the
+elimination rules for positive types.  As a consequence of the latter,
+variables are either of atomic or negative type ($\HTy$).
+Contexts $\Gamma,\Delta$ are lists of $\HTy$s.
+%\fbox{$X ::= \patom \mid P$}.
+
+To add a variable of positive type $P$ to the context, we need to
+break it apart until only atoms and negative bits remain.  This is
+performed by maximal pattern matching, called the left-invertible
+phase of focalization.
+We express maximal pattern matching on $P$ as a strong functor
+$\Add P$ in the category of presheaves
+mapping a presheaf $\J$ (``judgement'') to $\Add P \J$
+and a presheaf morphism $f : (\J \hatto \K)\Gamma$ to
+$\stmap[\Add P]_\Gamma f : \AddHyp P \J \Gamma \to \AddHyp P \K \Gamma$.
+For arbitrary $\J$ and $\Gamma$, the set \fbox{$\AddHyp P \J \Gamma$} is
+inductively constructed by the following rules:
+\begin{gather*}
+  \nru{\phyp}
+      {\J\,(\cext \Gamma \patom)}
+      {\AddHyp {\patom} \J \Gamma}
+\qquad
+  \nru{\nbranch}
+      {}
+      {\AddHyp {\tyzero} \J \Gamma}
+\qquad
+  \nru{\bbranch}
+      {\AddHyp {P_1} \J \Gamma \qquad
+       \AddHyp {P_2} \J \Gamma }
+      {\AddHyp {P_1 + P_2} \J \Gamma}
+\\[2ex]
+  \nru{\nhyp}
+      {\J\,(\cext \Gamma N)}
+      {\AddHyp {\Thunk N} \J \Gamma}
+\qquad
+  \nru{\nsplit}
+      {\J\,\Gamma}
+      {\AddHyp {\tyone} \J \Gamma}
+\qquad
+  \nru{\bsplit}
+      {\AddHyp {P_1} {(\Add{P_2}\,\J)} \Gamma}
+      {\AddHyp {P_1 \times P_2} \J \Gamma}
+\end{gather*}
+Note the recursive occurrence of $\Add{P_2}$ as argument to
+$\Add{P_1}$ in $\bsplit$, which makes $\Add P$ a nested datatype
+\cite{bird:nested}.  Agda supports such nested inductive types; but
+note that $\Add{P}$ is uncontroversial, since it could also be defined
+by recursion on $P$.   It is tempting to name $\bsplit$
+``$\tjoin$'' and $\nsplit$ ``$\treturn$''
+since $\Add P$ is a graded monad on the monoid $(1,\times)$
+of product types;
+however, this coincidence shall not matter for our further considerations.
+
+Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
+context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
+of positive type $P$ are constructed by the
+following rules:
+\begin{gather*}
+  \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
+\qquad
+  \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk\,N}\Gamma}
+\\[2ex]
+  \nru{\punit}{}{\PValT{\tyone}\Gamma}
+\qquad
+  \nru{\ppair}
+      {\PValT{P_1}\Gamma \qquad \PValT{P_2}\Gamma}
+      {\PValTP{P_1 \times P_2}\Gamma}
+\qquad
+  \nru{\tinj_i}{\PValT{P_i}\Gamma}{\PValTP{P_1 + P_2}\Gamma}
+\end{gather*}
+Negative hypotheses can be eliminated by projections and application
+to values, as described by the following inductive family
+\fbox{$\NeT N \Gamma$}:
+\begin{gather*}
+  \nru{\nvar}{N \in \Gamma}{\NeT N \Gamma}
+\qquad
+  \nru{\tprj_i}
+      {\NeTP {N_1 \ntimes N_2} \Gamma}
+      {\NeT {N_i} \Gamma}
+\qquad
+  \nru{\tapp}
+      {\NeTP {P \To N} \Gamma \qquad \PValT P \Gamma}
+      {\NeT N \Gamma}
+\end{gather*}
+% Negative hypotheses can be eliminated by projections and application
+% to values $v : \V\,P\,\Gamma$ which we leave abstract in the following
+% inductive definition of \fbox{$\Ne[\V] N \Gamma$}:
+% \begin{gather*}
+%   \nru{\nvar}{N \in \Gamma}{\Ne[\V] N \Gamma}
+% \qquad
+%   \nru{\tprj_i}
+%       {\NeP[\V] {N_1 \ntimes N_2} \Gamma}
+%       {\Ne[\V] {N_i} \Gamma}
+% \qquad
+%   \nru{\tapp}
+%       {\NeP[\V] {P \To N} \Gamma \qquad \V\,P\,\Gamma}
+%       {\Ne[\V] N \Gamma}
+% \end{gather*}
+
+% decomposing
+% decomposes
+% \emph{values}, meaning inhabitants of positive types.
+An elimination may either result in a negative atom $\natom$ or a
+positive type $P$, which can be further taken apart by pattern
+matching.  Pattern matching on neutrals is organized in the
+inductively defined cover monad \fbox{$\Cov[\T]$}.
+\begin{gather*}
+  \nru{\treturn}{\J\,\Gamma}{\CoverT \J \Gamma}
+\qquad
+  \nru{\tmatch}
+      {\NeTP {\Comp\,P} \Gamma \qquad \AddHypP P {\Cov[\T]\J} \Gamma}
+      {\CoverT \J \Gamma}
+\end{gather*}
+
+Finally, normal forms of negative types are defined as inductive
+family \fbox{$\Nf N \Gamma$}.  It relies on the previous definitions
+with instance $\T = \tNf$.
+\begin{gather*}
+  \nru{\tne}
+      {\Cov[\tNf](\tNe[\tNf]\,\natom)\,\Gamma}
+      {\Nf {\natom} \Gamma}
+\qquad
+  \nru{\tval}
+      {\Cov[\tNf](\tVal[\tNf]\,P)\,\Gamma}
+      {\NfP {\Comp\,P} \Gamma}
+\\[2ex]
+  \nru{\npair}
+      {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
+      {\NfP {N_1 \ntimes N_2} \Gamma}
+\qquad
+  \nru{\tabs}
+      {\AddHypP P {\tNf\, N} \Gamma}
+      {\NfP {P \To N} \Gamma}
+\end{gather*}
+
 
 \section{Conclusion}
 \label{sec:concl}

@@ -275,13 +275,53 @@
 \newcommand{\ttempty}{()} % empty tuple
 \newcommand{\twk}{\mathsf{wk}}
 \newcommand{\tfresh}{\mathsf{fresh}}
-\newcommand{\Cov}{\mathsf{Cov}}
+\newcommand{\Cov}[1][]{\mathsf{Cov}^{#1}}
+\newcommand{\CoverT}[2]{\Cov[\T]#1\,#2}
+\newcommand{\Cover}[2]{\Cov\,#1\,#2}
 \newcommand{\trun}{\mathsf{run}}
 \newcommand{\trunNf}[1][]{\mathsf{runNf}^{#1}}
 \newcommand{\stmap}[1][]{\widehat{\mathsf{map}}^{#1}}
 \newcommand{\Ge}{\varepsilon}
 \newcommand{\dencase}{\denty{\tcase}}
 \newcommand{\denabort}{\denty{\tabort}}
+
+% Polarized lambda
+\newcommand{\patom}{o^+}
+\newcommand{\natom}{o^-}
+\newcommand{\PTy}{\mathsf{Ty}^+}
+\newcommand{\NTy}{\mathsf{Ty}^-}
+\newcommand{\HTy}{\mathsf{HTy}}
+\newcommand{\ntimes}{\mathbin{\&}}
+\newcommand{\tthunk}{\mathsf{thunk}}
+\newcommand{\tval}{\mathsf{val}}
+
+\newcommand{\Thunk}[1]{\mathsf{Thunk}\,#1}
+\newcommand{\Comp}[1]{\mathsf{Comp}\,#1}
+\newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
+\newcommand{\AddHyp}[3]{\Add{#1}\,#2\,#3}
+\newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
+\newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
+\newcommand{\PValP}[3][]{\Val^{#1}(#2)\,#3}
+\newcommand{\PValT}[3][]{\Val^{\T}#2\,#3}
+\newcommand{\PValTP}[3][]{\Val^{\T}(#2)\,#3}
+\newcommand{\phyp}{\mathsf{hyp}^+}
+\newcommand{\nhyp}{\mathsf{hyp}^-}
+\newcommand{\punit}{\mathsf{unit}^+}
+\newcommand{\nunit}{\mathsf{unit}^-}
+\newcommand{\ppair}{\mathsf{pair}^+}
+\newcommand{\npair}{\mathsf{pair}^-}
+
+\newcommand{\tbranch}{\mathsf{branch}}
+\newcommand{\nbranch}{\tbranch_0}
+\newcommand{\bbranch}{\tbranch_2}
+\newcommand{\tsplit}{\mathsf{split}}
+\newcommand{\nsplit}{\tsplit_0}
+\newcommand{\bsplit}{\tsplit_2}
+\newcommand{\pvar}{\tvar^{+}}
+\newcommand{\nvar}{\tvar^{-}}
+
+
+
 
 % normalization by evaluation
 \newcommand{\twhnf}{\mathsf{whnf}}
@@ -368,7 +408,8 @@
 % \newcommand{\injP}[2]{\tinj_{#1}(#2)}
 
 \newcommand{\tCover}{\mathsf{Cover}}
-\newcommand{\Cover}[1]{\tCover\,(#1)}
+%\newcommand{\Cover}[1]{\tCover\,(#1)}
+\newcommand{\tmatch}{\mathsf{match}}
 
 \newcommand{\treturn}[1][]{\mathsf{return}^{#1}}
 \newcommand{\treturnC}{\mathsf{returnC}}
@@ -996,10 +1037,12 @@
 \newcommand{\Var}[2]{\tVar(#1 \vdash #2)}
 \newcommand{\tHyp}{\mathsf{Hyp}}
 \newcommand{\Hyp}[2][]{\tHyp(#2)_{#1}}
-\newcommand{\tNe}{\mathsf{Ne}}
+\newcommand{\tNe}[1][]{\mathsf{Ne}^{#1}}
 %\newcommand{\Ne}[2]{\tNe\;#1\;#2}
-\newcommand{\Ne}[2]{\tNe\;#1\;#2}
-\newcommand{\NeP}[2]{\tNe\,(#1)\,#2}
+\newcommand{\Ne}[3][]{\tNe[#1]\;#2\;#3}
+\newcommand{\NeT}[2]{\tNe[\T]#1\;#2}
+\newcommand{\NeP}[3][]{\tNe[#1]\,(#2)\,#3}
+\newcommand{\NeTP}[2]{\tNe[\T](#1)\,#2}
 \newcommand{\NeExp}{\mathsf{NeExp}}
 \newcommand{\Null}{\emptyset}
 \newcommand{\Unit}{()}
@@ -1014,11 +1057,12 @@
 \newcommand{\Neut}{\mathsf{Neut}}
 \newcommand{\Norm}{\mathsf{Norm}}
 \newcommand{\VNe}{\mathsf{VNe}}
+\newcommand{\tVal}[1][]{\mathsf{Val}^{#1}}
 \newcommand{\Val}{\mathsf{Val}}
 \newcommand{\VFun}{\mathsf{VFun}}
 \newcommand{\VPair}{\mathsf{VPair}}
 \newcommand{\FVal}{\mathsf{FVal}}
-\newcommand{\PVal}{\mathsf{PVal}}
+%\newcommand{\PVal}{\mathsf{PVal}}
 \newcommand{\GVal}{\mathsf{GVal}}
 \newcommand{\tfst}{\mathsf{fst}}
 \newcommand{\tsnd}{\mathsf{snd}}
@@ -1353,10 +1397,13 @@
 \newcommand{\F}{\mathcal{F}}
 %\newcommand{\G}{\mathcal{G}}
 \renewcommand{\P}{\mathcal{P}}
+\newcommand{\J}{\mathcal{J}}
+\newcommand{\V}{\mathcal{V}}
+%\newcommand{\K}{\mathcal{K}}
 
 % universes (semantically)
 \newcommand{\UU}{\mathcal{U}}
-\newcommand{\TT}{\TYPE}%{\mathcal{T}}
+\newcommand{\TT}{\mathcal{T}}
 
 % models
 %\newcommand{\R}{\mathcal{R}}

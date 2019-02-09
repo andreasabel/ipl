@@ -3,6 +3,7 @@
 
 @STRING{aml	= "Archive of Mathematical Logic" }
 @STRING{ctcs95	= "Category Theory and Computer Science, CTCS'95" }
+@STRING{entcs	= "Electr. Notes in Theor. Comp. Sci." }
 @STRING{flops04	= "Proc. of the 7th Int. Symp. on Functional and Logic
 		  Programming, FLOPS 2004" }
 @STRING{lics01	= "Proc. of the 16th IEEE Symp. on Logic in Computer Science
@@ -10,6 +11,8 @@
 @STRING{lics91	= "Proc. of the 6th IEEE Symp. on Logic in Computer Science
 		  (LICS'91)" }
 @STRING{lncs	= "Lect. Notes in Comput. Sci." }
+@STRING{mpc98	= "Proc. of the 4th Int. Conf. on Mathematics of Program
+		  Construction, MPC '98" }
 @STRING{popl04	= "Proc. of the 31st {ACM} {S}ymp. on {P}rinciples of
 		  {P}rogramming {L}anguages, {POPL} 2004" }
 @STRING{popl17	= "Proc. of the 44th {ACM} {S}ymp. on {P}rinciples of
@@ -35,7 +38,11 @@
 @Book{		  mitchell:foundations,
   author	= {John Mitchell},
   title		= {Foundations of Programming Languages},
-  year		= 1996
+  series	= {Foundation of computing series},
+  year		= 1996,
+  timestamp	= {Wed, 27 Apr 2011 17:30:32 +0200},
+  biburl	= {https://dblp.org/rec/bib/books/daglib/0085577},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
 @Article{	  matthes:shortproofs,
@@ -73,6 +80,14 @@
   ee		= {http://doi.acm.org/10.1145/237721.237784},
   crossref	= {DBLP:conf/popl/1996},
   bibsource	= {DBLP, http://dblp.uni-trier.de}
+}
+
+@PhDThesis{	  zeilberger:PhD,
+  author	= {Noam Zeilberger},
+  title		= {The Logical Basis of Evaluation Order and
+		  Pattern-Matching},
+  school	= {Carnegie Mellon University},
+  year		= 2009
 }
 
 @PhDThesis{	  abel:habil,
@@ -117,6 +132,15 @@
 		  lambda-calculus},
   school	= {Ludwig-Maximilians-University Munich},
   year		= 2008
+}
+
+@InProceedings{	  bird:nested,
+  author	= {Richard Bird and Lambert Meertens},
+  title		= {Nested Datatypes},
+  booktitle	= mpc98,
+  year		= 1998,
+  volume	= 1422,
+  series	= lncs
 }
 
 @InProceedings{	  balatDiCosmoFiore:popl04,
@@ -174,6 +198,18 @@
   booktitle	= lics01,
   year		= {2001},
   bibsource	= {DBLP, http://dblp.uni-trier.de}
+}
+
+@Article{	  espiritoSanto:entcs17,
+  author	= {Jos{\'{e}} Esp{\'{\i}}rito Santo},
+  title		= {The Polarized {\(\lambda\)}-calculus},
+  journal	= entcs,
+  volume	= 332,
+  year		= 2017,
+  doi		= {10.1016/j.entcs.2017.04.010},
+  timestamp	= {Fri, 30 Nov 2018 13:26:33 +0100},
+  biburl	= {https://dblp.org/rec/bib/journals/entcs/Santo17},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
 @Proceedings{	  DBLP:conf/lics/1991,
