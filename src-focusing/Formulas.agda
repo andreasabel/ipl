@@ -135,14 +135,10 @@ mutual
   Cover : (i j : Size) (J : Cxt → Set) (Γ : Cxt) → Set
   Cover i j = Cover' (λ A → Ne j (Comp A)) i
 
-  --
-  Foc : (i : Size) (A : Form +) (Γ : Cxt) → Set
-  Foc i A = Cover ∞ i (RFoc i A)
-
   -- Non-invertible right rules:
 
   -- Right focusing (proof of a positive goal by decisions)
-  -- "normal"
+  -- "normal" / values.
 
   data RFoc : (i : Size) (A : Form +) (Γ : Cxt) → Set where
     -- Right focusing stops at a negative formulas
@@ -158,11 +154,11 @@ mutual
   -- Invertible right rules:
 
   -- Right inversion: break a goal into subgoals
-  -- "eta"
+  -- "eta" / definitions by copattern matching.
 
   data RInv : (i : Size) (A : Form -) (Γ : Cxt) → Set where
     -- Right inversion ends at a positive formula
-    ret  : ∀{i Γ A} (t : Foc i A Γ) → RInv (↑ i) (Comp A) Γ
+    ret  : ∀{i Γ A} (t : Cover ∞ i (RFoc i A) Γ) → RInv (↑ i) (Comp A) Γ
     -- Goal splitting
     trueI : ∀{i Γ} → RInv (↑ i) True Γ
     andI  : ∀{i Γ A B} (t : RInv i A Γ) (u : RInv i B Γ) → RInv (↑ i) (A ∧ B) Γ
