@@ -1059,6 +1059,33 @@ family \fbox{$\Nf N \Gamma$}.
       {\AddHypP P {\tNf\, N} \Gamma}
       {\NfP {P \To N} \Gamma}
 \end{gather*}
+All these inductive families are presheaves, due to factored
+presentation using $\Add P$ and $\Cov$ the proof is not a simple
+mutual induction.  Yet, in Agda, the generic proof goes through using a sized
+typing for these inductive families.  Similarily, defining the
+$\tjoin$ for monad $\Cov$ relies on sized typing.
+\[
+\begin{array}{lll}
+  \tjoin & : & \forall i.\
+    \Cov[i]\,(\Cov[\infty]\J) \todot \Cov[\infty]\J  \\
+  \tjoin[i+1]\,(\treturn[i]\;c) & = & c \\
+  \tjoin[i+1]\,(\tmatch^i\;t\;k)
+    & = & \tmatch^\infty\;
+     (t : \Ne P \Gamma)\;
+     (\stmap[\Add P]_\Gamma\;\tjoin[i]\;(k : \AddHypP P {\Cov[i]\J} \Gamma)) \\
+  % \tjoin^{i+1}\,(\tmatch\,(t : \Ne P \Gamma)\,
+  %   (k : \AddHypP P {\Cov^i\,\J} \Gamma))
+  %   & = & \tmatch\;t\;(\stmap[\Add P]_\Gamma\;\tjoin^i\;k) \\
+\end{array}
+\]
+Herein, we used the sized typing of the constructors of $\Cov$:
+\[
+\begin{array}{lll}
+  \treturn & : & \forall i.\ \J \todot \Cov[i+1] \J \\
+  \tmatch  & : & \forall i.\
+    \tNe\,(\Comp\,P) \todot \Add P\,(\Cov[i]\J) \todot \Cov[i+1]\J \\
+\end{array}
+\]
 
 
 
