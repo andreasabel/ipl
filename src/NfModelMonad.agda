@@ -212,7 +212,11 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
   ide : ∀ Γ → G⟦ Γ ⟧ Γ
   ide ε = _
-  ide (Γ ∙ A) = monG (weak id≤) (ide Γ) , reflect A (hyp top)
+  ide (Γ ∙ A) = monG (weak id≤) (ide Γ) , fresh A
+
+  ide' : ∀ Γ {Δ} (τ : Δ ≤ Γ) → G⟦ Γ ⟧ Δ
+  ide' ε       τ = _
+  ide' (Γ ∙ A) τ = ide' Γ (τ • weak id≤) , monT A τ (fresh A)
 
   -- Normalization
 
