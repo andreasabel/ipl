@@ -994,6 +994,79 @@ since $\Add P$ is a graded monad on the monoid $(1,\times)$
 of product types;
 however, this coincidence shall not matter for our further considerations.
 
+In the following, we mutually define the inductive families of
+presheaves $\tVal\,P$,
+$\tNe\,N$, $\Cov\,\J$,
+and $\tNf\,N$.
+
+Values \fbox{$v : \PVal P \Gamma$}
+of positive type $P$ are constructed by the
+following rules:
+\begin{gather*}
+  \nru{\pvar}{P \in \Gamma}{\PVal P \Gamma}
+\qquad
+  \nru{\tthunk}{\Nf N \Gamma}{\PValP{\Thunk\,N}\Gamma}
+\\[2ex]
+  \nru{\punit}{}{\PVal{\tyone}\Gamma}
+\qquad
+  \nru{\ppair}
+      {\PVal{P_1}\Gamma \qquad \PVal{P_2}\Gamma}
+      {\PValP{P_1 \times P_2}\Gamma}
+\qquad
+  \nru{\tinj_i}{\PVal{P_i}\Gamma}{\PValP{P_1 + P_2}\Gamma}
+\end{gather*}
+Negative hypotheses can be eliminated by projections and application
+to values, as described by the following inductive family
+\fbox{$\Ne N \Gamma$}:
+\begin{gather*}
+  \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
+\qquad
+  \nru{\tprj_i}
+      {\NeP {N_1 \ntimes N_2} \Gamma}
+      {\Ne {N_i} \Gamma}
+\qquad
+  \nru{\tapp}
+      {\NeP {P \To N} \Gamma \qquad \PVal P \Gamma}
+      {\Ne N \Gamma}
+\end{gather*}
+An elimination may either result in a negative atom $\natom$ or a
+positive type $P$, which can be further taken apart by pattern
+matching.  Pattern matching on neutrals is organized in the
+inductively defined strong monad \fbox{$\Cov$}.
+\begin{gather*}
+  \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
+\qquad
+  \nru{\tmatch}
+      {\NeP {\Comp\,P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
+      {\Cover \J \Gamma}
+\end{gather*}
+Finally, normal forms of negative types are defined as inductive
+family \fbox{$\Nf N \Gamma$}.
+\begin{gather*}
+  \nru{\tne}
+      {\CoverP {\tNe\,\natom} \Gamma}
+      {\Nf {\natom} \Gamma}
+\quad
+  \nru{\tval}
+      {\CoverP {\tVal\,P}  \Gamma}
+      {\NfP {\Comp\,P} \Gamma}
+\quad
+  \nru{\npair}
+      {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
+      {\NfP {N_1 \ntimes N_2} \Gamma}
+\quad
+  \nru{\tabs}
+      {\AddHypP P {\tNf\, N} \Gamma}
+      {\NfP {P \To N} \Gamma}
+\end{gather*}
+
+
+
+
+\clearpage
+
+\subsection{Parametrized syntax (superseded)}
+
 Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
 context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
 of positive type $P$ are constructed by the
