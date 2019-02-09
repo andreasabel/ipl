@@ -40,6 +40,8 @@ pattern here! = here refl
 
 module _ (Comp : CTy → Cxt → Set) where
 
+  -- Right non-invertible
+
   data Val' : (P : VTy) (Γ : Cxt) → Set where
     var   : ∀{Γ P}     (x : P ∈ Γ)                       → Val' P Γ
     pair  : ∀{Γ P₁ P₂} (v₁ : Val' P₁ Γ) (v₂ : Val' P₂ Γ) → Val' (P₁ ×̇ P₂) Γ
@@ -48,11 +50,7 @@ module _ (Comp : CTy → Cxt → Set) where
 
 mutual
 
-  data Val : (P : VTy) (Γ : Cxt) → Set where
-    var   : ∀{Γ P}     (x : P ∈ Γ)                     → Val P Γ
-    pair  : ∀{Γ P₁ P₂} (v₁ : Val P₁ Γ) (v₂ : Val P₂ Γ) → Val (P₁ ×̇ P₂) Γ
-    inj   : ∀{Γ I P} i (v : Val (P i) Γ)               → Val (Σ̇ I P) Γ
-    thunk : ∀{Γ N}     (t : Comp N Γ)                  → Val (thunk N) Γ
+  Val = Val' Comp
 
   data Comp : (N : CTy) (Γ : Cxt) → Set where
     -- introductions
@@ -62,27 +60,45 @@ mutual
     -- positive eliminations
     split : ∀{Γ P₁ P₂ N} (v : Val (P₁ ×̇ P₂) Γ) (t : Comp N (P₂ ∷ P₁ ∷ Γ)) → Comp N Γ
     case  : ∀{Γ I P N}   (v : Val (Σ̇ I P) Γ) (t : ∀ i → Comp N (P i ∷ Γ)) → Comp N Γ
-    force : ∀{Γ N}       (v : Val (thunk N) Γ)   → Comp N Γ
-    -- binds
-    letv  : ∀{Γ P N}     (v : Val P Γ)         (t : Comp N (P ∷ Γ)) → Comp N Γ
     bind  : ∀{Γ P N}     (u : Comp (comp P) Γ) (t : Comp N (P ∷ Γ)) → Comp N Γ
     -- negative elimination
+    force : ∀{Γ N}       (v : Val (thunk N) Γ)   → Comp N Γ
     prj   : ∀{Γ I N} i   (t : Comp (Π I N) Γ)                        → Comp (N i) Γ
     app   : ∀{Γ P N}     (t : Comp (P ⇒ N) Γ)   (v : Val P Γ)        → Comp N Γ
+    -- cut
+    letv  : ∀{Γ P N}     (v : Val P Γ)         (t : Comp N (P ∷ Γ)) → Comp N Γ
 
 -- Normal forms
 
+module _ (Val : VTy → Cxt → Set) where
+
+  -- Right non-invertible
+
+  data Ne' : (N : CTy) (Γ : Cxt) → Set where
+    force : ∀{Γ N}     (x : thunk N ∈ Γ)                 → Ne' N Γ
+    prj   : ∀{Γ I N} i (t : Ne' (Π I N) Γ)               → Ne' (N i) Γ
+    app   : ∀{Γ P N}   (t : Ne' (P ⇒ N) Γ) (v : Val P Γ) → Ne' N Γ
+
 mutual
 
-  data NVal : (P : VTy) (Γ : Cxt) → Set where
-    var   : ∀{Γ P}     (x : P ∈ Γ)                     → NVal P Γ
-    pair  : ∀{Γ P₁ P₂} (v₁ : NVal P₁ Γ) (v₂ : NVal P₂ Γ) → NVal (P₁ ×̇ P₂) Γ
-    inj   : ∀{Γ I P} i (v : NVal (P i) Γ)               → NVal (Σ̇ I P) Γ
-    thunk : ∀{Γ N}     (t : NComp N Γ)                  → NVal (thunk N) Γ
+  NVal = Val' Nf
+  Ne   = Ne' NVal
 
-  data NComp : (N : CTy) (Γ : Cxt) → Set where
-    ret   : ∀{Γ P}   (v : NVal P Γ)                → NComp (comp P) Γ
-    rec   : ∀{Γ I N} (t : ∀ i → NComp (N i) Γ)     → NComp (Π I N) Γ
-    abs   : ∀{Γ P N} (t : NComp N (P ∷ Γ))         → NComp (P ⇒ N) Γ
-    split : ∀{Γ P₁ P₂ N} (x : (P₁ ×̇ P₂) ∈ Γ) (t : NComp N (P₂ ∷ P₁ ∷ Γ)) → NComp N Γ
-    case  : ∀{Γ I P N} (x : Σ̇ I P ∈ Γ) (t : ∀ i → NComp N (P i ∷ Γ)) → NComp N Γ
+  data NComp : (Q : VTy) (Γ : Cxt) → Set where
+    ret   : ∀{Γ Q}       (v : NVal Q Γ)      → NComp Q Γ   -- Invoke RFoc
+    ne    : ∀{Γ Q}       (n : Ne (comp Q) Γ) → NComp Q Γ   -- Finish with LFoc
+      -- e.g. app (force f) x
+
+    -- Use lemma LFoc
+    bind  : ∀{Γ P Q}     (u : Ne (comp P) Γ) (t : NComp Q (P ∷ Γ)) → NComp Q Γ
+
+    -- Left invertible
+    split : ∀{Γ P₁ P₂ Q} (x : (P₁ ×̇ P₂) ∈ Γ) (t : NComp Q (P₂ ∷ P₁ ∷ Γ)) → NComp Q Γ
+    case  : ∀{Γ I P Q}   (x : Σ̇ I P ∈ Γ)     (t : ∀ i → NComp Q (P i ∷ Γ)) → NComp Q Γ
+
+  -- Right invertible
+
+  data Nf : (N : CTy) (Γ : Cxt) → Set where
+    comp  : ∀{Γ P}   (t : NComp P Γ)        → Nf (comp P) Γ
+    rec   : ∀{Γ I N} (t : ∀ i → Nf (N i) Γ) → Nf (Π I N) Γ
+    abs   : ∀{Γ P N} (t : Nf N (P ∷ Γ))     → Nf (P ⇒ N) Γ
