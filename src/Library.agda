@@ -11,6 +11,13 @@ open import Data.Unit    public using (⊤)
 open import Data.Empty   public using (⊥; ⊥-elim)
 open import Data.Product public using (Σ; ∃; _×_; _,_; proj₁; proj₂; <_,_>; curry; uncurry) renaming (map to map-×)
 open import Data.Sum     public using (_⊎_; inj₁; inj₂; [_,_]; [_,_]′) renaming (map to map-⊎)
+
+open import Data.List     public using (List; []; _∷_)
+open import Data.List.All public using (All; []; _∷_)
+open import Data.List.Any public using (here; there)
+open import Data.List.Membership.Propositional       public using (_∈_)
+open import Data.List.Relation.Sublist.Propositional public using (_⊆_)
+
 open import Function     public using (_∘_; _∘′_; id; _$_; case_of_; const; flip)
 
 open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst; Extensionality)
