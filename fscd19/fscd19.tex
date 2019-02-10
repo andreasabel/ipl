@@ -964,7 +964,7 @@ fresh variables names rather than using Kripke function space / presheaves.
 Defining%
 \footnote{%
 A more accurate presentation of $\tNF$ would be
-$\sum_{u : \tNf A\,\Gamma} (\tm u \cong t)$
+$\Sigma\,{u : \tNf A\,\Gamma}.\ (\tm u \cong t)$
 in order to make absolutely clear that we
 want get hold of the witness $u$ of the existential statement;
 however, we shall only use constructive
@@ -973,7 +973,7 @@ in this article and thus stick to the notation $\exists$.
 We mean \emph{constructive existence} in
   contrast to classical existence and
   \emph{mere existence} from Homotopy Type Theory which
-  requires propositional truncation.
+  is the propositional truncation of constructive existence.
 }
 \fbox{$\NF t = \exists n \of \tNf A\,\Gamma.\ \tm n \cong t$}
 % for $t : A \from \Gamma$,
@@ -994,12 +994,14 @@ typing restrictions are implicit in the well-typedness assumption,
 \eg, $t \cong \tunit$ presupposes $t : \tyone \from \Gamma$
 since $\tunit : \tyone \from \Gamma$.
 \begin{gather*}
+%% BETA LAWS
   \nru{\rbetato}{}{\tapp\,(\tabs\,t)\,u \cong \subone t u}
 \qquad
   \nru{\rbetatimes}{}{\prjP i {\tpair\,t_1\,t_2} \cong t_i}
 \qquad
   \nru{\rbetaplus}{}{\tcase\,(\inj i t)\,t_1\,t_2 \cong t_i}
 \\[2ex]
+%% ETA LAWS
   \nru{\retato}{}{t \cong
     \tabs\,(\tapp\,(\tren\,\twk\,t)\,(\tvar\,\tzero))}
 \quad
@@ -1015,57 +1017,94 @@ since $\tunit : \tyone \from \Gamma$.
 \qquad
   \nru{\retazero}{}{t \cong \tabort\,t}
 \\[2ex]
+%% PERMUTATIONS
   \nru{\rpi{\To}{\tyempty}}
     {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
 \qquad
+  \nru{\rpi{\To}{+}}
+      {t_i' = \tapp\,t_i\,(\tren\,\twk\,u)}
+      {\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
+\\[1ex]
   \nru{\rpi{\times}{\tyempty}}
     {}{\prjP i {\tabort\,t} \cong \tabort\,t}
-\\[1ex]
-  \nru{\rpi{+}{\tyempty}}
-    {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
 \qquad
-  \nru{\rpi{\tyempty}{\tyempty}}
-    {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
-\\[2ex]
-  \nru{\rpi{\To}{+}}
-    {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
-    \
-    t_i' = \tapp\,t_i\,(\tren\,\twk\,u)
-  % \nru{\rpi{\To}{+}}
-  %   {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\,t
-  %        \, (\tapp\,t_1\,(\tren\,\twk\,u))
-  %        \, (\tapp\,t_2\,(\tren\,\twk\,u))
-  %   }
-\\
   \nru{\rpi{\times}{+}}
     {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
          \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
-\\
+\\[2ex]
+  \nru{\rpi{+}{\tyempty}}
+    {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
+\qquad
   \nru{\rpi{+}{+}}
-    {}{\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
+      {t_i' = \tcase\;t_i\;u_1'\;u_2'
+       \quad
+       u_j' = \tren\,(\tlift\,\twk)\,u_j
+      }
+      {\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
         \tcase\;t\;t_1'\;t_2'}
     \
-    t_i' = \tcase\;t_i\;u_1'\;u_2'
-    ; \quad
-    u_j' = \tren\,(\tlift\,\twk)\,u_j
     % t_i' = \tcase\;t_i
     %   \,(\tren\,(\tlift\,\twk)\,u_1)
     %   \,(\tren\,(\tlift\,\twk)\,u_2)
-\\
+\\[1ex]
+  \nru{\rpi{\tyempty}{\tyempty}}
+    {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
+\qquad
   \nru{\rpi{\tyempty}{+}}
-    {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
+    {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong
+      \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
+%% OLD:
+%   \nru{\rpi{\To}{\tyempty}}
+%     {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
+% \qquad
+%   \nru{\rpi{\times}{\tyempty}}
+%     {}{\prjP i {\tabort\,t} \cong \tabort\,t}
+% \\[1ex]
+%   \nru{\rpi{+}{\tyempty}}
+%     {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
+% \qquad
+%   \nru{\rpi{\tyempty}{\tyempty}}
+%     {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
+% \\[2ex]
+%   \nru{\rpi{\To}{+}}
+%     {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
+%     \
+%     t_i' = \tapp\,t_i\,(\tren\,\twk\,u)
+%   % \nru{\rpi{\To}{+}}
+%   %   {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\,t
+%   %        \, (\tapp\,t_1\,(\tren\,\twk\,u))
+%   %        \, (\tapp\,t_2\,(\tren\,\twk\,u))
+%   %   }
+% \\
+%   \nru{\rpi{\times}{+}}
+%     {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
+%          \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
+% \\
+%   \nru{\rpi{+}{+}}
+%     {}{\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
+%         \tcase\;t\;t_1'\;t_2'}
+%     \
+%     t_i' = \tcase\;t_i\;u_1'\;u_2'
+%     ; \quad
+%     u_j' = \tren\,(\tlift\,\twk)\,u_j
+%     % t_i' = \tcase\;t_i
+%     %   \,(\tren\,(\tlift\,\twk)\,u_1)
+%     %   \,(\tren\,(\tlift\,\twk)\,u_2)
+% \\
+%   \nru{\rpi{\tyempty}{+}}
+%     {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
 \end{gather*}
 The different law classes contribute to the shape and completeness of
 the normal forms in the following way:
 Thanks to the $\eta$-laws, a normal form of negative type is always an
 introduction.  A normal form of sum type ($+$, $\tyzero$) is always a
 case tree whose leaves are injections.  A normal form of atomic type
-($o$) is always a neutral.  The $\beta$ and $\pi$ laws determine the
-shape of neutrals.
+($o$) is always case tree whose leaves are neutral.
+The $\beta$ and $\pi$ laws determine the shape of neutrals.
 Thanks to the $\beta$-laws,
 the principal argument of normal eliminations cannot be an
 introduction.  Because of the negative permutation rules
-$\rpi N P$, it cannot be positive elimination
+$\rpi N P$ it cannot be positive elimination
 ($\tcase$, $\tabort$) either, which leaves only negative eliminations
 in neutrals ($\tapp$, $\tprj$).  Finally the positive permutation
 rules $\rpi P P$ guarantee that having neutral scrutinees in case
@@ -1076,6 +1115,102 @@ trees is sufficient.
 
 \section{Call-By-Push Value}
 \label{sec:cbpv}
+
+\[
+\begin{array}{lllrl@{\qquad}l}
+  \PTy & \ni & P,Q & ::= & \patom
+    \mid \tyzero \mid P_1 + P_2
+    \mid \tyone \mid P_1 \times P_2
+    \mid \Thunk N
+  & \mbox{positive type}
+\\
+  \NTy & \ni & N,M & ::= & \natom
+    \mid \top \mid N_1 \ntimes N_2
+    \mid P \To N
+    \mid \Comp P
+  & \mbox{negative type}
+\\
+  \HTy & \ni & H & ::= & \patom \mid P
+  & \mbox{hypothesis type}
+\\
+\end{array}
+\]
+
+Pure CBPV adds right non-invertible focusing.
+
+
+Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
+context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
+of positive type $P$ are constructed by the
+following rules:
+\begin{gather*}
+  \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
+\qquad
+  \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk N}\Gamma}
+\\[2ex]
+  \nru{\punit}{}{\PValT{\tyone}\Gamma}
+\qquad
+  \nru{\ppair}
+      {\PValT{P_1}\Gamma \qquad \PValT{P_2}\Gamma}
+      {\PValTP{P_1 \times P_2}\Gamma}
+\qquad
+  \nru{\tinj_i}{\PValT{P_i}\Gamma}{\PValTP{P_1 + P_2}\Gamma}
+\end{gather*}
+
+It relies on the previous definitions
+with instance $\T = \tNf$.
+\fbox{$\Tm N \Gamma$}:
+\begin{gather*}
+  \nru{\tret}
+      {\PVal P \Gamma}
+      {\TmP {\Comp P} \Gamma}
+\quad
+  \nru{\tabs}
+      {\Tm N {(\cext \Gamma P)}}
+      {\TmP {P \To N} \Gamma}
+\quad
+  \nru{\npair}
+      {\Tm {N_1} \Gamma \qquad \Tm {N_2} \Gamma}
+      {\TmP {N_1 \ntimes N_2} \Gamma}
+\quad
+  \nru{\nunit}
+      {}
+      {\Tm \top \Gamma}
+\\[2ex]
+  \nru{\tforce}
+      {\PValP {\Thunk N} \Gamma}
+      {\Tm N \Gamma}
+\qquad
+  \nru{\tapp}
+      {\TmP {P \To N} \Gamma \qquad \PVal P \Gamma}
+      {\Tm N \Gamma}
+\qquad
+  \nru{\tprj_i}
+      {\TmP {N_1 \ntimes N_2} \Gamma}
+      {\Tm {N_i} \Gamma}
+\\[2ex]
+% \end{gather*}
+% \begin{gather*}
+  \nru{\tbind}
+      {\TmP {\Comp P} \Gamma \qquad \Tm N {(\cext \Gamma P)}}
+      {\Tm N \Gamma}
+\qquad
+  \nru{\tsplit}
+    {\TmP {P_1 \times P_2} \Gamma
+      \qquad \Tm N {(\cext {\cext \Gamma P_1} P_2)}
+    }{\Tm N \Gamma}
+\\[2ex]
+  \nru{\tcase}
+    {\TmP {P_1 + P_2} \Gamma
+      \qquad \Tm N {(\cext \Gamma P_1)}
+      \qquad \Tm N {(\cext \Gamma P_2)}
+    }{\Tm N \Gamma}
+\qquad
+  \nru{\tabort}
+    {\Tm \tyzero \Gamma}
+    {\Tm N \Gamma}
+\end{gather*}
+
 
 \section{Focused Intuitionistic Propositional Logic}
 \label{sec:fipl}

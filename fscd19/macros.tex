@@ -319,6 +319,8 @@
 \newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
 \newcommand{\AddHyp}[3]{\Add{#1}\,#2\,#3}
 \newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
+\newcommand{\Tm}[3][]{\tTm^{#1\,}#2\,#3}
+\newcommand{\TmP}[3][]{\tTm^{#1}\,(#2)\,#3}
 \newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
 \newcommand{\PValP}[3][]{\Val^{#1}\,(#2)\,#3}
 \newcommand{\PValT}[3][]{\Val^{\T}#2\,#3}
@@ -338,6 +340,9 @@
 \newcommand{\bsplit}{\tsplit_2}
 \newcommand{\pvar}{\tvar^{+}}
 \newcommand{\nvar}{\tvar^{-}}
+\newcommand{\tforce}{\mathsf{force}}
+\newcommand{\tret}{\mathsf{ret}}
+\newcommand{\tbind}{\mathsf{bind}}
 
 
 
@@ -1049,7 +1054,7 @@
 \newcommand{\Env}{\mathsf{Env}}
 \newcommand{\tTm}{\mathsf{Tm}}
 %\newcommand{\Tm}[2]{\tTm(#1 \vdash #2)}
-\newcommand{\Tm}[2][]{\tTm(#2)_{#1}}
+%\newcommand{\Tm}[2][]{\tTm(#2)_{#1}}
 \newcommand{\BVar}{\mathsf{BVar}}
 \newcommand{\FVar}{\mathsf{FVar}}
 \newcommand{\tVar}{\mathsf{Var}}
