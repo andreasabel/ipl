@@ -265,11 +265,14 @@ Thus, lists $\Gamma$ form a category
 $\Cxt$ with morphisms $\tau : \Gamma \sublist \Delta$, and the category laws
 hold propositionally, e.g., we have $\id \rcomp \tau \equiv \tau$ in
 propositional equality for all morphisms $\tau$.
+The singleton weakening $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$,
+also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
+
 
 The category $\Cxt$ allows us to consider $A{\in}\_$ as a presheaf over
 $\Cxt\op$ for any $A$, witnessed by \fbox{$\treindex : \Gamma \sublist
   \Delta \to A \in \Gamma \to A \in \Delta$}, which is the morphism
-part of functor from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
+part of functor $A{\in}\_$ from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
 The associated naturality laws \fbox{$\treindex\,\tid\,x \equiv x$}
 and \fbox{$\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
@@ -298,7 +301,7 @@ while base types ($\tybase$) and sum types ($+$ and $\tyzero$) are positive.
 %   \mid \tyzero$}.
 % Herein, $a$ ranges over atomic types aka base types.
 Intrinsically well-typed lambda-terms, in abstract syntax,
-are just inhabitants $t$ of the type \fbox{$A \from \Gamma$},
+are just inhabitants $t$ of the indexed set \fbox{$A \from \Gamma$},
 inductively defined by the following rules.
 \begin{gather*}
   \nru{\tvar}{A \in \Gamma}{A \from \Gamma}
@@ -325,13 +328,13 @@ inductively defined by the following rules.
 \qquad
   \nru{\tcase}
     {A_1 + A_2 \from \Gamma
-      \qquad C \from \cext \Gamma A_1
-      \qquad C \from \cext \Gamma A_2
-    }{C \from \Gamma}
+      \qquad B \from \cext \Gamma A_1
+      \qquad B \from \cext \Gamma A_2
+    }{B \from \Gamma}
 \qquad
   \nru{\tabort}
     {\tyzero \from \Gamma}
-    {C \from \Gamma}
+    {B \from \Gamma}
 \end{gather*}
 The skilled eye of the reader will immediately recognize the proof
 rules of intuitionistic propositional logic (IPL) under the
@@ -355,7 +358,7 @@ Terms of type $A$ form a presheaf
 $A{\from}\_$ as witnessed by the standard weakening operation%
 \footnote{Here, $\tren$ is short for \emph{renaming}, but in a nameless
 calculus we should better speak of \emph{reindexing}, which could, a
-bit clumsily, also abbreviated to $\tren$.}
+bit clumsily, be also abbreviated to $\tren$.}
 \fbox{$\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta$}
 defined by recursion over $t : A \from \Gamma$,
 and naturality laws for $\tren$ analogously to $\treindex$.
@@ -372,8 +375,8 @@ shall not consider them in this article.
 }
 are logically characterized as those fulfilling the
 \emph{subformula} property \cite{prawitz:natded,matthes:shortproofs}.
-Normal forms \fbox{$t : \tNf A\, \Gamma$} are mutually defined with
-\emph{neutral} normal forms \fbox{$t : \Ne A \Gamma$}.
+Normal forms \fbox{$n : \tNf A\, \Gamma$} are mutually defined with
+\emph{neutral} normal forms \fbox{$u : \Ne A \Gamma$}.
 In the following inductive definition, we reuse the rule names from the
 term constructors.
 \begin{gather*}
@@ -411,7 +414,7 @@ term constructors.
     {\Ne \tyzero \Gamma}
     {\Nf P \Gamma}
 \end{gather*}
-These rules only allow the elimination of neutrals; guarantees
+These rules only allow the elimination of neutrals; this guarantees
 the subformula property and prevents any kind of computational
 ($\beta$) redex.
 The new rule $\tne$ embeds $\tNe$ into $\tNf$,
@@ -443,8 +446,9 @@ morphisms, \eg, write $\A \todot \B \todot \C$ for
 $\forall \Gamma.\ \A\,\Gamma \to (\B\,\Gamma \to \C\,\Gamma)$.
 
 While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
-normal forms of positive types $P$, their extension to negative types
-is admissible.
+normal forms of positive types $P$, their extension $\tcase^B$ and
+$\tabort^B$ to negative types
+is admissible, for instance:
 \[
 \begin{array}{l@{~}lcl}
   \multicolumn 4 l {\tabort^B ~:~ \tNe\, 0 \todot \tNf\,B} \\
@@ -458,8 +462,9 @@ $\tcase$ generalizes analogously, with a bit of care when weakening
 the branches.
 
 \emph{Proof normalization} is concerned with finding a normal form
-$u : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
-\emph{term normalization} additionally requires that $\tm u \cong t$
+$n : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
+\emph{term normalization} additionally requires \emph{soundness},
+\ie, that $\tm u \cong t$
 with respect to a equational theory $\cong$ on terms.
 
 \subsection{Proof normalization}
@@ -467,8 +472,10 @@ with respect to a equational theory $\cong$ on terms.
 For didactical purposes, let us first focus on the simpler task of
 constructing a normalization function
 \fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
-that does not guarantee any relation between its input term $t$ and
-output normal form $u$.
+without any soundness guarantee.
+% that does not guarantee any relation between its input term $t$ and
+% output normal form $u$.
+%
 % \emph{Normalization by evaluation} (NbE) decomposes normalization as
 % \fbox{\(
 %   \norm[\Gamma] A (t : A \from \Gamma)
@@ -500,7 +507,7 @@ The role of evaluation is to produce from a term the corresponding
 semantic (\ie, meta-theoretic) function, which is finally reified to a normal form.
 Since we are evaluating open terms $t$, we need to supply an environment
 $\idenv\Gamma$ which will map the free indices of $t$ to corresponding
-\emph{unknowns}.  To accomodate unknowns in the semantics, types $A$
+\emph{unknowns}.  To accommodate unknowns in the semantics, types $A$
 are mapped to presheaves $\den A$ (rather than just sets), and in
 particular each base type $\tybase$ is mapped to the presheaf
 $\tNe\,\tybase$ with the intention that the neutrals take the role of
@@ -579,9 +586,11 @@ and reification $\down A : \den A \todot \tNf A$ along the way.
 %     (f\,(\twk^A)\,(\tfresh^A_\Gamma)))
 % \end{array}
 % \end{gather*}
-In the equation for $\down{A \To B}$,
-the renaming $\twk : \Gamma \sublist \cext \Gamma A$,
-defined by $\twk = \tweak\,\tid$, makes room
+%In the equation for
+In the reification at function types
+$\down{A \To B}$,
+the renaming $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$
+makes room
 for a new variable of type $A$, which is reflected into $\den A$ by
 \[
 \begin{array}{lcl@{\qquad}lcl}
@@ -592,7 +601,8 @@ for a new variable of type $A$, which is reflected into $\den A$ by
 \]
 The ability to introduce fresh variables into a context, and to use
 semantic objects such as $f : \den{A \To B}\Gamma$ in a such extended
-context, is the reason for utilizing presheaves instead of just sets.
+context, is the reason for utilizing presheaves instead of just sets
+as semantic types.
 
 Note also that in the equation for $\up{A \To B}$,
 the neutral $u : \Ne A \Gamma$ is
@@ -608,7 +618,7 @@ inhabitant of the empty set, which means that reflection at the empty
 type would not be definable.  Similarily, the setting
 $\den{A + B} = \den A \hatplus \den B$ is refuted by
 % $\up[\tyone + \tyone]^{\tyone + \tyone} (\tvar\,\tzero) : \bone \bplus \bone$
-$\up[A + B]{A + B} (\tvar\,\tzero) : \den A (A+B) \bplus \den B (A+B)$
+$\up[A + B]{A + B} (\tvar\,\tzero) : \den A (A{+}B) \bplus \den B (A{+}B)$
 which would require us to make a decision of whether $A$ holds or $B$ holds
 while only be given a hypothesis of type $A + B$.
 Not even the usual interpretation of base types $\den o = \tNe\,o$
@@ -646,12 +656,12 @@ offers us these services:
 % \end{enumerate}
 \[
 \begin{array}{lcl@{\quad}l}
-\tabort^\C & : & \tNe\, \tyzero \todot \C\,\A
+\tabort^\C & : & \tNe\, \tyzero \todot \C\,\B
   & \mbox{case on absurd neutral} \\
-\tcase^\C_\Gamma & : & \Ne {(A + B)} \Gamma
-  \to \C\,\A\,(\cext \Gamma A)
-  \to \C\,\A\,(\cext \Gamma B)
-  \to \C\,\A\,\Gamma
+\tcase^\C_\Gamma & : & \Ne {(A_1 + A_2)} \Gamma
+  \to \C\,\B\,(\cext \Gamma {A_1})
+  \to \C\,\B\,(\cext \Gamma {A_2})
+  \to \C\,\B\,\Gamma
   & \mbox{case on neutral} \\
 \trunNf[\C] & : & \C\,(\tNf A) \todot \tNf A
   & \mbox{run the monad ($\tNf$ only)} \\
@@ -663,14 +673,15 @@ the free cover monad
 $\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^{\Cov}$, and
 $\tcase^{\Cov}$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
 binary case tree whose inner nodes ($\tcase$) are labeled by a neutral term
-of sum type $A+B$ and its two branches by the context extensions $A$
-and $B$, resp.  Leaves are either ($\tabort$)
-labeled by a neutral term of empty type $\tyzero$,
-or ($\treturn$) by an element of $\A$.  Functoriality amounts to
+of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
+and $A_2$, resp.  Leaves are either
+labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
+or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
 replacing the labels of the $\treturn$-leaves, and the monadic bind replaces
 these leaves by further case trees.  (The uninspiring $\tjoin[\Cov]$
-flattens a 2-level case tree into a single one.)
-Finally $\trunNf[\Cov]$ is a simple recursion, replacing $\tcase^{\Cov}$
+flattens a 2-level case tree, \ie, a case tree with case trees as
+leaves, into a single one.)
+Finally $\trunNf[\Cov]$ is a simple recursion on the tree, replacing $\tcase^{\Cov}$
 and $\tabort^{\Cov}$
 by the $\tcase$ and $\tabort$ constructions on normal forms, and
 $\treturn[\Cov]$ by the identity.
@@ -738,7 +749,7 @@ a natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
 type $A$.  In other words, we can \emph{run} the monad, pushing its
 effects into $\den A$.  We proceed by induction on $A$.
 Positive types $P$ are already monadic,
-and $\trun^P$ is simply the $\tjoin$ of monad $\C$.
+and $\trun^P$ is simply the $\tjoin$ of the monad $\C$.
 At negative types we can recurse pointwise at a smaller type,
 exploiting that values of negative types are essentially
 (finite or infinite) tuples.
@@ -903,13 +914,13 @@ We mean \emph{constructive existence} in
   \emph{mere existence} from Homotopy Type Theory which
   requires propositional truncation.
 }
-\fbox{$\NF t = \exists u \of \tNf A\,\Gamma.\; \tm u \cong t$}
+\fbox{$\NF t = \exists n \of \tNf A\,\Gamma.\ \tm n \cong t$}
 % for $t : A \from \Gamma$,
 we aim to construct a normalization function
 \[
   \tnorm : (t : A \from \Gamma) \to \NF t
 \]
-that gives us for each term $t$ a $\cong$-equal normal form $u$.
+that gives us for each term $t$ a $\cong$-equal normal form $n$.
 
 \section{Call-By-Push Value}
 \label{sec:cbpv}
@@ -955,7 +966,7 @@ break it apart until only atoms and negative bits remain.  This is
 performed by maximal pattern matching, called the left-invertible
 phase of focalization.
 We express maximal pattern matching on $P$ as a strong functor
-$\Add P$ in the category of presheaves
+$\Add P$ in the category of presheaves,
 mapping a presheaf $\J$ (``judgement'') to $\Add P \J$
 and a presheaf morphism $f : (\J \hatto \K)\Gamma$ to
 $\stmap[\Add P]_\Gamma f : \AddHyp P \J \Gamma \to \AddHyp P \K \Gamma$.
@@ -984,7 +995,7 @@ inductively constructed by the following rules:
       {\AddHyp {\tyone} \J \Gamma}
 \qquad
   \nru{\bsplit}
-      {\AddHyp {P_1} {(\Add{P_2}\,\J)} \Gamma}
+      {\AddHyp {P_1} {\left(\Add{P_2}\,\J\right)} \Gamma}
       {\AddHyp {P_1 \times P_2} \J \Gamma}
 \end{gather*}
 Note the recursive occurrence of $\Add{P_2}$ as argument to
@@ -1075,7 +1086,7 @@ $\tjoin$ for monad $\Cov$ relies on sized typing.
   \tjoin[i+1]\,(\tmatch^i\;t\;k)
     & = & \tmatch^\infty\;
      (t : \Ne P \Gamma)\;
-     (\stmap[\Add P]_\Gamma\;\tjoin[i]\;(k : \AddHypP P {\Cov[i]\J} \Gamma)) \\
+     \left(\stmap[\Add P]_\Gamma\;\tjoin[i]\;(k : \AddHypP P {\Cov[i]\J} \Gamma)\right) \\
   % \tjoin^{i+1}\,(\tmatch\,(t : \Ne P \Gamma)\,
   %   (k : \AddHypP P {\Cov^i\,\J} \Gamma))
   %   & = & \tmatch\;t\;(\stmap[\Add P]_\Gamma\;\tjoin^i\;k) \\

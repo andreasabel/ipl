@@ -5,7 +5,8 @@
 destdir=$(HOME)/public_html
 
 # commands
-bibtool=bibtool -- 'preserve.key.case = ON' \
+bibtool=bibtool -q \
+	  -- 'preserve.key.case = ON' \
 	  -- 'check.double = ON' \
 	  -- 'check.double.delete = ON' \
 	  -- 'delete.field = { abstract }' \
@@ -25,7 +26,7 @@ bibtool=bibtool -- 'preserve.key.case = ON' \
 
 catcfg=sed -e "s/%.*//g" <
 latex=latex
-pdflatex=pdflatex
+pdflatex=pdflatex -interaction=batchmode
 bibliography=medium.bib
 
 # stdlib=$(HOME)/agda/std-lib/src
