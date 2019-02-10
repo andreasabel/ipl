@@ -256,8 +256,10 @@
 \newcommand{\tpair}{\mathsf{pair}}
 \newcommand{\tprj}{\mathsf{prj}}
 \newcommand{\prj}[2]{\tprj_{#1}\;#2}
+\newcommand{\prjP}[2]{\tprj_{#1}\,(#2)}
 \newcommand{\tinj}{\mathsf{inj}}
 \newcommand{\inj}[2]{\tinj_{#1}\;#2}
+\newcommand{\injP}[2]{\tinj_{#1}\,(#2)}
 \newcommand{\tabort}{\mathsf{abort}}
 \newcommand{\tren}{\mathsf{ren}}
 \newcommand{\tm}[1]{\ulcorner#1\urcorner}
@@ -288,6 +290,19 @@
 \newcommand{\dencase}{\denty{\tcase}}
 \newcommand{\denabort}{\denty{\tabort}}
 \newcommand{\CC}{\mathsf{CC}}
+
+% Term normalization
+\newcommand{\subone}[2]{#1[#2]}
+\newcommand{\rbetato}{\beta^\To}
+\newcommand{\rbetatimes}{\beta^\times}
+\newcommand{\rbetaplus}{\beta^+}
+\newcommand{\retato}{\eta^\To}
+\newcommand{\retatimes}{\eta^\times}
+\newcommand{\retaplus}{\eta^+}
+\newcommand{\retazero}{\eta^{\tyzero}}
+\newcommand{\retaone}{\eta^{\tyone}}
+\newcommand{\rpi}[2]{\pi^{#1,#2}}
+
 
 % Polarized lambda
 \newcommand{\patom}{o^+}
@@ -1127,7 +1142,7 @@
 \newcommand{\rconst}{\rulename{\typref{}const}}
 \newcommand{\rconv}{\rulename{\typref{}conv}}
 %\newcommand{\rsubst}{\rulename{\typref{}subst}}
-\newcommand{\rpi}{\rulename{\typref{}pi}}
+%\newcommand{\rpi}{\rulename{\typref{}pi}}
 \newcommand{\runiv}{\rulename{\typref{}univ}}
 \newcommand{\ruf}{\rulename{\typref{}univ-f}}
 \newcommand{\ruin}{\rulename{\typref{}univ-i-n}}

@@ -638,7 +638,9 @@ presheaf morphism $f : \A \todot \B$ to the morphism
 $\tmap[\C]f: \C\,\A \todot \C\;\B$ satisfying the functor laws for
 identity and composition.  Then, there are natural transformations
 $\treturn[\C] : \A \todot \C\,\A$ (unit) and
-$\tjoin[\C] : \C\,(\C\,\A) \todot \C\,\A$ (concatenation) satisfying
+$\tjoin[\C] : \C\,(\C\,\A) \todot \C\,\A$ (multiplication)
+% (concatenation)
+satisfying
 the monad laws.
 
 We are looking for a cover monad $\C$ that
@@ -980,6 +982,95 @@ we aim to construct a normalization function
   \tnorm : (t : A \from \Gamma) \to \NF t
 \]
 that gives us for each term $t$ a $\cong$-equal normal form $n$.
+
+
+%Equational theory \fbox{$t \cong t'$} for $t,t' : A \from \Gamma$.
+Term equality\fbox{$t \cong t'$} for $t,t' : A \from \Gamma$ is the
+least congruence over the following axioms, which we have grouped into
+$\beta$ (computation), $\eta$ (extensionality), and $\pi$ (permutation)
+rules.  We may refer to subgroups, like $\eta^N$ for the negative
+$\eta$-rules ($\retato$, $\retatimes$, $\retaone$).  Note that all
+typing restrictions are implicit in the well-typedness assumption,
+\eg, $t \cong \tunit$ presupposes $t : \tyone \from \Gamma$
+since $\tunit : \tyone \from \Gamma$.
+\begin{gather*}
+  \nru{\rbetato}{}{\tapp\,(\tabs\,t)\,u \cong \subone t u}
+\qquad
+  \nru{\rbetatimes}{}{\prjP i {\tpair\,t_1\,t_2} \cong t_i}
+\qquad
+  \nru{\rbetaplus}{}{\tcase\,(\inj i t)\,t_1\,t_2 \cong t_i}
+\\[2ex]
+  \nru{\retato}{}{t \cong
+    \tabs\,(\tapp\,(\tren\,\twk\,t)\,(\tvar\,\tzero))}
+\quad
+  \nru{\retatimes}{}{t \cong \tpair\,(\prj 1 t)\,(\prj 2 t)}
+\quad
+  \nru{\retaone}{}{t \cong \tunit}
+\\[1ex]
+  \nru{\retaplus}{}{t \cong
+    \tcase\,t
+      \,(\injP 1 {\tvar\,\tzero})
+      \,(\injP 2 {\tvar\,\tzero})
+    }
+\qquad
+  \nru{\retazero}{}{t \cong \tabort\,t}
+\\[2ex]
+  \nru{\rpi{\To}{\tyempty}}
+    {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
+\qquad
+  \nru{\rpi{\times}{\tyempty}}
+    {}{\prjP i {\tabort\,t} \cong \tabort\,t}
+\\[1ex]
+  \nru{\rpi{+}{\tyempty}}
+    {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
+\qquad
+  \nru{\rpi{\tyempty}{\tyempty}}
+    {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
+\\[2ex]
+  \nru{\rpi{\To}{+}}
+    {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
+    \
+    t_i' = \tapp\,t_i\,(\tren\,\twk\,u)
+  % \nru{\rpi{\To}{+}}
+  %   {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\,t
+  %        \, (\tapp\,t_1\,(\tren\,\twk\,u))
+  %        \, (\tapp\,t_2\,(\tren\,\twk\,u))
+  %   }
+\\
+  \nru{\rpi{\times}{+}}
+    {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
+         \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
+\\
+  \nru{\rpi{+}{+}}
+    {}{\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
+        \tcase\;t\;t_1'\;t_2'}
+    \
+    t_i' = \tcase\;t_i\;u_1'\;u_2'
+    ; \quad
+    u_j' = \tren\,(\tlift\,\twk)\,u_j
+    % t_i' = \tcase\;t_i
+    %   \,(\tren\,(\tlift\,\twk)\,u_1)
+    %   \,(\tren\,(\tlift\,\twk)\,u_2)
+\\
+  \nru{\rpi{\tyempty}{+}}
+    {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
+\end{gather*}
+The different law classes contribute to the shape and completeness of
+the normal forms in the following way:
+Thanks to the $\eta$-laws, a normal form of negative type is always an
+introduction.  A normal form of sum type ($+$, $\tyzero$) is always a
+case tree whose leaves are injections.  A normal form of atomic type
+($o$) is always a neutral.  The $\beta$ and $\pi$ laws determine the
+shape of neutrals.
+Thanks to the $\beta$-laws,
+the principal argument of normal eliminations cannot be an
+introduction.  Because of the negative permutation rules
+$\rpi N P$, it cannot be positive elimination
+($\tcase$, $\tabort$) either, which leaves only negative eliminations
+in neutrals ($\tapp$, $\tprj$).  Finally the positive permutation
+rules $\rpi P P$ guarantee that having neutral scrutinees in case
+trees is sufficient.
+
 
 \clearpage
 
