@@ -1,16 +1,20 @@
 %%%% WARNING! AUTOMATICALLY CREATED BIBFILE
 %%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!
 
+@STRING{acm	= "ACM Press" }
 @STRING{aml	= "Archive of Mathematical Logic" }
+@STRING{apal	= "Ann. Pure Appl. Logic" }
 @STRING{ctcs95	= "Category Theory and Computer Science, CTCS'95" }
 @STRING{entcs	= "Electr. Notes in Theor. Comp. Sci." }
 @STRING{flops04	= "Proc. of the 7th Int. Symp. on Functional and Logic
 		  Programming, FLOPS 2004" }
+@STRING{ieee	= "IEEE Computer Soc. Press" }
 @STRING{lics01	= "Proc. of the 16th IEEE Symp. on Logic in Computer Science
 		  (LICS 2001)" }
 @STRING{lics91	= "Proc. of the 6th IEEE Symp. on Logic in Computer Science
 		  (LICS'91)" }
 @STRING{lncs	= "Lect. Notes in Comput. Sci." }
+@STRING{mit	= "MIT Press" }
 @STRING{mpc98	= "Proc. of the 4th Int. Conf. on Mathematics of Program
 		  Construction, MPC '98" }
 @STRING{popl04	= "Proc. of the 31st {ACM} {S}ymp. on {P}rinciples of
@@ -19,6 +23,7 @@
 		  {P}rogramming {L}anguages, {POPL} 2017" }
 @STRING{popl96	= "Proc. of the 23rd {ACM} {S}ymp. on {P}rinciples of
 		  {P}rogramming {L}anguages, {POPL}'96" }
+@STRING{springer= "Springer" }
 @STRING{tlca93	= "Proc. of the 1st Int. Conf. on Typed Lambda Calculi and
 		  Applications, TLCA '93" }
 @STRING{tlca99	= "Proc. of the 4th Int. Conf. on Typed Lambda Calculi and
@@ -39,6 +44,7 @@
   author	= {John Mitchell},
   title		= {Foundations of Programming Languages},
   series	= {Foundation of computing series},
+  publisher	= mit,
   year		= 1996,
   timestamp	= {Wed, 27 Apr 2011 17:30:32 +0200},
   biburl	= {https://dblp.org/rec/bib/books/daglib/0085577},
@@ -101,6 +107,7 @@
   opttype	= {},
   optaddress	= {},
   optmonth	= {},
+  publisher	= {Unpublished},
   optpostscript	= {},
   optpdf	= {},
   optdvi	= {},
@@ -123,6 +130,7 @@
 @Book{		  prawitz:natDed,
   author	= {Dag Prawitz},
   title		= {Natural Deduction},
+  publisher	= {Almqvist \& Wiksell, Stockholm},
   year		= 1965
 }
 
@@ -134,20 +142,37 @@
   year		= 2008
 }
 
+@Article{	  ilikLeeHerbelin:apal10,
+  author	= {Danko Ilik and Gyesik Lee and Hugo Herbelin},
+  title		= {Kripke models for classical logic},
+  journal	= apal,
+  volume	= 161,
+  number	= 11,
+  year		= 2010,
+  doi		= {10.1016/j.apal.2010.04.007},
+  timestamp	= {Mon, 05 Jun 2017 20:52:11 +0200},
+  biburl	= {https://dblp.org/rec/bib/journals/apal/IlikLH10},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
+}
+
 @InProceedings{	  bird:nested,
   author	= {Richard Bird and Lambert Meertens},
   title		= {Nested Datatypes},
   booktitle	= mpc98,
   year		= 1998,
+  editor	= {Johan Jeuring},
   volume	= 1422,
-  series	= lncs
+  series	= lncs,
+  publisher	= springer
 }
 
 @InProceedings{	  balatDiCosmoFiore:popl04,
   author	= {Vincent Balat and Roberto Di Cosmo and Marcelo P. Fiore},
   title		= {Extensional normalisation and type-directed partial
 		  evaluation for typed lambda calculus with sums},
+  editor	= {Neil D. Jones and Xavier Leroy},
   booktitle	= popl04,
+  publisher	= acm,
   year		= 2004,
   ee		= {http://doi.acm.org/10.1145/964001.964007},
   bibsource	= {DBLP, http://dblp.uni-trier.de}
@@ -196,6 +221,7 @@
   title		= {Normalization by Evaluation for Typed Lambda Calculus with
 		  Coproducts},
   booktitle	= lics01,
+  publisher	= ieee,
   year		= {2001},
   bibsource	= {DBLP, http://dblp.uni-trier.de}
 }
@@ -215,6 +241,7 @@
 @Proceedings{	  DBLP:conf/lics/1991,
   title		= lics91,
   booktitle	= lics91,
+  publisher	= ieee,
   year		= 1991,
   timestamp	= {Fri, 21 Nov 2014 14:08:56 +0100},
   biburl	= {http://dblp.uni-trier.de/rec/bib/conf/lics/1991},
@@ -222,8 +249,10 @@
 }
 
 @Proceedings{	  DBLP:conf/flops/2004,
+  editor	= {Yukiyoshi Kameyama and Peter J. Stuckey},
   title		= flops04,
   booktitle	= flops04,
+  publisher	= springer,
   series	= lncs,
   volume	= 2998,
   year		= 2004,
@@ -231,8 +260,10 @@
 }
 
 @Proceedings{	  DBLP:conf/tlca/1993,
+  editor	= {Marc Bezem and Jan Friso Groote},
   title		= tlca93,
   booktitle	= tlca93,
+  publisher	= springer,
   series	= lncs,
   volume	= 664,
   year		= 1993,
@@ -243,8 +274,10 @@
 }
 
 @Proceedings{	  DBLP:conf/tlca/1999,
+  editor	= {Jean{-}Yves Girard},
   title		= tlca99,
   booktitle	= tlca99,
+  publisher	= springer,
   series	= lncs,
   volume	= 1581,
   year		= 1999,
@@ -255,8 +288,10 @@
 }
 
 @Proceedings{	  DBLP:conf/popl/2017,
+  editor	= {Giuseppe Castagna and Andrew D. Gordon},
   title		= popl17,
   booktitle	= popl17,
+  publisher	= acm,
   year		= 2017,
   doi		= {10.1145/3009837},
   timestamp	= {Wed, 28 Dec 2016 13:17:00 +0100},
@@ -265,8 +300,10 @@
 }
 
 @Proceedings{	  DBLP:conf/popl/1996,
+  editor	= {Hans-Juergen Boehm and Guy L. {Steele Jr.}},
   title		= popl96,
   booktitle	= popl96,
+  publisher	= acm,
   year		= 1996,
   ee		= {http://dl.acm.org/citation.cfm?id=237721},
   timestamp	= {Mon, 21 May 2012 16:19:50 +0200},
@@ -275,8 +312,10 @@
 }
 
 @Proceedings{	  DBLP:conf/ctcs/1995,
+  editor	= {David H. Pitt and David E. Rydeheard and Peter Johnstone},
   title		= ctcs95,
   booktitle	= ctcs95,
+  publisher	= springer,
   series	= lncs,
   volume	= 953,
   year		= 1995,

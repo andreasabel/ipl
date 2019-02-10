@@ -17,11 +17,11 @@ bibtool=bibtool -q \
 	  -- 'delete.field = { isbn }' \
 	  -- 'delete.field = { url }' \
 	  -- 'delete.field = { note }' \
-	  -- 'delete.field = { editor }' \
-	  -- 'delete.field = { publisher }' \
 	  -- 'delete.field = { pages }'
 
 #	  -- 'delete.field = { doi }' \
+#	  -- 'delete.field = { publisher }' \
+#	  -- 'delete.field = { editor }' \
 #
 
 catcfg=sed -e "s/%.*//g" <

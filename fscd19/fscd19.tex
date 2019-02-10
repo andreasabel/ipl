@@ -853,7 +853,7 @@ Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \g
   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
   \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
      \dencase\;\dent u \gamma\;f_1\;f_2
-    \ \mbox{ \textbf{where}} \\
+    \ \bwhere \\
     \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
         & = &
         \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
@@ -894,9 +894,68 @@ semantics, by recursion on $\Gamma$:
 
 \subsection{Continuation monad}
 
+An alternative implementation of $\C$ is the continuation monad $\CC$
+on presheaves as, for instance, employed by Ilik et al.\
+\cite{ilikLeeHerbelin:apal10}
+for Kripke models and NbE of classical logic.
+\[
+  \CC\;\J = \forall A.\ (\J \hatto \tNf\,A) \hatto \tNf\,A
+\]
+The answer type of this continuation monad is always $\tNF$, however,
+we are polymorphic in the simple type $A$ of normal forms we produce.
 
+Agda has been really helpful to produce the rather technical but
+straightforward evidence that $\CC$ is a strong monad.
+The method $\trunNf[\CC] : \CC\,(\tNf\,A) \todot \tNf\,A$
+exists by definition, using the identity continuation $\tNf\,A \hatto \tNf\,A$.
+In the following, we demonstrate that $\CC$
+enables matching on neutrals:
+\[
+\begin{array}{l}
+  \tabort^{\CC} \, (u : \Ne \tyzero \Gamma) ~:~  \CC\,\J\,\Gamma \\
+  \tabort^{\CC}
+    \; u
+    \; (\tau : \Gamma \sublist \Delta)
+    \; (k : (\J \hatto \tNf\,B)\Delta)
+     ~=~
+    \tabort\,(\tren\,\tau\,u)
+\\[2ex]
+  \tcase^{\CC}
+     \; (u : \NeP {A_1 + A_2} \Gamma)
+     \; (c_1 : \CC\,\J\,(\cext \Gamma {A_1}))
+     \; (c_2 : \CC\,\J\,(\cext \Gamma {A_2}))
+    ~:~ \CC\,\J\,\Gamma \\
+  \tcase^{\CC}
+    \; u
+    \; c_1
+    \; c_2
+    \; (\tau : \Gamma \sublist \Delta)
+    \; (k : (\J \hatto \tNf\,B)\Delta)
+     ~=~
+    \tcase\;(\tren\,\tau\,u)\;n_1\;n_2
+    \bwhere \\
+\qquad
+  \begin{array}{l@{~~}c@{~~}l}
+     n_i & : & \Nf B {(\cext \Delta {A_i})} \\
+     n_i & = & c_i
+      \; (\tlift^{A_i}\,\tau
+            : \cext \Gamma {A_i} \sublist \cext \Delta {A_i})
+      \; \left(\lambda
+            \; (\tau' : \cext \Delta {A_i} \sublist \Phi)
+            \; (j :  \J\,\Phi) .
+            \ k
+            \; (\twk^{A_i} \rcomp \tau')
+            \; j
+         \right)
+  \end{array}
+\end{array}
+\]
+The NbE algorithm using $\CC$ is comparable to Danvy's type-directed
+partial evaluation \cite[Figure~8]{danvy:popl96}.  However, he uses
+shift-reset style continutations which can be programmed in the
+continuation monad, and relies on Scheme's \texttt{gensym} to produce
+fresh variables names rather than using Kripke function space / presheaves.
 
-\clearpage
 
 \subsection{Term normalization}
 
@@ -922,6 +981,8 @@ we aim to construct a normalization function
 \]
 that gives us for each term $t$ a $\cong$-equal normal form $n$.
 
+\clearpage
+
 \section{Call-By-Push Value}
 \label{sec:cbpv}
 
@@ -945,7 +1006,7 @@ divides types deeply into positive and negative.
     \mid \Comp P
   & \mbox{negative type}
 \\
-  \HTy & \ni & X,Y & ::= & \patom \mid P
+  \HTy & \ni & H & ::= & \patom \mid P
   & \mbox{hypothesis type}
 \\
 \end{array}
@@ -1019,7 +1080,7 @@ following rules:
 \begin{gather*}
   \nru{\pvar}{P \in \Gamma}{\PVal P \Gamma}
 \qquad
-  \nru{\tthunk}{\Nf N \Gamma}{\PValP{\Thunk\,N}\Gamma}
+  \nru{\tthunk}{\Nf N \Gamma}{\PValP{\Thunk N}\Gamma}
 \\[2ex]
   \nru{\punit}{}{\PVal{\tyone}\Gamma}
 \qquad
@@ -1051,7 +1112,7 @@ inductively defined strong monad \fbox{$\Cov$}.
   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
 \qquad
   \nru{\tmatch}
-      {\NeP {\Comp\,P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
+      {\NeP {\Comp P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
       {\Cover \J \Gamma}
 \end{gather*}
 Finally, normal forms of negative types are defined as inductive
@@ -1063,7 +1124,7 @@ family \fbox{$\Nf N \Gamma$}.
 \quad
   \nru{\tval}
       {\CoverP {\tVal\,P}  \Gamma}
-      {\NfP {\Comp\,P} \Gamma}
+      {\NfP {\Comp P} \Gamma}
 \quad
   \nru{\npair}
       {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
@@ -1097,7 +1158,7 @@ Herein, we used the sized typing of the constructors of $\Cov$:
 \begin{array}{lll}
   \treturn & : & \forall i.\ \J \todot \Cov[i+1] \J \\
   \tmatch  & : & \forall i.\
-    \tNe\,(\Comp\,P) \todot \Add P\,(\Cov[i]\J) \todot \Cov[i+1]\J \\
+    \tNe\,(\Comp P) \todot \Add P\,(\Cov[i]\J) \todot \Cov[i+1]\J \\
 \end{array}
 \]
 
@@ -1115,7 +1176,7 @@ following rules:
 \begin{gather*}
   \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
 \qquad
-  \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk\,N}\Gamma}
+  \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk N}\Gamma}
 \\[2ex]
   \nru{\punit}{}{\PValT{\tyone}\Gamma}
 \qquad
@@ -1165,7 +1226,7 @@ inductively defined cover monad \fbox{$\Cov[\T]$}.
   \nru{\treturn}{\J\,\Gamma}{\CoverT \J \Gamma}
 \qquad
   \nru{\tmatch}
-      {\NeTP {\Comp\,P} \Gamma \qquad \AddHypP P {\Cov[\T]\J} \Gamma}
+      {\NeTP {\Comp P} \Gamma \qquad \AddHypP P {\Cov[\T]\J} \Gamma}
       {\CoverT \J \Gamma}
 \end{gather*}
 
@@ -1179,7 +1240,7 @@ with instance $\T = \tNf$.
 \qquad
   \nru{\tval}
       {\Cov[\tNf](\tVal[\tNf]\,P)\,\Gamma}
-      {\NfP {\Comp\,P} \Gamma}
+      {\NfP {\Comp P} \Gamma}
 \\[2ex]
   \nru{\npair}
       {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}

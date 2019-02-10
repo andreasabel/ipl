@@ -154,6 +154,7 @@
 \newcommand{\mtrue}{\mbox{true}}
 \newcommand{\mwith}{\ \mbox{with}\ }
 \newcommand{\mwhere}{\ \mbox{where}\ }
+\newcommand{\bwhere}{\mbox{ \textbf{where} }}
 \newcommand{\mholds}{\ \mbox{holds}\ }
 \newcommand{\munless}{\ \mbox{unless}\ }
 \newcommand{\mboth}{\ \mbox{both}\ }
@@ -246,6 +247,7 @@
 \newcommand{\bzero}{\ensuremath{\mbox{\textbf{0}}}}
 \newcommand{\tyone}{1}
 \newcommand{\tyzero}{0}
+\newcommand{\tyempty}{\tyzero}
 \newcommand{\from}{\dashv}
 \newcommand{\tvar}{\mathsf{var}}
 \newcommand{\tabs}{\mathsf{abs}}
@@ -285,6 +287,7 @@
 \newcommand{\Ge}{\varepsilon}
 \newcommand{\dencase}{\denty{\tcase}}
 \newcommand{\denabort}{\denty{\tabort}}
+\newcommand{\CC}{\mathsf{CC}}
 
 % Polarized lambda
 \newcommand{\patom}{o^+}
@@ -296,13 +299,13 @@
 \newcommand{\tthunk}{\mathsf{thunk}}
 \newcommand{\tval}{\mathsf{val}}
 
-\newcommand{\Thunk}[1]{\mathsf{Thunk}\,#1}
-\newcommand{\Comp}[1]{\mathsf{Comp}\,#1}
+\newcommand{\Thunk}[1]{\mathit{Thunk}\,#1}
+\newcommand{\Comp}[1]{\mathit{Comp}\,#1}
 \newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
 \newcommand{\AddHyp}[3]{\Add{#1}\,#2\,#3}
 \newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
 \newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
-\newcommand{\PValP}[3][]{\Val^{#1}(#2)\,#3}
+\newcommand{\PValP}[3][]{\Val^{#1}\,(#2)\,#3}
 \newcommand{\PValT}[3][]{\Val^{\T}#2\,#3}
 \newcommand{\PValTP}[3][]{\Val^{\T}(#2)\,#3}
 \newcommand{\phyp}{\mathsf{hyp}^+}
