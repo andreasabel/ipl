@@ -338,11 +338,13 @@ inductively defined by the following rules.
 \end{gather*}
 The skilled eye of the reader will immediately recognize the proof
 rules of intuitionistic propositional logic (IPL) under the
-Curry-Howard isomorphism.  A term such as
+Curry-Howard isomorphism.  Using shorthand
+\fbox{$\vv n = \tvar\,(\tsuc^n\,\tzero)$} for the $n$th variable,
+a term such as
 \(
   \tabs\,(\tabs\,(\tpair\,
-    (\tvar\,(\tsuc\,\tzero))\,
-    (\tabs\,(\tapp\,(\tvar\,(\tsuc\,\tzero))\,(\tvar\,\tzero)))))
+    \vv1\,
+    (\tabs\,(\tapp\,\vv1\,\vv0))))
 \)
 could in concrete syntax be rendered as
 \(
@@ -613,18 +615,18 @@ reified from the semantic value $a$.
 
 A direct extension of our presheaf semantics to positive types cannot
 work.  For instance, with $\den \tyzero = \hat0$, simply
-$\up[\tyzero] \tyzero (\tvar\,\tzero) : \bzero$ would give us an
+$\up[\tyzero] \tyzero \vv0 : \bzero$ would give us an
 inhabitant of the empty set, which means that reflection at the empty
 type would not be definable.  Similarily, the setting
 $\den{A + B} = \den A \hatplus \den B$ is refuted by
-% $\up[\tyone + \tyone]^{\tyone + \tyone} (\tvar\,\tzero) : \bone \bplus \bone$
-$\up[A + B]{A + B} (\tvar\,\tzero) : \den A (A{+}B) \bplus \den B (A{+}B)$
+% $\up[\tyone + \tyone]^{\tyone + \tyone} \vv0 : \bone \bplus \bone$
+$\up[A + B]{A + B} \vv0 : \den A (A{+}B) \bplus \den B (A{+}B)$
 which would require us to make a decision of whether $A$ holds or $B$ holds
 while only be given a hypothesis of type $A + B$.
 Not even the usual interpretation of base types $\den o = \tNe\,o$
 works in the presence of sums, as we would not be able to interpret
 the term
-$\tabs\,(\tcase\,(\tvar\,\tzero)\,(\tvar\,\tzero)\,(\tvar\,\tzero)) :
+$\tabs\,(\tcase\,\vv0\,\vv0\,\vv0) :
 (o+o) \To o$ in our semantics, as $\Ne o (o+o)$ is empty.
 What is needed are case distinctions on neutrals in the semantics,
 allowing us the elimination of positive hypotheses before producing a
@@ -1003,7 +1005,7 @@ since $\tunit : \tyone \from \Gamma$.
 \\[2ex]
 %% ETA LAWS
   \nru{\retato}{}{t \cong
-    \tabs\,(\tapp\,(\tren\,\twk\,t)\,(\tvar\,\tzero))}
+    \tabs\,(\tapp\,(\tren\,\twk\,t)\,\vv0)}
 \quad
   \nru{\retatimes}{}{t \cong \tpair\,(\prj 1 t)\,(\prj 2 t)}
 \quad
@@ -1011,8 +1013,8 @@ since $\tunit : \tyone \from \Gamma$.
 \\[1ex]
   \nru{\retaplus}{}{t \cong
     \tcase\,t
-      \,(\injP 1 {\tvar\,\tzero})
-      \,(\injP 2 {\tvar\,\tzero})
+      \,(\inj 1 {\vv0})
+      \,(\inj 2 {\vv0})
     }
 \qquad
   \nru{\retazero}{}{t \cong \tabort\,t}
@@ -1215,7 +1217,8 @@ context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
 of positive type $P$ are constructed by the
 following rules:
 \begin{gather*}
-  \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
+  \nru{\tvar}{P \in \Gamma}{\PValT P \Gamma}
+  % \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
 \qquad
   \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk N}\Gamma}
 \\[2ex]
@@ -1267,18 +1270,18 @@ with instance $\T = \tNf$.
       {\Tm N \Gamma}
 \qquad
   \nru{\tsplit}
-    {\TmP {P_1 \times P_2} \Gamma
+    {\PValP {P_1 \times P_2} \Gamma
       \qquad \Tm N {(\cext {\cext \Gamma P_1} P_2)}
     }{\Tm N \Gamma}
 \\[2ex]
   \nru{\tcase}
-    {\TmP {P_1 + P_2} \Gamma
+    {\PValP {P_1 + P_2} \Gamma
       \qquad \Tm N {(\cext \Gamma P_1)}
       \qquad \Tm N {(\cext \Gamma P_2)}
     }{\Tm N \Gamma}
 \qquad
   \nru{\tabort}
-    {\Tm \tyzero \Gamma}
+    {\PVal \tyzero \Gamma}
     {\Tm N \Gamma}
 \end{gather*}
 
@@ -1288,7 +1291,8 @@ Normal forms:  $\PVal[\tNf]$.
 
 \fbox{$\Ne N \Gamma$}:
 \begin{gather*}
-  \nru{\nvar}{\Thunk N \in \Gamma}{\Ne N \Gamma}
+  \nru{\tforce}{\Thunk N \in \Gamma}{\Ne N \Gamma}
+  % \nru{\nvar}{\Thunk N \in \Gamma}{\Ne N \Gamma}
 \qquad
   \nru{\tprj_i}
       {\NeP {N_1 \ntimes N_2} \Gamma}
@@ -1359,16 +1363,105 @@ form, monadic intermediate computations are permitted under a final
 $\trunNf$.  Negative reflection $\up N : \tNe\,N \todot \den N$ is as
 before generalized from variables to neutrals, to handle the breaking
 down of $N$ via eliminations.
+%
+In the following definition of reflection we use the abbreviation
+\fbox{$\tfresh^P_\Gamma = \up[\cext \Gamma P] P \vv0 : \Cov\,\den P$}.
 \[
+\def\arraystretch{1.3}
+\begin{array}{l@{\,}l@{~~}c@{~~}l}
+  \multicolumn 2 l {\upG P} & : & P \in \Gamma \to \Cov\,\den P \, \Gamma\\
+  \upG {\patom}         & x & = & x \\
+  \upG {\tyone}         & x & = & \treturn\;\ttempty \\
+  \upG {P_1 \times P_2} & x & = & \tsplit\;x\,
+    \left(
+     (\up[\cext{\cext \Gamma {P_1}}{P_2}]{P_1}\,\vv1)
+     \star
+     (\up[\cext{\cext \Gamma {P_1}}{P_2}]{P_2}\,\vv0)
+    \right) \\
+    % (\tzip
+    % \,(\up[\cext{\cext \Gamma {P_1}}{P_2}]{P_1}\,\vv1)
+    % \,(\up[\cext{\cext \Gamma {P_1}}{P_2}]{P_2}\,\vv0)
+    % ) \\
+  \upG{\tyzero}         & x & = & \tabort\;x \\
+  \upG{P_1 + P_2}       & x & = & \tcase\;x
+    \; (\tmap\;\iota_1\;\tfresh^{P_1}_\Gamma)
+    \; (\tmap\;\iota_2\;\tfresh^{P_2}_\Gamma)
+    \\
+  \upG{\Thunk N} & x & = & \treturn\,(\upG N (\tforce\,x)) \\
+\end{array}
+\,
 \begin{array}{lcl}
-  \upG P & : & P \in \Gamma \to \den P \\
-  \upG {\patom} \; x & = & x \\
-  \upG {\tyone} \; x & = & \treturn\;\ttempty \\
-  \upG {P_1 \times P_2} \; x & = & \tsplit\;x\;\tzip
+  \down P & : & \den P \todot \tVal\,P \\
+  \down {\patom} & = & \tvar \\
+  \downG {\tyone} () & = & \punit \\
+  \downG {P_1 \times P_2}(a_1,a_2) & = & \ppair
+    \,(\downG {P_1} a_1)
+    \,(\downG {P_2} a_2)
+    \\
+  \down {\tyzero} & = & \tmagic \\
+  \down {P_1 + P_2} & = &
+    [  \tinj_1 \comp \down{P_1}
+    ,\ \tinj_2 \comp \down{P_2}
+    ] \\
+  \down {\Thunk N} & = & \tthunk \circ \down N \\
 \end{array}
 \]
+Reflection at positive pairs uses monoidal functoriality
+$\C\,\A \todot \C\,\B \todot \C\,(\A \hattimes \B)$
+called $\star$ by McBride and Paterson \cite[Section 7]{mcbridePaterson:applicative}
+which for monads $\C$ can be defined by
+$c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
+% $\tzip\;c = \tjoin \comp \tmap\,(\lambda\,a.\ (c,\, \treturn\,a)$.
 
-
+For negative product types, reflection and reification works as before:
+\[
+\def\arraystretch{1.3}
+\begin{array}{l@{\,}l@{~~}c@{~~}l}
+  \multicolumn 2 l {\up N} & : & \tNe\,N \todot \den N \\
+  \upG \natom & u & = & \treturn\,u \\
+  \upG \top   & u & = & \ttempty \\
+  \upG {N_1 \ntimes N_2} & u & = & \left(
+    \upG {N_1} \; (\prj 1 u)
+    ,\
+    \upG {N_2} \; (\prj 2 u)
+    \right) \\
+\end{array}
+\
+\begin{array}{l@{\,}l@{~~}c@{~~}l}
+  \multicolumn 2 l {\down N} & : & \den N \todot \tNf\;N \\
+  \downG \natom & c  & = & \tne\,c \\
+  \downG \top   & () & = & \nunit \\
+  \downG {N_1 \ntimes N_2} & (b_1,b_2) & = & \npair
+    \, (\downG {N_1} \; b_1)
+    \, (\downG {N_2} \; b_1)
+    \\
+\end{array}
+\]
+Reflection for function types is also unchanged, except that $\tapp$
+expects a value argument now.
+\[
+\def\arraystretch{1.3}
+\begin{array}{l@{\,}l@{~~}c@{~~}l}
+  \upG {P \To N} & u & = & \lambda
+    \;(\tau : \Gamma \sublist \Delta)
+    \;(a : \den P \Delta)
+    . \
+    \up[\Delta] N \left( \tapp\,(\tren\,\tau\,u)\,(\down[\Delta] P a) \right)
+    \\
+  \downG {P \To N} & f & = & \tabs \left( \trunNf \left(
+    \stmap
+      \left(
+        \lambda
+          \;(\tau : (\cext \Gamma P) \sublist \Delta)
+          \;(a : \den P \Delta)
+          . \
+          f\; (\twk^P \rcomp \tau)\; a
+        \right)
+      \,\tfresh^P_\Gamma
+    \right) \right)
+    \\
+\end{array}
+\]
 
 
 
