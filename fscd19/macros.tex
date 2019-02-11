@@ -290,6 +290,10 @@
 \newcommand{\dencase}{\denty{\tcase}}
 \newcommand{\denabort}{\denty{\tabort}}
 \newcommand{\CC}{\mathsf{CC}}
+\newcommand{\vzero}{\mathsf{v}_0}
+\newcommand{\vone}{\mathsf{v}_1}
+\newcommand{\vv}[1]{\mathsf{v}_{#1}}
+\newcommand{\tzip}{\mathsf{zip}}
 
 % Term normalization
 \newcommand{\subone}[2]{#1[#2]}
@@ -314,8 +318,10 @@
 \newcommand{\tthunk}{\mathsf{thunk}}
 \newcommand{\tval}{\mathsf{val}}
 
-\newcommand{\Thunk}[1]{\mathit{Thunk}\,#1}
-\newcommand{\Comp}[1]{\mathit{Comp}\,#1}
+\newcommand{\tThunk}{\mathit{Thunk}}
+\newcommand{\tComp}{\mathit{Comp}}
+\newcommand{\Thunk}[1]{\tThunk\,#1}
+\newcommand{\Comp}[1]{\tComp\,#1}
 \newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
 \newcommand{\AddHyp}[3]{\Add{#1}\,#2\,#3}
 \newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
@@ -421,6 +427,7 @@
 \newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
 \newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
+\newcommand{\hatzero}{\hat{0}}
 % \newcommand{\hattimes}{\mathrel{\hat{\times}}}
 % \newcommand{\hatplus}{\mathrel{\hat{+}}}
 \newcommand{\tenv}{\mathsf{env}}

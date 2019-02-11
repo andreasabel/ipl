@@ -1113,9 +1113,40 @@ trees is sufficient.
 
 \clearpage
 
-\section{Call-By-Push Value}
+\section{Normalization to Call-By-Push Value}
 \label{sec:cbpv}
 
+As remarked in the previous section, the placement of the monad $\C$
+in the type semantics is a bit wasteful:  Each positive type is
+prefixed by $\C$.  In our grammar of normal forms, this corresponds to
+the ability to perform case distinctions ($\tcase$, $\tabort$) at any
+positive type $P$.  In fact, our type interpretation $\den A$
+corresponds to the translation of call-by-name (CBN) lambda-calculus
+into Moggi's monadic meta-language \cite{moggi:infcomp91,levy:hosc05}.
+
+It would be sufficient, however, to perform all necessary
+case distinctions
+when transitioning from a negative type to a positive type.
+Introduction of the function type adds hypotheses to the context,
+providing material for case distinctions, but introduction of positive
+types does not add anything in that respect.  Thus, we could
+\emph{focus} on positive introductions until we transition back to a
+negative type.  Such focusing is present in the call-by-value (CBV)
+lambda-calculus, where positive introductions only operate on values,
+and variables stand only for values.  This structure is even more
+clearly spelled out in Levy's call-by-push-value (CBPV)
+\cite{levy:hosc05}, as it comes with a deep classification of types
+into positive and negative ones.  In the following, we shall utilize
+pure (\ie, effect-free) CBPV to achieve chaining of positive
+introductions.
+
+CBPV calls positive types $P$ \emph{value types} $A$ and negative
+types $N$
+\emph{computation types} $\underline B$,
+however, we shall stick to our terminology
+which is known from research on focalization.
+However, we shall use $\tThunk$ for switch $\downarrow$ and $\tComp$ for
+switch $\uparrow$.
 \[
 \begin{array}{lllrl@{\qquad}l}
   \PTy & \ni & P,Q & ::= & \patom
@@ -1130,13 +1161,53 @@ trees is sufficient.
     \mid \Comp P
   & \mbox{negative type}
 \\
-  \HTy & \ni & H & ::= & \patom \mid P
-  & \mbox{hypothesis type}
-\\
 \end{array}
 \]
+CBPV uses $U$ for $\tThunk$ and $F$ for $\tComp$, however, we find
+these names uninspiring unless you have good knowledge of the intended
+model.  Further, CBPV employs labeled sums $\Sigma_I (P_i)_{i : I}$
+and labeled records $\Pi_I (P_i)_{i : I}$ for up to countably infinite
+label sets $I$ while we only have finite sums $(\tyzero,+)$ and
+records $(\top,\ntimes)$.  However, this difference in not essential,
+our treatment extends directly to the infinite case, since we are
+working in type theory which allows infinitely branching inductive
+types.   As a last difference, CBPV does not consider base types; in
+anticipation of the next section, we add them as both positive atoms
+($\patom$) and negative atoms ($\natom$).
 
-Pure CBPV adds right non-invertible focusing.
+Getting a bit ahead of ourselves, let us consider the
+mutually defined interpretations
+$\den P$ and $\den N$ of positive and negative types as presheaves.
+\[
+\begin{array}{lcl}
+  \den{\tyone} & = & \hatone \\
+  \den{P_1 \times P_2} & = & \den{P_1} \hattimes \den{P_2} \\
+  \den{\tyzero} & = & \hatzero \\
+  \den{P_1 + P_2} & = & \den{P_1} \hatplus \den{P_2} \\
+  \den{\Thunk N} & = & \den N \\
+  \den{\patom} & = & \patom{\in}\_ \\
+\end{array}
+\qquad
+\begin{array}{lcl}
+  \den{\top} & = & \hatone \\
+  \den{N_1 \ntimes N_2} & = & \den{N_1} \hattimes \den{N_2} \\
+  \\
+  \den{P \To N} & = & \den P \hatto \den N \\
+  \den{\Comp P} & = & \C \den P \\
+  \den{\natom}  & = & \C (\tNe\, \natom) \\
+\end{array}
+\]
+Semantically, we do not distinguish between positive and negative
+products.  Notably, sum types can now be interpreted as plain presheaf
+sums.  The $\tThunk$ marker is ignored, yet $\tComp$, marking the
+switch from the negative to the positive type interpretation, places
+the cover monad.  Positive atoms, standing for value types without
+constructors, are only inhabited by variables $x : \patom \in \Gamma$.
+Negative atoms stand for computation types without own eliminations,
+thus, their inhabitants stem only from eliminations of more complex
+types, made from positive eliminations captured in $\C$ and negative
+eliminations chained together as neutral $\tNe\,\natom$, which we
+shall define below.
 
 
 Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
@@ -1210,6 +1281,96 @@ with instance $\T = \tNf$.
     {\Tm \tyzero \Gamma}
     {\Tm N \Gamma}
 \end{gather*}
+
+
+Normal forms:  $\PVal[\tNf]$.
+
+
+\fbox{$\Ne N \Gamma$}:
+\begin{gather*}
+  \nru{\nvar}{\Thunk N \in \Gamma}{\Ne N \Gamma}
+\qquad
+  \nru{\tprj_i}
+      {\NeP {N_1 \ntimes N_2} \Gamma}
+      {\Ne {N_i} \Gamma}
+\qquad
+  \nru{\tapp}
+      {\NeP {P \To N} \Gamma \qquad \PVal P \Gamma}
+      {\Ne N \Gamma}
+\end{gather*}
+Pattern matching on variables is organized in the
+inductively defined strong monad \fbox{$\Cov$}.
+\begin{gather*}
+  \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
+\qquad
+  \nru{\tbind}
+      {\NeP {\Comp P} \Gamma \qquad \Cover \J (\cext \Gamma P)}
+      {\Cover \J \Gamma}
+\\[2ex]
+  \nru{\tsplit}
+      {P_1 \times P_2 \in \Gamma \qquad
+       \Cover \J (\cext {\cext \Gamma {P_1}} {P_2})
+      }
+      {\Cover \J \Gamma}
+\\[2ex]
+  \nru{\tcase}
+      {P_1 + P_2 \in \Gamma
+       \qquad \Cover \J (\cext \Gamma {P_1})
+       \qquad \Cover \J (\cext \Gamma {P_2})
+      }
+      {\Cover \J \Gamma}
+\qquad
+  \nru{\tabort}
+      {\tyempty \in \Gamma}
+      {\Cover \J \Gamma}
+\end{gather*}
+Finally, normal forms of negative types are defined as inductive
+family \fbox{$\Nf N \Gamma$}.
+\begin{gather*}
+  \nru{\tne}
+      {\CoverP {\tNe\,\natom} \Gamma}
+      {\Nf {\natom} \Gamma}
+\quad
+  \nru{\tret}
+      {\CoverP {\tVal\,P}  \Gamma}
+      {\NfP {\Comp P} \Gamma}
+\quad
+  \nru{\npair}
+      {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
+      {\NfP {N_1 \ntimes N_2} \Gamma}
+\quad
+  \nru{\tabs}
+      {\Nf N {\cext \Gamma P}}
+      {\NfP {P \To N} \Gamma}
+\end{gather*}
+We again can run the cover monad on normal forms, \ie, have
+$\trunNf : \Cov\,(\tNf N) \todot \tNf N$.
+
+Reification $\down P : \den P \todot \tVal\,P$ at positive types produces
+a normal value, and $\down N : \den P \todot \tNf\,N$ at negative types a
+normal term.  During reification of function types $P \To N$ in
+context $\Gamma$ we need to embed a fresh variable
+$x : P \in \cext \Gamma P$ into $\den P$, breaking down $P$ to
+positive atoms $\patom$ and negative remainders $\Thunk N$.
+However, in $\den P$ we do not have case analysis available, thus,
+positive reflection $\upG P : P \in \Gamma \to \Cover {\den P} \Gamma$
+needs to run in the monad.  Luckily, as $\down N$ produces a normal
+form, monadic intermediate computations are permitted under a final
+$\trunNf$.  Negative reflection $\up N : \tNe\,N \todot \den N$ is as
+before generalized from variables to neutrals, to handle the breaking
+down of $N$ via eliminations.
+\[
+\begin{array}{lcl}
+  \upG P & : & P \in \Gamma \to \den P \\
+  \upG {\patom} \; x & = & x \\
+  \upG {\tyone} \; x & = & \treturn\;\ttempty \\
+  \upG {P_1 \times P_2} \; x & = & \tsplit\;x\;\tzip
+\end{array}
+\]
+
+
+
+
 
 
 \section{Focused Intuitionistic Propositional Logic}
