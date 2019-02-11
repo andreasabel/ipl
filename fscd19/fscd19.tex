@@ -834,14 +834,24 @@ The evaluation function
 \fbox{$\denty {t : A \from \Gamma}  : \den \Gamma \todot \den A$}
 % \fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
 can now be defined by recursion on $t$.
+% using an auxiliary definition
+% \fbox{$\fden{t : B \from \cext \Gamma A} : \den \Gamma \todot \den{A \To B}$}.
 Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 % Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 \[
 \begin{array}{lcl}
+  % \fdent{t : B \from \cext \Gamma A}\gamma & = &
+  %   \lambda
+  %     \,(\tau : \Delta \sublist \Phi)
+  %     \,(a : \den A \Phi)
+  %     .\
+  %     \dent t {(\tren\,\tau\,\gamma,\ a)} \\[1ex]
   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
-  \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma \;
-     (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi) & = &
-        \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+  \dent{\tabs\,t}\gamma
+      & = & \fdent t \gamma \\
+  % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma \;
+  %    (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi) & = &
+  %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
   % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
   %    \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
   %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
@@ -855,16 +865,39 @@ Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \g
   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
-  \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
-     \dencase\;\dent u \gamma\;f_1\;f_2
-    \ \bwhere \\
-    \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
-        & = &
-        \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
+  \dent{\tcase\;u\;t_1\;t_2}\gamma & = &
+     \dencase\;\dent u \gamma\;\fdent{t_1}\gamma\;\fdent{t_2}\gamma \\
+  % \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
+    %  \dencase\;\dent u \gamma\;f_1\;f_2
+    % \ \bwhere \\
+    % \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
+    %     & = &
+    %     \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
    % \
    %  (\lambda\; (\tau : \Delta \sublist \Phi)\,(b : \den A \Phi).\
    %      \dent v {(\tren\;\tau\;\gamma,\ b)})
     \\
+\end{array}
+\]
+For interpretation of the binders $\tabs$ and $\tcase$ we use the
+mutually defined $\fden{\_}$.
+\[
+\begin{array}{lcl}
+  \fden{t : B \from \cext \Gamma A}
+    & : & \den \Gamma \todot \den{A \To B} \\
+    & = &
+      \lambda\, (\gamma : \den \Gamma \Delta)
+      \,(\tau : \Delta \sublist \Phi)
+      \,(a : \den A \Phi)
+      .\ \,
+      \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+  % \fden{\_} ~~:~~ B \from \cext \Gamma A} \to \den \Gamma \todot \den{A \To B}
+  % \\
+  % \fdent{t : B \from \cext \Gamma A}\gamma
+  %     \,(\tau : \Delta \sublist \Phi)
+  %     \,(a : \den A \Phi)
+  %     ~~=~~
+  %     \dent t {(\tren\,\tau\,\gamma,\ a)} \\
 \end{array}
 \]
 The coproduct eliminations $\denabort$ and $\dencase$
