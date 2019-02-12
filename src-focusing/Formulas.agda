@@ -302,6 +302,11 @@ mapCover' :  ∀{P Q Γ} (f : (P ⇒̂ Q) Γ) {i j} (c : Cover i j P Γ) → Cov
 mapCover' f (returnC t) = returnC (f id≤ t)
 mapCover' f (matchC t c) = matchC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover is sized!
 
+-- Remark: Graded monad (andE)
+
+bindAddHyp : ∀{A B J K} (monJ : Mon J) → AddHyp A J →̇ ((J ⇒̂ AddHyp B K) ⇒̂ AddHyp (A ∧ B) K)
+bindAddHyp monJ t τ k = andE (mapAddHyp' k (monAddHyp monJ τ t))
+
 -- Semantics
 
 ⟦_⟧ : ∀{p} (A : Form p) (Γ : Cxt) → Set
@@ -371,6 +376,84 @@ paste True    _     = _
 paste (A ∧ B) c     = paste A (mapCover proj₁ c) , paste B (mapCover proj₂ c)
 paste (A ⇒ B) c τ a = paste B (mapCover' (λ τ' f → f id≤ (mon⟦ A ⟧ τ' a)) (monCover mon⟦ A ⇒ B ⟧ τ c))
 paste (Comp A)      = joinCover
+
+-- Snippets to define evaluation in polarized lambda calculus
+
+module Evaluation where
+
+  -- Environments
+
+  G⟦_⟧ : (Γ : Cxt) → Cxt → Set
+  G⟦ ε     ⟧ Δ = ⊤
+  G⟦ Γ ∙ P ⟧ Δ = G⟦ Γ ⟧ Δ × ⟦ P ⟧ Δ
+
+  monG⟦_⟧ : (Γ : Cxt) → Mon (G⟦ Γ ⟧)
+  monG⟦ ε ⟧ = _
+  monG⟦ Γ ∙ P ⟧ τ (γ , a) = monG⟦ Γ ⟧ τ γ , mon⟦ P ⟧ τ a
+
+  Ev : (R : Set) (Δ Γ : Cxt) → Set
+  Ev R Δ Γ = G⟦ Γ ⟧ Δ → R
+
+  cut : ∀{R P Δ} → ⟦ P ⟧ Δ → AddHyp P (Ev R Δ) →̇ Ev R Δ
+  cut x        (addAtom t) γ = t (γ , returnC x)
+  cut a        (addNeg t)  γ = t (γ , a)
+  cut _        (trueE t)     = t
+  cut (a , b)  (andE t)      = cut a (mapAddHyp (cut b) t)
+  cut ()       falseE
+  cut (inj₁ a) (orE t u)     = cut a t
+  cut (inj₂ b) (orE t u)     = cut b u
+
+-- Den : ∀{p} (A : Form p) (Δ : Cxt) → Cxt → Set
+-- Den A Δ Γ = G⟦ Γ ⟧ Δ → ⟦ A ⟧ Δ
+
+-- cut : ∀{ N : Form - }{P Δ} → ⟦ P ⟧ Δ → AddHyp P (Den N Δ) →̇ Den N Δ
+-- cut {N} x        (addAtom t) γ = t (γ , returnC x)
+-- cut {N} a        (addNeg t)  γ = t (γ , a)
+-- cut {N} _        (trueE t) = t
+-- cut {N} (a , b)  (andE t)  = cut {N} a (mapAddHyp (cut {N} b) t)
+-- cut {N} ()       falseE
+-- cut {N} (inj₁ a) (orE t u) = cut {N} a t
+-- cut {N} (inj₂ b) (orE t u) = cut {N} b u
+
+-- {-
+
+-- ⦅_⦆ : ∀{p} (A : Form p) → Cxt → Set
+-- ⦅ A ⦆ Γ = G⟦ Γ ⟧ →̇ ⟦ A ⟧
+
+
+-- cut : ∀{P}{ N : Form - } → ⟦ P ⟧ →̇ (AddHyp P ⦅ N ⦆ ⇒̂ ⦅ N ⦆)
+-- cut a τ (addAtom t) γ = {!!}
+-- cut a τ (addNeg t) γ = t (γ , {!mon⟦ _ ⟧ τ a!})
+-- cut _ τ (trueE t) γ = {!!}
+-- cut (a , b) τ (andE t) γ = {!cut !}
+-- cut a τ falseE γ = {!!}
+-- cut a τ (orE t u) γ = {!!}
+
+-- {-
+-- cut : ∀{P N} → AddHyp P ⦅ N ⦆  →̇ ⦅ P ⇒ N ⦆
+-- cut (addAtom j) γ τ x = j (monG⟦ _ ⟧ τ γ , returnC x)
+-- cut (addNeg  j) γ τ a = j (monG⟦ _ ⟧ τ γ , a)
+-- cut (trueE   j) γ τ _ = j (monG⟦ _ ⟧ τ γ)
+-- cut (andE j) γ τ (a , b) = cut (mapAddHyp' (λ τ' j' → {!cut j'!} ) j) γ τ a
+-- cut falseE γ τ ()
+-- cut (orE j k) γ τ (inj₁ a) = {!!}
+-- cut (orE j k) γ τ (inj₂ b) = {!!}
+
+-- {-
+-- -- Cuts
+
+-- subH : ∀ {N Γ Δ} → Hyp N Δ → Δ ≤ Γ → Δ ≤ Γ ∙ N
+-- subH x τ = {!!}
+
+-- cut : ∀{P J} (monJ : Mon J) → AddHyp P J →̇ (⟦ P ⟧ ⇒̂ J)
+-- cut monJ (addAtom t) τ a = monJ (subH a τ) t
+-- cut monJ (addNeg t) τ a = {!!} --  monJ {!subN a τ!} t
+-- cut monJ (trueE t) τ _ = monJ τ t
+-- cut monJ (andE t) τ (a , b) = {!!}
+-- cut monJ falseE τ ()
+-- cut monJ (orE t u) τ (inj₁ a) = cut monJ t τ a
+-- cut monJ (orE t u) τ (inj₂ b) = cut monJ u τ b
+
 
 -- Intuitionistic propositional logic
 
@@ -537,6 +620,12 @@ module CBV where
   norm t = reify- _ (eval t (ide _))
 
 
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}
 -- -}
 -- -}
 -- -}
