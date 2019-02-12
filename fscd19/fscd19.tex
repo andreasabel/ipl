@@ -1157,9 +1157,10 @@ prefixed by $\C$.  In our grammar of normal forms, this corresponds to
 the ability to perform case distinctions ($\tcase$, $\tabort$) at any
 positive type $P$.  In fact, our type interpretation $\den A$
 corresponds to the translation of call-by-name (CBN) lambda-calculus
-into Moggi's monadic meta-language \cite{moggi:infcomp91,levy:hosc05}.
+into Moggi's monadic meta-language \cite{moggi:infcomp91,levy:hosc06}.
 
-It would be sufficient, however, to perform all necessary
+It would be sufficient %, however,
+to perform all necessary
 case distinctions
 when transitioning from a negative type to a positive type.
 Introduction of the function type adds hypotheses to the context,
@@ -1170,10 +1171,12 @@ negative type.  Such focusing is present in the call-by-value (CBV)
 lambda-calculus, where positive introductions only operate on values,
 and variables stand only for values.  This structure is even more
 clearly spelled out in Levy's call-by-push-value (CBPV)
-\cite{levy:hosc05}, as it comes with a deep classification of types
+\cite{levy:hosc06}, as it comes with a deep classification of types
 into positive and negative ones.  In the following, we shall utilize
 pure (\ie, effect-free) CBPV to achieve chaining of positive
 introductions.
+
+\subsection{Types and polarization}
 
 CBPV calls positive types $P$ \emph{value types} $A$ and negative
 types $N$
@@ -1252,6 +1255,8 @@ Contexts are lists of \emph{positive} types as in CBPV variables stand
 for values.  Interpretation of contexts $\den \Gamma$ is again defined
 pointwise $\den \cempty = \hatone$ and
 $\den{\cext \Gamma P} = \den \Gamma \hattimes \den P$.
+
+\subsection{Terms and evaluation}
 
 Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
 context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
@@ -1336,15 +1341,16 @@ sum types.
 \end{gather*}
 
 Interpretation of values
-$\dent{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
+$\denty{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
 and terms
-$\dent{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
+$\denty{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
 is straightforward, thanks to the pioneering work of
 Moggi \cite{moggi:infcomp91} and
-Levy \cite{levy:hosc05}
+Levy \cite{levy:hosc06}
 put into the design of CBPV.
 \[
 \begin{array}{lcl}
+  \\
   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
   \dent{\punit}\gamma   & = & \ttempty \\
   \dent{\ppair\,v_1\,v_2}\gamma & = &
@@ -1352,28 +1358,26 @@ put into the design of CBPV.
   \dent{\inj i v}\gamma & = & \iota_i \dent v \gamma \\
   \dent{\tthunk\,t}\gamma & = & \dent t \gamma \\
 \end{array}
-\]
-Since $\tThunk$ serves only as an embedding of negative into positive
-types and has no semantic effect,
-we interpret thunking and forcing by the identity.
-\[
+\quad
 \begin{array}{lcl}
-  \dent{\tforce\,v}\gamma & = & \dent v \gamma \\
   \dent{\tabs\,t}\gamma
       & = & \fdent t \gamma \\
   \dent{\tapp\,t\,v} \gamma & = &
      \dent t \gamma\;\tid\;\dent v \gamma \\
-  \dent{\punit}\gamma & = & \ttempty \\
-  \dent{\ppair\,t_1\,t_2}\gamma & = &
+  \dent{\nunit}\gamma & = & \ttempty \\
+  \dent{\npair\,t_1\,t_2}\gamma & = &
     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+  \dent{\tforce\,v}\gamma & = & \dent v \gamma \\
 \end{array}
 \]
+Since $\tThunk$ serves only as an embedding of negative into positive
+types and has no semantic effect,
+we interpret thunking and forcing by the identity.
+The eliminations for positive types deal now only with values, thus,
+need not reference the monad operations.
 \[
 \begin{array}{lcl}
-  \dent{\tret\,v}\gamma & = & \treturn[\C] \; \dent v \gamma \\
-  \dent{\tbind\,u\,t}\gamma & = & \trun\,
-    (\stmap[\C] \; \fdent t \gamma\; \dent u \gamma) \\
   \dent{\tsplit\,v\,t}\gamma & = & (\lambda\,(a_1,a_2).\
     \dent{t}{(\gamma,a_1,a_2)} ) \; \dent v \gamma \\
   \dent{\tcase\,v\,t_1\,t_2}\gamma & = &
@@ -1383,11 +1387,27 @@ we interpret thunking and forcing by the identity.
   \dent{\tabort\,v}\gamma & = & \tmagic\,\dent v \gamma \\
 \end{array}
 \]
+The use of the monad is confined to $\tret$ and $\tbind$.
+Note the availability of $\trun^\C : \C \den N \to \den N$
+at any negative type $N$ for the interpretation of $\tbind$.
+\[
+\begin{array}{lcl}
+  \dent{\tret\,v}\gamma & = & \treturn[\C] \; \dent v \gamma \\
+  \dent{\tbind\,u\,t}\gamma & = & \trun^\C\,
+    (\stmap[\C] \; \fdent t \gamma\; \dent u \gamma) \\
+\end{array}
+\]
 
-Normal forms:  $\PVal[\tNf]$.
+\subsection{Normal forms and normalization}
 
+Positive normal forms are values $v : \PVal[\tNf]$ whose thunks only
+contain negative normal forms.
 
-\fbox{$\Ne N \Gamma$}:
+Neutral normal forms \fbox{$\Ne N \Gamma$} are negative eliminations
+starting from a forced $\tThunk$ rather than from variables of negative
+types (as those do not exist in CBPV).  However, due to normality
+the $\tThunk$ cannot be a $\tthunk$, but only a variable
+$\Thunk N \in \Gamma$.
 \begin{gather*}
   \nru{\tforce}{\Thunk N \in \Gamma}{\Ne N \Gamma}
   % \nru{\nvar}{\Thunk N \in \Gamma}{\Ne N \Gamma}
@@ -1397,10 +1417,14 @@ Normal forms:  $\PVal[\tNf]$.
       {\Ne {N_i} \Gamma}
 \qquad
   \nru{\tapp}
-      {\NeP {P \To N} \Gamma \qquad \PVal P \Gamma}
+      {\NeP {P \To N} \Gamma \qquad \PValNf P \Gamma}
       {\Ne N \Gamma}
 \end{gather*}
-Pattern matching on variables is organized in the
+Variables are originally introduced by either $\tabs$ or
+the $\tbind$ind of a neutral of type $\Comp P$ to a new variable of type
+$P$.  Variables of composite value type can be broken down by pattern
+matching, introducing variables of smaller type.  These positive
+eliminations plus $\tbind$ are organized in the
 inductively defined strong monad \fbox{$\Cov$}.
 \begin{gather*}
   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
@@ -1427,32 +1451,40 @@ inductively defined strong monad \fbox{$\Cov$}.
       {\Cover \J \Gamma}
 \end{gather*}
 Finally, normal forms of negative types are defined as inductive
-family \fbox{$\Nf N \Gamma$}.
+family \fbox{$\Nf N \Gamma$}.  They are generated by maximal negative
+introduction ($\tabs$, $\npair$, $\nunit$) until a negative atom or
+$\Comp P$ is reached.  Then, elimination of neutrals and variables is
+possible through the $\Cov$ monad until an answer can be given in form
+of a base neutral ($\tNe\,\natom$) or a normal value.
 \begin{gather*}
   \nru{\tne}
       {\CoverP {\tNe\,\natom} \Gamma}
       {\Nf {\natom} \Gamma}
-\quad
+\qquad
   \nru{\tret}
-      {\CoverP {\tVal\,P}  \Gamma}
+      {\CoverP {\tVal[\tNf]\,P}  \Gamma}
       {\NfP {\Comp P} \Gamma}
-\quad
+\\[2ex]
+  \nru{\nunit}{}{\Nf \top \Gamma}
+\qquad
   \nru{\npair}
       {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
       {\NfP {N_1 \ntimes N_2} \Gamma}
-\quad
+\qquad
   \nru{\tabs}
       {\Nf N {\cext \Gamma P}}
       {\NfP {P \To N} \Gamma}
 \end{gather*}
 We again can run the cover monad on normal forms, \ie, have
-$\trunNf : \Cov\,(\tNf N) \todot \tNf N$.
+$\trunNf : \Cov\,(\tNf N) \todot \tNf N$, which extends to
+negative semantic values
+$\trun : \Cov \den N \todot \den N$.
 
-Reification $\down P : \den P \todot \tVal\,P$ at positive types produces
+Reification $\down P : \den P \todot \tVal[\tNf]\,P$ at positive types produces
 a normal value, and $\down N : \den P \todot \tNf\,N$ at negative types a
 normal term.  During reification of function types $P \To N$ in
 context $\Gamma$ we need to embed a fresh variable
-$x : P \in \cext \Gamma P$ into $\den P$, breaking down $P$ to
+$x : P \in (\cext \Gamma P)$ into $\den P$, breaking down $P$ to
 positive atoms $\patom$ and negative remainders $\Thunk N$.
 However, in $\den P$ we do not have case analysis available, thus,
 positive reflection $\upG P : P \in \Gamma \to \Cover {\den P} \Gamma$
@@ -1463,7 +1495,11 @@ before generalized from variables to neutrals, to handle the breaking
 down of $N$ via eliminations.
 %
 In the following definition of reflection we use the abbreviation
-\fbox{$\tfresh^P_\Gamma = \up[\cext \Gamma P] P \vv0 : \Cov\,\den P$}.
+\fbox{\(
+  \tfresh^P_\Gamma
+    = \up[\cext \Gamma P] P \vv0
+    : \Cover{\den P}{(\cext \Gamma P)}
+\)}.
 \[
 \def\arraystretch{1.3}
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
@@ -1489,7 +1525,7 @@ In the following definition of reflection we use the abbreviation
 \end{array}
 \,
 \begin{array}{lcl}
-  \down P & : & \den P \todot \tVal\,P \\
+  \down P & : & \den P \todot \tVal[\tNf]\,P \\
   \down {\patom} & = & \tvar \\
   \downG {\tyone} () & = & \punit \\
   \downG {P_1 \times P_2}(a_1,a_2) & = & \ppair
@@ -1505,10 +1541,20 @@ In the following definition of reflection we use the abbreviation
 \end{array}
 \]
 Reflection at positive pairs uses monoidal functoriality
-$\C\,\A \todot \C\,\B \todot \C\,(\A \hattimes \B)$
+$\C\,\A_1 \todot \C\,\A_2 \todot \C\,(\A_1 \hattimes \A_2)$
 called $\star$ by McBride and Paterson \cite[Section 7]{mcbridePaterson:applicative}
 which for monads $\C$ can be defined by
-$c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
+$c_1 \star c_2 =
+   \tjoin \; (\tmap\;(\lambda\,a_1.\
+   \tmap\;(\lambda\,a_2.\ (a_1,a_2))
+    \;c_2)
+    \;c_1)$.
+% $c_1 \star c_2 =
+%    \tjoin \; (\tmap\;(\lambda\,a_1.\
+%    \tjoin \; (\tmap\;(\lambda\,a_2.\ \treturn\,(a_1,a_2))
+%     \;c_2))
+%     \;c_1)$.
+% $c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
 % $\tzip\;c = \tjoin \comp \tmap\,(\lambda\,a.\ (c,\, \treturn\,a)$.
 
 For negative product types, reflection and reification works as before:
@@ -1560,8 +1606,35 @@ expects a value argument now.
     \\
 \end{array}
 \]
+The identity environment $\idenv \Gamma : \Cover {\den \Gamma} \Gamma$
+can only be generated in the monad, due to monadic positive
+reflection.
+\[
+\begin{array}{lcl}
+  \idenv{\cempty} & = & \treturn\,() \\
+  \idenv{\cext \Gamma P} & = &
+    (\tren\,\twk^P\,\idenv\Gamma) \star \tfresh^P_\Gamma \\
+\end{array}
+\]
+Putting things together, we obtain the normalization function
+\[
+  \tnorm\,(t : \Tm N \Gamma) = \trunNf\,
+    \left(
+      \tmap\,\left(\down N \comp \denty t\right)\,\idenv\Gamma
+    \right)
+.
+\]
 
+Taking stock, we have arrived at normal forms that eagerly introduce
+($\tNf$) and eliminate ($\tNe$) negative types and also eagerly
+introduce positive types ($\tVal$).  However, the elimination of
+positive types is still rather non-deterministic.
+It is possible to only partially break up a composite positive type
+and leave smaller, but still composite positive types for later
+pattern matching.
 
+The placement of $\tsplit$, $\tcase$, and $\tabort$ is only
+constrained by the presence of the split variable
 
 
 \section{Focused Intuitionistic Propositional Logic}

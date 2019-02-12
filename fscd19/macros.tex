@@ -64,8 +64,10 @@
 \def\rv{\mathclose{{]\kern-0.14em]}}}   % closing ]] value delimiter
 \newcommand{\den}[1]{\lv #1 \rv}
 \newcommand{\Den}[2]{\den{#1}_{#2}}
-\newcommand{\dent}[2]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis_{#2}}
-\newcommand{\denty}[1]{\llparenthesis#1\rrparenthesis}
+\newcommand{\dent}[2]{\denty{#1}_{#2}}
+\newcommand{\denty}[1]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis}
+% \newcommand{\dent}[2]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis_{#2}}
+% \newcommand{\denty}[1]{\llparenthesis#1\rrparenthesis}
 \newcommand{\fden} [1]{\lambda\denty{\kern0.3ex#1\kern0.3ex}}
 \newcommand{\fdent}[2]{\lambda\dent{#1}{#2}}
 % \newcommand{\fden}[1]{\mathsf{F}\denty{#1}}
@@ -289,6 +291,10 @@
 \newcommand{\CoverT}[2]{\Cov[\T]#1\,#2}
 \newcommand{\Cover}[2]{\Cov\,#1\,#2}
 \newcommand{\CoverP}[2]{\Cov\,(#1)\,#2}
+\newcommand{\CM}{\mathsf{CM}}
+\newcommand{\tCM}{\mathsf{CM}}
+\newcommand{\CovM}[2]{\CM\,#1\,#2}
+\newcommand{\CovMP}[2]{\CM\,(#1)\,#2}
 \newcommand{\trun}{\mathsf{run}}
 \newcommand{\trunNf}[1][]{\mathsf{runNf}^{#1}}
 \newcommand{\stmap}[1][]{\widehat{\mathsf{map}}^{#1}}
@@ -335,10 +341,12 @@
 \newcommand{\TmP}[3][]{\tTm^{#1}\,(#2)\,#3}
 \newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
 \newcommand{\PValP}[3][]{\Val^{#1}\,(#2)\,#3}
-\newcommand{\PValT}[3][]{\Val^{\T}#2\,#3}
-\newcommand{\PValTP}[3][]{\Val^{\T}(#2)\,#3}
-\newcommand{\PValTm}[3][]{\Val^{\tTm}#2\,#3}
-\newcommand{\PValTmP}[3][]{\Val^{\tTm}(#2)\,#3}
+\newcommand{\PValT}[2]{\Val^{\T}#1\,#2}
+\newcommand{\PValTP}[2]{\Val^{\T}(#1)\,#2}
+\newcommand{\PValTm}[2]{\Val^{\tTm}#1\,#2}
+\newcommand{\PValTmP}[2]{\Val^{\tTm}(#1)\,#2}
+\newcommand{\PValNf}[2]{\Val^{\tNf}#1\,#2}
+\newcommand{\PValNfP}[2]{\Val^{\tNf}(#1)\,#2}
 \newcommand{\phyp}{\mathsf{hyp}^+}
 \newcommand{\nhyp}{\mathsf{hyp}^-}
 \newcommand{\punit}{\mathsf{unit}^+}
@@ -884,7 +892,8 @@
 % weak normalization
 \newcommand{\eqclass}[1]{\overline{#1}}
 
-\newcommand{\idenv}[1]{\gamma_{#1}}
+%\newcommand{\idenv}[1]{\gamma_{#1}}
+\newcommand{\idenv}[1]{\mathord{\uparrow}^{#1}}
 \newcommand{\evall}[2]{\clost{#2}{\idenv{#1}}} % lazy
 \newcommand{\evalsto}{\searrow}
 \newcommand{\at}{\mathrel{@}}
