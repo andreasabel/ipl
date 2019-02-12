@@ -118,7 +118,7 @@ module _ (Ne : (A : Form +) (Γ : Cxt) → Set) where
 
   data Cover' (i : Size) (J : Cxt → Set) (Γ : Cxt) : Set where
     returnC : (t : J Γ) → Cover' i J Γ
-    caseC   : ∀{j : Size< i} {A} (t : Ne A Γ) (c : AddHyp A (Cover' j J) Γ) → Cover' i J Γ
+    matchC   : ∀{j : Size< i} {A} (t : Ne A Γ) (c : AddHyp A (Cover' j J) Γ) → Cover' i J Γ
 
 -- Left focusing (break a negative hypothesis A down into something positive)
 -- "spine"
@@ -180,13 +180,13 @@ mapAddHyp f (orE t u)   = orE (mapAddHyp f t) (mapAddHyp f u)
 
 mapCover :  ∀{P Q} (f : P →̇ Q) {i j} → Cover i j P →̇ Cover i j Q
 mapCover f (returnC t) = returnC (f t)
-mapCover f (caseC t c) = caseC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
+mapCover f (matchC t c) = matchC t (mapAddHyp (mapCover f) c)  -- Cover should be sized!
 
 -- Cover monad
 
 joinCover : ∀{i j P} → Cover i j (Cover ∞ j P) →̇ Cover ∞ j P
 joinCover (returnC t) = t
-joinCover (caseC t c) = caseC t (mapAddHyp joinCover c)
+joinCover (matchC t c) = matchC t (mapAddHyp joinCover c)
 
 -- Context extension (thinning)
 
@@ -267,7 +267,7 @@ mutual
 
   monCover : ∀{i j P} (monP : Mon P) → Mon (Cover i j P)
   monCover         monP τ (returnC t)      = returnC (monP τ t)
-  monCover {i} {j} monP τ (caseC {i'} t c) = caseC (monNe τ t)
+  monCover {i} {j} monP τ (matchC {i'} t c) = matchC (monNe τ t)
     (monAddHyp (monCover {i'} {j} monP) τ c)
 
   monRFoc : ∀{i A} → Mon (RFoc i A)
@@ -300,7 +300,7 @@ mapAddHyp' f (orE t u)   = orE (mapAddHyp' f t) (mapAddHyp' f u)
 
 mapCover' :  ∀{P Q Γ} (f : (P ⇒̂ Q) Γ) {i j} (c : Cover i j P Γ) → Cover i j Q Γ
 mapCover' f (returnC t) = returnC (f id≤ t)
-mapCover' f (caseC t c) = caseC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover is sized!
+mapCover' f (matchC t c) = matchC t (mapAddHyp' (λ τ → mapCover' λ τ' → f (τ' • τ)) c)  -- Cover is sized!
 
 -- Semantics
 
@@ -331,13 +331,13 @@ mon⟦ Thunk A ⟧           = mon⟦ A ⟧
 
 mutual
 
-  reify- : ∀ (A : Form -) {Γ} → ⟦ A ⟧ Γ → RInv ∞ A Γ
+  reify- : ∀ (A : Form -) → ⟦ A ⟧ →̇ RInv ∞ A
   reify- True     _       = trueI
   reify- (A ∧ B)  (a , b) = andI (reify- A a) (reify- B b)
   reify- (A ⇒ B)  f       = impI (reflectHyp A λ τ a → reify- B (f τ a))
   reify- (Comp A) c       = ret (mapCover (reify+ A) c)
 
-  reify+ : ∀ (A : Form +) {Γ} → ⟦ A ⟧ Γ → RFoc ∞ A Γ
+  reify+ : ∀ (A : Form +) → ⟦ A ⟧ →̇ RFoc ∞ A
   reify+ True _           = trueI
   reify+ (A ∧ B) (a , b)  = andI (reify+ A a) (reify+ B b)
   reify+ (Atom P) x       = hyp x
@@ -362,7 +362,7 @@ mutual
   reflect True t = _
   reflect (A ∧ B) t = reflect A (andE₁ t) , reflect B (andE₂ t)
   reflect (A ⇒ B) t τ a = reflect B (impE (monNe τ t) (reify+ A a))  -- need monNe
-  reflect (Comp A) t = caseC t (reflectHyp A λ τ a → returnC a)
+  reflect (Comp A) t = matchC t (reflectHyp A λ τ a → returnC a)
 
 -- Negative propositions are comonadic
 
