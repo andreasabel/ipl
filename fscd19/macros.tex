@@ -339,14 +339,26 @@
 \newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
 \newcommand{\Tm}[3][]{\tTm^{#1\,}#2\,#3}
 \newcommand{\TmP}[3][]{\tTm^{#1}\,(#2)\,#3}
-\newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
-\newcommand{\PValP}[3][]{\Val^{#1}\,(#2)\,#3}
-\newcommand{\PValT}[2]{\Val^{\T}#1\,#2}
-\newcommand{\PValTP}[2]{\Val^{\T}(#1)\,#2}
-\newcommand{\PValTm}[2]{\Val^{\tTm}#1\,#2}
-\newcommand{\PValTmP}[2]{\Val^{\tTm}(#1)\,#2}
-\newcommand{\PValNf}[2]{\Val^{\tNf}#1\,#2}
-\newcommand{\PValNfP}[2]{\Val^{\tNf}(#1)\,#2}
+\newcommand{\PVal}[3][]{\Val\,#2\,#3}
+\newcommand{\PValP}[3][]{\Val\,(#2)\,#3}
+\newcommand{\PValT}[2]{\Val\,#1\,#2}
+\newcommand{\PValTP}[2]{\Val\,(#1)\,#2}
+\newcommand{\PValTm}[2]{\Val\,#1\,#2}
+\newcommand{\PValTmP}[2]{\Val\,(#1)\,#2}
+% \newcommand{\PVal}[3][]{\Val^{#1\,}#2\,#3}
+% \newcommand{\PValP}[3][]{\Val^{#1}\,(#2)\,#3}
+% \newcommand{\PValT}[2]{\Val^{\T}#1\,#2}
+% \newcommand{\PValTP}[2]{\Val^{\T}(#1)\,#2}
+% \newcommand{\PValTm}[2]{\Val^{\tTm}#1\,#2}
+% \newcommand{\PValTmP}[2]{\Val^{\tTm}(#1)\,#2}
+\newcommand{\tVnf}{\mathsf{Vnf}}
+\newcommand{\tVNf}{\tVnf}
+\newcommand{\VNf}{\PValNf}
+\newcommand{\PValNf}[2]{\tVNf\,#1\,#2}
+\newcommand{\PValNfP}[2]{\tVNf\,(#1)\,#2}
+% \newcommand{\PValNf}[2]{\Val^{\tNf}#1\,#2}
+% \newcommand{\PValNfP}[2]{\Val^{\tNf}(#1)\,#2}
+
 \newcommand{\phyp}{\mathsf{hyp}^+}
 \newcommand{\nhyp}{\mathsf{hyp}^-}
 \newcommand{\punit}{\mathsf{unit}^+}
@@ -440,7 +452,7 @@
 \newcommand{\eval}[3][]{\teval_{#1}\;#2\;#3}
 \newcommand{\evalG}{\eval[\Gamma]}
 \newcommand{\reify}[3][]{\treify_{#1}^{#2}\,#3}
-\newcommand{\reflect}[3][]{\treflect_{#1}^{#2}\,#3}
+\newcommand{\reflect}[2][]{\treflect_{#1}^{#2}}
 \newcommand{\norm}[3][]{\tnorm_{#1}^{#2}\,#3}
 \newcommand{\hatone}{\hat{1}}
 \newcommand{\hatzero}{\hat{0}}

@@ -1258,7 +1258,7 @@ $\den{\cext \Gamma P} = \den \Gamma \hattimes \den P$.
 
 \subsection{Terms and evaluation}
 
-Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
+Assuming a family $\Tm N \Gamma$ of terms of negative type $N$ in
 context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
 of positive type $P$ shall be constructed by the
 following rules:
@@ -1266,7 +1266,7 @@ following rules:
   \nru{\tvar}{P \in \Gamma}{\PValT P \Gamma}
   % \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
 \qquad
-  \nru{\tthunk}{\T\,N\,\Gamma}{\PValTP{\Thunk N}\Gamma}
+  \nru{\tthunk}{\Tm N \Gamma}{\PValTP{\Thunk N}\Gamma}
 \\[2ex]
   \nru{\punit}{}{\PValT{\tyone}\Gamma}
 \qquad
@@ -1400,8 +1400,26 @@ at any negative type $N$ for the interpretation of $\tbind$.
 
 \subsection{Normal forms and normalization}
 
-Positive normal forms are values $v : \PVal[\tNf]$ whose thunks only
+Positive normal forms are values $v : \VNf P \Gamma$
+referring only to atomic variables and
+whose thunks only
 contain negative normal forms.
+% Positive normal forms are values $v : \PVal[\tNf]$ whose thunks only
+% contain negative normal forms.
+\begin{gather*}
+  \nru{\tvar}{\patom \in \Gamma}{\PValNf {\patom} \Gamma}
+  % \nru{\pvar}{P \in \Gamma}{\PValNf P \Gamma}
+\qquad
+  \nru{\tthunk}{\Nf N \Gamma}{\PValNfP{\Thunk N}\Gamma}
+\\[2ex]
+  \nru{\punit}{}{\PValNf{\tyone}\Gamma}
+\qquad
+  \nru{\ppair}
+      {\PValNf{P_1}\Gamma \qquad \PValNf{P_2}\Gamma}
+      {\PValNfP{P_1 \times P_2}\Gamma}
+\qquad
+  \nru{\tinj_i}{\PValNf{P_i}\Gamma}{\PValNfP{P_1 + P_2}\Gamma}
+\end{gather*}
 
 Neutral normal forms \fbox{$\Ne N \Gamma$} are negative eliminations
 starting from a forced $\tThunk$ rather than from variables of negative
@@ -1421,7 +1439,7 @@ $\Thunk N \in \Gamma$.
       {\Ne N \Gamma}
 \end{gather*}
 Variables are originally introduced by either $\tabs$ or
-the $\tbind$ind of a neutral of type $\Comp P$ to a new variable of type
+the $\tbind$ing of a neutral of type $\Comp P$ to a new variable of type
 $P$.  Variables of composite value type can be broken down by pattern
 matching, introducing variables of smaller type.  These positive
 eliminations plus $\tbind$ are organized in the
@@ -1462,7 +1480,7 @@ of a base neutral ($\tNe\,\natom$) or a normal value.
       {\Nf {\natom} \Gamma}
 \qquad
   \nru{\tret}
-      {\CoverP {\tVal[\tNf]\,P}  \Gamma}
+      {\CoverP {\tVNf\,P}  \Gamma}
       {\NfP {\Comp P} \Gamma}
 \\[2ex]
   \nru{\nunit}{}{\Nf \top \Gamma}
@@ -1480,7 +1498,7 @@ $\trunNf : \Cov\,(\tNf N) \todot \tNf N$, which extends to
 negative semantic values
 $\trun : \Cov \den N \todot \den N$.
 
-Reification $\down P : \den P \todot \tVal[\tNf]\,P$ at positive types produces
+Reification $\down P : \den P \todot \tVNf\,P$ at positive types produces
 a normal value, and $\down N : \den P \todot \tNf\,N$ at negative types a
 normal term.  During reification of function types $P \To N$ in
 context $\Gamma$ we need to embed a fresh variable
@@ -1525,7 +1543,7 @@ In the following definition of reflection we use the abbreviation
 \end{array}
 \,
 \begin{array}{lcl}
-  \down P & : & \den P \todot \tVal[\tNf]\,P \\
+  \down P & : & \den P \todot \tVNf\,P \\
   \down {\patom} & = & \tvar \\
   \downG {\tyone} () & = & \punit \\
   \downG {P_1 \times P_2}(a_1,a_2) & = & \ppair
@@ -1562,8 +1580,9 @@ For negative product types, reflection and reification works as before:
 \def\arraystretch{1.3}
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
   \multicolumn 2 l {\up N} & : & \tNe\,N \todot \den N \\
-  \upG \natom & u & = & \treturn\,u \\
-  \upG \top   & u & = & \ttempty \\
+  \upG {\Comp P} & u & = & \tbind\,u\,\tfresh^P_\Gamma \\
+  \upG \natom    & u & = & \treturn\,u \\
+  \upG \top      & u & = & \ttempty \\
   \upG {N_1 \ntimes N_2} & u & = & \left(
     \upG {N_1} \; (\prj 1 u)
     ,\
@@ -1573,11 +1592,12 @@ For negative product types, reflection and reification works as before:
 \
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
   \multicolumn 2 l {\down N} & : & \den N \todot \tNf\;N \\
-  \downG \natom & c  & = & \tne\,c \\
-  \downG \top   & () & = & \nunit \\
+  \downG {\Comp P} & c  & = & \tmap\;(\down P)\;c \\
+  \downG \natom    & c  & = & \tne\,c \\
+  \downG \top      & () & = & \nunit \\
   \downG {N_1 \ntimes N_2} & (b_1,b_2) & = & \npair
     \, (\downG {N_1} \; b_1)
-    \, (\downG {N_2} \; b_1)
+    \, (\downG {N_2} \; b_2)
     \\
 \end{array}
 \]
@@ -1627,50 +1647,55 @@ Putting things together, we obtain the normalization function
 
 Taking stock, we have arrived at normal forms that eagerly introduce
 ($\tNf$) and eliminate ($\tNe$) negative types and also eagerly
-introduce positive types ($\tVal$).  However, the elimination of
+introduce positive types ($\tVnf$).  However, the elimination of
 positive types is still rather non-deterministic.
 It is possible to only partially break up a composite positive type
 and leave smaller, but still composite positive types for later
 pattern matching.
-
-The placement of $\tsplit$, $\tcase$, and $\tabort$ is only
-constrained by the presence of the split variable
+The last refinement, chaining also the positive eliminations, will be
+discussed in the following section.
+% The placement of $\tsplit$, $\tcase$, and $\tabort$ is only
+% constrained by the presence of the split variable
 
 
 \section{Focused Intuitionistic Propositional Logic}
 \label{sec:fipl}
 
-Polarized lambda calculus \cite{espiritoSanto:entcs17}
-divides types deeply into positive and negative.
+% Polarized lambda calculus \cite{espiritoSanto:entcs17}
+% divides types deeply into positive and negative.
 
-\[
-\begin{array}{lllrl@{\qquad}l}
-  \PTy & \ni & P,Q & ::= & \patom
-    \mid \tyzero \mid P_1 + P_2
-    \mid \tyone \mid P_1 \times P_2
-    \mid \Thunk N
-  & \mbox{positive type}
-\\
-  \NTy & \ni & N,M & ::= & \natom
-    \mid \top \mid N_1 \ntimes N_2
-    \mid P \To N
-    \mid \Comp P
-  & \mbox{negative type}
-\\
-  \HTy & \ni & H & ::= & \patom \mid P
-  & \mbox{hypothesis type}
-\\
-\end{array}
-\]
-Espirito Santo's version actually does not contain the positive
-product $\times$, however, it appears in Zeilberger
-\cite{zeilberger:PhD}.
+% \[
+% \begin{array}{lllrl@{\qquad}l}
+%   \PTy & \ni & P,Q & ::= & \patom
+%     \mid \tyzero \mid P_1 + P_2
+%     \mid \tyone \mid P_1 \times P_2
+%     \mid \Thunk N
+%   & \mbox{positive type}
+% \\
+%   \NTy & \ni & N,M & ::= & \natom
+%     \mid \top \mid N_1 \ntimes N_2
+%     \mid P \To N
+%     \mid \Comp P
+%   & \mbox{negative type}
+% \\
+%   \HTy & \ni & H & ::= & \patom \mid N
+%   & \mbox{hypothesis type}
+% \\
+% \end{array}
+% \]
+% Espirito Santo's version actually does not contain the positive
+% product $\times$, however, it appears in Zeilberger
+% \cite{zeilberger:PhD}.
 
-Polarized lambda-calculus is a focused calculus, it eagerly employs
+Polarized lambda-calculus
+\cite{zeilberger:PhD,espiritoSanto:entcs17}
+is a focused calculus, it eagerly employs
 invertible rules: the introduction rules for negative types and the
 elimination rules for positive types.  As a consequence of the latter,
-variables are either of atomic or negative type ($\HTy$).
-Contexts $\Gamma,\Delta$ are lists of $\HTy$s.
+variables are either of atomic or negative type $H ::= \patom \mid N$.
+%($\HTy$).
+Contexts $\Gamma,\Delta$ are lists of $H$s.
+%$\HTy$s.
 %\fbox{$X ::= \patom \mid P$}.
 
 To add a variable of positive type $P$ to the context, we need to
@@ -1719,6 +1744,140 @@ by recursion on $P$.   It is tempting to name $\bsplit$
 since $\Add P$ is a graded monad on the monoid $(1,\times)$
 of product types;
 however, this coincidence shall not matter for our further considerations.
+
+Focalization is a technique to remove don't-care non-determinism from
+proof search, and as such, polarized lambda calculus is foremost a
+calculus of normal forms.
+These normal forms are given by four mutually defined inductive
+families of presheaves $\tVnf\,P$,
+$\tNe\,N$, $\Cov\,\J$,
+and $\tNf\,N$.  As they are very similar to the CBPV normal forms
+given in the last section we only report the differences.
+
+Values \fbox{$v : \PVal P \Gamma$} are unchanged, they can refer to
+atomic positive hypotheses ($\pvar$) and normal $\tthunk$s.
+
+Neutrals \fbox{$\Ne N \Gamma$} start with a negative variable instead
+of with $\tforce$, as forcing thunks is already performed in $\nhyp$
+when adding analysing hypotheses of $\tThunk$ type.
+\[
+  \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
+\]
+
+The Cover monad \fbox{$\Cover \J \Gamma$}
+lacks constructors $\tsplit$, $\tcase$ and $\tabort$
+since the pattern matching is taken care of by $\Add P$.
+\begin{gather*}
+  \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
+\qquad
+  \nru{\tbind}
+      {\NeP {\Comp P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
+      {\Cover \J \Gamma}
+\end{gather*}
+
+The normal forms \fbox{$\Nf N \Gamma$} of negative type are unchanged
+with the exception that pattern matching happens eagerly in $\tabs$.
+\[
+  \nru{\tabs}
+      {\AddHypP P {\tNf\, N} \Gamma}
+      {\NfP {P \To N} \Gamma}
+\]
+
+
+All these inductive families are presheaves, due to factored
+presentation using $\Add P$ and $\Cov$ the proof is not a simple
+mutual induction.  Yet, in Agda, the generic proof goes through using a sized
+typing for these inductive families.  Similarily, defining the
+$\tjoin$ for monad $\Cov$ relies on sized typing.
+\[
+\begin{array}{lll}
+  \tjoin & : & \forall i.\
+    \Cov[i]\,(\Cov[\infty]\J) \todot \Cov[\infty]\J  \\
+  \tjoin[i+1]\,(\treturn[i]\;c) & = & c \\
+  \tjoin[i+1]\,(\tbind^i\;t\;k)
+    & = & \tbind^\infty\;
+     (t : \Ne P \Gamma)\;
+     \left(\stmap[\Add P]_\Gamma\;\tjoin[i]\;
+       \left(k : \AddHypP P {\Cov[i]\J} \Gamma
+       \right)
+     \right)
+\end{array}
+\]
+Herein, we used the sized typing of the constructors of $\Cov$:
+\[
+\begin{array}{lll}
+  \treturn & : & \forall i.\ \J \todot \Cov[i+1] \J \\
+  \tbind  & : & \forall i.\
+    \tNe\,(\Comp P) \todot \Add P\,(\Cov[i]\J) \todot \Cov[i+1]\J \\
+\end{array}
+\]
+
+Due to the eager splitting of positive hypotheses, reflection at type $P$
+now lives in the $\Add P$ graded monad rather than $\Cov$.  Further,
+as pattern matching may produce $n \geq 0$ cases, reflection cannot simply
+produce one positive semantic value; instead, one such value is needed
+for every branch.  We implement
+\fbox{$\reflect P : (\den P \hatto \J) \todot \Add P \J$}
+as a higher-order function expecting a continuation $k$ which is
+invoked for each generated branch with the semantic value of type $P$
+constructed for this branch.
+\[
+\begin{array}{l@{~}lcl}
+  \reflect {\patom} & k & = &
+    \phyp \left( k\;\twk^{\patom}\,(\pvar\,\tzero) \right) \\
+  \reflect {\Thunk N} & k & = &
+    \nhyp \left( k\;\twk^N \left( \up N (\nvar\,\tzero) \right) \right)\\
+  \reflect {\tyzero} & k & = & \nbranch \\
+  \reflect {P_1 + P_2} & k & = & \bbranch
+    \,\left( \treflect^{P_1}\,(\lambda\,\tau. \ k\,\tau \comp \iota_1) \right)
+    \,\left( \treflect^{P_2}\,(\lambda\,\tau. \ k\,\tau \comp \iota_2) \right)
+    \\
+  \reflect{\tyone} & k & = & \nsplit\;(k\;\tid\;\ttempty) \\
+  \reflect{P_1 \times P_2} & k & = & \bsplit
+    \,\left(
+      \treflect^{P_1} \left( \lambda\,\tau_1\,a_1. \
+      \treflect^{P_2} \left( \lambda\,\tau_2\,a_2. \
+        k\, (\tau_1 \rcomp \tau_2)\, (\tren\,\tau_2\,a_1, \ a_2)
+        \right)
+      \right)
+    \right)
+\end{array}
+\]
+Reflecting at a positive atomic type $\patom$ is the regular ending of a
+reflection pass: we call continuation $k$ with a fresh variable
+$\pvar\,\tzero$ of type $\patom$, making space for the variable
+using $\twk^{\patom}$.
+In case we end at type $\Thunk N$, we add a new variable
+$\nvar\,\tzero$ of type $N$ and pass it to $k$, after full
+$\eta$-expansion via $\up N$.  Two more endings are possible:
+At type
+$\tyzero$, we have reached an absurd case, meaning that no
+continuation is necessary since we can conclude with
+\emph{ex falsum quod libet}.
+At type $\tyone$, there is no need to add a new variable, as values
+of type $\tyone$ contain no information.  We simply pass the unit
+value $\ttempty$ to $k$ in this case.
+Reflecting at $P_1 + P_2$ generates two branches, which may result in
+several uses of the continuation $k$.
+In the first branch, we recursively reflect at $P_1$.  Its
+continuation will receive a semantic value in $\den{P_1}$ which we
+inject via $\iota_1$ into $\den{P_1 + P_2}$ to pass it to $k$.  The
+second branch proceeds analogously.
+Finally reflecting at $P_1 \times P_2$ means we first have to analyze
+$P_1$, and in each of the generated branches we continue to analyze
+$P_2$.  Thus $\reflect{P_2}$ is passed as a continuation to
+$\reflect{P_1}$.  Each reflection phase gives us a semantic value
+$a_i$ of type $P_i$, which we combine to a tuple before passing it to
+$k$.  Note also that the context extension $\tau_1$ created in the
+first phase needs to be composed with the context extension $\tau_2$
+of the second phase to transport $k$ into the final context.  Further,
+the value $a_1$ was constructed relative to the target of
+$\tau_1$ and still needs
+to be transported with $\tau_2$ before paired up with $a_2$.
+
+\clearpage
+
+\subsection{Old, explicit syntax}
 
 In the following, we mutually define the inductive families of
 presheaves $\tVal\,P$,
@@ -1890,7 +2049,7 @@ with instance $\T = \tNf$.
       {\Nf {\natom} \Gamma}
 \qquad
   \nru{\tval}
-      {\Cov[\tNf](\tVal[\tNf]\,P)\,\Gamma}
+      {\Cov[\tNf](\tVNf\,P)\,\Gamma}
       {\NfP {\Comp P} \Gamma}
 \\[2ex]
   \nru{\npair}
