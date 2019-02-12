@@ -1813,7 +1813,7 @@ Herein, we used the sized typing of the constructors of $\Cov$:
 \]
 
 Due to the eager splitting of positive hypotheses, reflection at type $P$
-now lives in the $\Add P$ graded monad rather than $\Cov$.  Further,
+now lives in the graded monad $\Add P$ rather than $\Cov$.  Further,
 as pattern matching may produce $n \geq 0$ cases, reflection cannot simply
 produce one positive semantic value; instead, one such value is needed
 for every branch.  We implement
@@ -1874,6 +1874,57 @@ of the second phase to transport $k$ into the final context.  Further,
 the value $a_1$ was constructed relative to the target of
 $\tau_1$ and still needs
 to be transported with $\tau_2$ before paired up with $a_2$.
+
+The method $\reflect P$ replaces previous uses of $\tfresh^P$ in
+reflection and reification at negative types.
+% and identity environment creation.
+\[
+\begin{array}{l@{~}lcl}
+  \downG {P \To N} & f & = & \tabs
+    \left(
+      \reflect[\Gamma] P
+        \left(
+          \lambda \, (\tau : \Gamma \sublist \Delta) \; a .\
+          \down[\Delta] P (f \; \tau \; a)
+        \right)
+    \right)
+  \\
+  \upG {\Comp P} & u & = & \tbind \; u
+    \left(
+      \reflect[\Gamma] P
+        \left(
+          \lambda \; \tau \; a .\
+          \treturn\; a
+        \right)
+    \right)
+  % \\
+  % \idenv{\cext \Gamma P} & = &
+\end{array}
+\]
+% To create an identity environment using $\treflect$, let us first
+% extend $\Add\_$ to contexts, following the intuition that
+Due to the strong limitation on context entries,
+the identity environment $\idenv \Gamma$ can be built
+straightforwardly using negative reflection.
+\[
+\begin{array}{lcl}
+  \idenv{\cempty} & = & \ttempty \\
+  \idenv{\cext \Gamma {\patom}} & = &
+    \left(
+      \tren\;\twk^{\patom}\;\idenv\Gamma
+      , \
+      \pvar\,\tzero
+    \right) \\
+  \idenv{\cext \Gamma N} & = &
+    \left(
+      \tren\;\twk^N\;\idenv\Gamma
+      , \
+      \upG N (\nvar\,\tzero)
+    \right) \\
+\end{array}
+\]
+
+
 
 \clearpage
 
