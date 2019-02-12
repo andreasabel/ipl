@@ -1233,7 +1233,8 @@ $\den P$ and $\den N$ of positive and negative types as presheaves.
 \end{array}
 \]
 Semantically, we do not distinguish between positive and negative
-products.  Notably, sum types can now be interpreted as plain presheaf
+products.  Notably, sum types can now be interpreted as plain
+(pointwise) presheaf
 sums.  The $\tThunk$ marker is ignored, yet $\tComp$, marking the
 switch from the negative to the positive type interpretation, places
 the cover monad.  Positive atoms, standing for value types without
@@ -1243,11 +1244,18 @@ thus, their inhabitants stem only from eliminations of more complex
 types, made from positive eliminations captured in $\C$ and negative
 eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
+The method $\trunNf[\C]$ of cover monad $\C$ can be extended to
+$\trun^N : \C \den N \to \den N$ for negative types $N$, by recursion
+on $N$.  Informally, speaking this makes all negative types \emph{monadic}.
 
+Contexts are lists of \emph{positive} types as in CBPV variables stand
+for values.  Interpretation of contexts $\den \Gamma$ is again defined
+pointwise $\den \cempty = \hatone$ and
+$\den{\cext \Gamma P} = \den \Gamma \hattimes \den P$.
 
 Assuming a family $\T\,N\,\Gamma$ of terms of negative type $N$ in
 context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
-of positive type $P$ are constructed by the
+of positive type $P$ shall be constructed by the
 following rules:
 \begin{gather*}
   \nru{\tvar}{P \in \Gamma}{\PValT P \Gamma}
@@ -1264,12 +1272,21 @@ following rules:
   \nru{\tinj_i}{\PValT{P_i}\Gamma}{\PValTP{P_1 + P_2}\Gamma}
 \end{gather*}
 
-It relies on the previous definitions
-with instance $\T = \tNf$.
-\fbox{$\Tm N \Gamma$}:
+The terms of pure CBPV are given by the inductive family \fbox{$\Tm N \Gamma$}.
+It repeats the introductions and eliminations of negative types,
+except that application is restricted to values.  Values of type
+$\Thunk N$ are embedded via $\tforce$.
+Further, values of type $P$ can embedded
+via $\tret$, producing a term of type $\Comp P$.  Such terms are
+eliminated by $\tbind$ which is, unlike the usual monadic bind, not
+only available for $\tComp$-types but for arbitrary negative types
+$N$.  This is justified due to the monadic character of negative
+types, by virtue of $\trun^N$.  Finally, there are eliminators
+($\tsplit$, $\tcase$, $\tabort$) for values of positive product and
+sum types.
 \begin{gather*}
   \nru{\tret}
-      {\PVal P \Gamma}
+      {\PValTm P \Gamma}
       {\TmP {\Comp P} \Gamma}
 \quad
   \nru{\tabs}
@@ -1285,11 +1302,11 @@ with instance $\T = \tNf$.
       {\Tm \top \Gamma}
 \\[2ex]
   \nru{\tforce}
-      {\PValP {\Thunk N} \Gamma}
+      {\PValTmP {\Thunk N} \Gamma}
       {\Tm N \Gamma}
 \qquad
   \nru{\tapp}
-      {\TmP {P \To N} \Gamma \qquad \PVal P \Gamma}
+      {\TmP {P \To N} \Gamma \qquad \PValTm P \Gamma}
       {\Tm N \Gamma}
 \qquad
   \nru{\tprj_i}
@@ -1303,21 +1320,69 @@ with instance $\T = \tNf$.
       {\Tm N \Gamma}
 \qquad
   \nru{\tsplit}
-    {\PValP {P_1 \times P_2} \Gamma
+    {\PValTmP {P_1 \times P_2} \Gamma
       \qquad \Tm N {(\cext {\cext \Gamma P_1} P_2)}
     }{\Tm N \Gamma}
 \\[2ex]
   \nru{\tcase}
-    {\PValP {P_1 + P_2} \Gamma
+    {\PValTmP {P_1 + P_2} \Gamma
       \qquad \Tm N {(\cext \Gamma P_1)}
       \qquad \Tm N {(\cext \Gamma P_2)}
     }{\Tm N \Gamma}
 \qquad
   \nru{\tabort}
-    {\PVal \tyzero \Gamma}
+    {\PValTm \tyzero \Gamma}
     {\Tm N \Gamma}
 \end{gather*}
 
+Interpretation of values
+$\dent{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
+and terms
+$\dent{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
+is straightforward, thanks to the pioneering work of
+Moggi \cite{moggi:infcomp91} and
+Levy \cite{levy:hosc05}
+put into the design of CBPV.
+\[
+\begin{array}{lcl}
+  \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+  \dent{\punit}\gamma   & = & \ttempty \\
+  \dent{\ppair\,v_1\,v_2}\gamma & = &
+    (\dent{v_1}\gamma,\ \dent{v_2}\gamma) \\
+  \dent{\inj i v}\gamma & = & \iota_i \dent v \gamma \\
+  \dent{\tthunk\,t}\gamma & = & \dent t \gamma \\
+\end{array}
+\]
+Since $\tThunk$ serves only as an embedding of negative into positive
+types and has no semantic effect,
+we interpret thunking and forcing by the identity.
+\[
+\begin{array}{lcl}
+  \dent{\tforce\,v}\gamma & = & \dent v \gamma \\
+  \dent{\tabs\,t}\gamma
+      & = & \fdent t \gamma \\
+  \dent{\tapp\,t\,v} \gamma & = &
+     \dent t \gamma\;\tid\;\dent v \gamma \\
+  \dent{\punit}\gamma & = & \ttempty \\
+  \dent{\ppair\,t_1\,t_2}\gamma & = &
+    (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+  \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+\end{array}
+\]
+\[
+\begin{array}{lcl}
+  \dent{\tret\,v}\gamma & = & \treturn[\C] \; \dent v \gamma \\
+  \dent{\tbind\,u\,t}\gamma & = & \trun\,
+    (\stmap[\C] \; \fdent t \gamma\; \dent u \gamma) \\
+  \dent{\tsplit\,v\,t}\gamma & = & (\lambda\,(a_1,a_2).\
+    \dent{t}{(\gamma,a_1,a_2)} ) \; \dent v \gamma \\
+  \dent{\tcase\,v\,t_1\,t_2}\gamma & = &
+    [  \lambda a_1.\ \dent{t_1}{(\gamma,a_1)}
+    ,\ \lambda a_2.\ \dent{t_2}{(\gamma,a_2)}
+    ]\; \dent v \gamma \\
+  \dent{\tabort\,v}\gamma & = & \tmagic\,\dent v \gamma \\
+\end{array}
+\]
 
 Normal forms:  $\PVal[\tNf]$.
 
