@@ -160,6 +160,11 @@ Coquand.}
 \section{Introduction}
 \label{sec:intro}
 
+The idea behind \emph{normalization by evaluation} (NbE) is to utilize a
+standard interpreter, usually evaluating closed terms, to compute the
+normal form of an open term.
+
+
 Weak coproducts.
 Weak sheaf (non-unique pasting).
 
@@ -1029,15 +1034,23 @@ semantics, by recursion on $\Gamma$:
 
 \subsection{Continuation monad}
 
-An alternative implementation of $\C$ is the continuation monad $\CC$
-on presheaves as, for instance, employed by Ilik et al.\
-\cite{ilikLeeHerbelin:apal10}
-for Kripke models and NbE of classical logic.
+As already observed by Filinski
+\cite[Section~5.4]{filinski:semaccounttdpe}
+\cite[Section~3.2]{filinski:tlca01},
+normalization by evaluation can be carried out in the continuation
+monad.
+In our setting, we use a continuation monad $\CC$ on presheaves
+defined as
+% An alternative implementation of $\C$ is the continuation monad $\CC$
+% on presheaves as, for instance, employed by Ilik et al.\
+% \cite{ilikLeeHerbelin:apal10}
+% for Kripke models and NbE of classical logic.
 \[
   \CC\;\J = \forall A.\ (\J \hatto \tNf\,A) \hatto \tNf\,A
+  .
 \]
 The answer type of this continuation monad is always $\tNF$, however,
-we are polymorphic in the simple type $A$ of normal forms we produce.
+we are polymorphic in the simple type $A$ of normal forms we produce.%
 
 Agda has been really helpful to produce the rather technical but
 straightforward evidence that $\CC$ is a strong monad.
@@ -1673,7 +1686,10 @@ Contexts $\Gamma,\Delta$ are lists of $H$s.
 To add a variable of positive type $P$ to the context, we need to
 break it apart until only atoms and negative bits remain.  This is
 performed by maximal pattern matching, called the left-invertible
-phase of focalization.
+phase of focalization.%
+\footnote{Filinski \cite[Section~4]{filinski:tlca01} achieves maximal pattern
+matching through an additional, ordered context $\Theta$ for positive
+variables which are eagerly split.}
 We express maximal pattern matching on $P$ as a strong functor
 $\Add P$ in the category of presheaves,
 mapping a presheaf $\J$ (``judgement'') to $\Add P \J$
