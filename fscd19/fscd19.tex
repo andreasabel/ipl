@@ -182,6 +182,8 @@ constructs, while PolLambda has only deep, maximal pattern matching.
 Agda formalization:
 Sized types, nested data types.
 
+Structural focalization for sequent calculus \cite{simmons:tocl14}.
+
 \nocite{bergerSchwichtenberg:lics91}
 
 \nocite{jungTiuryn:tlca93}
@@ -218,7 +220,7 @@ $t : T$ meaning that object $t$ is an inhabitant of type $T$.
 However, to avoid confusion with object-level types such as the simple
 types of lambda calculus, we will refer to meta-level types as
 \emph{sets}.  Consequently, the colon $:$
-takes the role of elementhood $\in$ in set-theory, and we are free to
+takes the role of elementhood $\in$ in set theory, and we are free to
 reuse the symbol $\in$ for other purposes.
 
 \subsection{Contexts and indices}
@@ -1924,6 +1926,94 @@ straightforwardly using negative reflection.
 \end{array}
 \]
 
+The terms \fbox{$\Tm N \Gamma$} of the focused lambda calculus are the
+ones of CBPV minus the positive eliminations ($\tsplit$, $\tcase$,
+$\tabort$), the added negative variable rule ($\nvar$) and the
+necessary changes to the binders $\tabs$ and $\tbind$.
+\begin{gather*}
+  \nru{\nvar}{N \in \Gamma}{\Tm N \Gamma}
+\qquad
+  \nru{\tabs}
+      {\AddHypP P {\tTm\, N} \Gamma}
+      {\TmP {P \To N} \Gamma}
+\qquad
+  \nru{\tbind}
+      {\Tm {\Comp P} \Gamma \qquad \AddHypP P {\tTm\,N} \Gamma}
+      {\Tm N \Gamma}
+\end{gather*}
+Term interpretation
+\fbox{$\denty\_ : \Tm N \Gamma \to \den \Gamma \todot \den N$}
+shall be as for CBPV except that we need to exchange the
+interpretation function for binders \fbox{$\fden\_ : \Tm N {(\cext
+    \Gamma P)} \to \den \Gamma \todot \den{P \To N}$}.  Since a binder
+for $P$ performs a maximal splitting on $P$ and takes the form of a
+function defined by a case (and split) tree,
+applying it to a value $v$ of type $P$ amounts to a complete
+matching of $v$ against the case tree, and bind the remaining
+atomic and negative crumbs.  This matching can be defined for a
+generic evaluation function of type
+$\Evvv \J \Delta \Gamma = \den \Gamma \Delta \to \J\,\Delta$.
+\[
+\begin{array}{l@{~}l@{~}l@{~}lcl}
+  \multicolumn 6 {l} {\tmatch ~~:~~ \den P \Delta \to
+    \AddHyp P {\Evv \J \Delta} \todot \Evv \J \Delta }\\
+  \tmatch & x & (\phyp\,e) & \gamma & = & e\,(\gamma,\; \treturn\,x) \\
+  \tmatch & b & (\nhyp\,e) & \gamma & = & e\,(\gamma,\; b) \\
+  \tmatch & \ttempty & (\nsplit\,e) & \gamma & = & e\,\gamma \\
+  \tmatch & (a_1,a_2) & (\bsplit\,e) & \gamma & = &
+    \tmatch\;a_1\;(\tmap[\Add P]\,(\tmatch\;a_2)\;e)\;\gamma \\
+  \tmatch & a & \nbranch & \gamma & = & \tmagic\,a \\
+  \tmatch & (\iota_1\;a_1) & (\bbranch\;e_1\;e_2) & \gamma & = &
+    \tmatch\;a_1\;e_1\;\gamma \\
+  \tmatch & (\iota_2\;a_2) & (\bbranch\;e_1\;e_2) & \gamma & = &
+    \tmatch\;a_2\;e_2\;\gamma \\
+\end{array}
+\]
+With instantiations $\J = \den N$ and
+$\denty\_ : \Tm N \todot \Evv {\den N} \Delta$,
+the interpretation $\fden t$
+of binder $t : \AddHypP P {\tTm\,N} \Gamma$
+is defined as follows:
+\[
+  \fdent{t}
+    {(\gamma : \den \Gamma \Delta)}
+    \, (\tau : \Delta \sublist \Phi)
+    \, (a : \den P \Phi)
+    ~~=~~
+    \tmatch
+      \; a
+      \; (\tmap[\Add P]\;\denty\_\;t)
+      \; (\tren\,\tau\,\gamma)
+\]
+This completes the definition of the normalization function
+$\tnorm\, (t : \Tm N \Gamma)
+  = \down N \dent t {\idenv\Gamma}$.
+
+\section{Conclusion}
+\label{sec:concl}
+
+\bibliography{auto-fscd19}
+
+% \appendix
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \clearpage
@@ -2111,13 +2201,3 @@ with instance $\T = \tNf$.
       {\AddHypP P {\tNf\, N} \Gamma}
       {\NfP {P \To N} \Gamma}
 \end{gather*}
-
-
-\section{Conclusion}
-\label{sec:concl}
-
-\bibliography{auto-fscd19}
-
-% \appendix
-
-\end{document}
