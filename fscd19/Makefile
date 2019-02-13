@@ -17,17 +17,18 @@ bibtool=bibtool -q \
 	  -- 'delete.field = { isbn }' \
 	  -- 'delete.field = { url }' \
 	  -- 'delete.field = { note }' \
-	  -- 'delete.field = { pages }'
+	  -- 'delete.field = { pages }' \
+	  -- 'delete.field = { editor }'
 
 #	  -- 'delete.field = { doi }' \
 #	  -- 'delete.field = { publisher }' \
-#	  -- 'delete.field = { editor }' \
 #
 
 catcfg=sed -e "s/%.*//g" <
 latex=latex
 pdflatex=pdflatex -interaction=batchmode
-bibliography=medium.bib
+bibliography=short.bib
+# bibliography=medium.bib
 
 # stdlib=$(HOME)/agda/std-lib/src
 
