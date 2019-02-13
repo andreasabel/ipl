@@ -457,10 +457,21 @@ is admissible, for instance:
 \begin{array}{l@{~}lcl}
   \multicolumn 4 l {\tabort^B ~:~ \tNe\, 0 \todot \tNf\,B} \\
   \tabort^{\tyone}     & u & = & \tunit \\
-  \tabort^{A \times B} & u & = & \tpair\,(\tabort^A\,u)\,(\tabort^B\,u) \\
-  \tabort^{A \To B}    & u & = & \tabs\,(\tabort^B\,(\tren\,\twk^A\,u)) \\
   \tabort^P           & u & = & \tabort\;u \\
 \end{array}
+\qquad
+\begin{array}{l@{~}lcl}
+  \\
+  \tabort^{A \times B} & u & = & \tpair\,(\tabort^A\,u)\,(\tabort^B\,u) \\
+  \tabort^{A \To B}    & u & = & \tabs\,(\tabort^B\,(\tren\,\twk^A\,u)) \\
+\end{array}
+% \begin{array}{l@{~}lcl}
+%   \multicolumn 4 l {\tabort^B ~:~ \tNe\, 0 \todot \tNf\,B} \\
+%   \tabort^{\tyone}     & u & = & \tunit \\
+%   \tabort^{A \times B} & u & = & \tpair\,(\tabort^A\,u)\,(\tabort^B\,u) \\
+%   \tabort^{A \To B}    & u & = & \tabs\,(\tabort^B\,(\tren\,\twk^A\,u)) \\
+%   \tabort^P           & u & = & \tabort\;u \\
+% \end{array}
 \]
 $\tcase$ generalizes analogously, with a bit of care when weakening
 the branches.
@@ -622,13 +633,14 @@ $\down{A \To B}$,
 the renaming $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$
 makes room
 for a new variable of type $A$, which is reflected into $\den A$ by
-\[
-\begin{array}{lcl@{\qquad}lcl}
-  \tfresh : \den A (\cext \Gamma A) \\
-  \tfresh = \up[\cext \Gamma A] A (\tvar\;\tzero)
-  . \\
-\end{array}
-\]
+\fbox{$\tfresh^A_\Gamma = \up[\cext \Gamma A] A {\vv0} : \den A (\cext \Gamma A)$}.
+% \[
+% \begin{array}{lcl@{\qquad}lcl}
+%   \tfresh : \den A (\cext \Gamma A) \\
+%   \tfresh = \up[\cext \Gamma A] A {\vv0}
+%   . \\
+% \end{array}
+% \]
 The ability to introduce fresh variables into a context, and to use
 semantic objects such as $f : \den{A \To B}\Gamma$ in a such extended
 context, is the reason for utilizing presheaves instead of just sets
@@ -864,49 +876,105 @@ The evaluation function
 can now be defined by recursion on $t$.
 % using an auxiliary definition
 % \fbox{$\fden{t : B \from \cext \Gamma A} : \den \Gamma \todot \den{A \To B}$}.
-Herein the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
+Herein, the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 % Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
 \[
 \begin{array}{lcl}
-  % \fdent{t : B \from \cext \Gamma A}\gamma & = &
-  %   \lambda
-  %     \,(\tau : \Delta \sublist \Phi)
-  %     \,(a : \den A \Phi)
-  %     .\
-  %     \dent t {(\tren\,\tau\,\gamma,\ a)} \\[1ex]
-  \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
-  \dent{\tabs\,t}\gamma
-      & = & \fdent t \gamma \\
-  % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma \;
-  %    (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi) & = &
-  %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
-  % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
-  %    \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
-  %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
-  \dent{\tapp\,t\,u} \gamma & = &
-     \dent t \gamma\;\tid\;\dent u \gamma \\
-  % \dent{\tapp\,(t : A \To B \from \Gamma)\,u} \gamma & = &
-  %    \dent t \gamma\;\tid\;\dent u \gamma \\
   \dent{\tunit}\gamma & = & \ttempty \\
   \dent{\tpair\,t_1\,t_2}\gamma & = &
     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
-  \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+  \dent{\tabs\,t}\gamma & = & \fdent t \gamma \\
   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
-  \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
+  \\
+\end{array}
+\quad
+\begin{array}{lcl}
+  \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+  \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+  \dent{\tapp\,t\,u} \gamma & = &
+     \dent t \gamma\;\tid\;\dent u \gamma \\
   \dent{\tcase\;u\;t_1\;t_2}\gamma & = &
      \dencase\;\dent u \gamma\;\fdent{t_1}\gamma\;\fdent{t_2}\gamma \\
-  % \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
-    %  \dencase\;\dent u \gamma\;f_1\;f_2
-    % \ \bwhere \\
-    % \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
-    %     & = &
-    %     \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
-   % \
-   %  (\lambda\; (\tau : \Delta \sublist \Phi)\,(b : \den A \Phi).\
-   %      \dent v {(\tren\;\tau\;\gamma,\ b)})
-    \\
+  \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
 \end{array}
+% \begin{array}{lcl}
+%   \\
+%   \dent{\tabs\,t}\gamma & = & \fdent t \gamma \\
+%   \dent{\tunit}\gamma & = & \ttempty \\
+%   \dent{\tpair\,t_1\,t_2}\gamma & = &
+%     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+%   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
+%   \\
+% \end{array}
+% \begin{array}{lcl}
+%   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+%   \dent{\tapp\,t\,u} \gamma & = &
+%      \dent t \gamma\;\tid\;\dent u \gamma \\
+%   \\
+%   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+%   \dent{\tcase\;u\;t_1\;t_2}\gamma & = &
+%      \dencase\;\dent u \gamma\;\fdent{t_1}\gamma\;\fdent{t_2}\gamma \\
+%   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
+% \end{array}
+% \begin{array}{lcl}
+%   \\
+%   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+%   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
+%   \dent{\tcase\;u\;t_1\;t_2}\gamma & = &
+%      \dencase\;\dent u \gamma\;\fdent{t_1}\gamma\;\fdent{t_2}\gamma \\
+%   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
+% \end{array}
+% \begin{array}{lcl}
+%   \dent{\tabs\,t}\gamma & = & \fdent t \gamma \\
+%   \dent{\tapp\,t\,u} \gamma & = &
+%      \dent t \gamma\;\tid\;\dent u \gamma \\
+%   \dent{\tunit}\gamma & = & \ttempty \\
+%   \dent{\tpair\,t_1\,t_2}\gamma & = &
+%     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+%   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+% \end{array}
 \]
+% \[
+% \begin{array}{lcl}
+%   % \fdent{t : B \from \cext \Gamma A}\gamma & = &
+%   %   \lambda
+%   %     \,(\tau : \Delta \sublist \Phi)
+%   %     \,(a : \den A \Phi)
+%   %     .\
+%   %     \dent t {(\tren\,\tau\,\gamma,\ a)} \\[1ex]
+%   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
+%   \dent{\tabs\,t}\gamma
+%       & = & \fdent t \gamma \\
+%   % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma \;
+%   %    (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi) & = &
+%   %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+%   % \dent{\tabs\,(t : B \from \cext \Gamma A)}\gamma & = &
+%   %    \lambda\, (\tau : \Delta \sublist \Phi)\, (a : \den A \Phi). \
+%   %       \dent t {(\tren\,\tau\,\gamma,\ a)} \\
+%   \dent{\tapp\,t\,u} \gamma & = &
+%      \dent t \gamma\;\tid\;\dent u \gamma \\
+%   % \dent{\tapp\,(t : A \To B \from \Gamma)\,u} \gamma & = &
+%   %    \dent t \gamma\;\tid\;\dent u \gamma \\
+%   \dent{\tunit}\gamma & = & \ttempty \\
+%   \dent{\tpair\,t_1\,t_2}\gamma & = &
+%     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+%   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
+%   \dent{\inj i t}\gamma & = & \iota_i \dent t \gamma \\
+%   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
+%   \dent{\tcase\;u\;t_1\;t_2}\gamma & = &
+%      \dencase\;\dent u \gamma\;\fdent{t_1}\gamma\;\fdent{t_2}\gamma \\
+%   % \dent{\tcase\,(u : A_1 + A_2 \from \Gamma)\;t_1\;t_2}\gamma & = &
+%     %  \dencase\;\dent u \gamma\;f_1\;f_2
+%     % \ \bwhere \\
+%     % \multicolumn 1 r {f_i\; (\tau : \Delta \sublist \Phi)\,(a_i : \den {A_i} \Phi)}
+%     %     & = &
+%     %     \dent {t_i} {(\tren\;\tau\;\gamma,\ {a_i})}
+%    % \
+%    %  (\lambda\; (\tau : \Delta \sublist \Phi)\,(b : \den A \Phi).\
+%    %      \dent v {(\tren\;\tau\;\gamma,\ b)})
+%     \\
+% \end{array}
+% \]
 For interpretation of the binders $\tabs$ and $\tcase$ we use the
 mutually defined $\fden{\_}$.
 \[
@@ -1654,18 +1722,29 @@ These normal forms are given by four mutually defined inductive
 families of presheaves $\tVnf\,P$,
 $\tNe\,N$, $\Cov\,\J$,
 and $\tNf\,N$.  As they are very similar to the CBPV normal forms
-given in the last section we only report the differences.
-
+given in the last section, we only report the differences.
+%
 Values \fbox{$v : \PVal P \Gamma$} are unchanged, they can refer to
 atomic positive hypotheses ($\pvar$) and normal $\tthunk$s.
-
+%
 Neutrals \fbox{$\Ne N \Gamma$} start with a negative variable instead
 of with $\tforce$, as forcing thunks is already performed in $\nhyp$
 when adding analysing hypotheses of $\tThunk$ type.
+% \[
+%   \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
+% \]
+%
+The normal forms \fbox{$\Nf N \Gamma$} of negative type are unchanged
+with the exception that pattern matching happens eagerly in $\tabs$.
 \[
   \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
+\qquad
+\qquad
+  \nru{\tabs}
+      {\AddHypP P {\tNf\, N} \Gamma}
+      {\NfP {P \To N} \Gamma}
 \]
-
+%
 The Cover monad \fbox{$\Cover \J \Gamma$}
 lacks constructors $\tsplit$, $\tcase$ and $\tabort$
 since the pattern matching is taken care of by $\Add P$.
@@ -1676,14 +1755,6 @@ since the pattern matching is taken care of by $\Add P$.
       {\NeP {\Comp P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
       {\Cover \J \Gamma}
 \end{gather*}
-
-The normal forms \fbox{$\Nf N \Gamma$} of negative type are unchanged
-with the exception that pattern matching happens eagerly in $\tabs$.
-\[
-  \nru{\tabs}
-      {\AddHypP P {\tNf\, N} \Gamma}
-      {\NfP {P \To N} \Gamma}
-\]
 
 
 All these inductive families are presheaves, due to factored
@@ -1812,18 +1883,33 @@ straightforwardly using negative reflection.
 \begin{array}{lcl}
   \idenv{\cempty} & = & \ttempty \\
   \idenv{\cext \Gamma {\patom}} & = &
-    \left(
+    (
       \tren\;\twk^{\patom}\;\idenv\Gamma
       , \
       \pvar\,\tzero
-    \right) \\
+    ) \\
   \idenv{\cext \Gamma N} & = &
-    \left(
+    (
       \tren\;\twk^N\;\idenv\Gamma
       , \
       \upG N (\nvar\,\tzero)
-    \right) \\
+    ) \\
 \end{array}
+% \begin{array}{lcl}
+%   \idenv{\cempty} & = & \ttempty \\
+%   \idenv{\cext \Gamma {\patom}} & = &
+%     \left(
+%       \tren\;\twk^{\patom}\;\idenv\Gamma
+%       , \
+%       \pvar\,\tzero
+%     \right) \\
+%   \idenv{\cext \Gamma N} & = &
+%     \left(
+%       \tren\;\twk^N\;\idenv\Gamma
+%       , \
+%       \upG N (\nvar\,\tzero)
+%     \right) \\
+% \end{array}
 \]
 
 The terms \fbox{$\Tm N \Gamma$} of the focused lambda calculus are the
