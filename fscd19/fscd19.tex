@@ -465,18 +465,43 @@ is admissible, for instance:
 $\tcase$ generalizes analogously, with a bit of care when weakening
 the branches.
 
-\emph{Proof normalization} is concerned with finding a normal form
-$n : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
-\emph{term normalization} additionally requires \emph{soundness},
-\ie, that $\tm u \cong t$
-with respect to a equational theory $\cong$ on terms.
+% \emph{Proof normalization} is concerned with finding a normal form
+% $n : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
+% \emph{term normalization} additionally requires \emph{soundness},
+% \ie, that $\tm u \cong t$
+% with respect to a equational theory $\cong$ on terms.
 
-\subsection{Proof normalization}
+% \subsection{Proof normalization}
 
-For didactical purposes, let us first focus on the simpler task of
-constructing a normalization function
+% For didactical purposes, let us first focus on the simpler task of
+% constructing a normalization function
+% \fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
+% without any soundness guarantee.
+
+\subsection{Normalization}
+
+%\emph{Normalization}
+Normalization is concerned with finding a normal form
+$n : \Nf A \Gamma$ for each term $t : A \from \Gamma$.
+The normal form should be \emph{sound},
+\ie, $\tm n \cong t$
+with respect to a equational theory $\cong$ on terms
+(see \cref{sec:eq}).
+Further, normalization should decide $\cong$, \ie,
+terms $t,t'$ with $t \cong t'$ should have the same normal form $n$.
+In this article, we implement only the normalization function
 \fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
-without any soundness guarantee.
+with proving its soundness and completeness.
+From a logical perspective, we will compute for each derivation of $A
+\from \Gamma$ a normal derivation $\Nf A \Gamma$.
+
+% \subsection{Proof normalization}
+
+% For didactical purposes, let us first focus on the simpler task of
+% constructing a normalization function
+% \fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
+% without any soundness guarantee.
+
 % that does not guarantee any relation between its input term $t$ and
 % output normal form $u$.
 %
@@ -542,7 +567,7 @@ We will interpret simple types $A$ as corresponding presheaves
 $\den A$.  Let us start with the negative types, defining
 reflection $\up A : \tNe\, A \todot \den A$
 and reification $\down A : \den A \todot \tNf A$ along the way.
-\begin{gather*}
+\[
 \begin{array}{lcl}
   \den   \tyone          & = & \hatone \\
   \upG   \tyone \; u     & = & \ttempty \\
@@ -554,7 +579,8 @@ and reification $\down A : \den A \todot \tNf A$ along the way.
   \upG   {A \times B} \; u  & = & (\upG A (\prj1 u),\;\upG B (\prj2 u)) \\
   \downG {A \times B} (a,b) & = & \tpair\,(\downG A a)\,(\downG B b) \\
 \end{array}
-\\[2ex]
+\]
+\[
 \begin{array}{lcl}
   \den {A \To B}    & = & \den A \hatto \den B \\
   \upG   {A \To B}    \; u \; (\tau : \Gamma \sublist \Delta) \; (a : \den A \Delta)
@@ -562,7 +588,7 @@ and reification $\down A : \den A \todot \tNf A$ along the way.
   \downG {A \To B}    f        & = & \tabs\,(\down[\cext \Gamma A] B
     (f\;\twk^A_\Gamma\;\tfresh^A_\Gamma))
 \end{array}
-\end{gather*}
+\]
 % We will interpret simple types $A$ as corresponding presheaves
 % $\den A$.  Let us start with the negative types:
 % \[
@@ -996,159 +1022,33 @@ continuation monad, and relies on Scheme's \texttt{gensym} to produce
 fresh variables names rather than using Kripke function space / presheaves.
 
 
-\subsection{Term normalization}
+% \subsection{Term normalization}
 
-Defining%
-\footnote{%
-A more accurate presentation of $\tNF$ would be
-$\Sigma\,{u : \tNf A\,\Gamma}.\ (\tm u \cong t)$
-in order to make absolutely clear that we
-want get hold of the witness $u$ of the existential statement;
-however, we shall only use constructive
-existentials
-in this article and thus stick to the notation $\exists$.
-We mean \emph{constructive existence} in
-  contrast to classical existence and
-  \emph{mere existence} from Homotopy Type Theory which
-  is the propositional truncation of constructive existence.
-}
-\fbox{$\NF t = \exists n \of \tNf A\,\Gamma.\ \tm n \cong t$}
-% for $t : A \from \Gamma$,
-we aim to construct a normalization function
-\[
-  \tnorm : (t : A \from \Gamma) \to \NF t
-\]
-that gives us for each term $t$ a $\cong$-equal normal form $n$.
-
-
-%Equational theory \fbox{$t \cong t'$} for $t,t' : A \from \Gamma$.
-Term equality\fbox{$t \cong t'$} for $t,t' : A \from \Gamma$ is the
-least congruence over the following axioms, which we have grouped into
-$\beta$ (computation), $\eta$ (extensionality), and $\pi$ (permutation)
-rules.  We may refer to subgroups, like $\eta^N$ for the negative
-$\eta$-rules ($\retato$, $\retatimes$, $\retaone$).  Note that all
-typing restrictions are implicit in the well-typedness assumption,
-\eg, $t \cong \tunit$ presupposes $t : \tyone \from \Gamma$
-since $\tunit : \tyone \from \Gamma$.
-\begin{gather*}
-%% BETA LAWS
-  \nru{\rbetato}{}{\tapp\,(\tabs\,t)\,u \cong \subone t u}
-\qquad
-  \nru{\rbetatimes}{}{\prjP i {\tpair\,t_1\,t_2} \cong t_i}
-\qquad
-  \nru{\rbetaplus}{}{\tcase\,(\inj i t)\,t_1\,t_2 \cong t_i}
-\\[2ex]
-%% ETA LAWS
-  \nru{\retato}{}{t \cong
-    \tabs\,(\tapp\,(\tren\,\twk\,t)\,\vv0)}
-\quad
-  \nru{\retatimes}{}{t \cong \tpair\,(\prj 1 t)\,(\prj 2 t)}
-\quad
-  \nru{\retaone}{}{t \cong \tunit}
-\\[1ex]
-  \nru{\retaplus}{}{t \cong
-    \tcase\,t
-      \,(\inj 1 {\vv0})
-      \,(\inj 2 {\vv0})
-    }
-\qquad
-  \nru{\retazero}{}{t \cong \tabort\,t}
-\\[2ex]
-%% PERMUTATIONS
-  \nru{\rpi{\To}{\tyempty}}
-    {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
-\qquad
-  \nru{\rpi{\To}{+}}
-      {t_i' = \tapp\,t_i\,(\tren\,\twk\,u)}
-      {\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
-\\[1ex]
-  \nru{\rpi{\times}{\tyempty}}
-    {}{\prjP i {\tabort\,t} \cong \tabort\,t}
-\qquad
-  \nru{\rpi{\times}{+}}
-    {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
-         \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
-\\[2ex]
-  \nru{\rpi{+}{\tyempty}}
-    {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
-\qquad
-  \nru{\rpi{+}{+}}
-      {t_i' = \tcase\;t_i\;u_1'\;u_2'
-       \quad
-       u_j' = \tren\,(\tlift\,\twk)\,u_j
-      }
-      {\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
-        \tcase\;t\;t_1'\;t_2'}
-    \
-    % t_i' = \tcase\;t_i
-    %   \,(\tren\,(\tlift\,\twk)\,u_1)
-    %   \,(\tren\,(\tlift\,\twk)\,u_2)
-\\[1ex]
-  \nru{\rpi{\tyempty}{\tyempty}}
-    {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
-\qquad
-  \nru{\rpi{\tyempty}{+}}
-    {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong
-      \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
-%% OLD:
-%   \nru{\rpi{\To}{\tyempty}}
-%     {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
-% \qquad
-%   \nru{\rpi{\times}{\tyempty}}
-%     {}{\prjP i {\tabort\,t} \cong \tabort\,t}
-% \\[1ex]
-%   \nru{\rpi{+}{\tyempty}}
-%     {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
-% \qquad
-%   \nru{\rpi{\tyempty}{\tyempty}}
-%     {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
-% \\[2ex]
-%   \nru{\rpi{\To}{+}}
-%     {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
-%     \
-%     t_i' = \tapp\,t_i\,(\tren\,\twk\,u)
-%   % \nru{\rpi{\To}{+}}
-%   %   {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\,t
-%   %        \, (\tapp\,t_1\,(\tren\,\twk\,u))
-%   %        \, (\tapp\,t_2\,(\tren\,\twk\,u))
-%   %   }
-% \\
-%   \nru{\rpi{\times}{+}}
-%     {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
-%          \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
-% \\
-%   \nru{\rpi{+}{+}}
-%     {}{\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
-%         \tcase\;t\;t_1'\;t_2'}
-%     \
-%     t_i' = \tcase\;t_i\;u_1'\;u_2'
-%     ; \quad
-%     u_j' = \tren\,(\tlift\,\twk)\,u_j
-%     % t_i' = \tcase\;t_i
-%     %   \,(\tren\,(\tlift\,\twk)\,u_1)
-%     %   \,(\tren\,(\tlift\,\twk)\,u_2)
-% \\
-%   \nru{\rpi{\tyempty}{+}}
-%     {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
-\end{gather*}
-The different law classes contribute to the shape and completeness of
-the normal forms in the following way:
-Thanks to the $\eta$-laws, a normal form of negative type is always an
-introduction.  A normal form of sum type ($+$, $\tyzero$) is always a
-case tree whose leaves are injections.  A normal form of atomic type
-($o$) is always case tree whose leaves are neutral.
-The $\beta$ and $\pi$ laws determine the shape of neutrals.
-Thanks to the $\beta$-laws,
-the principal argument of normal eliminations cannot be an
-introduction.  Because of the negative permutation rules
-$\rpi N P$ it cannot be positive elimination
-($\tcase$, $\tabort$) either, which leaves only negative eliminations
-in neutrals ($\tapp$, $\tprj$).  Finally the positive permutation
-rules $\rpi P P$ guarantee that having neutral scrutinees in case
-trees is sufficient.
+% Defining%
+% \footnote{%
+% A more accurate presentation of $\tNF$ would be
+% $\Sigma\,{u : \tNf A\,\Gamma}.\ (\tm u \cong t)$
+% in order to make absolutely clear that we
+% want get hold of the witness $u$ of the existential statement;
+% however, we shall only use constructive
+% existentials
+% in this article and thus stick to the notation $\exists$.
+% We mean \emph{constructive existence} in
+%   contrast to classical existence and
+%   \emph{mere existence} from Homotopy Type Theory which
+%   is the propositional truncation of constructive existence.
+% }
+% \fbox{$\NF t = \exists n \of \tNf A\,\Gamma.\ \tm n \cong t$}
+% % for $t : A \from \Gamma$,
+% we aim to construct a normalization function
+% \[
+%   \tnorm : (t : A \from \Gamma) \to \NF t
+% \]
+% that gives us for each term $t$ a $\cong$-equal normal form $n$.
 
 
-\clearpage
+
+
 
 \section{Normalization to Call-By-Push Value}
 \label{sec:cbpv}
@@ -1994,7 +1894,138 @@ $\tnorm\, (t : \Tm N \Gamma)
 
 \bibliography{auto-fscd19}
 
-% \appendix
+\clearpage
+\appendix
+
+\section{Equational Theory for STLC with Weak Sums}
+\label{sec:eq}
+
+%Equational theory \fbox{$t \cong t'$} for $t,t' : A \from \Gamma$.
+Term equality\fbox{$t \cong t'$} for $t,t' : A \from \Gamma$ is the
+least congruence over the following axioms, which we have grouped into
+$\beta$ (computation), $\eta$ (extensionality), and $\pi$ (permutation)
+rules.  We may refer to subgroups, like $\eta^N$ for the negative
+$\eta$-rules ($\retato$, $\retatimes$, $\retaone$).  Note that all
+typing restrictions are implicit in the well-typedness assumption,
+\eg, $t \cong \tunit$ presupposes $t : \tyone \from \Gamma$
+since $\tunit : \tyone \from \Gamma$.
+\begin{gather*}
+%% BETA LAWS
+  \nru{\rbetato}{}{\tapp\,(\tabs\,t)\,u \cong \subone t u}
+\qquad
+  \nru{\rbetatimes}{}{\prjP i {\tpair\,t_1\,t_2} \cong t_i}
+\qquad
+  \nru{\rbetaplus}{}{\tcase\,(\inj i t)\,t_1\,t_2 \cong t_i}
+\\[2ex]
+%% ETA LAWS
+  \nru{\retato}{}{t \cong
+    \tabs\,(\tapp\,(\tren\,\twk\,t)\,\vv0)}
+\quad
+  \nru{\retatimes}{}{t \cong \tpair\,(\prj 1 t)\,(\prj 2 t)}
+\quad
+  \nru{\retaone}{}{t \cong \tunit}
+\\[1ex]
+  \nru{\retaplus}{}{t \cong
+    \tcase\,t
+      \,(\inj 1 {\vv0})
+      \,(\inj 2 {\vv0})
+    }
+\qquad
+  \nru{\retazero}{}{t \cong \tabort\,t}
+\\[2ex]
+%% PERMUTATIONS
+  \nru{\rpi{\To}{\tyempty}}
+    {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
+\qquad
+  \nru{\rpi{\To}{+}}
+      {t_i' = \tapp\,t_i\,(\tren\,\twk\,u)}
+      {\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
+\\[1ex]
+  \nru{\rpi{\times}{\tyempty}}
+    {}{\prjP i {\tabort\,t} \cong \tabort\,t}
+\qquad
+  \nru{\rpi{\times}{+}}
+    {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
+         \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
+\\[2ex]
+  \nru{\rpi{+}{\tyempty}}
+    {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
+\qquad
+  \nru{\rpi{+}{+}}
+      {t_i' = \tcase\;t_i\;u_1'\;u_2'
+       \quad
+       u_j' = \tren\,(\tlift\,\twk)\,u_j
+      }
+      {\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
+        \tcase\;t\;t_1'\;t_2'}
+    \
+    % t_i' = \tcase\;t_i
+    %   \,(\tren\,(\tlift\,\twk)\,u_1)
+    %   \,(\tren\,(\tlift\,\twk)\,u_2)
+\\[1ex]
+  \nru{\rpi{\tyempty}{\tyempty}}
+    {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
+\qquad
+  \nru{\rpi{\tyempty}{+}}
+    {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong
+      \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
+%% OLD:
+%   \nru{\rpi{\To}{\tyempty}}
+%     {}{\tapp\,(\tabort\,t)\,u \cong \tabort\,t}
+% \qquad
+%   \nru{\rpi{\times}{\tyempty}}
+%     {}{\prjP i {\tabort\,t} \cong \tabort\,t}
+% \\[1ex]
+%   \nru{\rpi{+}{\tyempty}}
+%     {}{\tcase\,(\tabort\,t)\,t_1\,t_2 \cong \tabort\,t}
+% \qquad
+%   \nru{\rpi{\tyempty}{\tyempty}}
+%     {}{\tabort\,(\tabort\,t) \cong \tabort\,t}
+% \\[2ex]
+%   \nru{\rpi{\To}{+}}
+%     {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\;t\;t_1'\;t_2'}
+%     \
+%     t_i' = \tapp\,t_i\,(\tren\,\twk\,u)
+%   % \nru{\rpi{\To}{+}}
+%   %   {}{\tapp\,(\tcase\;t\;t_1\;t_2)\,u \cong \tcase\,t
+%   %        \, (\tapp\,t_1\,(\tren\,\twk\,u))
+%   %        \, (\tapp\,t_2\,(\tren\,\twk\,u))
+%   %   }
+% \\
+%   \nru{\rpi{\times}{+}}
+%     {}{\prjP i {\tcase\;t\;t_1\;t_2} \cong
+%          \tcase\,t\,(\prj i {t_1})\,(\prj i {t_2})}
+% \\
+%   \nru{\rpi{+}{+}}
+%     {}{\tcase\,(\tcase\;t\;t_1\;t_2)\,u_1\,u_2 \cong
+%         \tcase\;t\;t_1'\;t_2'}
+%     \
+%     t_i' = \tcase\;t_i\;u_1'\;u_2'
+%     ; \quad
+%     u_j' = \tren\,(\tlift\,\twk)\,u_j
+%     % t_i' = \tcase\;t_i
+%     %   \,(\tren\,(\tlift\,\twk)\,u_1)
+%     %   \,(\tren\,(\tlift\,\twk)\,u_2)
+% \\
+%   \nru{\rpi{\tyempty}{+}}
+%     {}{\tabort\,(\tcase\;t\;t_1\;t_2) \cong \tcase\,t\,(\tabort\,t_1)\,(\tabort\,t_2)}
+\end{gather*}
+The different law classes contribute to the shape and completeness of
+the normal forms in the following way:
+Thanks to the $\eta$-laws, a normal form of negative type is always an
+introduction.  A normal form of sum type ($+$, $\tyzero$) is always a
+case tree whose leaves are injections.  A normal form of atomic type
+($o$) is always case tree whose leaves are neutral.
+The $\beta$ and $\pi$ laws determine the shape of neutrals.
+Thanks to the $\beta$-laws,
+the principal argument of normal eliminations cannot be an
+introduction.  Because of the negative permutation rules
+$\rpi N P$ it cannot be positive elimination
+($\tcase$, $\tabort$) either, which leaves only negative eliminations
+in neutrals ($\tapp$, $\tprj$).  Finally the positive permutation
+rules $\rpi P P$ guarantee that having neutral scrutinees in case
+trees is sufficient.
+
 
 \end{document}
 
