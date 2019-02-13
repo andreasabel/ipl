@@ -272,13 +272,13 @@ also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
 
 
 The category $\Cxt$ allows us to consider $A{\in}\_$ as a presheaf over
-$\Cxt\op$ for any $A$, witnessed by \fbox{$\treindex : \Gamma \sublist
-  \Delta \to A \in \Gamma \to A \in \Delta$}, which is the morphism
+$\Cxt\op$ for any $A$, witnessed by $\treindex : \Gamma \sublist
+  \Delta \to A \in \Gamma \to A \in \Delta$, which is the morphism
 part of functor $A{\in}\_$ from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
-The associated naturality laws \fbox{$\treindex\,\tid\,x \equiv x$}
-and \fbox{$\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
-\treindex\,(\tau_1 \rcomp \tau_2)\,x$} hold propositionally.
+The associated naturality laws $\treindex\,\tid\,x \equiv x$
+and $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
+\treindex\,(\tau_1 \rcomp \tau_2)\,x$ hold propositionally.
 
 \subsection{STLC and its normal forms}
 
@@ -529,15 +529,15 @@ From a logical perspective, we will compute for each derivation of $A
 % followed by
 % \emph{reification}
 % \nofbox{$\downG A : \Den A \Gamma \to \Nf A \Gamma$}.
-\emph{Normalization by evaluation} (NbE) decomposes normalization as
+\emph{Normalization by evaluation} (NbE)
 \fbox{\(
 %  \norm[\Gamma] A (t : A \from \Gamma)
   \tnorm\, (t : A \from \Gamma)
   = \down A \dent t {\idenv\Gamma}
 \)}
-which is
+decomposes normalization into
 \emph{evaluation}
-\nofbox{$\dent \_ \_ : (t : A \from \Gamma) \to \den \Gamma \todot
+\nofbox{$\denty\_ : (t : A \from \Gamma) \to \den \Gamma \todot
   \den A$}
 in the identity environment \nofbox{$\idenv\Gamma : \den \Gamma \Gamma$}
 followed by
