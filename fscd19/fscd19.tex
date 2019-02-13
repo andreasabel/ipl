@@ -857,19 +857,21 @@ and the transported cover $\tren\;\tau\;c : \C\den{A \To B}\Delta$.
 We extend the type interpretation pointwise to contexts, \ie,
 $\den \cempty = \hatone$ and
 $\den{\cext \Gamma A} = \den \Gamma \hattimes \den A$
-and obtain a natural projection function from the semantic enironments:
-\[
-\begin{array}{lcl}
-  \tlookup\,(x : A \in \Gamma) & : &  \den \Gamma \todot \den A \\
-  \tlookup\;\tzero     & = & \pi_2 \\
-  \tlookup\;(\tsuc\,x) & = & \tlookup\;x \comp \pi_1 \\
-\end{array}
+and obtain a natural projection function
+$\tlookup\,(x : A \in \Gamma) : \den \Gamma \todot \den A$
+from the semantic enironments.
+% \[
 % \begin{array}{lcl}
-%   \tlookup & : & A \in \Gamma \to \den \Gamma \todot \den A \\
+%   \tlookup\,(x : A \in \Gamma) & : &  \den \Gamma \todot \den A \\
 %   \tlookup\;\tzero     & = & \pi_2 \\
 %   \tlookup\;(\tsuc\,x) & = & \tlookup\;x \comp \pi_1 \\
 % \end{array}
-\]
+% % \begin{array}{lcl}
+% %   \tlookup & : & A \in \Gamma \to \den \Gamma \todot \den A \\
+% %   \tlookup\;\tzero     & = & \pi_2 \\
+% %   \tlookup\;(\tsuc\,x) & = & \tlookup\;x \comp \pi_1 \\
+% % \end{array}
+% \]
 The evaluation function
 \fbox{$\denty {t : A \from \Gamma}  : \den \Gamma \todot \den A$}
 % \fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
