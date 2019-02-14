@@ -1,6 +1,6 @@
 -- A Beth model of normal forms
 
-open import Library
+open import Library hiding (_∈_; All)
 
 module NfModel (Base : Set) where
 

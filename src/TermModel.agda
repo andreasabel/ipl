@@ -1,6 +1,6 @@
 -- A term model à la Beth
 
-open import Library
+open import Library hiding (_∈_)
 
 module TermModel (Base : Set) where
 

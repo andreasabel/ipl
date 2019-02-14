@@ -1,7 +1,7 @@
 {-# OPTIONS --postfix-projections #-}
 module PresheavesAndSheaves where
 
-open import Library hiding (refl; trans)
+open import Library hiding (refl; trans; _∈_)
 
 open import Level
 import Relation.Binary.Core as Eq
