@@ -104,8 +104,44 @@ and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Secon
 \Copyright{Andreas Abel %and Frederik F. Ramcke
  and Christian Sattler}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
 
-\ccsdesc[100]{General and reference~General literature}
-\ccsdesc[100]{General and reference}%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10003752.10003790.10011740</concept_id>
+% <concept_desc>Theory of computation~Type theory</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10003752.10010124.10010125.10010127</concept_id>
+% <concept_desc>Theory of computation~Functional constructs</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10003752.10010124.10010125.10010130</concept_id>
+% <concept_desc>Theory of computation~Type structures</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10003752.10010124.10010131.10010137</concept_id>
+% <concept_desc>Theory of computation~Categorical semantics</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10003752.10003790.10003792</concept_id>
+% <concept_desc>Theory of computation~Proof theory</concept_desc>
+% <concept_significance>100</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+\ccsdesc[500]{Theory of computation~Type theory}
+\ccsdesc[500]{Theory of computation~Type structures}
+\ccsdesc[300]{Theory of computation~Functional constructs}
+\ccsdesc[300]{Theory of computation~Proof theory}
+\ccsdesc[300]{Theory of computation~Categorical semantics}
+\ccsdesc[100]{Theory of computation~Operational semantics}
+%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
 
 \keywords{Evaluation, Intuitionistic Propositional Logic,
   Lambda-Calculus, Monad, Normalization,
@@ -116,7 +152,7 @@ and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Secon
 \relatedversion{}%optional, e.g. full version hosted on arXiv, HAL, or other respository/website
 %\relatedversion{A full version of the paper is available at \url{...}.}
 
-\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+\supplement{\url{https://andreasabel.github.io/ipl/html/NfModelMonad.html}}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
 
 %\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
 
@@ -165,6 +201,7 @@ standard interpreter, usually evaluating closed terms, to compute the
 normal form of an open term.
 The normal form is achieved by a type-directed \emph{reification}
 procedure after evaluating the open term to a semantic value, mapping
+(\emph{reflecting})
 the free variables to corresponding \emph{unknowns} in the semantics.
 The literal use of a standard interpreter
 can be achieved for the pure simply-typed lambda-calculus
@@ -176,20 +213,20 @@ reification of functions to lambdas.
 Thanks to $\eta$-equality at function types, free variables of
 function type can be reflected into the semantics as functions
 applying the variable to their reified argument,
-becoming a neutral.  This mechanism provides us with unknowns of
+forming a neutral term.  This mechanism provides us with unknowns of
 function type which can be faithfully reified to normal forms.
 % Since neutrals are closed under application to normal arguments, they
 % can act as unknown functions, storing the reified semantic argument
 % they are invoked with (thus, these unknowns are aka accumulators
 % \cite{gregoireleroy:icfp02}).
 
-For the extension to sum types (logically disjunctions and categorically
+For the extension to sum types (logically, disjunctions and categorically,
 weak coproducts), this reflection trick does not work anymore.  A
 semantic value of binary sum type is either a left or a right
 injection, but the decision between left or right cannot be taken at
 reflection time, since a variable of sum type does not provide us with
 the information.  A literal standard interpreter for closed terms can
-thus no longer be used for NbE.  Instead, we can utilize a monadic
+thus no longer be used for NbE;  instead, we can utilize a monadic
 interpreter.  When the interpreter attempts a case distinction on an
 unknown of sum type, it asks an oracle whether the unknown is a left
 or a right injection.  The oracle returns one of these alternatives,
@@ -199,7 +236,7 @@ oracle can be modeled in a \emph{monad} $\C$,
 which records the questions asked and the continuation of the
 interpreter for each of the possible answers.
 A monadic semantic value is thus a \emph{case tree} where the leaves
-are occupied by non-monadic values.
+are occupied by non-monadic values \cite{altenkirchUustalu:flops04}.
 In this article we only consider weak sum types, producing non-unique
 normal forms, where it does not
 matter in which order the questions are asked (commuting case splits),
@@ -209,11 +246,11 @@ The model would need refinement for strong, extensional sums
 \cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17}.
 
 Filinski \cite{filinski:tlca01} studied NbE for Moggi's computional lambda
-calculus \cite{moggi:infcomp91} shedding light on the difference
+calculus \cite{moggi:infcomp91}, shedding light on the difference
 between call-by-name (CBN) and call-by-value (CBV) NbE, where Danvy's
 type-directed partial evaluation \cite{danvy:popl96} falls into the
 latter class.  The contribution of the computational lambda calculus
-is to make explicit where the monad is envoked during monadic
+is to make explicit where the monad is invoked during monadic
 evaluation, and this placement of the monad carries over to the NbE
 setting.  Moggi's studies were continued by Levy \cite{levy:hosc06}
 who designed the call-by-push-value (CBPV) lambda-calculus to embed
@@ -233,8 +270,8 @@ interrupted by more questions to the oracle.  In the research field of
 focalization \cite{andreoli:focusing,liangMiller:csl07} we speak of
 \emph{chaining non-invertible introductions}.
 Invertible introductions are already chained in NbE thanks to
-extensionality ($\eta$) for function (an more generally, negative)
-types.  Non-invertible eliminations are also happing in a chain,
+extensionality ($\eta$) for function, and more generally, negative
+types.  Non-invertible eliminations are also happening in a chain,
 building neutrals.  What is missing from the picture is the chaining
 of invertible eliminations, i.e., case distinctions and, more
 generally, pattern matching.  The picture is completed by extending
@@ -243,12 +280,29 @@ NbE to \emph{polarized lambda calculus}
 in Section~\ref{sec:fipl}.
 
 
-In our presentation of the various lambda calculi and NbE, we use
-presheaves for the abstract syntax and the semantics
-\cite{altenkirchHofmannStreicher:ctcs95}.
+In our presentation of the various lambda calculi we ignore the
+concrete syntax, only consider the abstract syntax obtained by the
+Curry-Howard-Isomorphism.  A term is simply a derivation tree whose
+nodes are rule invokations.  Thus, a intrinsically typed,
+nameless syntax is most natural,
+and our syntactic classes are just presheaves over the category of
+typing contexts and renamings.  The use of presheaves then smoothly
+extents to the semantic constructions \cite{altenkirchHofmannStreicher:ctcs95}.
 
-In contrast to Zeilberger \cite{zeilberger:PhD}.
+Concerning the presentation of polarized lambda calculus, we depart from
+Zeilberger \cite{zeilberger:PhD} who employs \emph{a priori}
+infinitary syntax, modelling a case tree as a meta-level function mapping
+well-typed patterns to branches.  Instead, we use a graded monad
+representing complete pattern matching over a newly added hypothesis,
+which is in spirit akin to Filinski's \cite[Section~4]{filinski:tlca01}
+and Krishnaswami's \cite{krishnaswami:popl09} treatment of eager
+pattern matching using a separate context of variables to be matched
+on.
 
+Our design choices were guided by an Agda formalization of sections 2
+(complete) and 4 (partial), available at \url{https://github.com/andreasabel/ipl}.
+Agda was particularly helpful to correctly handle the renamings
+abundantly present when working with presheaves.
 
 % Weak coproducts.
 % Weak sheaf (non-unique pasting).
@@ -2081,6 +2135,23 @@ $\tnorm\, (t : \Tm N \Gamma)
 
 \section{Conclusion}
 \label{sec:concl}
+
+We have implemented NbE for CBPV and polarized lambda calculus
+formulated with intrinsically well-typed syntax and presheaf
+semantics.  As a side result, we have proven semantically
+that the normal forms of both systems are logically complete, \ie,
+each derivable judgement $\Gamma \der N$ has a normal derivation.
+It remains to show that NbE for these calculi is also computationally
+sound and complete, i.e., the computational behavior of term and
+normal form should agree, and normalization should decide a suitable
+equational theory on terms.
+
+Additionally, a natural question to investigate is whether known CBN
+and CBV NbE algorithms can be obtained from our NbE algorithms by
+embedding simply-typed lambda calculus into our polarized calculi,
+using known CBN and CBV translations.  Further, we would like to study
+the NbE algorithm for STLC arising from the optimal translation, i.e.,
+the one inserting a minimal amount of $\tThunk$ and $\tComp$ transitions.
 
 \bibliography{auto-fscd19}
 
