@@ -2,8 +2,8 @@
 %%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!
 
 @STRING{acm	= "ACM" }
-@STRING{acmtocl	= "ACM TOCL" }
 @STRING{aml	= "AML" }
+@STRING{csl07	= "CSL'07" }
 @STRING{ctcs95	= "CTCS'95" }
 @STRING{entcs	= "ENTCS" }
 @STRING{flops04	= "FLOPS'04" }
@@ -11,9 +11,11 @@
 @STRING{ieee	= "IEEE CS Press" }
 @STRING{infcomp	= "Inf. Comput." }
 @STRING{jfp	= "JFP" }
+@STRING{jlc	= "JLC" }
 @STRING{lics01	= "LICS'01" }
 @STRING{lics91	= "LICS'91" }
 @STRING{lncs	= "LNCS" }
+@STRING{lpar10	= "LPAR'10" }
 @STRING{mit	= "MIT Press" }
 @STRING{mpc98	= "MPC'98" }
 @STRING{popl04	= "POPL'04" }
@@ -22,8 +24,18 @@
 @STRING{ppdp99	= "PPDP'99" }
 @STRING{springer= "Springer" }
 @STRING{tlca01	= "TLCA'01" }
-@STRING{tlca93	= "TLCA'93" }
-@STRING{tlca99	= "TLCA'99" }
+
+@InProceedings{	  brockNannestadSchuermann:lpar10,
+  author	= {Taus Brock{-}Nannestad and Carsten Sch{\"{u}}rmann},
+  title		= {Focused Natural Deduction},
+  booktitle	= lpar10,
+  year		= 2010,
+  crossref	= {DBLP:conf/lpar/2010y},
+  doi		= {10.1007/978-3-642-16242-8\_12},
+  timestamp	= {Tue, 23 May 2017 01:12:10 +0200},
+  biburl	= {https://dblp.org/rec/bib/conf/lpar/Brock-NannestadS10},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
+}
 
 @Article{	  mcBridePaterson:applicative,
   author	= {Conor McBride and Ross Paterson},
@@ -75,18 +87,6 @@
   bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
-@InProceedings{	  jungTiuryn:tlca93,
-  author	= {Achim Jung and Jerzy Tiuryn},
-  title		= {A New Characterization of Lambda Definability},
-  booktitle	= tlca93,
-  year		= {1993},
-  crossref	= {DBLP:conf/tlca/1993},
-  doi		= {10.1007/BFb0037110},
-  timestamp	= {Sat, 20 May 2017 15:32:50 +0200},
-  biburl	= {https://dblp.org/rec/bib/conf/tlca/JungT93},
-  bibsource	= {dblp computer science bibliography, https://dblp.org}
-}
-
 @InProceedings{	  filinski:semAccountTDPE,
   author	= {Andrzej Filinski},
   title		= {A Semantic Account of Type-Directed Partial Evaluation},
@@ -131,22 +131,17 @@
   year		= 2009
 }
 
-@PhDThesis{	  abel:habil,
-  author	= {Andreas Abel},
-  title		= {Normalization by Evaluation: {D}ependent Types and
-		  Impredicativity},
-  school	= {Ludwig-Maximilians-Uni\-ver\-sity Munich},
-  type		= {Habilitation thesis},
-  year		= {2013},
-  optkey	= {},
-  opttype	= {},
-  optaddress	= {},
-  optmonth	= {},
-  publisher	= {Unpublished},
-  optpostscript	= {},
-  optpdf	= {},
-  optdvi	= {},
-  optabstract	= {}
+@Article{	  andreoli:focusing,
+  author	= {Jean{-}Marc Andreoli},
+  title		= {Logic Programming with Focusing Proofs in Linear Logic},
+  journal	= jlc,
+  volume	= 2,
+  number	= 3,
+  year		= 1992,
+  doi		= {10.1093/logcom/2.3.297},
+  timestamp	= {Wed, 17 May 2017 14:25:56 +0200},
+  biburl	= {https://dblp.org/rec/bib/journals/logcom/Andreoli92},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
 @InProceedings{	  bergerSchwichtenberg:lics91,
@@ -185,9 +180,9 @@
   number	= 1,
   year		= 1991,
   doi		= {10.1016/0890-5401(91)90052-4},
-  timestamp	= {Wed, 06 Jul 2011 21:23:46 +0200},
-  biburl	= {http://dblp.uni-trier.de/rec/bib/journals/iandc/Moggi91},
-  bibsource	= {dblp computer science bibliography, http://dblp.org}
+  timestamp	= {Wed, 14 Nov 2018 10:35:08 +0100},
+  biburl	= {https://dblp.org/rec/bib/journals/iandc/Moggi91},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
 @InProceedings{	  bird:nested,
@@ -202,19 +197,6 @@
   bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
-@Article{	  simmons:tocl14,
-  author	= {Robert J. Simmons},
-  title		= {Structural Focalization},
-  journal	= acmtocl,
-  volume	= 15,
-  number	= 3,
-  year		= 2014,
-  doi		= {10.1145/2629678},
-  timestamp	= {Wed, 14 Nov 2018 10:49:01 +0100},
-  biburl	= {https://dblp.org/rec/bib/journals/tocl/Simmons14},
-  bibsource	= {dblp computer science bibliography, https://dblp.org}
-}
-
 @InProceedings{	  balatDiCosmoFiore:popl04,
   author	= {Vincent Balat and Roberto Di Cosmo and Marcelo P. Fiore},
   title		= {Extensional normalisation and type-directed partial
@@ -225,19 +207,6 @@
   doi		= {10.1145/964001.964007},
   timestamp	= {Tue, 06 Nov 2018 11:07:43 +0100},
   biburl	= {https://dblp.org/rec/bib/conf/popl/BalatCF04},
-  bibsource	= {dblp computer science bibliography, https://dblp.org}
-}
-
-@InProceedings{	  fioreSimpson:tlca99,
-  author	= {Marcelo P. Fiore and Alex K. Simpson},
-  title		= {Lambda Definability with Sums via {Grothendieck} Logical
-		  Relations},
-  booktitle	= tlca99,
-  year		= 1999,
-  crossref	= {DBLP:conf/tlca/1999},
-  doi		= {10.1007/3-540-48959-2_12},
-  timestamp	= {Sat, 30 Dec 2017 13:59:02 +0100},
-  biburl	= {https://dblp.org/rec/bib/conf/tlca/FioreS99},
   bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
@@ -295,6 +264,18 @@
   bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
+@InProceedings{	  liangMiller:csl07,
+  author	= {Chuck Liang and Dale Miller},
+  title		= {Focusing and Polarization in Intuitionistic Logic},
+  booktitle	= csl07,
+  year		= 2007,
+  crossref	= {DBLP:conf/csl/2007},
+  doi		= {10.1007/978-3-540-74915-8\_34},
+  timestamp	= {Sun, 12 Nov 2017 16:01:30 +0100},
+  biburl	= {https://dblp.org/rec/bib/conf/csl/LiangM07},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
+}
+
 @Article{	  espiritoSanto:entcs17,
   author	= {Jos{\'{e}} Esp{\'{\i}}rito Santo},
   title		= {The Polarized {\(\lambda\)}-calculus},
@@ -305,6 +286,19 @@
   timestamp	= {Fri, 30 Nov 2018 13:26:33 +0100},
   biburl	= {https://dblp.org/rec/bib/journals/entcs/Santo17},
   bibsource	= {dblp computer science bibliography, https://dblp.org}
+}
+
+@Proceedings{	  DBLP:conf/lpar/2010y,
+  title		= lpar10,
+  booktitle	= lpar10,
+  series	= lncs,
+  volume	= 6397,
+  publisher	= springer,
+  year		= 2010,
+  doi		= {10.1007/978-3-642-16242-8},
+  timestamp	= {Fri, 08 Oct 2010 13:49:16 +0200},
+  biburl	= {http://dblp.uni-trier.de/rec/bib/conf/lpar/2010y},
+  bibsource	= {dblp computer science bibliography, http://dblp.org}
 }
 
 @Proceedings{	  DBLP:conf/lics/1991,
@@ -360,32 +354,6 @@
   bibsource	= {DBLP, http://dblp.uni-trier.de}
 }
 
-@Proceedings{	  DBLP:conf/tlca/1993,
-  title		= tlca93,
-  booktitle	= tlca93,
-  publisher	= springer,
-  series	= lncs,
-  volume	= 664,
-  year		= 1993,
-  doi		= {10.1007/BFb0037093},
-  timestamp	= {Sat, 20 May 2017 15:32:50 +0200},
-  biburl	= {https://dblp.org/rec/bib/conf/tlca/1993},
-  bibsource	= {dblp computer science bibliography, https://dblp.org}
-}
-
-@Proceedings{	  DBLP:conf/tlca/1999,
-  title		= tlca99,
-  booktitle	= tlca99,
-  publisher	= springer,
-  series	= lncs,
-  volume	= 1581,
-  year		= 1999,
-  doi		= {10.1007/3-540-48959-2},
-  timestamp	= {Sat, 30 Dec 2017 13:59:02 +0100},
-  biburl	= {https://dblp.org/rec/bib/conf/tlca/1999},
-  bibsource	= {dblp computer science bibliography, https://dblp.org}
-}
-
 @Proceedings{	  DBLP:conf/popl/2017,
   title		= popl17,
   booktitle	= popl17,
@@ -416,6 +384,19 @@
   timestamp	= {Mon, 21 May 2012 16:19:50 +0200},
   biburl	= {http://dblp.uni-trier.de/rec/bib/conf/popl/1996},
   bibsource	= {dblp computer science bibliography, http://dblp.org}
+}
+
+@Proceedings{	  DBLP:conf/csl/2007,
+  title		= csl07,
+  booktitle	= csl07,
+  series	= lncs,
+  volume	= 4646,
+  publisher	= springer,
+  year		= 2007,
+  doi		= {10.1007/978-3-540-74915-8},
+  timestamp	= {Fri, 02 Jun 2017 13:01:07 +0200},
+  biburl	= {https://dblp.org/rec/bib/conf/csl/2007},
+  bibsource	= {dblp computer science bibliography, https://dblp.org}
 }
 
 @Proceedings{	  DBLP:conf/ctcs/1995,

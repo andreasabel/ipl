@@ -163,53 +163,138 @@ Coquand.}
 The idea behind \emph{normalization by evaluation} (NbE) is to utilize a
 standard interpreter, usually evaluating closed terms, to compute the
 normal form of an open term.
+The normal form is achieved by a type-directed \emph{reification}
+procedure after evaluating the open term to a semantic value, mapping
+the free variables to corresponding \emph{unknowns} in the semantics.
+The literal use of a standard interpreter
+can be achieved for the pure simply-typed lambda-calculus
+\cite{bergerSchwichtenberg:lics91,filinski:semaccounttdpe}
+by modelling uninterpreted base types as sets of neutral (aka atomic)
+terms, or more precisely, as presheaves or sets of neutral term
+families, in order to facilitate fresh bound variable generation during
+reification of functions to lambdas.
+Thanks to $\eta$-equality at function types, free variables of
+function type can be reflected into the semantics as functions
+applying the variable to their reified argument,
+becoming a neutral.  This mechanism provides us with unknowns of
+function type which can be faithfully reified to normal forms.
+% Since neutrals are closed under application to normal arguments, they
+% can act as unknown functions, storing the reified semantic argument
+% they are invoked with (thus, these unknowns are aka accumulators
+% \cite{gregoireleroy:icfp02}).
+
+For the extension to sum types (logically disjunctions and categorically
+weak coproducts), this reflection trick does not work anymore.  A
+semantic value of binary sum type is either a left or a right
+injection, but the decision between left or right cannot be taken at
+reflection time, since a variable of sum type does not provide us with
+the information.  A literal standard interpreter for closed terms can
+thus no longer be used for NbE.  Instead, we can utilize a monadic
+interpreter.  When the interpreter attempts a case distinction on an
+unknown of sum type, it asks an oracle whether the unknown is a left
+or a right injection.  The oracle returns one of these alternatives,
+wrapping a new unknown in the injection.  The communication with the
+oracle can be modeled in a \emph{monad} $\C$,
+% with the service $\tNe\,(A + B) \to \C\,(\den A + \den B)$
+which records the questions asked and the continuation of the
+interpreter for each of the possible answers.
+A monadic semantic value is thus a \emph{case tree} where the leaves
+are occupied by non-monadic values.
+In this article we only consider weak sum types, producing non-unique
+normal forms, where it does not
+matter in which order the questions are asked (commuting case splits),
+and whether the same
+question is asked several times (redundant case splits).
+The model would need refinement for strong, extensional sums
+\cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17}.
+
+Filinski \cite{filinski:tlca01} studied NbE for Moggi's computional lambda
+calculus \cite{moggi:infcomp91} shedding light on the difference
+between call-by-name (CBN) and call-by-value (CBV) NbE, where Danvy's
+type-directed partial evaluation \cite{danvy:popl96} falls into the
+latter class.  The contribution of the computational lambda calculus
+is to make explicit where the monad is envoked during monadic
+evaluation, and this placement of the monad carries over to the NbE
+setting.  Moggi's studies were continued by Levy \cite{levy:hosc06}
+who designed the call-by-push-value (CBPV) lambda-calculus to embed
+both the CBN and CBV lambda calculus.
+
+In this work, we formulate NbE for CBPV
+(Section~\ref{sec:cbpv}), with the aim to investigate
+later whether CBN and CBV NbE can be recovered from CBPV NbE via the
+standard translations of the CBN and CBV calculi into CBPV.
 
 
-Weak coproducts.
-Weak sheaf (non-unique pasting).
+In contrast to the normal forms of CBN NbE, which is the algorithmic
+counterpart of the completeness proof for intuitionistic propositional
+logic (IPL) using Beth models, CBPV NbE gives us more restrained
+normal forms, where the production of a value via injections cannot be
+interrupted by more questions to the oracle.  In the research field of
+focalization \cite{andreoli:focusing,liangMiller:csl07} we speak of
+\emph{chaining non-invertible introductions}.
+Invertible introductions are already chained in NbE thanks to
+extensionality ($\eta$) for function (an more generally, negative)
+types.  Non-invertible eliminations are also happing in a chain,
+building neutrals.  What is missing from the picture is the chaining
+of invertible eliminations, i.e., case distinctions and, more
+generally, pattern matching.  The picture is completed by extending
+NbE to \emph{polarized lambda calculus}
+\cite{zeilberger:PhD,brockNannestadSchuermann:lpar10,espiritoSanto:entcs17}
+in Section~\ref{sec:fipl}.
 
-Contributions:
-\begin{enumerate}
-\item Abstract cover monad.
-\item NbE for CBPV and polarized lambda-calculus.
-\end{enumerate}
 
-CBPV differs from PolLambda in that hypotheses can be arbitrary
-positive formulas in CBPV, but only positive atoms or negative
-formulas in PolLambda.  This means that in CBPV, there is more choice
-on when and how to decompose a hypothesis into ones of smaller
-positive type, whereas in PolLambda there is no freedom: mandatory
-maximal splitting is dictated by the left inversion phase.
+In our presentation of the various lambda calculi and NbE, we use
+presheaves for the abstract syntax and the semantics
+\cite{altenkirchHofmannStreicher:ctcs95}.
 
-Normal forms of CBPV thus retain individual shallow pattern matching
-constructs, while PolLambda has only deep, maximal pattern matching.
+In contrast to Zeilberger \cite{zeilberger:PhD}.
 
-Agda formalization:
-Sized types, nested data types.
 
-Structural focalization for sequent calculus \cite{simmons:tocl14}.
+% Weak coproducts.
+% Weak sheaf (non-unique pasting).
 
-\nocite{bergerSchwichtenberg:lics91}
+% Contributions:
+% \begin{enumerate}
+% \item Abstract cover monad.
+% \item NbE for CBPV and polarized lambda-calculus.
+% \end{enumerate}
 
-\nocite{jungTiuryn:tlca93}
+% CBPV differs from PolLambda in that hypotheses can be arbitrary
+% positive formulas in CBPV, but only positive atoms or negative
+% formulas in PolLambda.  This means that in CBPV, there is more choice
+% on when and how to decompose a hypothesis into ones of smaller
+% positive type, whereas in PolLambda there is no freedom: mandatory
+% maximal splitting is dictated by the left inversion phase.
 
-\nocite{altenkirchHofmannStreicher:ctcs95}
+% Normal forms of CBPV thus retain individual shallow pattern matching
+% constructs, while PolLambda has only deep, maximal pattern matching.
 
-\nocite{abel:habil}
+% Agda formalization:
+% Sized types, nested data types.
 
-\nocite{danvy:popl96}
+% Structural focalization for sequent calculus \cite{simmons:tocl14}.
 
-\nocite{fioreSimpson:tlca99}
+% \nocite{bergerSchwichtenberg:lics91}
 
-\nocite{altenkirchDybjerHofmannScott:lics01}
+% \nocite{jungTiuryn:tlca93}
 
-\nocite{balatDiCosmoFiore:popl04}
+% \nocite{altenkirchHofmannStreicher:ctcs95}
 
-\nocite{altenkirchUustalu:flops04}
+% \nocite{abel:habil}
 
-\nocite{barral:PhD}
+% \nocite{danvy:popl96}
 
-\nocite{scherer:popl17}
+% \nocite{fioreSimpson:tlca99}
+
+% \nocite{altenkirchDybjerHofmannScott:lics01}
+
+% \nocite{balatDiCosmoFiore:popl04}
+
+% \nocite{altenkirchUustalu:flops04}
+
+% \nocite{barral:PhD}
+
+% \nocite{scherer:popl17}
 
 
 \section{Normalization by Evaluation for the Simply-Typed Lambda
@@ -1645,6 +1730,7 @@ discussed in the following section.
 
 \section{Focused Intuitionistic Propositional Logic}
 \label{sec:fipl}
+\label{sec:pol}
 
 % Polarized lambda calculus \cite{espiritoSanto:entcs17}
 % divides types deeply into positive and negative.
