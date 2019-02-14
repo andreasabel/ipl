@@ -1,7 +1,6 @@
 -- A Beth model of normal forms
 
 {-# OPTIONS --postfix-projections #-}
-{-# OPTIONS -v rewriting:90 #-}
 
 open import Library
 

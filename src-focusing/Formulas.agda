@@ -403,57 +403,6 @@ module Evaluation where
   cut (inj₁ a) (orE t u)     = cut a t
   cut (inj₂ b) (orE t u)     = cut b u
 
--- Den : ∀{p} (A : Form p) (Δ : Cxt) → Cxt → Set
--- Den A Δ Γ = G⟦ Γ ⟧ Δ → ⟦ A ⟧ Δ
-
--- cut : ∀{ N : Form - }{P Δ} → ⟦ P ⟧ Δ → AddHyp P (Den N Δ) →̇ Den N Δ
--- cut {N} x        (addAtom t) γ = t (γ , returnC x)
--- cut {N} a        (addNeg t)  γ = t (γ , a)
--- cut {N} _        (trueE t) = t
--- cut {N} (a , b)  (andE t)  = cut {N} a (mapAddHyp (cut {N} b) t)
--- cut {N} ()       falseE
--- cut {N} (inj₁ a) (orE t u) = cut {N} a t
--- cut {N} (inj₂ b) (orE t u) = cut {N} b u
-
--- {-
-
--- ⦅_⦆ : ∀{p} (A : Form p) → Cxt → Set
--- ⦅ A ⦆ Γ = G⟦ Γ ⟧ →̇ ⟦ A ⟧
-
-
--- cut : ∀{P}{ N : Form - } → ⟦ P ⟧ →̇ (AddHyp P ⦅ N ⦆ ⇒̂ ⦅ N ⦆)
--- cut a τ (addAtom t) γ = {!!}
--- cut a τ (addNeg t) γ = t (γ , {!mon⟦ _ ⟧ τ a!})
--- cut _ τ (trueE t) γ = {!!}
--- cut (a , b) τ (andE t) γ = {!cut !}
--- cut a τ falseE γ = {!!}
--- cut a τ (orE t u) γ = {!!}
-
--- {-
--- cut : ∀{P N} → AddHyp P ⦅ N ⦆  →̇ ⦅ P ⇒ N ⦆
--- cut (addAtom j) γ τ x = j (monG⟦ _ ⟧ τ γ , returnC x)
--- cut (addNeg  j) γ τ a = j (monG⟦ _ ⟧ τ γ , a)
--- cut (trueE   j) γ τ _ = j (monG⟦ _ ⟧ τ γ)
--- cut (andE j) γ τ (a , b) = cut (mapAddHyp' (λ τ' j' → {!cut j'!} ) j) γ τ a
--- cut falseE γ τ ()
--- cut (orE j k) γ τ (inj₁ a) = {!!}
--- cut (orE j k) γ τ (inj₂ b) = {!!}
-
--- {-
--- -- Cuts
-
--- subH : ∀ {N Γ Δ} → Hyp N Δ → Δ ≤ Γ → Δ ≤ Γ ∙ N
--- subH x τ = {!!}
-
--- cut : ∀{P J} (monJ : Mon J) → AddHyp P J →̇ (⟦ P ⟧ ⇒̂ J)
--- cut monJ (addAtom t) τ a = monJ (subH a τ) t
--- cut monJ (addNeg t) τ a = {!!} --  monJ {!subN a τ!} t
--- cut monJ (trueE t) τ _ = monJ τ t
--- cut monJ (andE t) τ (a , b) = {!!}
--- cut monJ falseE τ ()
--- cut monJ (orE t u) τ (inj₁ a) = cut monJ t τ a
--- cut monJ (orE t u) τ (inj₂ b) = cut monJ u τ b
-
 
 -- Intuitionistic propositional logic
 
