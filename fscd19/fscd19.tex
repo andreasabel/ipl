@@ -245,7 +245,7 @@ question is asked several times (redundant case splits).
 The model would need refinement for strong, extensional sums
 \cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17}.
 
-Filinski \cite{filinski:tlca01} studied NbE for Moggi's computional lambda
+Filinski \cite{filinski:tlca01} studied NbE for Moggi's computational lambda
 calculus \cite{moggi:infcomp91}, shedding light on the difference
 between call-by-name (CBN) and call-by-value (CBV) NbE, where Danvy's
 type-directed partial evaluation \cite{danvy:popl96} falls into the
@@ -283,7 +283,7 @@ in Section~\ref{sec:fipl}.
 In our presentation of the various lambda calculi we ignore the
 concrete syntax, only consider the abstract syntax obtained by the
 Curry-Howard-Isomorphism.  A term is simply a derivation tree whose
-nodes are rule invokations.  Thus, a intrinsically typed,
+nodes are rule invocations.  Thus, a intrinsically typed,
 nameless syntax is most natural,
 and our syntactic classes are just presheaves over the category of
 typing contexts and renamings.  The use of presheaves then smoothly
@@ -568,7 +568,7 @@ the subformula property and prevents any kind of computational
 ($\beta$) redex.
 The new rule $\tne$ embeds $\tNe$ into $\tNf$,
 but only at base types $\tybase$.
-Further, case distintion via $\tcase$ and $\tabort$
+Further, case distinction via $\tcase$ and $\tabort$
 is restricted to positive types $P$.
 As a consequence, our normal forms are
 \emph{$\eta$-long}, meaning that any normal inhabitant of a negative
@@ -589,7 +589,7 @@ This erasure function naturally commutes with reindexing, making it a
 natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
 resp.) and $A{\from}\_$.  We shall simply write, for instance,
 \fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
-(The point on the arrow is mnemoic for \emph{pointwise}.)
+(The point on the arrow is mnemonic for \emph{pointwise}.)
 Slightly abusive, we shall extend this notation to $n$-ary
 morphisms, \eg, write $\A \todot \B \todot \C$ for
 $\forall \Gamma.\ \A\,\Gamma \to (\B\,\Gamma \to \C\,\Gamma)$.
@@ -710,7 +710,7 @@ is written $S_1 \btimes S_2$ with projections $\pi_i : S_1 \btimes S_2
 $\iota_i : S_i \to S_1 \bplus S_2$ and elimination $[f_1,f_2] : S_1 \bplus
 S_2 \to T$ for arbitrary $f_i : S_i \to T$.
 
-Presheafs (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
+Presheaves (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
 constructed pointwise, \eg, $\hat0\,\Gamma = \bzero$, and given two
 presheaves $\A$ and $\B$,
 $(\A \hatplus \B)\,\Gamma = \A\,\Gamma \bplus \B\,\Gamma$.  For the
@@ -802,7 +802,7 @@ A direct extension of our presheaf semantics to positive types cannot
 work.  For instance, with $\den \tyzero = \hat0$, simply
 $\up[\tyzero] \tyzero \vv0 : \bzero$ would give us an
 inhabitant of the empty set, which means that reflection at the empty
-type would not be definable.  Similarily, the setting
+type would not be definable.  Similarly, the setting
 $\den{A + B} = \den A \hatplus \den B$ is refuted by
 % $\up[\tyone + \tyone]^{\tyone + \tyone} \vv0 : \bone \bplus \bone$
 $\up[A + B]{A + B} \vv0 : \den A (A{+}B) \bplus \den B (A{+}B)$
@@ -1004,7 +1004,7 @@ $\den \cempty = \hatone$ and
 $\den{\cext \Gamma A} = \den \Gamma \hattimes \den A$
 and obtain a natural projection function
 $\tlookup\,(x : A \in \Gamma) : \den \Gamma \todot \den A$
-from the semantic enironments.
+from the semantic environments.
 % \[
 % \begin{array}{lcl}
 %   \tlookup\,(x : A \in \Gamma) & : &  \den \Gamma \todot \den A \\
@@ -1240,7 +1240,7 @@ enables matching on neutrals:
 \]
 The NbE algorithm using $\CC$ is comparable to Danvy's type-directed
 partial evaluation \cite[Figure~8]{danvy:popl96}.  However, he uses
-shift-reset style continutations which can be programmed in the
+shift-reset style continuations which can be programmed in the
 continuation monad, and relies on Scheme's \texttt{gensym} to produce
 fresh variables names rather than using Kripke function space / presheaves.
 
@@ -1919,7 +1919,7 @@ since the pattern matching is taken care of by $\Add P$.
 All these inductive families are presheaves, due to factored
 presentation using $\Add P$ and $\Cov$ the proof is not a simple
 mutual induction.  Yet, in Agda, the generic proof goes through using a sized
-typing for these inductive families.  Similarily, defining the
+typing for these inductive families.  Similarly, defining the
 $\tjoin$ for monad $\Cov$ relies on sized typing.
 \[
 \begin{array}{lll}
@@ -2381,7 +2381,7 @@ family \fbox{$\Nf N \Gamma$}.
 All these inductive families are presheaves, due to factored
 presentation using $\Add P$ and $\Cov$ the proof is not a simple
 mutual induction.  Yet, in Agda, the generic proof goes through using a sized
-typing for these inductive families.  Similarily, defining the
+typing for these inductive families.  Similarly, defining the
 $\tjoin$ for monad $\Cov$ relies on sized typing.
 \[
 \begin{array}{lll}
