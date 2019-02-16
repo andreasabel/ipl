@@ -199,7 +199,7 @@ Coquand.}
 The idea behind \emph{normalization by evaluation} (NbE) is to utilize a
 standard interpreter, usually evaluating closed terms, to compute the
 normal form of an open term.
-The normal form is achieved by a type-directed \emph{reification}
+The normal form is obtained by a type-directed \emph{reification}
 procedure after evaluating the open term to a semantic value, mapping
 (\emph{reflecting})
 the free variables to corresponding \emph{unknowns} in the semantics.
@@ -220,17 +220,17 @@ function type which can be faithfully reified to normal forms.
 % they are invoked with (thus, these unknowns are aka accumulators
 % \cite{gregoireleroy:icfp02}).
 
-For the extension to sum types (logically, disjunctions and categorically,
+For the extension to sum types (logically, disjunctions, and categorically,
 weak coproducts), this reflection trick does not work anymore.  A
 semantic value of binary sum type is either a left or a right
 injection, but the decision between left or right cannot be taken at
 reflection time, since a variable of sum type does not provide us with
-the information.  A literal standard interpreter for closed terms can
+such information.  A literal standard interpreter for closed terms can
 thus no longer be used for NbE;  instead, we can utilize a monadic
 interpreter.  When the interpreter attempts a case distinction on an
 unknown of sum type, it asks an oracle whether the unknown is a left
 or a right injection.  The oracle returns one of these alternatives,
-wrapping a new unknown in the injection.  The communication with the
+wrapping a new unknown in the respective injection.  The communication with the
 oracle can be modeled in a \emph{monad} $\C$,
 % with the service $\tNe\,(A + B) \to \C\,(\den A + \den B)$
 which records the questions asked and the continuation of the
@@ -271,7 +271,7 @@ focalization \cite{andreoli:focusing,liangMiller:csl07} we speak of
 \emph{chaining non-invertible introductions}.
 Invertible introductions are already chained in NbE thanks to
 extensionality ($\eta$) for function, and more generally, negative
-types.  Non-invertible eliminations are also happening in a chain,
+types.  Non-invertible eliminations are also happening in a chain when
 building neutrals.  What is missing from the picture is the chaining
 of invertible eliminations, i.e., case distinctions and, more
 generally, pattern matching.  The picture is completed by extending
@@ -285,7 +285,7 @@ concrete syntax, only consider the abstract syntax obtained by the
 Curry-Howard-Isomorphism.  A term is simply a derivation tree whose
 nodes are rule invocations.  Thus, a intrinsically typed,
 nameless syntax is most natural,
-and our syntactic classes are just presheaves over the category of
+and our syntactic classes are all presheaves over the category of
 typing contexts and renamings.  The use of presheaves then smoothly
 extents to the semantic constructions
 \cite{catarina:csl93,altenkirchHofmannStreicher:ctcs95}.
@@ -421,7 +421,7 @@ $\Cxt\op$ for any $A$, witnessed by $\treindex : \Gamma \sublist
   \Delta \to A \in \Gamma \to A \in \Delta$, which is the morphism
 part of functor $A{\in}\_$ from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
 set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
-The associated naturality laws $\treindex\,\tid\,x \equiv x$
+The associated functor laws $\treindex\,\tid\,x \equiv x$
 and $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
 \treindex\,(\tau_1 \rcomp \tau_2)\,x$ hold propositionally.
 
@@ -485,7 +485,8 @@ inductively defined by the following rules.
 \end{gather*}
 The skilled eye of the reader will immediately recognize the proof
 rules of intuitionistic propositional logic (IPL) under the
-Curry-Howard isomorphism.  Using shorthand
+Curry-Howard isomorphism, where $A \from \Gamma$ is to be read as
+``$A$ follows from $\Gamma$''.  Using shorthand
 \fbox{$\vv n = \tvar\,(\tsuc^n\,\tzero)$} for the $n$th variable,
 a term such as
 \(
@@ -499,7 +500,7 @@ could in concrete syntax be rendered as
   .
 \)
 We leave the exact connection to a printable
-syntax of the STLC to imagination of the reader,
+syntax of the STLC to the imagination of the reader,
 as we shall not be concerned with considering
 concrete terms in this article.
 
@@ -510,7 +511,7 @@ calculus we should better speak of \emph{reindexing}, which could, a
 bit clumsily, be also abbreviated to $\tren$.}
 \fbox{$\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta$}
 defined by recursion over $t : A \from \Gamma$,
-and naturality laws for $\tren$ analogously to $\treindex$.
+and functor laws for $\tren$ analogously to $\treindex$.
 
 Normal forms%
 \footnote{%
@@ -563,11 +564,12 @@ term constructors.
     {\Ne \tyzero \Gamma}
     {\Nf P \Gamma}
 \end{gather*}
-These rules only allow the elimination of neutrals; this guarantees
+These rules only allow the elimination of \emph{neutrals}; this
+restriction guarantees
 the subformula property and prevents any kind of computational
 ($\beta$) redex.
 The new rule $\tne$ embeds $\tNe$ into $\tNf$,
-but only at base types $\tybase$.
+but only at base types $\tybase$ \cite[Section~3.3]{altenkirchHofmannStreicher:ctcs95}.
 Further, case distinction via $\tcase$ and $\tabort$
 is restricted to positive types $P$.
 As a consequence, our normal forms are
@@ -575,8 +577,8 @@ As a consequence, our normal forms are
 type is a respective introduction ($\tabs$, $\tunit$, or $\tpair$).
 This justifies the attribute \emph{negative} for these types:
 the construction of their inhabitants proceeds mechanically, without
-any choices.  In contrast, to construct an inhabitant of a
-\emph{positive} type choice is required: whether case distinction is
+any choices.  In contrast, constructing an inhabitant of a
+\emph{positive} type involves choice: whether case distinction is
 required, and which introduction to pick in the end ($\tinj_1$ or $\tinj_2$).
 
 Needless to say, $\tNe\,A$ and
@@ -588,12 +590,13 @@ that discards constructor $\tne$ but keeps all other constructors.
 This erasure function naturally commutes with reindexing, making it a
 natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
 resp.) and $A{\from}\_$.  We shall simply write, for instance,
-\fbox{$\tNf\,A \todot A{\from}\_$} for such presheaf morphisms.
+$\tNf\,A \todot A{\from}\_$ for such presheaf morphisms.
 (The point on the arrow is mnemonic for \emph{pointwise}.)
 Slightly abusive, we shall extend this notation to $n$-ary
 morphisms, \eg, write $\A \todot \B \todot \C$ for
 $\forall \Gamma.\ \A\,\Gamma \to (\B\,\Gamma \to \C\,\Gamma)$.
 
+\begin{remark*}
 While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
 normal forms of positive types $P$, their extension $\tcase^B$ and
 $\tabort^B$ to negative types
@@ -620,6 +623,8 @@ is admissible, for instance:
 \]
 $\tcase$ generalizes analogously, with a bit of care when weakening
 the branches.
+\end{remark*}
+
 
 % \emph{Proof normalization} is concerned with finding a normal form
 % $n : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
@@ -687,7 +692,8 @@ decomposes normalization into
 in the identity environment \nofbox{$\idenv\Gamma : \den \Gamma \Gamma$}
 followed by
 \emph{reification}
-\nofbox{$\down A : \den A \todot \tNf A$}.
+\nofbox{$\down A : \den A \todot \tNf A$}
+(aka quoting).
 The role of evaluation is to produce from a term the corresponding
 semantic (\ie, meta-theoretic) function, which is finally reified to a normal form.
 Since we are evaluating open terms $t$, we need to supply an environment
@@ -697,7 +703,7 @@ are mapped to presheaves $\den A$ (rather than just sets), and in
 particular each base type $\tybase$ is mapped to the presheaf
 $\tNe\,\tybase$ with the intention that the neutrals take the role of
 the unknowns.  The mapping $\up A : \tNe\,A \todot \den A$ from
-neutrals to unknowns is called \emph{reflection}, and defined mutually
+neutrals to unknowns is called \emph{reflection} (aka unquoting), and defined mutually
 with reification by induction on type $A$.
 
 At this point, let us fix some notation for sets to prepare for some
@@ -725,9 +731,9 @@ reflection $\up A : \tNe\, A \todot \den A$
 and reification $\down A : \den A \todot \tNf A$ along the way.
 \[
 \begin{array}{lcl}
-  \den   \tyone          & = & \hatone \\
-  \upG   \tyone \; u     & = & \ttempty \\
-  \downG \tyone \ttempty & = & \tunit \\
+  \den   \tyone             & = & \hatone \\
+  \upG   \tyone \; u        & = & \ttempty \\
+  \downG \tyone \; \ttempty & = & \tunit \\
 \end{array}
 \qquad\qquad\qquad
 \begin{array}{lcl}
@@ -800,12 +806,15 @@ reified from the semantic value $a$.
 
 A direct extension of our presheaf semantics to positive types cannot
 work.  For instance, with $\den \tyzero = \hat0$, simply
-$\up[\tyzero] \tyzero \vv0 : \bzero$ would give us an
+% $\up[\tyzero] \tyzero \vv0 : \bzero$
+$\tfresh^{\tyzero}_{\cempty} : \bzero$
+would give us an
 inhabitant of the empty set, which means that reflection at the empty
 type would not be definable.  Similarly, the setting
 $\den{A + B} = \den A \hatplus \den B$ is refuted by
 % $\up[\tyone + \tyone]^{\tyone + \tyone} \vv0 : \bone \bplus \bone$
-$\up[A + B]{A + B} \vv0 : \den A (A{+}B) \bplus \den B (A{+}B)$
+$\tfresh^{A + B}_{\cempty} : \den A (A{+}B) \bplus \den B (A{+}B)$
+% $\up[A + B]{A + B} \vv0 : \den A (A{+}B) \bplus \den B (A{+}B)$
 which would require us to make a decision of whether $A$ holds or $B$ holds
 while only be given a hypothesis of type $A + B$.
 Not even the usual interpretation of base types $\den o = \tNe\,o$
@@ -859,14 +868,18 @@ offers us these services:
 To make things concrete,
 we shall immediately construct an instance of such a cover monad:
 the free cover monad
-$\Cov$ defined inductively by $\treturn[\Cov]$, $\tabort^{\Cov}$, and
+$\Cov$ defined
+%inductively by
+as an inductive family with constructors
+$\treturn[\Cov]$, $\tabort^{\Cov}$, and
 $\tcase^{\Cov}$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
 binary case tree whose inner nodes ($\tcase$) are labeled by a neutral term
 of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
 and $A_2$, resp.  Leaves are either
 labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
 or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
-replacing the labels of the $\treturn$-leaves, and the monadic bind replaces
+replacing the labels of the $\treturn$-leaves, and the monadic bind
+(aka Kleisli extension) replaces
 these leaves by further case trees.  (The uninspiring $\tjoin[\Cov]$
 flattens a 2-level case tree, \ie, a case tree with case trees as
 leaves, into a single one.)
@@ -885,14 +898,14 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
 \[
 \begin{array}{lcl}
   \den   \tybase & = & \C\,(\tNe\,\tybase) \\
-  \upG   \tybase & = & \treturn[\C] \\
-  \downG \tybase & = & \trunNf[\C] \comp \tmap[\C]\tne \\
+  \up    \tybase & = & \treturn[\C] \\
+  \down  \tybase & = & \trunNf[\C] \comp \tmap[\C]\tne \\
 \end{array}
 \qquad
 \begin{array}{lcl}
   \den   \tyzero & = & \C\,\hat0 \\
-  \upG   \tyzero & = & \tabort^\C \\
-  \downG \tyzero & = & \trunNf[\C] \comp \tmap[\C]\tmagic \\
+  \up    \tyzero & = & \tabort^\C \\
+  \down  \tyzero & = & \trunNf[\C] \comp \tmap[\C]\tmagic \\
 \end{array}
 \]
 % \[
@@ -978,7 +991,7 @@ exploiting that values of negative types are essentially
 For the case of function types $A \To B$, we require the monad $\C$ to be
 \emph{strong}, which amounts to having
 $\stmap[\C]_\Gamma\, \ell : \C\A\,\Gamma \to \C\,\B\,\Gamma$ already for
-a local presheaf morphism $\ell : (\A \hatto \B)\Gamma$.
+a ``local'' presheaf morphism $\ell : (\A \hatto \B)\Gamma$.
 The typings are
 $c : \C \den{A \To B} \Gamma$ and
 $\tau : \Gamma \sublist \Delta$ and
@@ -1122,7 +1135,7 @@ Herein, the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \
 %     \\
 % \end{array}
 % \]
-For interpretation of the binders $\tabs$ and $\tcase$ we use the
+For the interpretation of the binders $\tabs$ and $\tcase$ we use the
 mutually defined $\fden{\_}$.
 \[
 \begin{array}{lcl}
@@ -1189,7 +1202,7 @@ defined as
   \CC\;\J = \forall A.\ (\J \hatto \tNf\,A) \hatto \tNf\,A
   .
 \]
-The answer type of this continuation monad is always $\tNF$, however,
+The answer type of this continuation monad is always $\tNf$, however,
 we are polymorphic in the simple type $A$ of normal forms we produce.%
 
 Agda has been really helpful to produce the rather technical but
@@ -1276,8 +1289,11 @@ fresh variables names rather than using Kripke function space / presheaves.
 \section{Normalization to Call-By-Push Value}
 \label{sec:cbpv}
 
-As remarked in the previous section, the placement of the monad $\C$
-in the type semantics is a bit wasteful:  Each positive type is
+
+The placement of the monad $\C$
+in the type semantics
+of the previous section
+is a bit wasteful:  Each positive type is
 prefixed by $\C$.  In our grammar of normal forms, this corresponds to
 the ability to perform case distinctions ($\tcase$, $\tabort$) at any
 positive type $P$.  In fact, our type interpretation $\den A$
@@ -1306,15 +1322,15 @@ introductions.
 CBPV calls positive types $P$ \emph{value types} $A$ and negative
 types $N$
 \emph{computation types} $\underline B$,
-however, we shall stick to our terminology
-which is known from research on focalization.
+yet we shall stick to our terminology
+which is common in publications on focalization.
 However, we shall use $\tThunk$ for switch $\downarrow$ and $\tComp$ for
 switch $\uparrow$.
 \[
 \begin{array}{lllrl@{\qquad}l}
   \PTy & \ni & P,Q & ::= & \patom
-    \mid \tyzero \mid P_1 + P_2
     \mid \tyone \mid P_1 \times P_2
+    \mid \tyzero \mid P_1 + P_2
     \mid \Thunk N
   & \mbox{positive type}
 \\
@@ -1374,9 +1390,9 @@ eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
 The method $\trunNf[\C]$ of cover monad $\C$ can be extended to
 $\trun^N : \C \den N \to \den N$ for negative types $N$, by recursion
-on $N$.  Informally, speaking this makes all negative types \emph{monadic}.
+on $N$.  Informally speaking, this makes all negative types \emph{monadic}.
 
-Contexts are lists of \emph{positive} types as in CBPV variables stand
+Contexts are lists of \emph{positive} types since in CBPV variables stand
 for values.  Interpretation of contexts $\den \Gamma$ is again defined
 pointwise $\den \cempty = \hatone$ and
 $\den{\cext \Gamma P} = \den \Gamma \hattimes \den P$.
@@ -1410,7 +1426,7 @@ Further, values of type $P$ can embedded
 via $\tret$, producing a term of type $\Comp P$.  Such terms are
 eliminated by $\tbind$ which is, unlike the usual monadic bind, not
 only available for $\tComp$-types but for arbitrary negative types
-$N$.  This is justified due to the monadic character of negative
+$N$.  This is justified by the monadic character of negative
 types, by virtue of $\trun^N$.  Finally, there are eliminators
 ($\tsplit$, $\tcase$, $\tabort$) for values of positive product and
 sum types.
@@ -1623,8 +1639,9 @@ $\trunNf : \Cov\,(\tNf N) \todot \tNf N$, which extends to
 negative semantic values
 $\trun : \Cov \den N \todot \den N$.
 
-Reification $\down P : \den P \todot \tVNf\,P$ at positive types produces
-a normal value, and $\down N : \den P \todot \tNf\,N$ at negative types a
+Reification $\down P : \den P \todot \tVNf\,P$ at positive types $P$ produces
+a normal value, and $\down N : \den N \todot \tNf\,N$ at negative
+types $N$ a
 normal term.  During reification of function types $P \To N$ in
 context $\Gamma$ we need to embed a fresh variable
 $x : P \in (\cext \Gamma P)$ into $\den P$, breaking down $P$ to
@@ -1700,7 +1717,7 @@ $c_1 \star c_2 =
 % $c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
 % $\tzip\;c = \tjoin \comp \tmap\,(\lambda\,a.\ (c,\, \treturn\,a)$.
 
-For negative product types, reflection and reification works as before:
+For negative types, reflection and reification works as before:
 \[
 \def\arraystretch{1.3}
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
@@ -1816,7 +1833,7 @@ discussed in the following section.
 Polarized lambda-calculus
 \cite{zeilberger:PhD,espiritoSanto:entcs17}
 is a focused calculus, it eagerly employs
-invertible rules: the introduction rules for negative types and the
+so-called \emph{invertible} rules: the introduction rules for negative types and the
 elimination rules for positive types.  As a consequence of the latter,
 variables are either of atomic or negative type $H ::= \patom \mid N$.
 %($\HTy$).
@@ -1836,7 +1853,7 @@ $\Add P$ in the category of presheaves,
 mapping a presheaf $\J$ (``judgement'') to $\Add P \J$
 and a presheaf morphism $f : (\J \hatto \K)\Gamma$ to
 $\stmap[\Add P]_\Gamma f : \AddHyp P \J \Gamma \to \AddHyp P \K \Gamma$.
-For arbitrary $\J$ and $\Gamma$, the set \fbox{$\AddHyp P \J \Gamma$} is
+For arbitrary $\J$ and $\Gamma$, the family \fbox{$\AddHyp P \J \Gamma$} is
 inductively constructed by the following rules:
 \begin{gather*}
   \nru{\phyp}
@@ -1888,13 +1905,14 @@ atomic positive hypotheses ($\pvar$) and normal $\tthunk$s.
 %
 Neutrals \fbox{$\Ne N \Gamma$} start with a negative variable instead
 of with $\tforce$, as forcing thunks is already performed in $\nhyp$
-when adding analysing hypotheses of $\tThunk$ type.
+when adding hypotheses of $\tThunk$ type.
 % \[
 %   \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
 % \]
 %
 The normal forms \fbox{$\Nf N \Gamma$} of negative type are unchanged
-with the exception that pattern matching happens eagerly in $\tabs$.
+with the exception that pattern matching happens eagerly in $\tabs$,
+by virtue of $\Add P$.
 \[
   \nru{\nvar}{N \in \Gamma}{\Ne N \Gamma}
 \qquad
@@ -1920,7 +1938,7 @@ All these inductive families are presheaves, due to factored
 presentation using $\Add P$ and $\Cov$ the proof is not a simple
 mutual induction.  Yet, in Agda, the generic proof goes through using a sized
 typing for these inductive families.  Similarly, defining the
-$\tjoin$ for monad $\Cov$ relies on sized typing.
+$\tjoin$ for monad $\Cov$ relies on sized typing \cite{abel:PhD}.
 \[
 \begin{array}{lll}
   \tjoin & : & \forall i.\
@@ -1947,7 +1965,7 @@ Herein, we used the sized typing of the constructors of $\Cov$:
 Due to the eager splitting of positive hypotheses, reflection at type $P$
 now lives in the graded monad $\Add P$ rather than $\Cov$.  Further,
 as pattern matching may produce $n \geq 0$ cases, reflection cannot simply
-produce one positive semantic value; instead, one such value is needed
+produce a single positive semantic value; instead, one such value is needed
 for every branch.  We implement
 \fbox{$\reflect P : (\den P \hatto \J) \todot \Add P \J$}
 as a higher-order function expecting a continuation $k$ which is
@@ -2035,7 +2053,8 @@ reflection and reification at negative types.
 \]
 % To create an identity environment using $\treflect$, let us first
 % extend $\Add\_$ to contexts, following the intuition that
-Due to the strong limitation on context entries,
+%Due to the strong limitation on context entries,
+Due to the absence of composite positive types in contexts,
 the identity environment $\idenv \Gamma$ can be built
 straightforwardly using negative reflection.
 \[
@@ -2083,7 +2102,7 @@ necessary changes to the binders $\tabs$ and $\tbind$.
       {\TmP {P \To N} \Gamma}
 \qquad
   \nru{\tbind}
-      {\Tm {\Comp P} \Gamma \qquad \AddHypP P {\tTm\,N} \Gamma}
+      {\TmP {\Comp P} \Gamma \qquad \AddHypP P {\tTm\,N} \Gamma}
       {\Tm N \Gamma}
 \end{gather*}
 Term interpretation
@@ -2107,7 +2126,7 @@ $\Evvv \J \Delta \Gamma = \den \Gamma \Delta \to \J\,\Delta$.
   \tmatch & \ttempty & (\nsplit\,e) & \gamma & = & e\,\gamma \\
   \tmatch & (a_1,a_2) & (\bsplit\,e) & \gamma & = &
     \tmatch\;a_1\;(\tmap[\Add P]\,(\tmatch\;a_2)\;e)\;\gamma \\
-  \tmatch & a & \nbranch & \gamma & = & \tmagic\,a \\
+  \tmatch & a & \nbranch & \gamma & = & \tmagic\;a \\
   \tmatch & (\iota_1\;a_1) & (\bbranch\;e_1\;e_2) & \gamma & = &
     \tmatch\;a_1\;e_1\;\gamma \\
   \tmatch & (\iota_2\;a_2) & (\bbranch\;e_1\;e_2) & \gamma & = &
