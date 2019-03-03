@@ -124,14 +124,14 @@ to computations $\Comp P$, and computations can be embedded into
 values by \emph{thunking} ($\Thunk N$).
 \[
 \begin{array}{lllrl@{\qquad}l}
-  \PTy & \ni & P,Q & ::= & \patom
+  \PTy & \ni & P & ::= & \patom
     % \mid \tyone \mid P_1 \times P_2
     % \mid \tyzero
     \mid P_1 + P_2
     \mid \Thunk N
   & \mbox{positive type / value type}
 \\
-  \NTy & \ni & N,M & ::= & % \natom
+  \NTy & \ni & N & ::= & % \natom
     % \mid \top \mid N_1 \ntimes N_2
     % \mid
     P \To N
