@@ -73,7 +73,12 @@ latex/%.tex : %.lagda
 talkAIM27.pdf : talkAIM27.tex macros.tex
 	pdflatex $<
 
-ship : shipTalk shipHtml
+ship : shipDraft
+
+shipDraft : $(destdir)/nbe-cbpv.pdf
+
+$(destdir)/nbe-cbpv.pdf : fscd19.pdf
+	cp -p $< $@
 
 shipHtml : src-stlc/html/Everything.html
 	cp -pr src-stlc/html $(destdir)/aim27/stlc-definability
