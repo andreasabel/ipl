@@ -1,0 +1,340 @@
+\nonstopmode
+\RequirePackage[dvipsnames]{xcolor}
+
+\documentclass[a4paper]{easychair}
+\usepackage{amssymb}
+%\usepackage{dsmath}
+%\usepackage{bbm}
+\usepackage{bbold}
+\usepackage[utf8x]{inputenc}
+
+\usepackage{natbib}
+\usepackage{hyperref}
+% \usepackage{agda} % colors
+
+\definecolor{DeepJungleGreen}{rgb}{0.0, 0.29, 0.29}
+\definecolor{DarkSpringGreen}{rgb}{0.09, 0.45, 0.27}
+\definecolor{ForestGreenTraditional}{rgb}{0.0, 0.27, 0.13}
+\definecolor{GreenPigment}{rgb}{0.0, 0.65, 0.31}
+\definecolor{CalPolyPomonaGreen}{rgb}{0.12, 0.3, 0.17}
+\definecolor{CSSGreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{DarkCerulean}{rgb}{0.03, 0.27, 0.49}
+\definecolor{DarkRaspberry}{rgb}{0.53, 0.15, 0.34}
+
+\colorlet{DarkBlue}{MidnightBlue!80!black}
+\definecolor{HanBlue}{rgb}{0.27, 0.42, 0.81}
+\definecolor{FrenchBlue}{rgb}{0.0, 0.45, 0.73}
+\definecolor{EgyptianBlue}{rgb}{0.06, 0.2, 0.65}
+
+\hypersetup{colorlinks=true,
+  linkcolor=Red,
+  citecolor=DarkRaspberry,%DarkPurple,%DarkCerulean,%CSSGreen,%CalPolyPomonaGreen,%GreenPigment,%ForestGreenTraditional,%DarkSpringGreen,%DeepJungleGreen,%ForestGreen,
+  urlcolor=MidnightBlue}
+
+\makeatletter
+\renewcommand\bibsection{%
+  \section*{\large{\refname}}%
+}%
+\makeatother
+
+%% Macros
+
+\input{macros}
+
+\renewcommand{\patom}{\ensuremath{o}}
+\renewcommand{\tVnf}{\mathsf{Nf}}
+
+\begin{document}
+
+\title{Normalization by Evaluation for Call-by-Push-Value}
+\titlerunning{Normalization by Evaluation for Call-by-Push-Value}
+\authorrunning{A. Abel}
+\author{Andreas Abel}
+\institute{
+  Department of Computer Science and Engineering,
+  Gothenburg University
+}
+
+% Keywords:
+% Modal typing, linear typing, strictness typing, positivity checking, guarded recursion
+
+\maketitle
+
+%\begin{abstract}
+%\end{abstract}
+
+\noindent
+
+Normalization by evaluation (NbE) \citep{bergerSchwichtenberg:lics91}
+is the interpretation of
+an (open) term of type $A$ as value in a suitable model $\den A$,
+followed by \emph{reification} of the value to a normal form of type
+$A$.  Functions $f$ in $\den{A \To B}$ are reified as
+$\lambda$-abstractions whose bodies are obtained
+by \emph{reflecting} a fresh variable of type $A$ as value $a$ in
+$\den{A}$ and reifying the application $f\,a$ at type $B$.
+A suitable model that supports fresh variable generation
+are \emph{presheaves} over the category of
+typing contexts $\Gamma$ and order-preserving embeddings
+$\Gamma \subseteq \Gamma'$, where a base type $o$ is interpreted as
+the presheaf $\tNe\;o$ of neutral normal forms of type $o$, and
+function types by the presheaf exponential aka Kripke function space
+\citep{catarina:csl93,altenkirchHofmannStreicher:ctcs95}.
+
+NbE for sum types requires a refinement of the model, as reflection of
+a variable of type $A + B$ as a value in $\den{A + B}$ requires case
+distinction in the model.  One such refinement are \emph{sheaves}
+\citep{altenkirchDybjerHofmannScott:lics01}; another is the use of a
+monad $\C$
+\citep{filinski:semaccounttdpe,filinski:tlca01,barral:PhD}
+in the category of presheaves
+for the interpretation of sum types:
+$\den{A + B} = \C(\den A + \den B)$.
+The smallest such \emph{``cover'' monad} $\C$ are binary trees where leaves are
+the monadic unit aka $\treturn$, and the nodes case distinctions
+over neutrals $\tNe\,(A_1 + A_2)$ of sum type.  When leaves are normal
+forms, the whole tree represents a normal form, thus,
+$\trunNf : \C(\tNf\,A) \to \tNf\,A$ is trivial.
+This \emph{running of the monad}
+on normal forms represents the algorithmic part of the sheaf condition
+on $\tNf\,A$ and extends as $\trun : \C \den A \to \den A$ to all
+semantic types.
+
+The given interpretation of sum types
+$\den{A + B} = \C(\den A + \den B)$ corresponds to the call-by-name
+(CBN) lambda calculus with lazy constructors.  NbE can also be
+performed in call-by-value (CBV) style, then the monad is placed in
+the codomain of function types: $\den{A \To B} = \den A \To \C \den B$
+\citep{danvy:popl96}.  A systematic semantic analysis of CBN and CBV
+lambda-calculi has been pioneered by \citet{moggi:infcomp91} through
+translation into his computational lambda calculus;
+\citet{filinski:tlca01} studied NbE for the latter calculus using the
+continuation monad.  Moggi's work was continued and refined
+by \citet{levy:hosc06} who subsumed CBV and CBN under his monadic
+call-by-push-value (CBPV) calculus.  In this work, we study NbE for CBPV.
+
+CBPV was designed to study lambda-calculus with effects.  It separates
+types into \emph{value} types $P$ and \emph{computation} types $N$, which we, in
+analogy to polarized lambda-calculus
+\citep{zeilberger:PhD,brockNannestadSchuermann:lpar10,espiritoSanto:entcs17}
+refer to as \emph{positive} and \emph{negative} types.
+Variables stand for values, thus, have positive types.
+The monad that models the effects is placed at the transition from values
+to computations $\Comp P$, and computations can be embedded into
+values by \emph{thunking} ($\Thunk N$).
+\[
+\begin{array}{lllrl@{\qquad}l}
+  \PTy & \ni & P,Q & ::= & \patom
+    % \mid \tyone \mid P_1 \times P_2
+    % \mid \tyzero
+    \mid P_1 + P_2
+    \mid \Thunk N
+  & \mbox{positive type / value type}
+\\
+  \NTy & \ni & N,M & ::= & % \natom
+    % \mid \top \mid N_1 \ntimes N_2
+    % \mid
+    P \To N
+    \mid \Comp P
+  & \mbox{negative type / computation type}
+\\
+\end{array}
+\]
+We restrict to a fragment of \emph{pure} CBPV
+with a single positive connective, sum
+types $P_1 + P_2$, and a single negative connective, call-by-value
+function types $P \To N$.  While we have no proper effects, the
+evaluation of open terms requires the effect of case distinction over
+neutrals, modeled by a cover monad $\C$.  In the following, we give
+inductive definitions of the presheaves of
+normal ($\tNf$) and neutral normal forms
+($\tNe$) of our fragment of CBPV and a concrete, strong cover monad $\Cov$.
+\begin{small}
+\begin{gather*}
+  \nru{\tvar}{\Var \patom \Gamma}{\PValNf {\patom} \Gamma}
+\quad
+  \nru{\tthunk}{\Nf N \Gamma}{\PValNfP{\Thunk N}\Gamma}
+\quad
+  \nru{\tinj_i}{\PValNf{P_i}\Gamma}{\PValNfP{P_1 + P_2}\Gamma}
+%\\[2ex]
+\quad
+  \nru{\tret}
+      {\CoverP {\tVNf\,P}  \Gamma}
+      {\NfP {\Comp P} \Gamma}
+\quad
+  \nru{\tabs}
+      {\Nf N {(\cext \Gamma P)}}
+      {\NfP {P \To N} \Gamma}
+\end{gather*}
+\end{small}
+\begin{small}
+\begin{gather*}
+  \nru{\tforce}{\VarP {\Thunk N} \Gamma}{\Ne N \Gamma}
+\qquad
+  \nru{\tapp}
+      {\NeP {P \To N} \Gamma \qquad \PValNf P \Gamma}
+      {\Ne N \Gamma}
+\qquad
+  \nru{\tbind}
+      {\NeP {\Comp P} \Gamma \qquad \Cover \J (\cext \Gamma P)}
+      {\Cover \J \Gamma}
+\\[2ex]
+  \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
+\qquad
+  \nru{\tcase}
+      {\VarP {P_1 + P_2} \Gamma
+       \qquad \Cover \J (\cext \Gamma {P_1})
+       \qquad \Cover \J (\cext \Gamma {P_2})
+      }
+      {\Cover \J \Gamma}
+\end{gather*}
+\end{small}
+\noindent
+($\J$ stands for an arbitrary presheaf in $\Cov\,\J$.)
+Normal forms are introductions starting from a variable of base type,
+except that the monad is placed at the
+transition $\tret$ from positive to negative types ($\Comp P$).
+Neutrals are eliminations of variables of type $\Thunk N$ into a
+positive type $\Comp P$, and can then be bound (see $\tbind$)
+to a variable of type $P$ to be used in a computation.  Variables of
+sum type $P_1 + P_2$ can be utilized in computations through a
+$\tcase$ split.
+\emph{Terms} $\tTm$ of CBPV are obtained by blurring the
+distinction between $\tNe$ and $\tNf$,
+generalizing $\tbind$ and $\tcase$ from $\Cov\,\J$ to
+computations $\tTm\,N$,
+relaxing $\tvar$ to variables
+of arbitrary type $P$, and $\tforce$ to arbitrary terms of type
+$\Thunk N$.  Terms are evaluated in the following presheaf model,
+which interprets $\tThunk$ as the identity and $\tComp$ as $\Cov$.
+\[
+\begin{array}[t]{lcl}
+  % \den{\tyone} & = & \hatone \\
+  % \den{P_1 \times P_2} & = & \den{P_1} \hattimes \den{P_2} \\
+  % \den{\tyzero} & = & \hatzero \\
+  \den{P_1 + P_2} & = & \den{P_1} \hatplus \den{P_2} \\
+  \den{\Thunk N} & = & \den N \\
+  \den{\patom} & = & \tVar\;\patom \\
+\end{array}
+\qquad
+\begin{array}[t]{lcl}
+  % \den{\top} & = & \hatone \\
+  % \den{N_1 \ntimes N_2} & = & \den{N_1} \hattimes \den{N_2} \\
+  % \\
+  \den{P \To N} & = & \den P \hatto \den N \\
+  \den{\Comp P} & = & \Cov \den P \\
+  % \den{\natom}  & = & \C (\tNe\, \natom) \\
+\end{array}
+\]
+The evaluation of $\tbind$-terms in $\Tm N$ relies on
+$\trun : \Cov \den N \to \den N$, which makes any computation type
+monadic.  Reflection $\uparrow$ and reification $\downarrow$ take the
+usual form, only that reflection of positive variables is monadic, to
+allow the complete splitting of sums via $\tcase$.
+It is invoked by reification of functions $\down {P \To N}$ via $\trunNf$.
+\[
+\begin{array}[t]{lcl}
+  \up P  & : & \tVar\, P \to \Cov\,\den P \\
+  \up N & : & \tNe\,N \to \den N \\
+\end{array}
+\qquad
+\begin{array}[t]{lcl}
+  \down P & : & \den P \to \tVNf\,P \\
+  \down N & : & \den N \to \tNf\,N \\
+\end{array}
+\]
+The details of our construction, plus extension to product types and
+polarized lambda calculus, can be found in the full version at
+\url{https://arxiv.org/abs/1902.06097}.
+A partial Agda formalization is available at
+\url{https://github.com/andreasabel/ipl}.
+
+% \[
+% \begin{array}[t]{lcl}
+%   \upG P  & : & \Var P \Gamma \to \Cov\,\den P \, \Gamma\\
+%   \downG P & : & \den P \Gamma \to \VNf P \Gamma \\
+% \end{array}
+% \qquad
+% \begin{array}[t]{l@{\,}l@{~~}c@{~~}l}
+%   \multicolumn 2 l {\upG N} & : & \Ne N \Gamma \to \den N \Gamma \\
+%   \multicolumn 2 l {\downG N} & : & \den N \Gamma \to \Nf N \Gamma \\
+% \end{array}
+% \]
+
+% Positive \fbox{$\VNf P \Gamma$} and negative \fbox{$\Nf N \Gamma$}
+% normal forms.
+% \begin{small}
+% \begin{gather*}
+%   \nru{\tvar}{\Var \patom \Gamma}{\PValNf {\patom} \Gamma}
+% \quad
+%   \nru{\tthunk}{\Nf N \Gamma}{\PValNfP{\Thunk N}\Gamma}
+% \quad
+%   \nru{\tinj_i}{\PValNf{P_i}\Gamma}{\PValNfP{P_1 + P_2}\Gamma}
+% %\\[2ex]
+% \quad
+%   \nru{\tret}
+%       {\CoverP {\tVNf\,P}  \Gamma}
+%       {\NfP {\Comp P} \Gamma}
+% \quad
+%   \nru{\tabs}
+%       {\Nf N {\cext \Gamma P}}
+%       {\NfP {P \To N} \Gamma}
+% \end{gather*}
+% \end{small}
+
+% Neutral normal forms \fbox{$\Ne N \Gamma$}
+% and the strong monad \fbox{$\Cov$}.
+% \begin{small}
+% \begin{gather*}
+%   \nru{\tforce}{\VarP {\Thunk N} \Gamma}{\Ne N \Gamma}
+% \qquad
+%   \nru{\tapp}
+%       {\NeP {P \To N} \Gamma \qquad \PValNf P \Gamma}
+%       {\Ne N \Gamma}
+% \qquad
+%   \nru{\tbind}
+%       {\NeP {\Comp P} \Gamma \qquad \Cover \J (\cext \Gamma P)}
+%       {\Cover \J \Gamma}
+% \\[2ex]
+%   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
+% \qquad
+%   \nru{\tcase}
+%       {\VarP {P_1 + P_2} \Gamma
+%        \qquad \Cover \J (\cext \Gamma {P_1})
+%        \qquad \Cover \J (\cext \Gamma {P_2})
+%       }
+%       {\Cover \J \Gamma}
+% \end{gather*}
+% \end{small}
+% Finally, normal forms of negative types are defined as inductive
+% family \fbox{$\Nf N \Gamma$}.  They are generated by maximal negative
+% introduction ($\tabs$, $\npair$, $\nunit$) until a negative atom or
+% $\Comp P$ is reached.  Then, elimination of neutrals and variables is
+% possible through the $\Cov$ monad until an answer can be given in form
+% of a base neutral ($\tNe\,\natom$) or a normal value.
+
+% We again can run the cover monad on normal forms, \ie, have
+% $\trunNf : \Cov\,(\tNf N) \todot \tNf N$, which extends to
+% negative semantic values
+% $\trun : \Cov \den N \todot \den N$.
+
+
+
+
+
+\paragraph*{Acknowledgments.}
+%Thanks to the anonymous referees, who helped improving the quality of
+%this abstract through their feedback.
+This work was supported by
+Vetenskapsr\aa{}det under Grant
+  No.~621-2014-4864 \emph{Termination Certificates
+  for Dependently-Typed Programs and Proofs via Refinement Types}
+and by the EU Cost Action CA15123 \emph{Types for programming and verification}.
+
+\begin{footnotesize}
+
+\bibliographystyle{abbrvnat}
+\bibliography{auto-types19}
+
+\end{footnotesize}
+\end{document}
