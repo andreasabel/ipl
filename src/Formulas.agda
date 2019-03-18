@@ -34,28 +34,37 @@ infixl 4 _∙_
 infix 3 _≤_
 
 data _≤_ : (Γ Δ : Cxt) → Set where
-  id≤ : ∀{Γ} → Γ ≤ Γ
+  ε    : ε ≤ ε
   weak : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ
   lift : ∀{A Γ Δ} (τ : Γ ≤ Δ) → Γ ∙ A ≤ Δ ∙ A
 
-postulate lift-id≤ : ∀{Γ A} → lift id≤ ≡ id≤ {Γ ∙ A}
-{-# REWRITE lift-id≤ #-}
+id≤ : ∀{Γ} → Γ ≤ Γ
+id≤ {ε}     = ε
+id≤ {Γ ∙ A} = lift id≤
 
 -- Category of thinnings
 
 _•_ : ∀{Γ Δ Φ} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) → Γ ≤ Φ
-id≤ • σ = σ
+ε      • σ = σ
 weak τ • σ = weak (τ • σ)
-lift τ • id≤ = lift τ
 lift τ • weak σ = weak (τ • σ)
 lift τ • lift σ = lift (τ • σ)
 
-•-id : ∀{Γ Δ} (τ : Γ ≤ Δ) → τ • id≤ ≡ τ
-•-id id≤ = refl
-•-id (weak τ) = cong weak (•-id τ)
-•-id (lift τ) = refl
+•-id-l : ∀{Γ Δ} (τ : Γ ≤ Δ) → id≤ • τ  ≡ τ
+•-id-l ε = refl
+•-id-l (weak τ) = cong weak (•-id-l τ)
+•-id-l (lift τ) = cong lift (•-id-l τ)
 
-{-# REWRITE •-id #-}
+•-id-r : ∀{Γ Δ} (τ : Γ ≤ Δ) → τ • id≤ ≡ τ
+•-id-r ε = refl
+•-id-r (weak τ) = cong weak (•-id-r τ)
+•-id-r (lift τ) = cong lift (•-id-r τ)
+
+•-ε-r : ∀{Γ} (τ : Γ ≤ ε) → τ • ε ≡ τ
+•-ε-r ε = refl
+•-ε-r (weak τ) = cong weak (•-ε-r τ)
+
+{-# REWRITE •-id-l •-id-r •-ε-r #-}
 
 -- Pullbacks
 
@@ -70,8 +79,8 @@ record RawPullback {Γ Δ₁ Δ₂} (τ₁ : Δ₁ ≤ Γ) (τ₂ : Δ₂ ≤ Γ
 -- for glb (weak τ₁) (weak τ₂) we have two choices how to proceed.
 
 glb : ∀ {Γ Δ₁ Δ₂} (τ₁ : Δ₁ ≤ Γ) (τ₂ : Δ₂ ≤ Γ) → RawPullback τ₁ τ₂
-glb id≤ τ₂ = rawPullback τ₂ id≤ (•-id τ₂)
-glb τ₁ id≤ = rawPullback id≤ τ₁ refl
+glb ε τ₂ = rawPullback τ₂ id≤ refl  -- REWRITE (•-id-r τ₂)
+glb τ₁ ε = rawPullback id≤ τ₁ refl  -- REWRITE (•-id-l τ₁)
 glb (weak τ₁) τ₂ =
   let rawPullback τ₁' τ₂' comm = glb τ₁ τ₂
   in  rawPullback (lift τ₁') (weak τ₂') (cong weak comm)
@@ -111,20 +120,23 @@ Mon : (P : Cxt → Set) → Set
 Mon P = ∀{Γ Δ} (τ : Γ ≤ Δ) → P Δ → P Γ
 
 monH : ∀{A} → Mon (Hyp A)
-monH id≤      x       = x
+monH ε      ()
 monH (weak τ) x       = pop (monH τ x)
 monH (lift τ) top     = top
 monH (lift τ) (pop x) = pop (monH τ x)
 
+monH-id : ∀{Γ A} (x : Hyp A Γ) → monH id≤ x ≡ x
+monH-id top     = refl
+monH-id (pop x) = cong pop (monH-id x)
+
 monH• : ∀{Γ Δ Φ A} (τ : Γ ≤ Δ) (σ : Δ ≤ Φ) (x : Hyp A Φ) → monH (τ • σ) x ≡ monH τ (monH σ x)
-monH• id≤      σ        x       = refl
+monH• ε ε ()
 monH• (weak τ) σ        x       = cong pop (monH• τ σ x)
-monH• (lift τ) id≤      x       = refl
 monH• (lift τ) (weak σ) x       = cong pop (monH• τ σ x)
 monH• (lift τ) (lift σ) top     = refl
 monH• (lift τ) (lift σ) (pop x) = cong pop (monH• τ σ x)
 
-{-# REWRITE monH• #-}
+{-# REWRITE monH-id monH• #-}
 
 □ : (P : Cxt → Set) → Cxt → Set
 □ P Γ = ∀{Δ} (τ : Δ ≤ Γ) → P Δ
@@ -160,3 +172,9 @@ KFun P Q = □ (CFun P Q)
 
 _⇒̂_  : (P Q : Cxt → Set) → Cxt → Set
 P ⇒̂ Q = λ Γ → ∀{Δ} (τ : Δ ≤ Γ) → P Δ → Q Δ
+
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}

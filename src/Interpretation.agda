@@ -59,9 +59,15 @@ Nf⦅_⦆ = D⦅_⦆ ∘ nf[_]
 -- Functor
 
 R⦅_⦆ : ∀{Γ Δ} (τ : Γ ≤ Δ) → Mor Γ Δ
-R⦅ id≤    ⦆ = id
+R⦅ ε      ⦆ = _
 R⦅ weak τ ⦆ = R⦅ τ ⦆ ∘ proj₁
 R⦅ lift τ ⦆ = R⦅ τ ⦆ ×̇ id
+
+R-id : ∀ Γ (γ : C⦅ Γ ⦆)→ R⦅ id≤ {Γ} ⦆ γ ≡ γ
+R-id ε γ = refl
+R-id (Γ ∙ A) γ = cong₂ _,_ (R-id Γ (proj₁ γ)) refl
+
+{-# REWRITE R-id #-}
 
 -- Kripke application
 
@@ -71,7 +77,7 @@ kapp A B f τ a δ = f (R⦅ τ ⦆ δ) (a δ)
 -- Naturality
 
 natH  : ∀{Γ Δ A} (τ : Δ ≤ Γ) (x : Hyp A Γ) → H⦅ monH τ x ⦆ ≡ H⦅ x ⦆ ∘ R⦅ τ ⦆
-natH id≤ x = refl
+natH ε ()
 natH (weak τ) x = cong (_∘ proj₁) (natH τ x)
 natH (lift τ) top = refl
 natH (lift τ) (pop x) = cong (_∘ proj₁) (natH τ x)
@@ -79,9 +85,8 @@ natH (lift τ) (pop x) = cong (_∘ proj₁) (natH τ x)
 {-# REWRITE natH #-}
 
 natR : ∀{Γ Δ Φ} (σ : Φ ≤ Δ) (τ : Δ ≤ Γ) → R⦅ σ • τ ⦆ ≡ R⦅ τ ⦆ ∘ R⦅ σ ⦆
-natR id≤ τ = refl
+natR ε        τ = refl
 natR (weak σ) τ = cong (_∘ proj₁) (natR σ τ)
-natR (lift σ) id≤ = refl
 natR (lift σ) (weak τ) = cong (_∘ proj₁) (natR σ τ)
 natR (lift σ) (lift τ) = cong (_×̇ id) (natR σ τ)
 

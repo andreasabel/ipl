@@ -38,4 +38,4 @@ import NbeModel
 
 -- A general theory of sheaves over preorders
 
-import PresheavesAndSheaves
+-- import PresheavesAndSheaves  -- Termination error

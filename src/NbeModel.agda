@@ -232,7 +232,7 @@ module _ A B (P : KPred A) (Q : KPred B) {Γ₀ Δ₀} (τ₀ : Δ₀ ≤ Γ₀)
 mapCᶜ : ∀{A} {P Q : KPred A} (monP : Mon P) (P⊂Q : ⟨ A ⟩ P ↪ Q) → ⟨ A ⟩ Cover A P ↪ Cover A Q
 mapCᶜ {A} {P} {Q} monP P⊂Q {Γ} {f} c = convCov A A P Q id≤ conv id≤ id≤ c
   where
-  conv : Converter A A P Q id≤
+  conv : Converter A A P Q ( id≤ {Γ})
   conv = record
     { φ      = λ δ τ f         → f ∘ R⦅ τ ⦆
     ; φ-case = λ δ τ C D f g h → refl
