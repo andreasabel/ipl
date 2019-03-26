@@ -169,7 +169,7 @@ and C. Sattler}%TODO mandatory. First: Use abbreviated first/middle names. Secon
 \emph{Another topological completeness proof for intuitionistic logic}
 received by email on 16th March 2000.
 Thorsten in turn credits his inspiration to an ALF proof by Thierry
-Coquand.}
+Coquand.  Thanks to Hugo Herbelin for feedback and spotting some typos.}
 % \acknowledgements{ The presentation of this NbE proof and its
 % Agda formalization benefited greatly from discussions with Christian
 % Sattler.}%optional
@@ -291,7 +291,7 @@ in Section~\ref{sec:fipl}.
 In our presentation of the various lambda calculi we ignore the
 concrete syntax, only consider the abstract syntax obtained by the
 Curry-Howard-Isomorphism.  A term is simply a derivation tree whose
-nodes are rule invocations.  Thus, a intrinsically typed,
+nodes are rule invocations.  Thus, an intrinsically typed,
 nameless syntax is most natural,
 and our syntactic classes are all presheaves over the category of
 typing contexts and renamings.  The use of presheaves then smoothly
@@ -654,7 +654,7 @@ Normalization is concerned with finding a normal form
 $n : \Nf A \Gamma$ for each term $t : A \from \Gamma$.
 The normal form should be \emph{sound},
 \ie, $\tm n \cong t$
-with respect to a equational theory $\cong$ on terms
+with respect to an equational theory $\cong$ on terms
 (see \cref{sec:eq}).
 Further, normalization should decide $\cong$, \ie,
 terms $t,t'$ with $t \cong t'$ should have the same normal form $n$.
@@ -1942,8 +1942,8 @@ since the pattern matching is taken care of by $\Add P$.
 \end{gather*}
 
 
-All these inductive families are presheaves, due to factored
-presentation using $\Add P$ and $\Cov$ the proof is not a simple
+All these inductive families are presheaves, however, due to the factored
+presentation using $\Add P$ and $\Cov$, the proof is not a simple
 mutual induction.  Yet, in Agda, the generic proof goes through using a sized
 typing for these inductive families.  Similarly, defining the
 $\tjoin$ for monad $\Cov$ relies on sized typing \cite{abel:PhD}.
@@ -2304,7 +2304,7 @@ the normal forms in the following way:
 Thanks to the $\eta$-laws, a normal form of negative type is always an
 introduction.  A normal form of sum type ($+$, $\tyzero$) is always a
 case tree whose leaves are injections.  A normal form of atomic type
-($o$) is always case tree whose leaves are neutral.
+($o$) is always a case tree whose leaves are neutral.
 The $\beta$ and $\pi$ laws determine the shape of neutrals.
 Thanks to the $\beta$-laws,
 the principal argument of normal eliminations cannot be an
