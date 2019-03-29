@@ -20,7 +20,9 @@ open import Data.List.Relation.Sublist.Propositional public using (_⊆_)
 
 open import Function     public using (_∘_; _∘′_; id; _$_; case_of_; const; flip)
 
-open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst; Extensionality)
+open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst)
+open import Axiom.Extensionality.Propositional    public using (Extensionality)
+
 {-# BUILTIN REWRITE _≡_ #-}
 
 postulate funExt : ∀{a b} → Extensionality a b
