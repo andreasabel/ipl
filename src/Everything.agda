@@ -25,6 +25,7 @@ import NfModelCaseTreeConv
 -- continuation monad used in Danvy's algorithm
 
 import NfModelMonad
+import Consistency
 
 -- A monadic interpreter using shift/reset and an optimization
 
