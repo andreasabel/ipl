@@ -61,7 +61,7 @@ be some abstract syntax".
 
 In fact we have given an abstract syntax since the rules correspond
 1-1 to dependently typed constructors, thus a judgement with rules
-corresponds 1-1 to a gramar for elements of indexed set.  Disposing of
+corresponds 1-1 to a grammar for elements of an indexed set.  Disposing of
 concrete syntax enables us to factor syntax conveniently, for instance
 by using Cov in the definition of Nf (line 392).  In case of split₂
 (line 438) it is not even immediate what the concrete-syntax analogy
@@ -88,10 +88,11 @@ By "coincidence" (or rather not by coincidence, since there are no
 coincidences in mathematics) it is the same calculus as the one found
 in the search for a lambda-calculus with effects.
 
-We are indeed only interested in CBPV as logical system.  Normalizing
-effects is beyond the scope of this paper.  In any case, since effects
-do not follow the introduction/elimination scheme, additional
-considerations would be necessary for normalizing effects.
+We are indeed only interested in CBPV as logical system.  Normalizing effects is
+beyond the scope of this paper.  In any case, since effects do not follow the
+introduction/elimination scheme, additional considerations would be necessary
+for normalizing effects and would like likely depend on the individual effects
+considered.
 
 - Future work: relationship to CBN and CBV translations (reviewers 1,2)
 
