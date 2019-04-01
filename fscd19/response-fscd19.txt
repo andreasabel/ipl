@@ -252,19 +252,18 @@ Thanks, FIXED.
 > once, especially at points where you said "this is a presheaf"
 > omitting the category
 
-We are using *covariant* functors J : Cxt → Set from the category Cxt
-of contexts and order-preserving embeddings Γ ⊆ Δ to the category Set
-of sets and functions, which gives us reindexing morphisms J Γ → J Δ.
-However, a presheaf is a *contravariant* functor J : Cᵒᵖ → Set by
-terminology, thus, to match our use case, we have to choose C = Cxtᵒᵖ,
-which means that we are dealing with presheaves over Cxtᵒᵖ.  The
-double dualization (Cxtᵒᵖ)ᵒᵖ cancels to simply Cxt then.
-TODO: explain in paper.
+In these techniques, one is always looking at a wide subcategory of the category of contexts and substitutions.
+An order-preserving embedding Γ ⊆ Δ gives rise to a substitution Δ → Γ in the opposite direction, that's why we have to take presheaves over Cxt^op.
+We agree that the direction of arrows in the category Cxt of contexts and order-preserving embeddings is non-standard from this perspective.
+However, it has the benefit that our presheaves are just *covariant* functor J : Cxt → Set.
+
+ADDED sentence explaining the relevance of Cxt^op.
 
 > 146: Maybe briefly say what a presheaf is to increase the
 > accessibility of the paper even more?
 
-TODO: explain in paper.
+FIXED. Made the introduction of presheaves more intuitive (thought still not
+giving a general definition).
 
 > 178: I think it should be stressed even more here that you are talking
 > about normal forms up to an equational theory and not up to
@@ -418,8 +417,10 @@ FIXED.
 > might be nice for readers not familiar with polarized systems
 >
 > 319: "is not essential"
->
->
+
+FIXED.
+
+
 > [1] Rizkallah, Christine, Dmitri Garbuzov, and Steve Zdancewic.
 > "A Formal Equational Theory for Call-By-Push-Value."
 > International Conference on Interactive Theorem Proving. Springer, Cham, 2018.

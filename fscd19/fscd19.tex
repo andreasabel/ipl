@@ -423,8 +423,10 @@ propositional equality for all morphisms $\tau$.
 The singleton weakening $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$,
 also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
 
-By a presheaf, we will always mean a presheaf over the category $\Cxt\op$, i.e.,
-a functor from $\Cxt$ to $\Set$.  For example, given any type $A$, we can
+By a \emph{presheaf} we will always mean a presheaf over the category $\Cxt\op$,
+i.e., a functor from $\Cxt$ to $\Set$.\footnote{With respect to the terms
+defined later, $\Cxt\op$ is to be seen as a category of contexts and those
+substitutions given by weakening.}  For example, given any type $A$, we can
 consider $A{\in}\_$ as such a presheaf, with action on objects mapping $\Gamma$
 to the set $A \in \Gamma$ of indices of $A$ in $\Gamma$ and action on morphisms
 witnessed by $\treindex : \Gamma \sublist \Delta \to A \in \Gamma \to A \in
@@ -1365,7 +1367,7 @@ these names uninspiring unless you have good knowledge of the intended
 model.  Further, CBPV employs labeled sums $\Sigma_I (P_i)_{i : I}$
 and labeled records $\Pi_I (P_i)_{i : I}$ for up to countably infinite
 label sets $I$ while we only have finite sums $(\tyzero,+)$ and
-records $(\top,\ntimes)$.  However, this difference in not essential,
+records $(\top,\ntimes)$.  However, this difference is not essential,
 our treatment extends directly to the infinite case, since we are
 working in type theory which allows infinitely branching inductive
 types.   As a last difference, CBPV does not consider base types; in
