@@ -174,9 +174,9 @@ Coquand.  Thanks to Hugo Herbelin for feedback and spotting some typos.}
 % Agda formalization benefited greatly from discussions with Christian
 % Sattler.}%optional
 
-\nolinenumbers %uncomment to disable line numbering
+% \nolinenumbers %uncomment to disable line numbering
 
-\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+% \hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
 
 %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \EventEditors{Jakob Rehof and XXX}
@@ -807,7 +807,7 @@ as semantic types.
 
 Note also that in the equation for $\up{A \To B}$,
 the neutral $u : \Ne A \Gamma$ is
-transported into $\Ne A \Gamma$ via reindexing with
+transported into $\Ne A \Delta$ via reindexing with
 $\tau : \Gamma \sublist \Delta$, in order to be applicable to the normal form
 $\down[\Delta]A a$
 reified from the semantic value $a$.
@@ -836,7 +836,7 @@ semantic value,
 and we shall capture this capability in a strong monad $\C$
 which can \emph{cover} the cases.
 
-To recapitulate, a monad $\C$ on presheaves is first an endofunctor,
+Recall that a monad $\C$ on presheaves is first an endofunctor,
 i.e., it maps any presheaf $\A$ to the presheaf $\C\,\A$ and any
 presheaf morphism $f : \A \todot \B$ to the morphism
 $\tmap[\C]f: \C\,\A \todot \C\;\B$ satisfying the functor laws for
@@ -888,9 +888,9 @@ labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
 or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
 replacing the labels of the $\treturn$-leaves, and the monadic bind
 (aka Kleisli extension) replaces
-these leaves by further case trees.  (The uninspiring $\tjoin[\Cov]$
-flattens a 2-level case tree, \ie, a case tree with case trees as
-leaves, into a single one.)
+these leaves by further case trees.  Bind is realized via $\tjoin[\Cov]$
+which flattens a 2-level case tree, \ie, a case tree with case trees as
+leaves, into a single one.
 Finally $\trunNf[\Cov]$ is a simple recursion on the tree, replacing $\tcase^{\Cov}$
 and $\tabort^{\Cov}$
 by the $\tcase$ and $\tabort$ constructions on normal forms, and
@@ -953,12 +953,21 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
 % \]
 %\end{gather*}
 
-All semantic types fulfill the weak sheaf condition aka weak pasting,
-meaning there is
-a natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
-type $A$.  In other words, we can \emph{run} the monad, pushing its
-effects into $\den A$.  We proceed by induction on $A$.
-Positive types $P$ are already monadic,
+The unwinding of the monad $\C$ via $\trunNf$ can be extended to a
+natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
+type $A$, meaning we can \emph{run} the monad,
+pushing its effects into $\den A$.%
+\footnote{In categorical terminology, the existence of
+$\trun^A$ means that
+all semantic types $\den{A}$ fulfill the \emph{weak sheaf condition},
+aka \emph{weak pasting}.}
+% All semantic types fulfill the weak sheaf condition aka weak pasting,
+% meaning there is
+% a natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
+% type $A$.  In other words, we can \emph{run} the monad, pushing its
+% effects into $\den A$.
+We proceed by induction on $A$.
+Positive semantic types $\den P$ are already monadic,
 and $\trun^P$ is simply the $\tjoin$ of the monad $\C$.
 At negative types we can recurse pointwise at a smaller type,
 exploiting that values of negative types are essentially
@@ -1195,11 +1204,13 @@ semantics, by recursion on $\Gamma$:
 
 \subsection{Continuation monad}
 
-As already observed by Filinski
+Besides the free cover monad $\Cov$, there is another canonical
+implementation of its interface, the continuation monad.
+Filinski
 \cite[Section~5.4]{filinski:semaccounttdpe}
-\cite[Section~3.2]{filinski:tlca01},
-normalization by evaluation can be carried out in the continuation
-monad.
+\cite[Section~3.2]{filinski:tlca01}
+already utilized the continuation monad for
+normalization by evaluation.
 In our setting, we use a continuation monad $\CC$ on presheaves
 defined as
 % An alternative implementation of $\C$ is the continuation monad $\CC$
@@ -1397,8 +1408,10 @@ types, made from positive eliminations captured in $\C$ and negative
 eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
 The method $\trunNf[\C]$ of cover monad $\C$ can be extended to
-$\trun^N : \C \den N \to \den N$ for negative types $N$, by recursion
-on $N$.  Informally speaking, this makes all negative types \emph{monadic}.
+$\trun^N : \C \den N \todot \den N$ for negative types $N$, by recursion
+on $N$.
+This makes the effects of $\C$ available at any negative type,
+in other words, makes all negative types \emph{monadic}.
 
 Contexts are lists of \emph{positive} types since in CBPV variables stand
 for values.  Interpretation of contexts $\den \Gamma$ is again defined
@@ -1593,6 +1606,8 @@ $P$.  Variables of composite value type can be broken down by pattern
 matching, introducing variables of smaller type.  These positive
 eliminations plus $\tbind$ are organized in the
 inductively defined strong monad \fbox{$\Cov$}.
+In the following rules, parameter $\J$ (for ``judgement'') stands for an
+arbitrary presheaf.
 \begin{gather*}
   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
 \qquad
@@ -2128,7 +2143,7 @@ $\Evvv \J \Delta \Gamma = \den \Gamma \Delta \to \J\,\Delta$.
 \[
 \begin{array}{l@{~}l@{~}l@{~}lcl}
   \multicolumn 6 {l} {\tmatch ~~:~~ \den P \Delta \to
-    \AddHyp P {\Evv \J \Delta} \todot \Evv \J \Delta }\\
+    \AddHypP P {\Evv \J \Delta} \todot \Evv \J \Delta }\\
   \tmatch & x & (\phyp\,e) & \gamma & = & e\,(\gamma,\; \treturn\,x) \\
   \tmatch & b & (\nhyp\,e) & \gamma & = & e\,(\gamma,\; b) \\
   \tmatch & \ttempty & (\nsplit\,e) & \gamma & = & e\,\gamma \\
