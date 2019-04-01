@@ -1,0 +1,515 @@
+A big thanks to the reviewers who spent considerable time to read and
+understand our paper and to provide valuable feedback and pointers to
+relevant literature.  We will take all comments into account when
+preparing the revision.
+
+- Missing theorems (1,3)
+
+- Incomplete formalization (1,2)
+
+- The choice of abstract syntax (3)
+
+- Relation to category theory (2,3)
+
+- CBPV as logical system (2)
+
+No NbE for effects.
+
+  let x = launchNuclearMissile; 1
+  in  x + 1
+
+
+
+- Future work: relationship to CBN CBV (1,2)
+
+
+> ----------------------- REVIEW 1 ---------------------
+> PAPER: 50
+> TITLE: Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus
+> AUTHORS: Andreas Abel and Christian Sattler
+>
+> Overall evaluation: 0 (borderline paper)
+>
+> ----------- Overall evaluation -----------
+>
+> This paper present a definition of normalization by evaluation for
+> call-by-push-value.  The authors first present NbE for a simply type
+> lambda calculus with sums. For that, they need to introduce a
+> (coverage) monad to be able to do backtracking or to build a case tree
+> of possible normalization. A version of this monad is then used to
+> interpret computations in CBPV and gives rise to an NbE algorithm for
+> CBPV. Finally, the authors discuss modification for focused polarized
+> logic, which is closed to CPBV.
+>
+> General Comment :
+>
+> This is an interesting work on how to extend NbE technique that are
+> compatible with the introduction of effect in the calculus. The paper
+> seems mathematically correct and the idea of using such a monad to
+> extend NbE to potentially effectful terms is very natural.
+>
+> However, I have severe reserves about the paper. Therefore I cannot be
+> positive about this paper.
+>
+> - The paper is missing theorem in two senses. First, it is missing a
+>   clear statement of what is claimed to be achieved, namely “logical
+>   consistency”. The expected theorem are not there.  I was expected at
+>   least computational soundness. Also I found quite disappointing that
+>   the the combination with the CBN and CBV translation to CBPV has not
+>   been investigated, without even explaining why. No time, too
+>   difficult, not sure is corresponds to usual NbE ?
+
+To investigate the relationship to the CBN and CBV translations was an
+idea we had during the writing, we did not have the time to
+investigate it yet.
+
+> - The formalization in Agda i just a link to a GitHub repo that is
+>   very hard to dive into. There is no README to know what has been
+>   done and where is has been done.  We don’t know what has been
+>   formalized in Agda for section 4. It seems that nothing has been
+>   formalized for section 3, why ?  The repo looks more like the link
+>   to an ongoing project than a link to some documented and finish
+>   material aimed at being understood by a reader.
+
+The Agda formalization helped us getting the constructions correct,
+but the paper is intended to be self-contained without the Agda
+formalization.
+
+> Minor remarks:
+>
+> The paper is longer than the 15 pages including biblio of the CFP, but
+> I didn’t take this into account in my review.
+>
+> However, putting the equational theory in Appendix rather feels like
+> the authors needed to save more space and decided quite arbitrarily to
+> cut this.
+>
+> In the definition of ↑A⇒B ,  where does ∆ comes from ?
+
+When quantifying over (τ : Γ ⊆ Δ) we implicitly quantify over Δ,
+similarily as when writing ∀ Δ ⊇ Γ. P, which is a common shorthand for
+∀ Δ. Γ ⊆ Δ ⇒ P.
+
+> typos:
+> - “a equational” page 5
+> - I am not sure "ex falsum quod libet” is correct, one usually says  “ex falso quodlibet”
+> - line 307: type of ↓N, P should be N
+
+Thanks, FIXED.
+
+
+> ----------------------- REVIEW 2 ---------------------
+> PAPER: 50
+> TITLE: Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus
+> AUTHORS: Andreas Abel and Christian Sattler
+>
+> Overall evaluation: 1 (weak accept)
+>
+> ----------- Overall evaluation -----------
+>
+> The paper develops normalization by evaluation for simply-typed,
+> call-by-push-value and polarized lambda-calculus, all of them
+> featuring sums, in a category of presheaves equipped with a
+> monad. Besides the fact that the paper seems to give the first
+> definition of NbE for CBPV and polarized lambda-calculus, the main
+> contribution is the observation how and where to place the monad,
+> which simplifies the definitions considerably.
+>
+> I am not an expert in NbE so I especially enjoyed the very detailed
+> and careful introduction of the idea spelled out for the simply-typed
+> lambda-calculus. The paper uses categorical terms, but should be
+> easily accessible without much categorical knowledge. Every new
+> concept is introduced well and category theory is used more as a
+> language to describe concrete definitions rather than as a foundation.
+>
+> NbE for CBPV and polarized lambda-calculus seem to be novel and in my
+> belief deserve publication, because it's a standard technique carried
+> out for (by now) standard systems in logics and programming languages
+> theory. However, I feel that the work is lacking some embedding in
+> related work w.r.t the calculi considered. Two or three sentences on
+> standard normalization proofs and an explicit sentence that this is
+> the first NbE proof for both systems (if it is) would be tremendously
+> helpful to judge the value of the contribution.
+>
+> The treatment of CBPV is more from a logical perspective than as a
+> computational system, which is left implicit in the paper. In my
+> opinion, the two major aspects of CBPV are (1) the "A value is, a
+> computation does"-mantra, which allows fine-grained control over
+> reduction and thus enables embedding CBV and CBN and (2) the
+> possibility to embed computational effects via the monad. Both aspects
+> are not even mentioned, which seems strange to me. Looking at the
+> equational theory and not at computation removes the "a value
+> is"-aspect, but are there ideas how the NbE method could be adapted to
+> also normalize w.r.t call-by-push-value reduction? Can effects be
+> easily incorporated into the proof, or would that require completely
+> new ideas? Considering that CBPV is in the title, I think this
+> questions definitely have to be discussed in the paper.
+>
+> The paper comes with a partial Agda formalization. I believe the
+> paper's claim that this helped in getting the renamings right, but in
+> the current state I'm hesitant to count the formalization as valuable
+> contribution. Most importantly, the paper needs to make precise what
+> is formalized and what is not (possibly in an appendix), where it
+> currently just claims a "partial formalization". And then I would hope
+> for some explanation why the CBPV part is not formalized. Is it due to
+> time pressure? Or would it just be more of the same? If the
+> formalization is an explicit contribution I also would expect that
+> related work in this area is covered. There must have been formalized
+> NbE proofs for simply-typed lambda-calculus before (in Agda and in
+> other systems), other formalizations of polarized lambda-calculus and
+> of CBPV.
+>
+>
+>
+> Comments for the authors
+>
+> 12: The abstract drops several buzzwords (which I find good), but
+> doesn't pick up on them later. For instance, "bi-cartesian" is only
+> mentioned in the first sentence of the abstract and never again.
+>
+> 122: I feel like the choice why the presheaves are all defined on
+> Cxt^{op} needs some explanation. The technique I am aware of to build
+> categorical models of type theory is to take a category of contexts
+> where morally Γ ⊆ Δ gives an arrow Δ → Γ. This confused me more than
+> once, especially at points where you said "this is a presheaf"
+> omitting the category
+
+We are using *covariant* functors J : Cxt → Set from the category Cxt
+of contexts and order-preserving embeddings Γ ⊆ Δ to the category Set
+of sets and functions, which gives us reindexing morphisms J Γ → J Δ.
+However, a presheaf is a *contravariant* functor J : Cᵒᵖ → Set by
+terminology, thus, to match our use case, we have to choose C = Cxtᵒᵖ,
+which means that we are dealing with presheaves over Cxtᵒᵖ.  The
+double dualization (Cxtᵒᵖ)ᵒᵖ cancels to simply Cxt then.
+TODO: explain in paper.
+
+> 146: Maybe briefly say what a presheaf is to increase the
+> accessibility of the paper even more?
+
+TODO: explain in paper.
+
+> 178: I think it should be stressed even more here that you are talking
+> about normal forms up to an equational theory and not up to
+> reduction. That's especially important for CBPV, where the
+> normal-forms w.r.t. the equational theory completely ignore the
+> reduction order induced by call-by-push-value.
+
+Indeed, following the "reduction-free normalization" philosophy of NbE
+[3], we are just looking for a canonical representative of the
+equivalence classes on terms induced by the equational theory.
+However, our normal forms are already fully characterized *logically*
+via the bidirectional grammar for Ne/Nf, which emerges from the
+introduction/elimination structure and the polarization of the
+formulas.  The equational theory matching these normal forms can also
+be conceived a *posteriori*, which is the approach we are taking in
+this paper.
+
+> 316: I agree that U and F are strange if you do not have lots of
+> experience with CBPV. On the other hand, changing the names makes it
+> hard for readers which do have experience with CBPV and makes it hard
+> for inexperienced readers to match definitions with definitions in
+> other papers.
+
+You have a point here, but in any case, we want a common notation for
+CBPV and polarized lambda calculus, and a bit longer names (such as
+Comp/Thunk) provide more orientation than F/U and the up/down arrows
+(which seem very arbitrary; I always confuse them).
+
+> 319: I think talking about CBPV as a fixed definition (as defined in
+> the initial paper) rather than a family of definitions is strange. The
+> initial CBPV definition is one member of this family, but your
+> finitary presentation is also a member. The contrast "CBPV epmloys
+> ... while we have ..." is unnecessarily sharp. For instance, there are
+> lots of presentation which where the language where a language with
+> finitary sums and products is called CBPV, e.g. [1,2].
+
+You are right.  TODO: fix in paper.
+
+> 326: Normally U (F A) is morally the same as A, up to effects. A
+> sentence explaining why this is the case or why you deviate here might
+> be nice.
+
+This is indeed the case, U.F amounts to the monad, which represents
+the effects in our case.
+
+> 361: At least mentioning the standard set-theoretic semantics for CBPV
+> with algebras would be good here. There, computations and values map
+> to semantically different entities. Do I understand correctly that you
+> can use the same entity for both values and computations because
+> you're looking at effect-free CBPV?
+
+The difference between positive and negative product does not show up
+in the type interpretation but, for instance, in reflection, where we
+use `split` in the positive case and the projections in the negative
+case.
+
+> 372: Again, I feel some motivation is needed why this are the normal
+> forms of CBPV up to the equational theory. When thinking about
+> computation, values are always normal because they don't compute, and
+> the whole idea of a thunk is that it is a normal form with no
+> restrictions.
+
+It is important to remember that we are dealing with open terms and we
+are taking eta-equality into account.  Thus, in contrast to the
+picture arising from computation (where we only deal with closed terms
+and have no eta reduction/expansion), a variable is not always a
+normal form, but only if it is of base type or negative type.
+
+> 513: I'm a bit unhappy with the word "implemented" here. Sure, you
+> have implemented on paper, but implemented for me means at least
+> written down in some formal system/programming language (which is Agda
+> here), which is missing for CBPV
+
+Ok, but given the formality of our definitions, the Agda
+implementation is a simple exercise.
+
+> 519: What's hard about the agreement proof? Or do you just leave it
+> out because you think it's out of scope for the paper?
+
+We are already over the page limit...
+
+> Minor comments
+>
+> 119: I would maybe write "x : (A ∈ Γ)" to make clear that "x : A ∈ Γ"
+> is not a definition here, but you really mean an inhabitant x of a
+> type. In named presentations it might be a short hand for "Γ x = A"
+>
+> 122: Is Cxt a typo? If not, a sentence why Ctx is not used might make
+> sense. Is it to avoid confusion with the usual presentation of Ctx
+> with arrows inverse to Cxt?
+>
+> 146: I would either say "all presheaves will be defined on this and
+> this category" or always say which category the presheaf is defined
+> on. This makes it way easier for readers to quickly calculate in the
+> head that this is really a presheaf.
+>
+> 164: I feel "Needless to say" is unnecessarily snappy to readers with
+> only very basic category theory knowledge. As mentioned, your paper is
+> doing a really good job in making the presentation accessible, it's a
+> good thing that it spells out the details, so I don't think that's
+> needless to say at all.
+>
+> 178: "an equational theory"
+>
+> 201: The symbol for the Kripke function space looks like a hybrid
+> between an arrow with a very strange, asymmetric tip and an arrow with
+> a hat. I think the latter is intended, so maybe move the hat a little
+> bit higher?
+>
+> 211: "such an extended context"
+>
+> 214: It should be "Ne A Δ"
+>
+> 217: I was confused by the 0 in the index for quite a while. This is a
+> singleton context, isn't it? Then maybe write ε.0 or mention that
+> singleton contexts look just like types
+>
+> 233: I feel repeating the category you build the monad on would
+> help. It's on the category of presheaves over Cxt^{op}, right?
+>
+> 246: There are Γs missing twice on the reifications
+>
+> 253: the map should be indexed by Δ
+>
+> 261: again, the map needs a Δ
+>
+> 270: the Δ is the point your defining on pointwise, but that's too
+> implicit currently in my opinion
+>
+> 315: Two sentences why products appear both negatively and positively
+> might be nice for readers not familiar with polarized systems
+>
+> 319: "is not essential"
+>
+>
+> [1] Rizkallah, Christine, Dmitri Garbuzov, and Steve Zdancewic.
+> "A Formal Equational Theory for Call-By-Push-Value."
+> International Conference on Interactive Theorem Proving. Springer, Cham, 2018.
+>
+> [2] Forster, Yannick, et al.
+> "Call-by-push-value in Coq: operational, equational, and denotational theory."
+> Proceedings of the 8th ACM SIGPLAN International Conference on Certified Programs and Proofs. ACM, 2019.
+>
+> ----------------------- REVIEW 3 ---------------------
+> PAPER: 50
+> TITLE: Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus
+> AUTHORS: Andreas Abel and Christian Sattler
+>
+> Overall evaluation: 1 (weak accept)
+>
+> ----------- Overall evaluation -----------
+>
+> Normalization by Evaluation (NbE) is the (by now well-understood)
+> beautiful idea that we can normalize terms in a typed lambda-calculus
+> through mutually recursive functions for evaluation and reification,
+> partially based on types.  NbE is one way to relate programming
+> languages (where we don't evaluate under lambda-abstractions) and pure
+> proof theory (where we fully normalize).
+>
+> Sums however present a difficulty.  In Section 2 the present paper
+> adapts a prior idea on using monads to update the semantic domain
+> needed for NbE to capture sums.  I find this idea compelling and
+> NbE factors very cleanly for a lambda-calculus with products and
+> sums.
+>
+> This, however, is characterized as "wasteful" (although I did not
+> understand what the authors meant by this), so Section 3 polarizes
+> the types and restructures NbE so that the use of the monad is
+> confined to the transition from positive to negative types.  This
+> seems like a natural idea, clarifying the approach of Section 2.
+> The simplicity of the definitions at the end of this section is
+> once again compelling, although some complexity is hidden in the
+> definition of the semantic functions.
+>
+> Again, the authors express some dissatisfaction I couldn't quite
+> follow and move on to a polarized and focused presentation.  This
+> step makes perfect sense to me, although it was difficult for me
+> to extract additional insight from this section.
+>
+> I am not familiar enough with the prior work to judge the degree
+> of originality confidently, but the idea of using a monad to
+> handle sums in NbE in this manner was new to me, as was the
+> extension to the polarized language.  The results have been
+> (mostly?) formalized, so I don't have any reason to doubt their
+> correctness.  NbE is certainly interesting and I find the results
+> to be significant in its further study, even if the open problems
+> mentioned in the conclusion are left to future work.
+>
+> The presentation is idiosyncratic in multiple ways, which one may
+> view as either charming or annoying.  Ultimately, I care if ideas
+> are communicated well so they can be easily understood, and for me
+> the paper receives mixed grades on that score.  I am going into
+> some detail on issues of the presentation below.  Overall, I like
+> the subject, the paper itself, and I believe I understood the main
+> ideas, but I think the presentation can be improved to make it
+> more understandable with less background.
+>
+> Presentation issues:
+>
+> Intrinsic typing.  Certainly an acceptable choice and seems to
+> work well in the formalization.
+>
+> No syntax.  That presented a significant obstacle to me.  Why not
+> use familiar syntax the the lambda-calculus instead of just the
+> names of the rules?  Could be some abstract syntax, but even that
+> would have helped.
+
+The rules (e.g. for normal forms) are a precise (dependently-typed)
+grammar for the abstract syntax (e.g. of normal forms).  The rules are
+a pretty-printing of the actual Agda data types that make up the
+various (intrinsically typed) syntactic classes.
+
+Note also that restriction to abstract syntax allows for a more
+factored presentation of syntax (e.g. Cov in Section 3) and syntax
+constructions which are not easily rendered in concrete (linearized)
+syntax (such as the nesting of <<P>> in Section 4).
+
+> Presheaves.  In the early parts of the paper there is a lot of
+> jargon regarding presheaves, which is, frankly, not necessary to
+> understand the paper.
+
+The jargon is indeed not necessary, but it connects to the categorical
+notions.  The paper is intended as a bridge between conventional and
+categorical meta-theory of lambda-calculus, and we want to be
+accessible for both camps.
+
+> No theorems.  The paper presents no formal definitions or theorems
+> but simply develops a narrative.  I guess the existence of certain
+> dependently typed functions takes the pace of any formal theorems,
+> but for me it would still have been helpful to see standard
+> theorems regarding the properties of various constructions.  It
+> might also help to put some of the definitions into figures so
+> they can be referenced in the text (even if the authors want to
+> avoid explicit Definition 1, Definition 2, ...).
+
+"No formal definitions" is probably not what was meant here, since, in
+fact, *all* definitions in the paper are fully formal (with a few
+definitions omitted).
+Indeed, as you say, dependently typed total functions second as proofs
+of the theorems their types express.  Since we work in Martin-Löf Type
+Theory, all are constructions are proof-relevant, thus, there are no
+theorems in the original sense.
+
+All constructions we give are uniquely determined by their name, thus,
+there is no secondary reference structure such as Definition nnn.  To
+help the reader with locating the definition, we have boxed important
+definitions which do not have their own disply.
+
+> Other feedback:
+>
+> The introduction talks about "oracles", but not the body of the
+> paper.  I didn't understand what the authors mean here and where
+> an "oracle" was supposed to be invoked.
+
+A path in a case tree corresponds to a sequence of questions asked
+to the oracle ("is this neutral a left or a right injection?")
+with the respective answers.  TODO: explain in paper.
+
+> L.133.  I found it strange to present the types with a polarity
+> distinction only at the top level.  P and N are later used (more
+> appropriately) in the polarized form.
+
+Strange but convenient. ;-)
+
+> L.136-138.  Why use a backward turnstile?
+
+We flip Γ ⊢ A to A ⊣ Γ so that we can uniformly write the index Γ last
+in all presheaves we introduce in the paper.
+
+> L.180-181.  It should be more clear right here what you are
+> "proving" in this paper and what is left to future work.  I had
+> difficulty interpreting this sentence.
+
+TODO
+
+> L.214. Should this be "Ne A Delta"?
+
+Indeed. FIXED
+
+> L.226. "recapitulate".  Since you do not introduce, discuss, or
+> otherwise treat this topic before, "recapitulate" seems like the
+> wrong term here.
+
+FIXED. "Recall that"
+
+> L.239.  Actually join seems to be used in a rather essential way
+> shortly, so why "uninspiring"?
+
+FIXED formulation.
+
+> L.247.  Not sure what you are trying to say here regarding "pasting".
+
+MOVED to footnote.  It is just to connect to category-theoretic concepts.
+
+> L.249.  "Positive types P are already monadic".  Don't know what
+> you mean by that.
+
+[[P]] = C ...
+
+> Section 2.4.  Don't understand the purpose of this section.  Please
+> explain.
+
+ADDED an introductory sentence.
+
+> L.336.  "Informally speaking, this makes all negative type monadic".
+> I don't understand this sentence.
+
+FIXED.  It means that the effects of monad C are available at any negative type.
+
+> L.384-387.  What is "J" in these rules?  Please explain.
+
+ADDED: J stands for an arbitrary presheaf.
+
+> L.397-405.  I could not understand this paragraph.  For example,
+> you talk about "needs to run in a monad".  What does that mean?
+
+It means that ↑ᴾ cannot be a pure function, but must be a monadic function
+(see its definition).
+
+> L.422.  "However, the elimination of positive types is still rather
+> non-deterministic."  In what sense is it non-deterministic?  What do
+> you mean by "It is possible..."  In what sense?
+
+It is non-deterministic in the sense that it is not fully determined,
+because "it is possible to only partially break up a composite
+positive type and..."
