@@ -3,6 +3,8 @@ understand our paper and to provide valuable feedback and pointers to
 relevant literature.  We will take all comments into account when
 preparing the revision.
 
+In the following, we clarify the main questions of the reviewers:
+
 - Contribution
 
 As the reviewers correctly understand, we are only proving logical
@@ -44,10 +46,10 @@ the distinction of introductions from eliminations and negative
 Reviewers 2 and 3 note that the Agda formalization is incomplete and
 unpolished.  The Agda formalization helped us to get the constructions
 right.  However, we like to think of this paper as an implementation
-of Nbe in *Type Theory*.  Systems like Agda disappear (where is LEGO
+of NbE in *Type Theory*.  Systems like Agda disappear (where is LEGO
 now?), but type theory is likely to stay with us for a while.  Thus,
 we do not consider the Agda code as a contribution of this paper.
-Instead, we have strived for a rigorous, self-contained mathematical
+Instead, we have striven for a rigorous, self-contained mathematical
 presentation.
 
 If wished, we can remove the reference to the partial Agda
@@ -61,11 +63,11 @@ be some abstract syntax".
 
 In fact we have given an abstract syntax since the rules correspond
 1-1 to dependently typed constructors, thus a judgement with rules
-corresponds 1-1 to a grammar for elements of an indexed set.  Disposing of
-concrete syntax enables us to factor syntax conveniently, for instance
-by using Cov in the definition of Nf (line 392).  In case of split₂
-(line 438) it is not even immediate what the concrete-syntax analogy
-of nesting should be.
+corresponds 1-1 to a grammar for elements of an indexed set.
+Disposing of concrete syntax enables us to factor syntax conveniently,
+for instance by using Cov in the definition of Nf (line 392).  In case
+of split₂ (line 438) it is not even immediate what the concrete-syntax
+analogy of nesting should be.
 
 - Relation to category theory (reviewers 2,3)
 
@@ -88,18 +90,23 @@ By "coincidence" (or rather not by coincidence, since there are no
 coincidences in mathematics) it is the same calculus as the one found
 in the search for a lambda-calculus with effects.
 
-We are indeed only interested in CBPV as logical system.  Normalizing effects is
-beyond the scope of this paper.  In any case, since effects do not follow the
-introduction/elimination scheme, additional considerations would be necessary
-for normalizing effects and would like likely depend on the individual effects
-considered.
+We are indeed only interested in CBPV as logical system.  Normalizing
+effects is beyond the scope of this paper.  In any case, since effects
+do not follow the introduction/elimination scheme, additional
+considerations would be necessary for normalizing effects and would
+like likely depend on the individual effects considered.
 
 - Future work: relationship to CBN and CBV translations (reviewers 1,2)
 
-We are sorry we could not satisfy the curiousity of our reviewers at
+We are sorry we could not satisfy the curiosity of our reviewers at
 this point.  The idea to investigate the relationship to the CBN/CBV
 translations came late in the process of writing, and there was
 neither time nor space to address it.
+
+We hope that we have addressed the major questions of the reviewers.
+Replies to many minor questions can be found in the longer version at
+
+  https://github.com/andreasabel/ipl/blob/master/fscd19/response-fscd19.txt
 
 > ----------------------- REVIEW 1 ---------------------
 > PAPER: 50
@@ -117,7 +124,7 @@ neither time nor space to address it.
 > of possible normalization. A version of this monad is then used to
 > interpret computations in CBPV and gives rise to an NbE algorithm for
 > CBPV. Finally, the authors discuss modification for focused polarized
-> logic, which is closed to CPBV.
+> logic, which is closed to CBPV.
 >
 > General Comment :
 >
@@ -165,7 +172,7 @@ formalization.
 > In the definition of ↑A⇒B ,  where does ∆ comes from ?
 
 When quantifying over (τ : Γ ⊆ Δ) we implicitly quantify over Δ,
-similarily as when writing ∀ Δ ⊇ Γ. P, which is a common shorthand for
+similarly as when writing ∀ Δ ⊇ Γ. P, which is a common shorthand for
 ∀ Δ. Γ ⊆ Δ ⇒ P.
 
 > typos:
@@ -351,9 +358,10 @@ We are already over the page limit...
 > is not a definition here, but you really mean an inhabitant x of a
 > type. In named presentations it might be a short hand for "Γ x = A"
 
+See 105-109 for explicit explanations of ":" and "∈".
+See also "suc zero : A ∈ Γ.A.B" in line 118.
 WON'T FIX.
 
->
 > 122: Is Cxt a typo? If not, a sentence why Ctx is not used might make
 > sense. Is it to avoid confusion with the usual presentation of Ctx
 > with arrows inverse to Cxt?
@@ -532,7 +540,7 @@ theorems in the original sense.
 All constructions we give are uniquely determined by their name, thus,
 there is no secondary reference structure such as Definition nnn.  To
 help the reader with locating the definition, we have boxed important
-definitions which do not have their own disply.
+definitions which do not have their own display.
 
 > Other feedback:
 >
