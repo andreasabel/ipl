@@ -3,25 +3,102 @@ understand our paper and to provide valuable feedback and pointers to
 relevant literature.  We will take all comments into account when
 preparing the revision.
 
-- Missing theorems (1,3)
+- Contribution
 
-- Incomplete formalization (1,2)
+As the reviewers correctly understand, we are only proving logical
+consistency in this paper, via normalization.  Our main contribution
+isn't any theorem (consistency of IPL has been proven a gazillion
+times before), but the organization of normalization via a monad which
+we specify abstractly (cover monad) and for which we give two
+implementations (case trees and continuations).
 
-- The choice of abstract syntax (3)
+Reviewer 1 voices disappointment that computational soundness is not
+demonstrated.  Indeed, we wish we could have included it.  However, we
+already struggled to fit the current content into the page limit (as
+Reviewer 1 also noticed), and adding more technical content would have
+sabotaged the goal of reaching a wide audience through an accessible
+presentation (acknowledged by Reviewer 2).  The main idea, the use of
+a monad in NbE and its placement at the polarization shift can already
+be communicated through the definition of the normalization function
+alone, and very effectively, as we believe.
 
-- Relation to category theory (2,3)
+A normalization function with intrinsic soundness is quite a bit more
+complicated, see
 
-- CBPV as logical system (2)
+  https://github.com/andreasabel/ipl/blob/master/src/NbeModel.agda
 
-No NbE for effects.
+for the case of IPL, and the added technicalities may cloud the main
+idea.  Thus, we save it for a publication venue without page limit
+such as a journal.
 
-  let x = launchNuclearMissile; 1
-  in  x + 1
+Without computational soundness, there was no need to retain the
+equational theory of IPL, thus, we relegated it to the appendix.
+Indeed, our normal forms can be understood purely logically, based on
+the distinction of introductions from eliminations and negative
+(choiceless) types from positive (choiceful) types.
 
+- Missing theorems (reviewers 1,3)
 
+- Incomplete formalization (reviewers 1,2)
 
-- Future work: relationship to CBN CBV (1,2)
+Reviewers 2 and 3 note that the Agda formalization is incomplete and
+unpolished.  The Agda formalization helped us to get the constructions
+right.  However, we like to think of this paper as an implementation
+of Nbe in *Type Theory*.  Systems like Agda disappear (where is LEGO
+now?), but type theory is likely to stay with us for a while.  Thus,
+we do not consider the Agda code as a contribution of this paper.
+Instead, we have strived for a rigorous, self-contained mathematical
+presentation.
 
+If wished, we can remove the reference to the partial Agda
+formalization from the paper.
+
+- The choice of abstract syntax (Reviewer 3)
+
+Reviewer 3 asks why we do not use the "familiar syntax [of] the
+lambda-calculus instead of just the names of the rules?  Could
+be some abstract syntax".
+
+In fact we have given an abstract syntax since the rules correspond
+1-1 to dependently typed constructors, thus a judgement with rules
+corresponds 1-1 to a gramar for elements of indexed set.  Disposing of
+concrete syntax enables us to factor syntax conveniently, for instance
+by using Cov in the definition of Nf (line 392).  In case of split₂
+(line 438) it is not even immediate what the concrete-syntax analogy
+of nesting should be.
+
+- Relation to category theory (reviewers 2,3)
+
+As reviewers 2 and 3 point out, the paper could have been presented
+without any reference to category theory.  We use category theory just
+as a source of terminology to accurately name the concepts we define.
+Further, we like to include experts on category theory in our
+readership, who could be upset about not naming the obvious.  The
+paper is intended as a bridge between conventional approaches to
+lambda-calculus and category-theoretic ones, without demanding too
+much expertise.
+
+- CBPV as logical system (Reviewer 2)
+
+In the context of focused lambda-calculi, which we study to reduce the
+degrees of liberty in normal forms (in other words, removing
+don't-care non-determinism), CBPV arises naturally as calculus with
+focusing on positive introductions but not on positive eliminations.
+By "coincidence" (or rather not by coincidence, since there are no
+coincidences in mathematics) it is the same calculus as the one found
+in the search for a lambda-calculus with effects.
+
+We are indeed only interested in CBPV as logical system.  Normalizing
+effects is beyond the scope of this paper.  In any case, since effects
+do not follow the introduction/elimination scheme, additional
+considerations would be necessary for normalizing effects.
+
+- Future work: relationship to CBN and CBV translations (reviewers 1,2)
+
+We are sorry we could not satisfy the curiousity of our reviewers at
+this point.  The idea to investigate the relationship to the CBN/CBV
+translations came late in the process of writing, and there was
+neither time nor space to address it.
 
 > ----------------------- REVIEW 1 ---------------------
 > PAPER: 50
