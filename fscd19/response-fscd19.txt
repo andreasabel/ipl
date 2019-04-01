@@ -350,37 +350,57 @@ We are already over the page limit...
 > 119: I would maybe write "x : (A ∈ Γ)" to make clear that "x : A ∈ Γ"
 > is not a definition here, but you really mean an inhabitant x of a
 > type. In named presentations it might be a short hand for "Γ x = A"
+
+WON'T FIX.
+
 >
 > 122: Is Cxt a typo? If not, a sentence why Ctx is not used might make
 > sense. Is it to avoid confusion with the usual presentation of Ctx
 > with arrows inverse to Cxt?
->
+
+NO COMMENT.
+
 > 146: I would either say "all presheaves will be defined on this and
 > this category" or always say which category the presheaf is defined
 > on. This makes it way easier for readers to quickly calculate in the
 > head that this is really a presheaf.
->
+
+ADDED. We now say that we only consider presheaves over Ctx^{op}.
+
 > 164: I feel "Needless to say" is unnecessarily snappy to readers with
 > only very basic category theory knowledge. As mentioned, your paper is
 > doing a really good job in making the presentation accessible, it's a
 > good thing that it spells out the details, so I don't think that's
 > needless to say at all.
->
+
+FIXED.
+
 > 178: "an equational theory"
->
+
+FIXED.
+
 > 201: The symbol for the Kripke function space looks like a hybrid
 > between an arrow with a very strange, asymmetric tip and an arrow with
 > a hat. I think the latter is intended, so maybe move the hat a little
 > bit higher?
->
+
+FIXED.
+
 > 211: "such an extended context"
->
+
+FIXED. But was also right before.
+
 > 214: It should be "Ne A Δ"
+
+FIXED. Also A should have been A ⇒ B.
+
 >
 > 217: I was confused by the 0 in the index for quite a while. This is a
 > singleton context, isn't it? Then maybe write ε.0 or mention that
 > singleton contexts look just like types
->
+
+FIXED.
+
 > 233: I feel repeating the category you build the monad on would
 > help. It's on the category of presheaves over Cxt^{op}, right?
 >

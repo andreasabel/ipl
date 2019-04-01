@@ -423,15 +423,14 @@ propositional equality for all morphisms $\tau$.
 The singleton weakening $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$,
 also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
 
-
-The category $\Cxt$ allows us to consider $A{\in}\_$ as a presheaf over
-$\Cxt\op$ for any $A$, witnessed by $\treindex : \Gamma \sublist
-  \Delta \to A \in \Gamma \to A \in \Delta$, which is the morphism
-part of functor $A{\in}\_$ from $\Cxt$ to $\Set$, mapping object $\Gamma$ to the
-set $A \in \Gamma$ of the indices of $A$ in $\Gamma$.
-The associated functor laws $\treindex\,\tid\,x \equiv x$
-and $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv
-\treindex\,(\tau_1 \rcomp \tau_2)\,x$ hold propositionally.
+By a presheaf, we will always mean a presheaf over the category $\Cxt\op$, i.e.,
+a functor from $\Cxt$ to $\Set$.  For example, given any type $A$, we can
+consider $A{\in}\_$ as such a presheaf, with action on objects mapping $\Gamma$
+to the set $A \in \Gamma$ of indices of $A$ in $\Gamma$ and action on morphisms
+witnessed by $\treindex : \Gamma \sublist \Delta \to A \in \Gamma \to A \in
+\Delta$.  The associated functor laws $\treindex\,\tid\,x \equiv x$ and
+$\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv \treindex\,(\tau_1 \rcomp
+\tau_2)\,x$ hold propositionally.
 
 \subsection{STLC and its normal forms}
 
@@ -589,8 +588,8 @@ any choices.  In contrast, constructing an inhabitant of a
 \emph{positive} type involves choice: whether case distinction is
 required, and which introduction to pick in the end ($\tinj_1$ or $\tinj_2$).
 
-Needless to say, $\tNe\,A$ and
-$\tNf\,A$ are presheaves, \ie, support reindexing with $\tren$ just as terms do.
+As expected, $\tNe\,A$ and $\tNf\,A$ are presheaves,
+\ie, support reindexing with $\tren$ just as terms do.
 From a normal form we can extract the term via an overloaded function
 \fbox{$\tm\_ : \Nf A \Gamma \to A \from \Gamma$} and
 \fbox{$\tm\_ : \Ne A \Gamma \to A \from \Gamma$}
@@ -638,7 +637,7 @@ the branches.
 % $n : \Nf A \Gamma$ for each derivation $t : A \from \Gamma$.  However,
 % \emph{term normalization} additionally requires \emph{soundness},
 % \ie, that $\tm u \cong t$
-% with respect to a equational theory $\cong$ on terms.
+% with respect to an equational theory $\cong$ on terms.
 
 % \subsection{Proof normalization}
 
@@ -801,13 +800,13 @@ for a new variable of type $A$, which is reflected into $\den A$ by
 % \end{array}
 % \]
 The ability to introduce fresh variables into a context, and to use
-semantic objects such as $f : \den{A \To B}\Gamma$ in a such extended
+semantic objects such as $f : \den{A \To B}\Gamma$ in such an extended
 context, is the reason for utilizing presheaves instead of just sets
 as semantic types.
 
 Note also that in the equation for $\up{A \To B}$,
-the neutral $u : \Ne A \Gamma$ is
-transported into $\Ne A \Delta$ via reindexing with
+the neutral $u : \Ne {(A \To B)} \Gamma$ is
+transported into $\Ne {(A \To B)} \Delta$ via reindexing with
 $\tau : \Gamma \sublist \Delta$, in order to be applicable to the normal form
 $\down[\Delta]A a$
 reified from the semantic value $a$.
