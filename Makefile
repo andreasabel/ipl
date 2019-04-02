@@ -13,6 +13,7 @@ default :
 
 docs : deploy clean
 	cp notes/*.pdf docs/
+	cp fscd19/fscd19.pdf docs/
 	cp -r src/html docs/
 
 # Make contents on travis
@@ -25,8 +26,9 @@ docs : deploy clean
 # 	$(docker) jlimperg/agda-stdlib make -C src
 
 deploy :
-	make -C notes deploy
-	make -C src deploy
+	make -C notes  deploy
+	make -C src    deploy
+	make -C fscd19 deploy
 
 # Provide empty docs folder
 clean :
