@@ -17,6 +17,7 @@ noVar ()
 -- No neutral in the empty context.
 
 noNe :  ∀{A} → Ne ε A → ⊥
+noNe (hyp ())
 noNe (impE t u) = noNe t
 noNe (andE₁ t)  = noNe t
 noNe (andE₂ t)  = noNe t
