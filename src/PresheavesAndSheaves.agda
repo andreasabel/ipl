@@ -322,13 +322,26 @@ module _ {P : Poset} where
 
       _⇒_ : Sheaf coverage
       _⇒_ .presheaf = F.presheaf PF.⇒ G.presheaf
-      _⇒_ .glue {a} C h a' p x = G.glue (weaken p C) help where
-        help : {b' : A} → b' ∈ weaken p C → G.⟦ b' ⟧
-        help {b'} e' = k (F.⟦ ∈-≤ e' ⟧-hom x) where
-          open Σ (<– weaken-ext (b' , e')) renaming (proj₁ to b; proj₂ to e)
+      _⇒_ .glue {a} C h a' p x = let
+          help : {b' : A} → b' ∈ weaken p C → G.⟦ b' ⟧
+          help {b'} e' = let
+              open Σ (<– weaken-ext (b' , e')) renaming (proj₁ to b; proj₂ to e)
+              k : F.⟦ b' ⟧ → G.⟦ b' ⟧
+              k = h e b' (Eq.subst (λ z → z .proj₁ ≤ b)
+                            (Inverse.right-inverse-of weaken-ext (b' , e'))
+                            (weaken-ext-meet {σ = p} {C = C} {x = b} {e = e} .IsMeet.π₂))
+            in k (F.⟦ ∈-≤ e' ⟧-hom x)
+        in G.glue (weaken p C) help
 
-          k : F.⟦ b' ⟧ → G.⟦ b' ⟧
-          k = h e b' (Eq.subst (λ z → z .proj₁ ≤ b) (Inverse.right-inverse-of weaken-ext (b' , e')) (weaken-ext-meet {σ = p} {C = C} {x = b} {e = e} .IsMeet.π₂))
+      -- _⇒_ : Sheaf coverage
+      -- _⇒_ .presheaf = F.presheaf PF.⇒ G.presheaf
+      -- _⇒_ .glue {a} C h a' p x = G.glue (weaken p C) help where
+      --   help : {b' : A} → b' ∈ weaken p C → G.⟦ b' ⟧
+      --   help {b'} e' = k (F.⟦ ∈-≤ e' ⟧-hom x) where
+      --     open Σ (<– weaken-ext (b' , e')) renaming (proj₁ to b; proj₂ to e)
+
+      --     k : F.⟦ b' ⟧ → G.⟦ b' ⟧
+      --     k = h e b' (Eq.subst (λ z → z .proj₁ ≤ b) (Inverse.right-inverse-of weaken-ext (b' , e')) (weaken-ext-meet {σ = p} {C = C} {x = b} {e = e} .IsMeet.π₂))
 
     ⇒-in : ∀ {F G H} → H ∧ F ≤ˢ G → H ≤ˢ F ⇒ G
     ⇒-in {F} {G} {H} = PF.⇒-in {F = F ᵖ} {G = G ᵖ} {H = H ᵖ}
