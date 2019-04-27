@@ -43,6 +43,9 @@ stlcagda = \
 
 # END stlcagda
 
+img=texlive/texlive
+# WAS: adnrv/texlive
+
 .PHONY : all debugMake html default deploy pack
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
@@ -52,7 +55,7 @@ default : nbeSum.pdf
 # Mount local dir in docker image as /home and set this as working directory
 mnt=/home
 deploy :
-	docker run -v $(shell pwd):$(mnt) -w $(mnt) adnrv/texlive latexmk -pdf nbeSum.tex
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) $(img) latexmk -pdf nbeSum.tex
 
 pack : nbeSum.zip
 

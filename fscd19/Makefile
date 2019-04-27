@@ -47,6 +47,9 @@ stlcagda = \
 
 # END stlcagda
 
+img=texlive/texlive
+# WAS: adnrv/texlive
+
 .PHONY : all debugMake html default deploy pack
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
@@ -55,7 +58,7 @@ default : fscd19.pdf
 
 mnt=/home
 deploy :
-	docker run -v $(shell pwd):$(mnt) -w $(mnt) adnrv/texlive latexmk -pdf fscd19.tex
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) $(img) latexmk -pdf fscd19.tex
 
 pack : fscd19.zip
 

@@ -19,9 +19,9 @@ docs : deploy clean
 # Make contents on travis
 
 deploy :
-	make -C notes  deploy
-	make -C src    deploy
 	make -C fscd19 deploy
+	make -C src    deploy
+	make -C notes  deploy
 
 # Provide empty docs folder
 clean :
