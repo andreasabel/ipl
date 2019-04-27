@@ -9,7 +9,8 @@ before_install:
   # - sudo apt-get -q update
   # - sudo apt-get install -y texlive-latex-extra texlive-math-extra
   - docker pull jlimperg/agda-stdlib
-  - docker pull sumdoc/texlive-2017
+  - docker pull adnrv/texlive
+  # WAS: sumdoc/texlive-2017
 
 script:
   - make docs
