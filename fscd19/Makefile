@@ -55,7 +55,7 @@ default : fscd19.pdf
 
 mnt=/home
 deploy :
-	docker run -v $(shell pwd):$(mnt) -w $(mnt) sumdoc/texlive-2017 latexmk -pdf fscd19.tex
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) adnrv/texlive latexmk -pdf fscd19.tex
 
 pack : fscd19.zip
 

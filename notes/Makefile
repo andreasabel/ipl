@@ -49,9 +49,10 @@ stlcagda = \
 
 default : nbeSum.pdf
 
+# Mount local dir in docker image as /home and set this as working directory
 mnt=/home
 deploy :
-	docker run -v $(shell pwd):$(mnt) -w $(mnt) sumdoc/texlive-2017 latexmk -pdf nbeSum.tex
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) adnrv/texlive latexmk -pdf nbeSum.tex
 
 pack : nbeSum.zip
 
