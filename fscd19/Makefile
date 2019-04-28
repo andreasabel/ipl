@@ -47,8 +47,9 @@ stlcagda = \
 
 # END stlcagda
 
-img=texlive/texlive
-# WAS: adnrv/texlive
+img=adnrv/texlive
+# texlive/texlive
+
 
 .PHONY : all debugMake html default deploy pack
 
