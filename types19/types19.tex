@@ -10,6 +10,7 @@
 
 \usepackage{natbib}
 \usepackage{hyperref}
+\urlstyle{sf}
 % \usepackage{agda} % colors
 
 \definecolor{DeepJungleGreen}{rgb}{0.0, 0.29, 0.29}
@@ -37,6 +38,14 @@
 }%
 \makeatother
 
+% less space between entries in bibliography
+\let\OLDthebibliography\thebibliography
+\renewcommand\thebibliography[1]{
+  \OLDthebibliography{#1}
+  \setlength{\parskip}{0pt}
+  \setlength{\itemsep}{0.2ex plus 0.3ex}
+}
+
 %% Macros
 
 \input{macros}
@@ -49,7 +58,8 @@
 \title{Normalization by Evaluation for Call-by-Push-Value}
 \titlerunning{Normalization by Evaluation for Call-by-Push-Value}
 \authorrunning{A. Abel}
-\author{Andreas Abel}
+\author{Andreas Abel\thanks{Supported by VR grant 621-2014-4864 and EU
+  Cost Action CA15123.}}
 \institute{
   Department of Computer Science and Engineering,
   Gothenburg University
@@ -86,7 +96,8 @@ a variable of type $A + B$ as a value in $\den{A + B}$ requires case
 distinction in the model.  One such refinement are \emph{sheaves}
 \citep{altenkirchDybjerHofmannScott:lics01}; another is the use of a
 monad $\C$
-\citep{filinski:semaccounttdpe,filinski:tlca01,barral:PhD}
+\citep{%filinski:semaccounttdpe,
+filinski:tlca01,barral:PhD}
 in the category of presheaves
 for the interpretation of sum types:
 $\den{A + B} = \C(\den A + \den B)$.
@@ -116,7 +127,7 @@ call-by-push-value (CBPV) calculus.  In this work, we study NbE for CBPV.
 CBPV was designed to study lambda-calculus with effects.  It separates
 types into \emph{value} types $P$ and \emph{computation} types $N$, which we, in
 analogy to polarized lambda-calculus
-\citep{zeilberger:PhD,brockNannestadSchuermann:lpar10,espiritoSanto:entcs17}
+\citep{zeilberger:PhD} %,brockNannestadSchuermann:lpar10,espiritoSanto:entcs17}
 refer to as \emph{positive} and \emph{negative} types.
 Variables stand for values, thus, have positive types.
 The monad that models the effects is placed at the transition from values
@@ -254,21 +265,20 @@ A partial Agda formalization is available at
 \url{https://github.com/andreasabel/ipl}.
 
 
-
-
-
-\paragraph*{Acknowledgments.}
-%Thanks to the anonymous referees, who helped improving the quality of
-%this abstract through their feedback.
-This work was supported by
-Vetenskapsr\aa{}det under Grant
-  No.~621-2014-4864 \emph{Termination Certificates
-  for Dependently-Typed Programs and Proofs via Refinement Types}
-and by the EU Cost Action CA15123 \emph{Types for programming and verification}.
+% \paragraph*{Acknowledgments.}
+% %Thanks to the anonymous referees, who helped improving the quality of
+% %this abstract through their feedback.
+% This work was supported by
+% Vetenskapsr\aa{}det under Grant
+%   No.~621-2014-4864 \emph{Termination Certificates
+%   for Dependently-Typed Programs and Proofs via Refinement Types}
+% and by the EU Cost Action CA15123 \emph{Types for programming and verification}.
 
 \begin{footnotesize}
 
 \bibliographystyle{abbrvnat}
+%\bibliographystyle{abbrvurl}
+%\bibliographystyle{plainurl} % no author-year cit.
 \bibliography{auto-types19}
 
 \end{footnotesize}

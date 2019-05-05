@@ -13,6 +13,11 @@ bibtool=bibtool -- 'preserve.key.case = ON' \
 	  -- 'delete.field = { month }' \
 	  -- 'delete.field = { isbn }' \
 	  -- 'delete.field = { doi }'
+
+deletemore = \
+  -- 'delete.field = { editor }' \
+  -- 'delete.field = { pages }'
+
 catcfg=sed -e "s/%.*//g" <
 latex=latex
 pdflatex=pdflatex
@@ -22,6 +27,7 @@ sedfile=postprocess.sed
 files=macros.tex
 # stdlib=$(HOME)/agda/test
 types19tex=types19.tex
+typesbibliography=short.bib
 
 default : types19.pdf # talkTYPES19.pdf talkTYPES19-with-notes.pdf talkTYPES19.zip
 
@@ -57,13 +63,16 @@ talkTYPES19.zip : Makefile talkTYPES19.tex talkTYPES19.pdf talkTYPES19-with-note
 
 # initially, run latex once to create an .aux file
 # mark .aux file as fresh by creating a stamp _aux
-types19_aux : $(types19tex) $(files)
+auto-types19.aux : $(types19tex) $(files) Makefile
 	$(pdflatex) $(types19tex);
-	touch $@;
+	cp types19.aux $@;
 
 # then, run bibtex
-types19.bbl : types19_aux auto-types19.bib
-	-bibtex types19;
+auto-types19.bbl : auto-types19.aux auto-types19.bib
+	-bibtex auto-types19;
+
+types19.bbl : auto-types19.bbl
+	sed -e 's/volume/vol\./g' -e 's/URL //g' < $< > $@
 
 # finally, finish by running latex twice again
 # this will update .aux, but leave the stamp _aux intact
@@ -76,12 +85,12 @@ types19.pdf : types19.bbl
 # auto-types19.bib is only defined if bibtool is present and all.bib exists
 
 ifneq ($(shell which bibtool),)
-ifneq ($(shell ls $(bibliography)),)
-auto-types19.bib : types19_aux $(bibliography)
+ifneq ($(shell ls $(typesbibliography)),)
+auto-types19.bib : auto-types19.aux $(typesbibliography)
 	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
 	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
 	echo "" >> $@ ;
-	$(bibtool) -x types19.aux -i $(bibliography) >> $@;
+	$(bibtool) $(deletemore) -x types19.aux -i $(typesbibliography) >> $@;
 endif
 endif
 
@@ -94,5 +103,13 @@ talk% : talk%.pdf
 
 talk%.pdf : talk%.tex
 	pdflatex $<;
+
+# cleaning
+
+clean :
+	-rm *.log *.aux *.blg *.out *_aux *.bbl
+
+veryclean : clean
+	-rm auto-*
 
 # EOF
