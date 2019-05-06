@@ -247,19 +247,16 @@ TSWLatexianTemp*
 # generated if using elsarticle.cls
 *.spl
 
-/notes/all.bib
-/notes/medium.bib
-/notes/short.bib
-/github-pages-token.txt
-/src/Bug-Local-Module-Where.agda
-/src/html/
+# Andreas' bibliography libraries
+all.bib
+medium.bib
+short.bib
+
+
 /fscd19/acmart-master/
+/ppdp19/acmart-master/
 /fscd19/lipics-v2019-authors.tgz
-/fscd19/lipics-v2019-authors/CHANGELOG
-/fscd19/lipics-v2019-authors/lipics-v2019-sample-article.bib
-/fscd19/lipics-v2019-authors/lipics-v2019-sample-article.tex
-/fscd19/lipics-v2019-authors/lipics-v2019-sample-article.vtc
-/fscd19/medium.bib
-/fscd19/all.bib
-/types19/all.bib
-/types19/medium.bib
+/fscd19/lipics-v2019-authors/
+/github-pages-token.txt
+/src/Bug*
+/src/html/

@@ -1,0 +1,201 @@
+# Makefile for PPDP
+# Author : Andreas Abel
+# Created: 2008-05-09, 2010-03-29, 2010-11-23, 2018-05-xx
+
+destdir=$(HOME)/public_html
+
+# commands
+bibtool=bibtool -q \
+	  -- 'preserve.key.case = ON' \
+	  -- 'check.double = ON' \
+	  -- 'check.double.delete = ON' \
+	  -- 'delete.field = { abstract }' \
+	  -- 'delete.field = { dvi }' \
+	  -- 'delete.field = { postscript }' \
+	  -- 'delete.field = { pdf }' \
+	  -- 'delete.field = { month }' \
+	  -- 'delete.field = { isbn }' \
+	  -- 'delete.field = { url }' \
+	  -- 'delete.field = { note }' \
+	  -- 'delete.field = { pages }' \
+	  -- 'delete.field = { editor }'
+
+#	  -- 'delete.field = { doi }' \
+#	  -- 'delete.field = { publisher }' \
+#
+
+catcfg=sed -e "s/%.*//g" <
+latex=latex
+pdflatex=pdflatex -halt-on-error
+#pdflatex=pdflatex -interaction=batchmode
+bibliography=short.bib
+# bibliography=medium.bib
+
+# stdlib=$(HOME)/agda/std-lib/src
+
+agda=agda
+
+files=ppdp19.tex Makefile macros.tex abstract.txt
+
+stlcagda = \
+  src/Everything.agda \
+  src/Library.agda \
+  src/SimpleTypes.agda \
+  src/STLCDefinable.agda \
+  src/NBE.agda \
+  src/NotNotDefinable.agda \
+  src/PeirceNotDefinable.agda \
+
+# END stlcagda
+
+img=adnrv/texlive
+# texlive/texlive
+
+
+.PHONY : all debugMake html default deploy pack
+
+.PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
+
+default : ppdp19.pdf
+
+mnt=/home
+deploy :
+	docker run -v $(shell pwd):$(mnt) -w $(mnt) $(img) latexmk -pdf ppdp19.tex
+
+pack : ppdp19.zip
+
+ppdp19.zip : ppdp19.pdf $(files) jfp1.cls harpoons.sty ppdp19.bbl jfp.bst auto-ppdp19.bib
+	zip $@ $^
+
+html : src-stlc/html/Everything.html
+
+src-stlc/html/Everything.html : $(stlcagda)
+	cd src-stlc; $(agda) --html Everything.agda
+
+latex/%.tex : %.lagda
+	$(agda) --latex $<
+
+talkAIM27.pdf : talkAIM27.tex macros.tex
+	pdflatex $<
+
+ship : shipDraft
+
+shipDraft : $(destdir)/nbe-cbpv.pdf
+
+$(destdir)/nbe-cbpv.pdf : ppdp19.pdf
+	cp -p $< $@
+
+shipHtml : src-stlc/html/Everything.html
+	cp -pr src-stlc/html $(destdir)/aim27/stlc-definability
+
+shipTalk : talkAIM27.pdf
+	cp -p $< $(destdir)/
+
+# ppdp19
+##################################################################
+
+# initially, run latex once to create an .aux file
+# mark .aux file as fresh by creating a stamp _aux
+ppdp19_aux : ppdp19.tex $(files)
+	$(pdflatex) ppdp19.tex;
+	touch $@;
+
+# then, run bibtex
+ppdp19.bbl : ppdp19_aux auto-ppdp19.bib
+	-bibtex ppdp19;
+
+# finally, finish by running latex twice again
+# this will update .aux, but leave the stamp _aux intact
+# (otherwise we would not converge and make would never
+# return a "Nothing to do")
+ppdp19.pdf : ppdp19.bbl
+	$(pdflatex) ppdp19.tex;
+	$(pdflatex) ppdp19.tex;
+
+# auto-ppdp19.bib is only defined if bibtool is present and all.bib exists
+
+ifneq ($(shell which bibtool),)
+ifneq ($(shell ls $(bibliography)),)
+auto-ppdp19.bib : ppdp19_aux $(bibliography)
+	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
+	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
+	echo "" >> $@ ;
+	$(bibtool) -x ppdp19.aux -i $(bibliography) >> $@;
+endif
+endif
+
+# ppdp19-long
+##################################################################
+
+# initially, run latex once to create an .aux file
+# mark .aux file as fresh by creating a stamp _aux
+ppdp19-long_aux : ppdp19-long.tex $(files)
+	$(pdflatex) ppdp19-long.tex;
+	touch $@;
+
+# then, run bibtex
+ppdp19-long.bbl : ppdp19-long_aux auto-ppdp19-long.bib
+	-bibtex ppdp19-long;
+
+# finally, finish by running latex twice again
+# this will update .aux, but leave the stamp _aux intact
+# (otherwise we would not converge and make would never
+# return a "Nothing to do")
+ppdp19-long.pdf : ppdp19-long.bbl
+	$(pdflatex) ppdp19-long.tex;
+	$(pdflatex) ppdp19-long.tex;
+
+# auto-ppdp19-long.bib is only defined if bibtool is present and all.bib exists
+
+ifneq ($(shell which bibtool),)
+ifneq ($(shell ls $(bibliography)),)
+auto-ppdp19-long.bib : ppdp19-long_aux $(bibliography)
+	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
+	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
+	echo "" >> $@ ;
+	$(bibtool) -x ppdp19-long.aux -i $(bibliography) >> $@;
+endif
+endif
+
+
+
+# Templates (reverted back to simple templates)
+
+
+talk% : talk%.pdf
+	cp -p $? $(destdir)/;
+	touch $@;
+
+talk%.pdf : talk%.tex
+	pdflatex $<;
+
+
+%.tex : %.lhs
+	lhs2TeX --poly -i lhs2TeX.fmt $< > $@
+# /usr/local/share/lhs2tex-1.13/
+
+% :  %.pdf # %.dvi %.ps.gz # %.tar.gz
+	cp -p $? $(destdir)/;
+	touch $@;
+
+%.dvi : %.tex
+	$(latex) $<;
+	-bibtex $*;
+	$(latex) $<;
+	$(latex) $<;
+
+%.pdf : %.dvi
+	pdflatex $*.tex;
+
+%.ps  : %.dvi
+	dvips -o $@ $<;
+
+%.gz : %
+	cat $< | gzip > $@
+
+## does not work since $ is evaluated before %
+#%.tar : %.cfg $(shell cat %.cfg)
+#	echo $?
+
+
+#EOF
