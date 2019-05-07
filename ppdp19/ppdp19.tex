@@ -1,10 +1,13 @@
 %
 % The first command in your LaTeX source must be the \documentclass command.
-\documentclass[sigplan,screen]{acmart}
+\documentclass[sigplan,screen,fleqn]{acmart}
+
 
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
 \usepackage{bm} % bold math
+
+%%\usepackage{nccmath} %ceqn  %% NOT COMPATIBLE
 
 \usepackage{cleveref}
 
@@ -53,7 +56,7 @@
 % The majority of ACM publications use numbered citations and references. If you are preparing content for an event
 % sponsored by ACM SIGGRAPH, you must use the "author year" style of citations and references. Uncommenting
 % the next command will enable that style.
-\citestyle{acmauthoryear}
+% \citestyle{acmauthoryear}
 
 %
 % end of the preamble, start of the body of the document source.
@@ -157,6 +160,8 @@
 % \end{teaserfigure}
 
 \maketitle
+
+\setlength{\mathindent}{\parindent}
 
 
 \section{Introduction}
@@ -366,8 +371,16 @@ number $n$, then $x : A \in \Gamma$ is exactly the (de Bruijn) index
 of $A$ in $\Gamma$.
 
 We can define
-\fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\rcomp}\_ : \Gamma
-\sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
+\[
+\begin{array}{lcl}
+\tid & : & \Gamma \sublist \Gamma
+\\
+\_{\rcomp}\_ & : & \Gamma
+\sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi
+\end{array}
+\]
+% \fbox{$\tid : \Gamma \sublist \Gamma$} and \fbox{$\_{\rcomp}\_ : \Gamma
+% \sublist \Delta \to \Delta \sublist \Phi \to \Gamma \sublist \Phi$}
 by recursion, meaning that the (proof-relevant)
 sublist relation is reflexive and transitive.
 % The sublist relation is reflexive and transitive, the witnesses
@@ -476,7 +489,11 @@ $A{\from}\_$ as witnessed by the standard weakening operation%
 \footnote{Here, $\tren$ is short for \emph{renaming}, but in a nameless
 calculus we should better speak of \emph{reindexing}, which could, a
 bit clumsily, be also abbreviated to $\tren$.}
-\fbox{$\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta$}
+%\fbox{$
+\[
+\tren : \Gamma \sublist \Delta \to A \from \Gamma \to A \from \Delta
+\]
+%$}
 defined by recursion over $t : A \from \Gamma$,
 and functor laws for $\tren$ analogously to $\treindex$.
 
@@ -551,8 +568,14 @@ required, and which introduction to pick in the end ($\tinj_1$ or $\tinj_2$).
 As expected, $\tNe\,A$ and $\tNf\,A$ are presheaves,
 \ie, support reindexing with $\tren$ just as terms do.
 From a normal form we can extract the term via an overloaded function
-\fbox{$\tm\_ : \Nf A \Gamma \to A \from \Gamma$} and
-\fbox{$\tm\_ : \Ne A \Gamma \to A \from \Gamma$}
+\[
+\begin{array}{lcl}
+\tm\_ & : & \Nf A \Gamma \to A \from \Gamma \\
+\tm\_ & : & \Ne A \Gamma \to A \from \Gamma \\
+\end{array}
+\]
+% \fbox{$\tm\_ : \Nf A \Gamma \to A \from \Gamma$} and
+% \fbox{$\tm\_ : \Ne A \Gamma \to A \from \Gamma$}
 that discards constructor $\tne$ but keeps all other constructors.
 This erasure function naturally commutes with reindexing, making it a
 natural transformation between the presheaves $\tNf\,A$ ($\tNe\,A$,
@@ -827,18 +850,18 @@ offers us these services:
 \[
 \begin{array}{l@{~}c@{~}l@{\quad}l}
 \tabort^\C & : & \tNe\, \tyzero \todot \C\,\B
-\\ &
-  & \mbox{case on absurd neutral} \\
+%\\ & & \mbox{case on absurd neutral}
+\\
 \tcase^\C_\Gamma & : & \Ne {(A_1 + A_2)} \Gamma
 \\
-  &\to& \C\,\B\,(\cext \Gamma {A_1})
+  && {} \to \C\,\B\,(\cext \Gamma {A_1})
   \to \C\,\B\,(\cext \Gamma {A_2})
   \to \C\,\B\,\Gamma
-\\ &
-  & \mbox{case on neutral} \\
+%\\ & & \mbox{case on neutral}
+\\
 \trunNf[\C] & : & \C\,(\tNf A) \todot \tNf A
-\\ &
-  & \mbox{run the monad ($\tNf$ only)} \\
+%\\ & & \mbox{run the monad ($\tNf$ only)}
+\\
 \end{array}
 \]
 To make things concrete,
@@ -1301,7 +1324,7 @@ following rules:
   \nru{\ppair}
       {\PValT{P_1}\Gamma \qquad \PValT{P_2}\Gamma}
       {\PValTP{P_1 \times P_2}\Gamma}
-\qquad
+\\[2ex]
   \nru{\tinj_i}{\PValT{P_i}\Gamma}{\PValTP{P_1 + P_2}\Gamma}
 \end{gather*}
 
@@ -1317,6 +1340,9 @@ $N$.  This is justified by the monadic character of negative
 types, by virtue of $\trun^N$.  Finally, there are eliminators
 ($\tsplit$, $\tcase$, $\tabort$) for values of positive product and
 sum types.
+\begin{figure}[htbp]
+%\begin{ceqn}
+\hrulefill
 \begin{gather*}
   \nru{\tret}
       {\PValTm P \Gamma}
@@ -1325,14 +1351,14 @@ sum types.
   \nru{\tabs}
       {\Tm N {(\cext \Gamma P)}}
       {\TmP {P \To N} \Gamma}
+\\[2ex]
+  \nru{\nunit}
+      {}
+      {\Tm \top \Gamma}
 \quad
   \nru{\npair}
       {\Tm {N_1} \Gamma \qquad \Tm {N_2} \Gamma}
       {\TmP {N_1 \ntimes N_2} \Gamma}
-\quad
-  \nru{\nunit}
-      {}
-      {\Tm \top \Gamma}
 \\[2ex]
   \nru{\tforce}
       {\PValTmP {\Thunk N} \Gamma}
@@ -1341,7 +1367,7 @@ sum types.
   \nru{\tapp}
       {\TmP {P \To N} \Gamma \qquad \PValTm P \Gamma}
       {\Tm N \Gamma}
-\qquad
+\\[2ex]
   \nru{\tprj_i}
       {\TmP {N_1 \ntimes N_2} \Gamma}
       {\Tm {N_i} \Gamma}
@@ -1351,7 +1377,7 @@ sum types.
   \nru{\tbind}
       {\TmP {\Comp P} \Gamma \qquad \Tm N {(\cext \Gamma P)}}
       {\Tm N \Gamma}
-\qquad
+\\[2ex]
   \nru{\tsplit}
     {\PValTmP {P_1 \times P_2} \Gamma
       \qquad \Tm N {(\cext {\cext \Gamma P_1} P_2)}
@@ -1362,11 +1388,17 @@ sum types.
       \qquad \Tm N {(\cext \Gamma P_1)}
       \qquad \Tm N {(\cext \Gamma P_2)}
     }{\Tm N \Gamma}
-\qquad
+\\[2ex]
   \nru{\tabort}
     {\PValTm \tyzero \Gamma}
     {\Tm N \Gamma}
 \end{gather*}
+%\end{ceqn}
+\hrulefill
+  \caption{Terms of CBPV}
+  \label{fig:tmcbpv}
+\end{figure}
+
 
 Interpretation of values
 $\denty{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
@@ -1385,9 +1417,9 @@ put into the design of CBPV.
     (\dent{v_1}\gamma,\ \dent{v_2}\gamma) \\
   \dent{\inj i v}\gamma & = & \iota_i \dent v \gamma \\
   \dent{\tthunk\,t}\gamma & = & \dent t \gamma \\
-\end{array}
-\quad
-\begin{array}{lcl}
+% \end{array}
+% \quad
+% \begin{array}{lcl}
   \dent{\tabs\,t}\gamma
       & = & \fdent t \gamma \\
   \dent{\tapp\,t\,v} \gamma & = &
@@ -1445,7 +1477,7 @@ contain negative normal forms.
   \nru{\ppair}
       {\PValNf{P_1}\Gamma \qquad \PValNf{P_2}\Gamma}
       {\PValNfP{P_1 \times P_2}\Gamma}
-\qquad
+\\[2ex]
   \nru{\tinj_i}{\PValNf{P_i}\Gamma}{\PValNfP{P_1 + P_2}\Gamma}
 \end{gather*}
 
@@ -1461,7 +1493,7 @@ $\Thunk N \in \Gamma$.
   \nru{\tprj_i}
       {\NeP {N_1 \ntimes N_2} \Gamma}
       {\Ne {N_i} \Gamma}
-\qquad
+\\[2ex]
   \nru{\tapp}
       {\NeP {P \To N} \Gamma \qquad \PValNf P \Gamma}
       {\Ne N \Gamma}
@@ -1493,7 +1525,7 @@ arbitrary presheaf.
        \qquad \Cover \J (\cext \Gamma {P_2})
       }
       {\Cover \J \Gamma}
-\qquad
+\\[2ex]
   \nru{\tabort}
       {\tyempty \in \Gamma}
       {\Cover \J \Gamma}
@@ -1518,7 +1550,7 @@ of a base neutral ($\tNe\,\natom$) or a normal value.
   \nru{\npair}
       {\Nf {N_1} \Gamma \qquad \Nf {N_2} \Gamma}
       {\NfP {N_1 \ntimes N_2} \Gamma}
-\qquad
+\\[2ex]
   \nru{\tabs}
       {\Nf N {\cext \Gamma P}}
       {\NfP {P \To N} \Gamma}
@@ -1570,23 +1602,24 @@ In the following definition of reflection we use the abbreviation
     \; (\tmap\;\iota_1\;\tfresh^{P_1}_\Gamma)
     \; (\tmap\;\iota_2\;\tfresh^{P_2}_\Gamma)
     \\
-  \upG{\Thunk N} & x & = & \treturn\,(\upG N (\tforce\,x)) \\
-\end{array}
-\,
-\begin{array}{lcl}
-  \down P & : & \den P \todot \tVNf\,P \\
-  \down {\patom} & = & \tvar \\
-  \downG {\tyone} () & = & \punit \\
-  \downG {P_1 \times P_2}(a_1,a_2) & = & \ppair
+  \upG{\Thunk N} & x & = & \treturn\,(\upG N (\tforce\,x))
+\\[2ex]
+% \end{array}
+% \,
+% \begin{array}{lcl}
+    \multicolumn 2 l {\down P} & : & \den P \todot \tVNf\,P \\
+  \down {\patom} & & = & \tvar \\
+  \downG {\tyone} & () & = & \punit \\
+  \downG {P_1 \times P_2} & (a_1,a_2) & = & \ppair
     \,(\downG {P_1} a_1)
     \,(\downG {P_2} a_2)
     \\
-  \down {\tyzero} & = & \tmagic \\
-  \down {P_1 + P_2} & = &
+  \down {\tyzero} & & = & \tmagic \\
+  \down {P_1 + P_2} & & = &
     [  \tinj_1 \comp \down{P_1}
     ,\ \tinj_2 \comp \down{P_2}
     ] \\
-  \down {\Thunk N} & = & \tthunk \circ \down N \\
+  \down {\Thunk N} & & = & \tthunk \circ \down N \\
 \end{array}
 \]
 Reflection at positive pairs uses monoidal functoriality
@@ -1608,8 +1641,10 @@ $c_1 \star c_2 =
 
 For negative types, reflection and reification works as before:
 \[
+\renewcommand{\left}{}
+\renewcommand{\right}{}
 \def\arraystretch{1.3}
-\begin{array}{l@{\,}l@{~~}c@{~~}l}
+\begin{array}{llcl} %{l@{\,}l@{~~}c@{~~}l}
   \multicolumn 2 l {\up N} & : & \tNe\,N \todot \den N \\
   \upG {\Comp P} & u & = & \tbind\,u\,\tfresh^P_\Gamma \\
   \upG \natom    & u & = & \treturn\,u \\
@@ -1618,10 +1653,11 @@ For negative types, reflection and reification works as before:
     \upG {N_1} \; (\prj 1 u)
     ,\
     \upG {N_2} \; (\prj 2 u)
-    \right) \\
-\end{array}
-\
-\begin{array}{l@{\,}l@{~~}c@{~~}l}
+    \right)
+\\[2ex]
+% \end{array}
+% \
+% \begin{array}{l@{\,}l@{~~}c@{~~}l}
   \multicolumn 2 l {\down N} & : & \den N \todot \tNf\;N \\
   \downG {\Comp P} & c  & = & \tmap\;(\down P)\;c \\
   \downG \natom    & c  & = & \tne\,c \\
@@ -1636,10 +1672,13 @@ Reflection for function types is also unchanged, except that $\tapp$
 expects a value argument now.
 \[
 \def\arraystretch{1.3}
+\renewcommand{\left}{\,}
+\renewcommand{\right}{}
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
   \upG {P \To N} & u & = & \lambda
-    \;(\tau : \Gamma \sublist \Delta)
-    \;(a : \den P \Delta)
+    \; \tau \; a
+    % \;(\tau : \Gamma \sublist \Delta)
+    % \;(a : \den P \Delta)
     . \
     \up[\Delta] N \left( \tapp\,(\tren\,\tau\,u)\,(\down[\Delta] P a) \right)
     \\
@@ -1647,12 +1686,13 @@ expects a value argument now.
     \stmap
       \left(
         \lambda
-          \;(\tau : (\cext \Gamma P) \sublist \Delta)
-          \;(a : \den P \Delta)
+          \; \tau \; a
+          % \;(\tau : (\cext \Gamma P) \sublist \Delta)
+          % \;(a : \den P \Delta)
           . \
           f\; (\twk^P \rcomp \tau)\; a
         \right)
-      \,\tfresh^P_\Gamma
+      \;\tfresh^P_\Gamma
     \right) \right)
     \\
 \end{array}
@@ -1749,19 +1789,19 @@ inductively constructed by the following rules:
       {\J\,(\cext \Gamma \patom)}
       {\AddHyp {\patom} \J \Gamma}
 \qquad
+  \nru{\nhyp}
+      {\J\,(\cext \Gamma N)}
+      {\AddHyp {\Thunk N} \J \Gamma}
+\\[2ex]
   \nru{\nbranch}
       {}
       {\AddHyp {\tyzero} \J \Gamma}
-\qquad
+\quad
   \nru{\bbranch}
       {\AddHyp {P_1} \J \Gamma \qquad
        \AddHyp {P_2} \J \Gamma }
       {\AddHyp {P_1 + P_2} \J \Gamma}
 \\[2ex]
-  \nru{\nhyp}
-      {\J\,(\cext \Gamma N)}
-      {\AddHyp {\Thunk N} \J \Gamma}
-\qquad
   \nru{\nsplit}
       {\J\,\Gamma}
       {\AddHyp {\tyone} \J \Gamma}
@@ -1816,9 +1856,9 @@ lacks constructors $\tsplit$, $\tcase$ and $\tabort$
 since the pattern matching is taken care of by $\Add P$.
 \begin{gather*}
   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
-\qquad
+\quad
   \nru{\tbind}
-      {\NeP {\Comp P} \Gamma \qquad \AddHypP P {\Cov\,\J} \Gamma}
+      {\NeP {\Comp P} \Gamma \quad \AddHypP P {\Cov\,\J} \Gamma}
       {\Cover \J \Gamma}
 \end{gather*}
 
@@ -1829,22 +1869,26 @@ mutual induction.  Yet, in Agda, the generic proof goes through using a sized
 typing for these inductive families.  Similarly, defining the
 $\tjoin$ for monad $\Cov$ relies on sized typing \cite{abel:PhD}.
 \[
-\begin{array}{lll}
+\renewcommand{\left}{}
+\renewcommand{\right}{}
+\begin{array}{lcl}
   \tjoin & : & \forall i.\
     \Cov[i]\,(\Cov[\infty]\J) \todot \Cov[\infty]\J  \\
   \tjoin[i+1]\,(\treturn[i]\;c) & = & c \\
   \tjoin[i+1]\,(\tbind^i\;t\;k)
     & = & \tbind^\infty\;
      (t : \Ne P \Gamma)\;
+\\ \multicolumn 3 {@{\qquad}l} {
      \left(\stmap[\Add P]_\Gamma\;\tjoin[i]\;
        \left(k : \AddHypP P {\Cov[i]\J} \Gamma
        \right)
      \right)
+}
 \end{array}
 \]
 Herein, we used the sized typing of the constructors of $\Cov$:
 \[
-\begin{array}{lll}
+\begin{array}{l@{~~}l@{~~}l}
   \treturn & : & \forall i.\ \J \todot \Cov[i+1] \J \\
   \tbind  & : & \forall i.\
     \tNe\,(\Comp P) \todot \Add P\,(\Cov[i]\J) \todot \Cov[i+1]\J \\
@@ -1861,6 +1905,8 @@ as a higher-order function expecting a continuation $k$ which is
 invoked for each generated branch with the semantic value of type $P$
 constructed for this branch.
 \[
+\renewcommand{\left}{}
+\renewcommand{\right}{}
 \begin{array}{l@{~}lcl}
   \reflect {\patom} & k & = &
     \phyp \left( k\;\twk^{\patom}\,(\pvar\,\tzero) \right) \\
@@ -1869,13 +1915,16 @@ constructed for this branch.
   \reflect {\tyzero} & k & = & \nbranch \\
   \reflect {P_1 + P_2} & k & = & \bbranch
     \,\left( \treflect^{P_1}\,(\lambda\,\tau. \ k\,\tau \comp \iota_1) \right)
+\\ &&& \qquad \quad \ \,
     \,\left( \treflect^{P_2}\,(\lambda\,\tau. \ k\,\tau \comp \iota_2) \right)
     \\
   \reflect{\tyone} & k & = & \nsplit\;(k\;\tid\;\ttempty) \\
   \reflect{P_1 \times P_2} & k & = & \bsplit
     \,\left(
       \treflect^{P_1} \left( \lambda\,\tau_1\,a_1. \
+\\ &&& \qquad \ \
       \treflect^{P_2} \left( \lambda\,\tau_2\,a_2. \
+\\ &&& \qquad \ \
         k\, (\tau_1 \rcomp \tau_2)\, (\tren\,\tau_2\,a_1, \ a_2)
         \right)
       \right)
@@ -1989,7 +2038,7 @@ necessary changes to the binders $\tabs$ and $\tbind$.
   \nru{\tabs}
       {\AddHypP P {\tTm\, N} \Gamma}
       {\TmP {P \To N} \Gamma}
-\qquad
+\\[2ex]
   \nru{\tbind}
       {\TmP {\Comp P} \Gamma \qquad \AddHypP P {\tTm\,N} \Gamma}
       {\Tm N \Gamma}
@@ -1997,8 +2046,14 @@ necessary changes to the binders $\tabs$ and $\tbind$.
 Term interpretation
 \fbox{$\denty\_ : \Tm N \Gamma \to \den \Gamma \todot \den N$}
 shall be as for CBPV except that we need to exchange the
-interpretation function for binders \fbox{$\fden\_ : \Tm N {(\cext
-    \Gamma P)} \to \den \Gamma \todot \den{P \To N}$}.  Since a binder
+interpretation function for binders
+%\fbox{$
+\[
+\fden\_ : \Tm N {(\cext
+    \Gamma P)} \to \den \Gamma \todot \den{P \To N}
+.\]
+%$}.
+Since a binder
 for $P$ performs a maximal splitting on $P$ and takes the form of a
 function defined by a case (and split) tree,
 applying it to a value $v$ of type $P$ amounts to a complete
@@ -2012,14 +2067,17 @@ $\Evvv \J \Delta \Gamma = \den \Gamma \Delta \to \J\,\Delta$.
     \AddHypP P {\Evv \J \Delta} \todot \Evv \J \Delta }\\
   \tmatch & x & (\phyp\,e) & \gamma & = & e\,(\gamma,\; \treturn\,x) \\
   \tmatch & b & (\nhyp\,e) & \gamma & = & e\,(\gamma,\; b) \\
-  \tmatch & \ttempty & (\nsplit\,e) & \gamma & = & e\,\gamma \\
-  \tmatch & (a_1,a_2) & (\bsplit\,e) & \gamma & = &
-    \tmatch\;a_1\;(\tmap[\Add P]\,(\tmatch\;a_2)\;e)\;\gamma \\
   \tmatch & a & \nbranch & \gamma & = & \tmagic\;a \\
   \tmatch & (\iota_1\;a_1) & (\bbranch\;e_1\;e_2) & \gamma & = &
     \tmatch\;a_1\;e_1\;\gamma \\
   \tmatch & (\iota_2\;a_2) & (\bbranch\;e_1\;e_2) & \gamma & = &
     \tmatch\;a_2\;e_2\;\gamma \\
+  \tmatch & \ttempty & (\nsplit\,e) & \gamma & = & e\,\gamma \\
+  \tmatch & (a_1,a_2) & (\bsplit\,e) & \gamma & = &
+\\ \multicolumn 6 {@{\qquad}l}{
+    \tmatch\;a_1\;(\tmap[\Add P]\,(\tmatch\;a_2)\;e)\;\gamma
+}
+\\
 \end{array}
 \]
 With instantiations $\J = \den N$ and
@@ -2027,17 +2085,18 @@ $\denty\_ : \Tm N \todot \Evv {\den N} \Delta$,
 the interpretation $\fden t$
 of binder $t : \AddHypP P {\tTm\,N} \Gamma$
 is defined as follows:
-\[
+\begin{multline*}
   \fdent{t}
     {(\gamma : \den \Gamma \Delta)}
     \, (\tau : \Delta \sublist \Phi)
     \, (a : \den P \Phi)
     ~~=~~
+\\ \qquad
     \tmatch
       \; a
       \; (\tmap[\Add P]\;\denty\_\;t)
       \; (\tren\,\tau\,\gamma)
-\]
+\end{multline*}
 This completes the definition of the normalization function
 $\tnorm\, (t : \Tm N \Gamma)
   = \down N \dent t {\idenv\Gamma}$.

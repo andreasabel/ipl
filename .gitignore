@@ -253,10 +253,15 @@ medium.bib
 short.bib
 
 
+/github-pages-token.txt
+
+/src/Bug*
+/src/Issue*
+/src/html/
+
 /fscd19/acmart-master/
-/ppdp19/acmart-master/
 /fscd19/lipics-v2019-authors.tgz
 /fscd19/lipics-v2019-authors/
-/github-pages-token.txt
-/src/Bug*
-/src/html/
+
+/ppdp19/acmart-master/
+/ppdp19/comment.cut
