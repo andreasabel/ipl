@@ -178,20 +178,22 @@ The literal use of a standard interpreter
 can be achieved for the pure simply-typed lambda-calculus
 \cite{bergerSchwichtenberg:lics91,filinski:semaccounttdpe}
 by modelling uninterpreted base types as sets of neutral (aka atomic)
-terms, or more precisely, as presheaves or sets of neutral term
-families, in order to facilitate fresh bound variable generation during
+terms.   More precisely, base types are interpreted
+as presheaves or sets of neutral term
+families, in order to facilitate the generation of
+fresh variables of base type during
 reification of functions to lambdas.
 Thanks to $\eta$-equality at function types, free variables of
-function type can be reflected into the semantics as functions
+\emph{function} type can be reflected into the semantics as functions
 applying the variable to their reified argument,
 forming a neutral term.  This mechanism provides us with unknowns of
-function type which can be faithfully reified to normal forms.
+base and function type which can be faithfully reified to normal forms.
 % Since neutrals are closed under application to normal arguments, they
 % can act as unknown functions, storing the reified semantic argument
 % they are invoked with (thus, these unknowns are aka accumulators
 % \cite{gregoireleroy:icfp02}).
 
-For the extension to sum types (logically, disjunctions, and categorically,
+For the extension to \emph{sum} types (logically, disjunctions, and categorically,
 weak coproducts), this reflection trick does not work anymore.  A
 semantic value of binary sum type is either a left or a right
 injection, but the decision between left or right cannot be taken at
@@ -209,11 +211,13 @@ interpreter for each of the possible answers.
 A monadic semantic value is thus a \emph{case tree} where the leaves
 are occupied by non-monadic values \cite{altenkirchUustalu:flops04}.
 In this article we only consider weak sum types, producing non-unique
-normal forms, where it does not
-matter in which order the questions are asked (commuting case splits),
-and whether the same
-question is asked several times (redundant case splits).
-The model would need refinement for strong, extensional sums
+normal forms.  In particular, case trees are not normalized, allowing,
+\eg, redundant case splits (\ie, asking the same question twice).
+Further, the order of case splits is not normalized: changing the
+order in which the questions are asked (commuting case splits),
+alters the normal form.
+The model would need refinement for extensional sums (strong
+coproducts) with unique normal forms
 \cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17}.
 
 Filinski \cite{filinski:tlca01} studied NbE for Moggi's computational lambda
@@ -228,11 +232,11 @@ who designed the call-by-push-value (CBPV) lambda-calculus to embed
 both the CBN and CBV lambda calculus.
 
 In this work, we formulate NbE for CBPV
-(Section~\ref{sec:cbpv}), with the aim to investigate
-later whether CBN and CBV NbE can be recovered from CBPV NbE via the
-standard translations of the CBN and CBV calculi into CBPV.
-
-
+(Section~\ref{sec:cbpv}).
+% , with the aim to investigate
+% later whether CBN and CBV NbE can be recovered from CBPV NbE via the
+% standard translations of the CBN and CBV calculi into CBPV.
+%
 In contrast to the normal forms of CBN NbE, which is the algorithmic
 counterpart of the completeness proof for intuitionistic propositional
 logic (IPL) using Beth models, CBPV NbE gives us more restrained
@@ -394,13 +398,23 @@ propositional equality for all morphisms $\tau$.
 The singleton weakening $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$,
 also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
 
-By a \emph{presheaf} we will always mean a presheaf over the category $\Cxt\op$,
-i.e., a functor from $\Cxt$ to $\Set$.\footnote{With respect to the terms
-defined later, $\Cxt\op$ is to be seen as a category of contexts and those
-substitutions given by weakening.}  For example, given any type $A$, we can
-consider $A{\in}\_$ as such a presheaf, with action on objects mapping $\Gamma$
-to the set $A \in \Gamma$ of indices of $A$ in $\Gamma$ and action on morphisms
-witnessed by $\treindex : \Gamma \sublist \Delta \to A \in \Gamma \to A \in
+In category theory, a presheaf $\A$ over category $\bC$ is a contravariant
+functor from $\bC$ into the category $\Set$ of sets and functions, \ie, a
+(covariant) functor from the category $\bC\op$ with flipped morphisms
+to $\Set$.
+In this paper, we are only interested in (covariant) functors from $\Cxt$ to
+$\Set$, thus,
+by a \emph{presheaf} we will always mean a presheaf over the category $\Cxt\op$.
+% i.e., a functor from $\Cxt$ to $\Set$.
+% \footnote{With respect to the terms
+% defined later, $\Cxt\op$ is to be seen as a category of contexts and those
+% substitutions given by weakening.}
+For example, given any type $A$, we can
+consider $A{\in}\_$ as such a presheaf, with the action on objects mapping $\Gamma$
+to the set $A \in \Gamma$ of indices of $A$ in $\Gamma$, and the action on morphisms
+% witnessed by
+being
+$\treindex : \Gamma \sublist \Delta \to A \in \Gamma \to A \in
 \Delta$.  The associated functor laws $\treindex\,\tid\,x \equiv x$ and
 $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv \treindex\,(\tau_1 \rcomp
 \tau_2)\,x$ hold propositionally.
@@ -408,7 +422,7 @@ $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv \treindex\,(\tau_1 \rcomp
 \subsection{STLC and its normal forms}
 
 Simple types shall be distinguished into positive types $P$ and
-negative types $N$, depending on their root type former.  Function
+negative types $N$, depending on their root type former (for now).  Function
 ($\To$) and product types ($\times$ and $\tyone$) are negative,
 while base types ($\tybase$) and sum types ($+$ and $\tyzero$) are positive.
 \[
@@ -543,7 +557,7 @@ term constructors.
       \qquad \NfC P {\cext \Gamma A_1}
       \qquad \NfC P {\cext \Gamma A_2}
     }{\Nf P \Gamma}
-\\[2ex]
+\\[1ex]
   \nru{\tabort}
     {\Ne \tyzero \Gamma}
     {\Nf P \Gamma}
@@ -586,6 +600,21 @@ Slightly abusive, we shall extend this notation to $n$-ary
 morphisms, \eg, write $\A \todot \B \todot \C$ for
 $\forall \Gamma.\ \A\,\Gamma \to (\B\,\Gamma \to \C\,\Gamma)$.
 
+We use the \fbox{$\forall$} quantifier as implicit dependent function
+type former in our meta-language,
+similar to the polymorphic quantifier in functional
+programming languages such as Haskell.  We may instantiate a
+polymorphic function such as $f : \A \todot \B$ silently, \eg, when $a
+: \A\,\Gamma$ then $f\,a : \B\,\Gamma$.  For clarity, we may sometimes
+provide the instantiation explicitely via subscript, \eg, $f_\Gamma :
+\A\,\Gamma \to \B\,\Gamma$ and $f_\Gamma\,a : B\,\Gamma$.  Similarly,
+to introduce a polymorphic function we may provide the implicit
+abstraction as subscript, such as in
+$\lambda\,{}_\Gamma\, a.\ b : \A \todot \B$ or
+$\lambda\,{}_\Gamma\, (a : \A\,\Gamma).\ b : \A \todot \B$, or
+omit it, \eg,
+$\lambda\,(a : \A\,\Gamma).\ b : \A \todot \B$.
+
 \begin{remark}
 While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
 normal forms of positive types $P$, their extension $\tcase^B$ and
@@ -600,7 +629,7 @@ is admissible, for instance:
 % \qquad
 % \begin{array}{l@{~}lcl}
 %   \\
-  \tabort^{A \times B} & u & = & \tpair\,(\tabort^A\,u)\,(\tabort^B\,u) \\
+  \tabort^{A_1 \times A_2} & u & = & \tpair\,(\tabort^{A_1}\,u)\,(\tabort^{A_2}\,u) \\
   \tabort^{A \To B}    & u & = & \tabs\,(\tabort^B\,(\tren\,\twk^A\,u)) \\
 \end{array}
 % \begin{array}{l@{~}lcl}
@@ -636,8 +665,8 @@ Normalization is concerned with finding a normal form
 $n : \Nf A \Gamma$ for each term $t : A \from \Gamma$.
 The normal form should be \emph{sound},
 \ie, $\tm n \cong t$
-with respect to an equational theory $\cong$ on terms
-(see \cref{sec:eq}).
+with respect to an equational theory $\cong$ on terms%
+. %(see \cref{sec:eq}).
 Further, normalization should decide $\cong$, \ie,
 terms $t,t'$ with $t \cong t'$ should have the same normal form $n$.
 In this article, we implement only the normalization function
@@ -679,12 +708,19 @@ From a logical perspective, we will compute for each derivation of $A
 %\)}
 decomposes normalization into
 \emph{evaluation}
-\nofbox{$\denty\_ : (t : A \from \Gamma) \to \den \Gamma \todot
-  \den A$}
-in the identity environment \nofbox{$\idenv\Gamma : \den \Gamma \Gamma$}
+\[%\nofbox{$
+\denty\_ : (t : A \from \Gamma) \to \den \Gamma \todot
+  \den A
+\]%$}
+in the identity environment
+\[%\nofbox{$
+\idenv\Gamma : \den \Gamma \Gamma
+\]%$}
 followed by
 \emph{reification}
-\nofbox{$\down A : \den A \todot \tNf A$}
+\[%\nofbox{$
+\down A : \den A \todot \tNf A
+\]%$}
 (aka quoting).
 The role of evaluation is to produce from a term the corresponding
 semantic (\ie, meta-theoretic) function, which is finally reified to a normal form.
@@ -708,7 +744,7 @@ is written $S_1 \btimes S_2$ with projections $\pi_i : S_1 \btimes S_2
 $\iota_i : S_i \to S_1 \bplus S_2$ and elimination $[f_1,f_2] : S_1 \bplus
 S_2 \to T$ for arbitrary $f_i : S_i \to T$.
 
-Presheaves (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
+Presheaf (co)products $\hat0$, $\hat1$, $\hatplus$, and $\hattimes$ are
 constructed pointwise, \eg, $\hat0\,\Gamma = \bzero$, and given two
 presheaves $\A$ and $\B$,
 $(\A \hatplus \B)\,\Gamma = \A\,\Gamma \bplus \B\,\Gamma$.  For the
@@ -720,25 +756,25 @@ $(\A \hatto \B)\,\Gamma = \forall \Delta.\, \Gamma \sublist \Delta
 We will interpret simple types $A$ as corresponding presheaves
 $\den A$.  Let us start with the negative types, defining
 reflection $\up A : \tNe\, A \todot \den A$
-and reification $\down A : \den A \todot \tNf A$ along the way.
+and reification $\down A : \den A \todot \tNf\, A$ along the way.
 \[
 \def\arraystretch{1.3}
 \begin{array}{lcl}
   \den   \tyone             & = & \hatone \\
   \upG   \tyone \; u        & = & \ttempty \\
-  \downG \tyone \; \ttempty & = & \tunit \\[1ex]
+  \downG \tyone \; \ttempty & = & \tunit \\[2ex]
 % \end{array}
 % \qquad\qquad\qquad
 % \begin{array}{lcl}
   \den   {A \times B}       & = & \den A \hattimes \den B \\
   \upG   {A \times B} \; u  & = & (\upG A (\prj1 u),\;\upG B (\prj2 u)) \\
-  \downG {A \times B} (a,b) & = & \tpair\,(\downG A a)\,(\downG B b) \\[1ex]
+  \downG {A \times B} (a,b) & = & \tpair\,(\downG A a)\,(\downG B b) \\[2ex]
 % \end{array}
 % \]
 % \[
 % \begin{array}{lcl}
   \den {A \To B}    & = & \den A \hatto \den B \\
-  \upG   {A \To B}\; u & = & \lambda \, (\tau : \Gamma \sublist \Delta) \; a %(a : \den A \Delta)
+  \upG   {A \To B}\; u & = & \lambda \, {}_\Delta \, (\tau : \Gamma \sublist \Delta) \, a %(a : \den A \Delta)
      .\ \up[\Delta] B (\tapp\;(\tren\,\tau\, u)\;(\down[\Delta] A a)) \\
   % \upG   {A \To B}    \; u \; (\tau : \Gamma \sublist \Delta) \; a %(a : \den A \Delta)
   %    & = & \up[\Delta] B (\tapp\;(\tren\,\tau\, u)\;(\down[\Delta] A a)) \\
