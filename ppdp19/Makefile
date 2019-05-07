@@ -17,9 +17,10 @@ bibtool=bibtool -q \
 	  -- 'delete.field = { isbn }' \
 	  -- 'delete.field = { url }' \
 	  -- 'delete.field = { note }' \
-	  -- 'delete.field = { pages }' \
-	  -- 'delete.field = { editor }'
 
+
+#	  -- 'delete.field = { pages }' \
+#	  -- 'delete.field = { editor }' \
 #	  -- 'delete.field = { doi }' \
 #	  -- 'delete.field = { publisher }' \
 #
@@ -28,8 +29,10 @@ catcfg=sed -e "s/%.*//g" <
 latex=latex
 pdflatex=pdflatex -halt-on-error
 #pdflatex=pdflatex -interaction=batchmode
-bibliography=short.bib
+
+# bibliography=short.bib
 # bibliography=medium.bib
+bibliography=all.bib
 
 # stdlib=$(HOME)/agda/std-lib/src
 
