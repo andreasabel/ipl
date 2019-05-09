@@ -1311,16 +1311,17 @@ types $N$
 yet we shall stick to our terminology
 which is common in publications on focalization.
 However, we shall use $\tThunk$ for switch $\downarrow$ and $\tComp$ for
-switch $\uparrow$.
+switch $\uparrow$, to avoid confusion with our notation for reflection
+and reification.
 \[
 \begin{array}{l@{~~}l@{~~}l@{~~}r@{~~}l}%@{\qquad}l}
-  \PTy & \ni & P,Q & ::= & \patom
+  \PTy & \ni & P & ::= & \patom
     \mid \tyone \mid P_1 \times P_2
     \mid \tyzero \mid P_1 + P_2
     \mid \Thunk N
 %  & \mbox{positive type}
 \\
-  \NTy & \ni & N,M & ::= & \natom
+  \NTy & \ni & N & ::= & \natom
     \mid \top \mid N_1 \ntimes N_2
     \mid P \To N
     \mid \Comp P
@@ -1330,7 +1331,8 @@ switch $\uparrow$.
 \]
 CBPV uses $U$ for $\tThunk$ and $F$ for $\tComp$, however, we find
 these names uninspiring unless you have good knowledge of the intended
-model.  Further, CBPV employs labeled sums $\Sigma_I (P_i)_{i : I}$
+model.  Further, CBPV \cite{levy:hosc06}
+employs labeled sums $\Sigma_I (P_i)_{i : I}$
 and labeled records $\Pi_I (P_i)_{i : I}$ for up to countably infinite
 label sets $I$ while we only have finite sums $(\tyzero,+)$ and
 records $(\top,\ntimes)$.  However, this difference is not essential,
@@ -1369,11 +1371,11 @@ products.  Notably, sum types can now be interpreted as plain
 (pointwise) presheaf
 sums.  The $\tThunk$ marker is ignored, yet $\tComp$, marking the
 switch from the negative to the positive type interpretation, places
-the cover monad.  Positive atoms, standing for value types without
+the cover monad.  Positive atoms $\patom$, standing for value types without
 constructors, are only inhabited by variables $x : \patom \in \Gamma$.
-Negative atoms stand for computation types without own eliminations,
-thus, their inhabitants stem only from eliminations of more complex
-types, made from positive eliminations captured in $\C$ and negative
+Negative atoms $\natom$ stand for computation types without own eliminations.
+Thus, their inhabitants stem only from eliminations of more complex
+types.  They are built from positive eliminations captured in $\C$ and negative
 eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
 The method $\trunNf[\C]$ of cover monad $\C$ can be extended to
@@ -1412,7 +1414,7 @@ The terms of pure CBPV are given by the inductive family \fbox{$\Tm N \Gamma$}.
 It repeats the introductions and eliminations of negative types,
 except that application is restricted to values.  Values of type
 $\Thunk N$ are embedded via $\tforce$.
-Further, values of type $P$ can embedded
+Further, values of type $P$ can be embedded
 via $\tret$, producing a term of type $\Comp P$.  Such terms are
 eliminated by $\tbind$ which is, unlike the usual monadic bind, not
 only available for $\tComp$-types but for arbitrary negative types
@@ -1818,13 +1820,13 @@ discussed in the following section.
 
 % \[
 % \begin{array}{lllrl@{\qquad}l}
-%   \PTy & \ni & P,Q & ::= & \patom
+%   \PTy & \ni & P & ::= & \patom
 %     \mid \tyzero \mid P_1 + P_2
 %     \mid \tyone \mid P_1 \times P_2
 %     \mid \Thunk N
 %   & \mbox{positive type}
 % \\
-%   \NTy & \ni & N,M & ::= & \natom
+%   \NTy & \ni & N & ::= & \natom
 %     \mid \top \mid N_1 \ntimes N_2
 %     \mid P \To N
 %     \mid \Comp P
