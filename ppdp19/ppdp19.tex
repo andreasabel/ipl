@@ -615,7 +615,8 @@ $\lambda\,{}_\Gamma\, (a : \A\,\Gamma).\ b : \A \todot \B$, or
 omit it, \eg,
 $\lambda\,(a : \A\,\Gamma).\ b : \A \todot \B$.
 
-\begin{remark}
+\begin{remark}[Positive eliminations into negative types]
+\label{rem:abort}
 While the coproduct eliminations $\tcase$ and $\tabort$ are limited to
 normal forms of positive types $P$, their extension $\tcase^B$ and
 $\tabort^B$ to negative types
@@ -833,7 +834,7 @@ the neutral $u : \Ne {(A \To B)} \Gamma$ is
 transported into $\Ne {(A \To B)} \Delta$ via reindexing with
 $\tau : \Gamma \sublist \Delta$, in order to be applicable to the normal form
 $\down[\Delta]A a$
-reified from the semantic value $a$.
+reified from the semantic value $a : \den A \Delta$.
 
 A direct extension of our presheaf semantics to positive types cannot
 work.  For instance, with $\den \tyzero = \hat0$, simply
@@ -852,7 +853,7 @@ Not even the usual interpretation of base types $\den o = \tNe\,o$
 works in the presence of sums, as we would not be able to interpret
 the term
 $\tabs\,(\tcase\,\vv0\,\vv0\,\vv0) :
-(o+o) \To o$ in our semantics, as $\Ne o (o+o)$ is empty.
+(o+o) \To o$ in our semantics, because $\Ne o (o+o)$ is empty.
 What is needed are case distinctions on neutrals in the semantics,
 allowing us the elimination of positive hypotheses before producing a
 semantic value,
@@ -870,8 +871,9 @@ $\tjoin[\C] : \C\,(\C\,\A) \todot \C\,\A$ (multiplication)
 satisfying
 the monad laws.
 
-We are looking for a cover monad $\C$ that
-offers us these services:
+We are looking for a monad $\C$, called a \emph{cover monad}, that
+takes the role of the \emph{oracle} alluded to in the introduction,
+and offers us these services:
 % \begin{enumerate}
 % \item Elimination of absurd neutrals
 % $\tabort^\C : \tNe\, \tyzero \todot \C\,\A$.
@@ -885,6 +887,9 @@ offers us these services:
 % \end{enumerate}
 \[
 \begin{array}{l@{~}c@{~}l@{\quad}l}
+\trunNf[\C] & : & \C\,(\tNf\, P) \todot \tNf\, P
+%\\ & & \mbox{run the monad ($\tNf$ only)}
+\\
 \tabort^\C & : & \tNe\, \tyzero \todot \C\,\B
 %\\ & & \mbox{case on absurd neutral}
 \\
@@ -895,20 +900,44 @@ offers us these services:
   \to \C\,\B\,\Gamma
 %\\ & & \mbox{case on neutral}
 \\
-\trunNf[\C] & : & \C\,(\tNf A) \todot \tNf A
-%\\ & & \mbox{run the monad ($\tNf$ only)}
-\\
 \end{array}
 \]
-To make things concrete,
-we shall immediately construct an instance of such a cover monad:
+Method $\trunNf[\C]$ enables us to \emph{run} a monadic computation of
+a normal form, $\C\,(\tNf\,P)\,\Gamma$, and delivers a normal form
+$\Nf P \Gamma$.  However, $\trunNf[\C]$ is not just the inverse of
+$\treturn[\C]$; instead, the information contained in $\C$ is reified and
+becomes part of the normal form delivered by $\trunNf[\C]$.
+
+Method $\tabort^\C_\Gamma$ allows us to end a computation by exhibiting an
+inconsistency witnessed by a neutral term $u : \Nf A \Gamma$.
+Remember that, ultimately, computations in $\C$ produce a normal form
+extracted by $\trunNf[\C]$.  With $\tabort^\C$ we notify the oracle
+that we are in an absurd case and the desired normal form can be
+trivially constructed by the $\tabort$-function of \Cref{rem:abort}.
+
+Method $\tcase^\C_\Gamma$ allows us, in a computation
+$\C\,\B\,\Gamma$,
+to ask the oracle about a neutral
+term $\NeP{A_1 + A_2}\Gamma$ of sum type.  We have to supply
+handlers for both possible answers:
+A computation $\C\,\B\,(\cext\Gamma{A_1})$ that can utilize an
+additional hypothesis of type $A_1$ in the case of a left injection,
+and analogously a computation $\C\,\B\,(\cext\Gamma{A_2})$ for the
+case of a right injection.
+
+The similarity of the monad services $\tabort^\C$ and $\tcase^\C$ to
+the corresponding constructors for normal forms, or their
+generalization of \Cref{rem:abort}, is hard to miss.
+Unsurprisingly, just \emph{case trees} are a first instance of a cover monad,
+% To make things concrete,
+% we shall immediately construct an instance of such a cover monad:
 the free cover monad
 $\Cov$ defined
 %inductively by
 as an inductive family with constructors
 $\treturn[\Cov]$, $\tabort^{\Cov}$, and
 $\tcase^{\Cov}$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
-binary case tree whose inner nodes ($\tcase$) are labeled by a neutral term
+binary case tree whose inner nodes ($\tcase$) are labeled by neutral terms
 of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
 and $A_2$, resp.  Leaves are either
 labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
@@ -988,24 +1017,25 @@ At negative types we can recurse pointwise at a smaller type,
 exploiting that values of negative types are essentially
 (finite or infinite) tuples.
 \[
-\begin{array}{ll@{~~}cl}%{l@{~}l@{~~}c@{~~}l}
+\begin{array}{l@{~~}l@{~~}c@{~~}l}%{l@{~}l@{~~}c@{~~}l}
   \multicolumn 4 l {\trun^A ~:~ \C \den A \todot \den A} \\
+  \trun^P & c & = & \tjoin[\C]\;c \\
   \trun^{\tyone} & c & = & \ttempty
     \\
   \trun^{A \times B} & c & = &
       (\trun^A\,(\tmap[\C]\;\pi_1\;c),\
        \trun^B\,(\tmap[\C]\;\pi_2\;c))
   \\
-  \trun^{A \To B} & c  & = & \lambda \,\tau \; a. \ \trun^B\,
-      (\stmap[\C]\;(\lambda\;\tau'\,f.\;f\;\tid\;(\tren\;\tau'\;a))
+  \trun^{A \To B} & c  & = & \lambda\,_\Delta \,\tau \; a. \ \trun^B\,
+      (\stmap[\C]\;(\lambda\,_\Phi\;\tau'\,f.\;f\;\tid\;(\tren\;\tau'\;a))
   \\ &&& \qquad \qquad (\tren\;\tau\;c))
   \\
-  \trun^{o}      & & = & \tjoin[\C]
-  \\
-  \trun^{\tyzero} & & = & \tjoin[\C]
-  \\
-  \trun^{A + B}   & & = & \tjoin[\C]
-  \\
+  % \trun^{o}      & & = & \tjoin[\C]
+  % \\
+  % \trun^{\tyzero} & & = & \tjoin[\C]
+  % \\
+  % \trun^{A + B}   & & = & \tjoin[\C]
+  % \\
 \end{array}
 \]
 For the case of function types $A \To B$, we require the monad $\C$ to be
@@ -1023,10 +1053,10 @@ $\den{A \to B} \todot \den B$, \ie, something that works in \emph{any}
 context.  However, applying to $a : \den A \Delta$ can only work in
 context $\Delta$ or any extension $\tau' : \Delta \sublist \Phi$,
 since we can transport $a$ to such a $\Phi$ via
-$a' := \tren\; \tau'\; a : \den A \Phi$ but not to a context unrelated to
+$a' := \tren\; \tau'\; a : \den A \Phi$, but not to a context unrelated to
 $\Delta$.  We obtain our input to $\trun^B$ of type $\C \den B \Gamma$
 as an instance of $\stmap[\C]_\Gamma$ applied to the local presheaf morphism
-$(\lambda \; \tau'\, f. \  f\;\tid\;a') :
+$(\lambda\,_\Phi \; \tau'\, f. \  f\;\tid\;a') :
 \Delta \sublist \Phi \to  \den{A \To B}\Phi \to \den B \Phi$
 % (\tau' : \Delta \sublist \Phi) (f : \den{A \To B}\Phi) \to \den B \Phi$
 and the transported cover $\tren\;\tau\;c : \C\den{A \To B}\Delta$.
@@ -1081,7 +1111,8 @@ mutually defined $\fden{\_}$.
   \fden{t : B \from \cext \Gamma A}
     : \den \Gamma \todot \den{A \To B} \\
     \quad =
-      \lambda\, (\gamma : \den \Gamma \Delta)
+      \lambda\,_\Delta\, (\gamma : \den \Gamma \Delta)
+      \,_\Phi
       \,(\tau : \Delta \sublist \Phi)
       \,(a : \den A \Phi)
       .\ \,
@@ -1108,7 +1139,7 @@ for any type $B$, and strong functoriality of $\C$.
     \todot \den{A_1 \To B}
     \todot \den{A_2 \To B}
     \todot \den{B} \\
-  \dencase^B & = & \lambda\,c\;f_1\;f_2.\
+  \dencase^B & = & \lambda\,c\,f_1\,f_2.\
     \trun^B (\stmap[\C]\;(\lambda\,\tau.\ [f_1\,\tau,\ f_2\,\tau])\;c) \\
 \end{array}
 \]
@@ -1123,6 +1154,15 @@ semantics, by recursion on $\Gamma$:
   \idenv {\cext \Gamma A} & = & (\tren\;\twk^A\,\idenv\Gamma, \  \tfresh^A_\Gamma)\\
 \end{array}
 \]
+We have obtained a computable function $\tnorm$ that yields for any
+derivation $A \from \Gamma$ a normal derivation $\Nf A \Gamma$.
+This amounts to proving
+consistency and canonicity of intuitionistic propositional logic, the
+Curry-Howard counterpart of our STLC with products and sums.
+The normalization function is parametrized by an arbitrary cover monad
+$\C$, which can be implemented via case trees ($\Cov$).  However,
+different implementations are possible.  In the next section, we exhibit
+another canonical choice for $\C$: the parameterized continuation monad on presheafs.
 
 \subsection{Continuation monad}
 
@@ -1133,59 +1173,63 @@ Filinski
 \cite[Section~3.2]{filinski:tlca01}
 already utilized the continuation monad for
 normalization by evaluation.
-In our setting, we use a continuation monad $\CC$ on presheaves
-defined as
+In our setting, we use a continuation monad $\CC$ on \emph{presheaves}
+$\B$ defined by
 % An alternative implementation of $\C$ is the continuation monad $\CC$
 % on presheaves as, for instance, employed by Ilik et al.\
 % \cite{ilikLeeHerbelin:apal10}
 % for Kripke models and NbE of classical logic.
 \[
-  \CC\;\J = \forall A.\ (\J \hatto \tNf\,A) \hatto \tNf\,A
+  \CC\;\B = \forall P.\ (\B \hatto \tNf\,P) \hatto \tNf\,P
   .
 \]
 The answer type of this continuation monad is always $\tNf$, however,
-we are polymorphic in the simple type $A$ of normal forms we produce.%
+we are polymorphic in the positive type $P$ of normal forms we produce.%
 
 Agda has been really helpful to produce the rather technical but
 straightforward evidence that $\CC$ is a strong monad.
-The method $\trunNf[\CC] : \CC\,(\tNf\,A) \todot \tNf\,A$
-exists by definition, using the identity continuation $\tNf\,A \hatto \tNf\,A$.
+The method $\trunNf[\CC] : \CC\,(\tNf\,P) \todot \tNf\,P$
+exists by definition, using the identity continuation $\tNf\,P \hatto \tNf\,P$.
 In the following, we demonstrate that $\CC$
 enables matching on neutrals:
 \[
+\renewcommand{\left}{}
+\renewcommand{\right}{}
 \begin{array}{l}
-  \tabort^{\CC} \, (u : \Ne \tyzero \Gamma) ~:~  \CC\,\J\,\Gamma \\
-  \tabort^{\CC}
+  \tabort^{\CC}_\Gamma \, (u : \Ne \tyzero \Gamma) ~:~  \CC\,\B\,\Gamma \\[0.2ex]
+  \tabort^{\CC}_\Gamma
     \; u
-    \; (\tau : \Gamma \sublist \Delta)
-    \; (k : (\J \hatto \tNf\,B)\Delta)
-     ~=~
+    \, _\Delta
+    \, (\tau : \Gamma \sublist \Delta)
+    \; (k : (\B \hatto \tNf\,P)\,\Delta)
+     ~=~ \\  \qquad
     \tabort\,(\tren\,\tau\,u)
 \\[2ex]
-  \tcase^{\CC}
-     \; (u : \NeP {A_1 + A_2} \Gamma) \\ \qquad \quad
-     \; (c_1 : \CC\,\J\,(\cext \Gamma {A_1}))
-     \; (c_2 : \CC\,\J\,(\cext \Gamma {A_2}))
-    ~:~ \CC\,\J\,\Gamma \\
-  \tcase^{\CC}
+  \tcase^{\CC}_\Gamma
+     \; (u : \NeP {A_1 + A_2} \Gamma) \, _\Delta \\ \qquad \quad
+     \; (c_1 : \CC\,\B\,(\cext \Gamma {A_1}))
+     \; (c_2 : \CC\,\B\,(\cext \Gamma {A_2}))
+    ~:~ \CC\,\B\,\Gamma \\
+  \tcase^{\CC}_\Gamma
     \; u
     \; c_1
     \; c_2
     \; (\tau : \Gamma \sublist \Delta)
-    \; (k : (\J \hatto \tNf\,B)\Delta)
+    \; (k : (\B \hatto \tNf\,P)\,\Delta)
      ~=~ \\  \qquad
     \tcase\;(\tren\,\tau\,u)\;n_1\;n_2
     \\ \qquad \bwhere \\
 \qquad
   \begin{array}{l@{~~}c@{~~}l}
-     n_i & : & \Nf B {(\cext \Delta {A_i})} \\
+     n_i & : & \Nf P {(\cext \Delta {A_i})} \\
      n_i & = & c_i
       \; (\tlift^{A_i}\,\tau
             : \cext \Gamma {A_i} \sublist \cext \Delta {A_i})
 \\ &&
       \; \left(\lambda
-            \; (\tau' : \cext \Delta {A_i} \sublist \Phi)
-            \; (j :  \J\,\Phi) .
+            \, _\Phi
+            \, (\tau' : \cext \Delta {A_i} \sublist \Phi)
+            \; (j :  \B\,\Phi) .
             \ k
             \; (\twk^{A_i} \rcomp \tau')
             \; j
@@ -1195,9 +1239,9 @@ enables matching on neutrals:
 \]
 The NbE algorithm using $\CC$ is comparable to Danvy's type-directed
 partial evaluation \cite[Figure~8]{danvy:popl96}.  However, he uses
-shift-reset style continuations which can be programmed in the
+shift-reset style continuations, which can be programmed in the
 continuation monad, and relies on Scheme's \texttt{gensym} to produce
-fresh variables names rather than using Kripke function space / presheaves.
+fresh variables names rather than using the Kripke function space / presheaves.
 
 
 % \subsection{Term normalization}
