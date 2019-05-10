@@ -677,9 +677,19 @@ with respect to an equational theory $\cong$ on terms%
 . %(see \cref{sec:eq}).
 Further, normalization should decide $\cong$, \ie,
 terms $t,t'$ with $t \cong t'$ should have the same normal form $n$.
-In this article, we implement only the normalization function
+In this article, we present only the normalization function
 \fbox{$\tnorm : A \from \Gamma \to \Nf A \Gamma$}
-with proving its soundness and completeness.
+without proving its soundness and completeness.%
+\footnote{An Agda formalization of NbE for IPL with
+soundness-by-construction is listed at
+  \url{https://andreasabel.github.io/ipl/html/NbeModel.html}.
+It is demonstrated that normalization does not change the
+interpretation of a term as function in the meta-language.
+Instead of presheaves, we work with Kripke predicates there.
+The main contribution of our work, the utilization of a cover monad
+for NbE, is however more clearly presented by just constructing the
+normalization function, as we do in this article.
+}
 From a logical perspective, we will compute for each derivation of $A
 \from \Gamma$ a normal derivation $\Nf A \Gamma$.
 
