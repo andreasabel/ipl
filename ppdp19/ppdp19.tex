@@ -1,7 +1,10 @@
 %
 % The first command in your LaTeX source must be the \documentclass command.
-\documentclass[sigplan,screen,fleqn]{acmart}
-
+\documentclass[sigplan,screen,fleqn,review]{acmart} % review for draft
+%% DRAFT only:
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\sloppy
 
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -277,7 +280,8 @@ pattern matching using a separate context of variables to be matched
 on.
 
 Our design choices were guided by an Agda formalization of sections 2
-(complete) and 4 (partial), available at \url{https://github.com/andreasabel/ipl}.
+(complete, see \url{https://andreasabel.github.io/ipl/html/NfModelMonad.html})
+and 4 (partial, see \url{https://andreasabel.github.io/ipl/html-focusing/Polarized.html}).
 Agda was particularly helpful to correctly handle the renamings
 abundantly present when working with presheaves.
 
