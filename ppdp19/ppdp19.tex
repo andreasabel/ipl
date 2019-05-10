@@ -9,7 +9,8 @@
 
 %%\usepackage{nccmath} %ceqn  %% NOT COMPATIBLE
 
-\usepackage{cleveref}
+\usepackage{cleveref} % \cref \Cref
+%\usepackage{dashrule}
 
 % \hypersetup{draft}  %% debugging url pagebreaks
 
@@ -420,6 +421,7 @@ $\treindex\,\tau_2\,(\treindex\,\tau_1\,x) \equiv \treindex\,(\tau_1 \rcomp
 \tau_2)\,x$ hold propositionally.
 
 \subsection{STLC and its normal forms}
+\label{sec:stlc}
 
 Simple types shall be distinguished into positive types $P$ and
 negative types $N$, depending on their root type former (for now).  Function
@@ -660,6 +662,7 @@ the branches.
 % without any soundness guarantee.
 
 \subsection{Normalization}
+\label{sec:normstlc}
 
 %\emph{Normalization}
 Normalization is concerned with finding a normal form
@@ -997,7 +1000,10 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
 % \]
 %\end{gather*}
 
-The unwinding of the monad $\C$ via $\trunNf$ can be extended to a
+Since positive types $P$ have a monadic interpretation, there is a
+natural transformation $\C\,\den P \todot \den P$ which is simply
+$\tjoin[\C]$.  It
+can be extended to a
 natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
 type $A$, meaning we can \emph{run} the monad,
 pushing its effects into $\den A$.%
@@ -1011,8 +1017,6 @@ aka \emph{weak pasting}.}
 % type $A$.  In other words, we can \emph{run} the monad, pushing its
 % effects into $\den A$.
 We proceed by induction on $A$.
-Positive semantic types $\den P$ are already monadic,
-and $\trun^P$ is simply the $\tjoin$ of the monad $\C$.
 At negative types we can recurse pointwise at a smaller type,
 exploiting that values of negative types are essentially
 (finite or infinite) tuples.
@@ -1143,6 +1147,17 @@ for any type $B$, and strong functoriality of $\C$.
     \trun^B (\stmap[\C]\;(\lambda\,\tau.\ [f_1\,\tau,\ f_2\,\tau])\;c) \\
 \end{array}
 \]
+It is noteworthy that the interpreter $\denty{\_}$ does not use any of
+the services of the cover monad; in fact, it only requires the monad
+$\C$ to be strong.  The interpreter is completely \emph{generic} for
+the CBN monadic semantics of types.  This restores the spirit of STLC
+NbE for sum types:  Take an \emph{off-the-shelf} interpreter for terms,
+implement reflection and reification after interpreting base types as sets
+(presheaves) of neutrals, plug them together with the interpreter, and
+voila!, there is your normalizer!
+Our insight here is that \emph{off-the-shelf interpreter} means
+\emph{monadic} in the presence of positive types.
+
 To complete the normalization function
 $\tnorm\,(t : A \from \Gamma) = \downG A \dent t {\idenv \Gamma}$
 we define the identity environment $\idenv \Gamma : \den \Gamma \Gamma$,
@@ -1344,8 +1359,15 @@ anticipation of the next section, we add them as both positive atoms
 
 Getting a bit ahead of ourselves, let us consider the
 mutually defined interpretations
-$\den P$ and $\den N$ of positive and negative types as presheaves.
-\[
+$\den P$ and $\den N$ of positive and negative types as presheaves
+(see \Cref{fig:tyint}).
+This interpretation is parametrized by a strong monad $\C$ on
+presheaves.
+\begin{figure}[htbp]
+\centering
+%\hrule width0.3\textwidth
+\hrulefill
+$$
 \begin{array}{lcl}
   \den{\tyone} & = & \hatone \\
   \den{P_1 \times P_2} & = & \den{P_1} \hattimes \den{P_2} \\
@@ -1353,34 +1375,37 @@ $\den P$ and $\den N$ of positive and negative types as presheaves.
   \den{P_1 + P_2} & = & \den{P_1} \hatplus \den{P_2} \\
   \den{\Thunk N} & = & \den N \\
   \den{\patom} & = & \patom{\in}\_ \\
-\end{array}
-%\qquad
-\]
-\[
-\begin{array}{lcl}
+\\
+% \end{array}
+% %\qquad
+% \begin{array}{lcl}
   \den{\top} & = & \hatone \\
   \den{N_1 \ntimes N_2} & = & \den{N_1} \hattimes \den{N_2} \\
-  \\
   \den{P \To N} & = & \den P \hatto \den N \\
   \den{\Comp P} & = & \C \den P \\
   \den{\natom}  & = & \C (\tNe\, \natom) \\
 \end{array}
-\]
+$$
+\hrulefill
+  \caption{Interpretation of polarized types}
+  \label{fig:tyint}
+\end{figure}
 Semantically, we do not distinguish between positive and negative
 products.  Notably, sum types can now be interpreted as plain
 (pointwise) presheaf
 sums.  The $\tThunk$ marker is ignored, yet $\tComp$, marking the
 switch from the negative to the positive type interpretation, places
-the cover monad.  Positive atoms $\patom$, standing for value types without
+the monad $\C$.  Positive atoms $\patom$, standing for value types without
 constructors, are only inhabited by variables $x : \patom \in \Gamma$.
 Negative atoms $\natom$ stand for computation types without own eliminations.
 Thus, their inhabitants stem only from eliminations of more complex
 types.  They are built from positive eliminations captured in $\C$ and negative
 eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
-The method $\trunNf[\C]$ of cover monad $\C$ can be extended to
-$\trun^N : \C \den N \todot \den N$ for negative types $N$, by recursion
-on $N$.
+The multiplication $\tjoin[\C]$ of the strong monad $\C$ can be
+extended to a natural transformation
+$\trun^N : \C \den N \todot \den N$ for negative types $N$.
+The construction proceeds by recursion on $N$, exactly as in \Cref{sec:normstlc}.
 This makes the effects of $\C$ available at any negative type,
 in other words, makes all negative types \emph{monadic}.
 
@@ -1391,10 +1416,38 @@ $\den{\cext \Gamma P} = \den \Gamma \hattimes \den P$.
 
 \subsection{Terms and evaluation}
 
-Assuming a family $\Tm N \Gamma$ of terms of negative type $N$ in
-context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
-of positive type $P$ shall be constructed by the
-following rules:
+Value terms \fbox{$v : \PValT P \Gamma$}, or short, \emph{values},
+and computation terms \fbox{$t : \Tm N \Gamma$}, or short,
+\emph{terms}, are defined mutually by the rules in \Cref{fig:tmcbpv}.
+Values inhabit positive types $P$ and are given by introduction rules
+only, whereas terms inhabit negative types $N$ and comprise both
+introduction rules for negative types as well as elimination rules for
+both positive ($\tsplit$, $\tcase$, $\tabort$)
+and negative types.
+%
+% Assuming a family $\Tm N \Gamma$ of terms of negative type $N$ in
+% context $\Gamma$, values \fbox{$v : \PValT P \Gamma$}
+% of positive type $P$ shall be constructed by the
+% following rules:
+%
+% The terms of pure CBPV are given by the inductive family \fbox{$\Tm N \Gamma$}.
+% It repeats the introductions and eliminations of negative types,
+% except
+Note
+that application is restricted to values.  Values of type
+$\Thunk N$ are embedded via $\tforce$.
+Further, values of type $P$ can be embedded
+via $\tret$, producing a term of type $\Comp P$.  Such terms are
+eliminated by $\tbind$ which is, unlike the usual monadic bind, not
+only available for $\tComp$-types but for arbitrary negative types
+$N$.  This is justified by the monadic character of negative
+types, by virtue of $\trun^N$.
+% Finally, there are eliminators
+% ($\tsplit$, $\tcase$, $\tabort$) for values of positive product and
+% sum types.
+\begin{figure}[htbp]
+%\begin{ceqn}
+\hrulefill
 \begin{gather*}
   \nru{\tvar}{P \in \Gamma}{\PValT P \Gamma}
   % \nru{\pvar}{P \in \Gamma}{\PValT P \Gamma}
@@ -1409,22 +1462,7 @@ following rules:
 \\[2ex]
   \nru{\tinj_i}{\PValT{P_i}\Gamma}{\PValTP{P_1 + P_2}\Gamma}
 \end{gather*}
-
-The terms of pure CBPV are given by the inductive family \fbox{$\Tm N \Gamma$}.
-It repeats the introductions and eliminations of negative types,
-except that application is restricted to values.  Values of type
-$\Thunk N$ are embedded via $\tforce$.
-Further, values of type $P$ can be embedded
-via $\tret$, producing a term of type $\Comp P$.  Such terms are
-eliminated by $\tbind$ which is, unlike the usual monadic bind, not
-only available for $\tComp$-types but for arbitrary negative types
-$N$.  This is justified by the monadic character of negative
-types, by virtue of $\trun^N$.  Finally, there are eliminators
-($\tsplit$, $\tcase$, $\tabort$) for values of positive product and
-sum types.
-\begin{figure}[htbp]
-%\begin{ceqn}
-\hrulefill
+\dotfill
 \begin{gather*}
   \nru{\tret}
       {\PValTm P \Gamma}
@@ -1441,15 +1479,18 @@ sum types.
   \nru{\npair}
       {\Tm {N_1} \Gamma \qquad \Tm {N_2} \Gamma}
       {\TmP {N_1 \ntimes N_2} \Gamma}
-\\[2ex]
+\end{gather*}
+\dotfill
+\begin{gather*}
+%\\[2ex]
   \nru{\tforce}
       {\PValTmP {\Thunk N} \Gamma}
       {\Tm N \Gamma}
-\qquad
+\\[2ex]
   \nru{\tapp}
       {\TmP {P \To N} \Gamma \qquad \PValTm P \Gamma}
       {\Tm N \Gamma}
-\\[2ex]
+\qquad
   \nru{\tprj_i}
       {\TmP {N_1 \ntimes N_2} \Gamma}
       {\Tm {N_i} \Gamma}
@@ -1459,25 +1500,29 @@ sum types.
   \nru{\tbind}
       {\TmP {\Comp P} \Gamma \qquad \Tm N {(\cext \Gamma P)}}
       {\Tm N \Gamma}
-\\[2ex]
+\end{gather*}
+\dotfill
+\begin{gather*}
+%\\[2ex]
   \nru{\tsplit}
     {\PValTmP {P_1 \times P_2} \Gamma
       \qquad \Tm N {(\cext {\cext \Gamma P_1} P_2)}
     }{\Tm N \Gamma}
+\quad
+  \nru{\tabort}
+    {\PValTm \tyzero \Gamma}
+    {\Tm N \Gamma}
 \\[2ex]
   \nru{\tcase}
     {\PValTmP {P_1 + P_2} \Gamma
       \qquad \Tm N {(\cext \Gamma P_1)}
       \qquad \Tm N {(\cext \Gamma P_2)}
     }{\Tm N \Gamma}
-\\[2ex]
-  \nru{\tabort}
-    {\PValTm \tyzero \Gamma}
-    {\Tm N \Gamma}
+%\\[2ex]
 \end{gather*}
 %\end{ceqn}
 \hrulefill
-  \caption{Terms of CBPV}
+  \caption{Value and computation terms (CBPV)}%Terms of CBPV}
   \label{fig:tmcbpv}
 \end{figure}
 
@@ -1487,7 +1532,7 @@ $\denty{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
 and terms
 $\denty{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
 is straightforward, thanks to the pioneering work of
-Moggi \cite{moggi:infcomp91} and
+Moggi \cite{moggi:infcomp91} and the work that
 Levy \cite{levy:hosc06}
 put into the design of CBPV.
 \[
@@ -1542,6 +1587,21 @@ at any negative type $N$ for the interpretation of $\tbind$.
 
 \subsection{Normal forms and normalization}
 
+The design of normal forms for pure CBPV follows the same principles
+as for the STLC with sums in \Cref{sec:stlc}.  We prevent
+$\beta$-redexes, i.e., eliminations of a type immediately following
+its introduction, by restricting the terms in elimination positions to
+neutrals.  Due to the focused nature of CBPV, neutrals of positive
+type are just variables.  We achieve $\eta$-long forms by only
+embedding neutrals of negative base type $\natom$ into normal forms.
+Maximal focusing for positive types is achieved by only admitting
+variables of base type $\patom$ in values.
+% and only variables of positive base type $\patom$ into.  For CBPV, this
+% concerns only negative atoms $\natom$, as positive atoms $\patom$ are
+% only inhabited by variables.
+In the following, we present the
+grammar for normal forms in detail.
+
 Positive normal forms are values $v : \VNf P \Gamma$
 referring only to atomic variables and
 whose thunks only
@@ -1581,7 +1641,7 @@ $\Thunk N \in \Gamma$.
       {\Ne N \Gamma}
 \end{gather*}
 Variables are originally introduced by either $\tabs$ or
-the $\tbind$ing of a neutral of type $\Comp P$ to a new variable of type
+the $\tbind$\-ing of a neutral of type $\Comp P$ to a new variable of type
 $P$.  Variables of composite value type can be broken down by pattern
 matching, introducing variables of smaller type.  These positive
 eliminations plus $\tbind$ are organized in the
@@ -1590,7 +1650,7 @@ In the following rules, parameter $\J$ (for ``judgement'') stands for an
 arbitrary presheaf.
 \begin{gather*}
   \nru{\treturn}{\J\,\Gamma}{\Cover \J \Gamma}
-\qquad
+\quad
   \nru{\tbind}
       {\NeP {\Comp P} \Gamma \qquad \Cover \J (\cext \Gamma P)}
       {\Cover \J \Gamma}
@@ -1600,16 +1660,17 @@ arbitrary presheaf.
        \Cover \J (\cext {\cext \Gamma {P_1}} {P_2})
       }
       {\Cover \J \Gamma}
+%\\[1ex]
+\quad
+  \nru{\tabort}
+      {\tyempty \in \Gamma}
+      {\Cover \J \Gamma}
 \\[2ex]
   \nru{\tcase}
       {P_1 + P_2 \in \Gamma
        \qquad \Cover \J (\cext \Gamma {P_1})
        \qquad \Cover \J (\cext \Gamma {P_2})
       }
-      {\Cover \J \Gamma}
-\\[2ex]
-  \nru{\tabort}
-      {\tyempty \in \Gamma}
       {\Cover \J \Gamma}
 \end{gather*}
 Finally, normal forms of negative types are defined as inductive
@@ -1637,10 +1698,10 @@ of a base neutral ($\tNe\,\natom$) or a normal value.
       {\Nf N {\cext \Gamma P}}
       {\NfP {P \To N} \Gamma}
 \end{gather*}
-We again can run the cover monad on normal forms, \ie, have
-$\trunNf : \Cov\,(\tNf N) \todot \tNf N$, which extends to
-negative semantic values
-$\trun : \Cov \den N \todot \den N$.
+Note that we do not have a function
+$\trunNf[\Cov] : \Cov\,(\tNf\,N) \todot \tNf\,N$ this time, instead, we
+directly employ $\Cov$ in the definition of $\tNf$ at the base case
+$\natom$ and $\Comp P$.
 
 Reification $\down P : \den P \todot \tVNf\,P$ at positive types $P$ produces
 a normal value, and $\down N : \den N \todot \tNf\,N$ at negative
@@ -1651,9 +1712,14 @@ $x : P \in (\cext \Gamma P)$ into $\den P$, breaking down $P$ to
 positive atoms $\patom$ and negative remainders $\Thunk N$.
 However, in $\den P$ we do not have case analysis available, thus,
 positive reflection $\upG P : P \in \Gamma \to \Cover {\den P} \Gamma$
-needs to run in the monad.  Luckily, as $\down N$ produces a normal
-form, monadic intermediate computations are permitted under a final
-$\trunNf$.  Negative reflection $\up N : \tNe\,N \todot \den N$ is as
+needs to run in the monad.
+Luckily, we can unwind the monad using $\trun^N$ before we recursively
+reify at type $N$.
+% %% TODO
+% Luckily, as $\down N$ produces a normal
+% form, monadic intermediate computations are permitted under a final
+% $\trunNf$.
+Negative reflection $\up N : \tNe\,N \todot \den N$ is as
 before generalized from variables to neutrals, to handle the breaking
 down of $N$ via eliminations.
 %
@@ -1665,7 +1731,7 @@ In the following definition of reflection we use the abbreviation
 \)}.
 \[
 \def\arraystretch{1.3}
-\begin{array}{l@{\,}l@{~~}c@{~~}l}
+\begin{array}{l@{\,}lcl}%@{~~~}c@{~~~}l}
   \multicolumn 2 l {\upG P} & : & P \in \Gamma \to \Cov\,\den P \, \Gamma\\
   \upG {\patom}         & x & = & x \\
   \upG {\tyone}         & x & = & \treturn\;\ttempty \\
@@ -1686,9 +1752,11 @@ In the following definition of reflection we use the abbreviation
     \\
   \upG{\Thunk N} & x & = & \treturn\,(\upG N (\tforce\,x))
 \\[2ex]
-% \end{array}
-% \,
-% \begin{array}{lcl}
+\end{array}
+\]
+\[
+\def\arraystretch{1.3}
+\begin{array}{l@{\,}lcl}
     \multicolumn 2 l {\down P} & : & \den P \todot \tVNf\,P \\
   \down {\patom} & & = & \tvar \\
   \downG {\tyone} & () & = & \punit \\
@@ -1758,24 +1826,45 @@ expects a value argument now.
 \renewcommand{\right}{}
 \begin{array}{l@{\,}l@{~~}c@{~~}l}
   \upG {P \To N} & u & = & \lambda
-    \; \tau \; a
+    \, _\Delta
+    \, \tau \; a
     % \;(\tau : \Gamma \sublist \Delta)
     % \;(a : \den P \Delta)
     . \
     \up[\Delta] N \left( \tapp\,(\tren\,\tau\,u)\,(\down[\Delta] P a) \right)
     \\
-  \downG {P \To N} & f & = & \tabs \left( \trunNf \left(
-    \stmap
+  \downG {P \To N} & f & = &
+    \left( \tabs
+     \comp \down[\cext \Gamma P] N
+     \comp \trun^N_{\cext \Gamma P}
+\\ &&& \quad {}
+     \comp \stmap
       \left(
         \lambda
-          \; \tau \; a
-          % \;(\tau : (\cext \Gamma P) \sublist \Delta)
+          \,_\Delta
+          \, \tau
+          % \,(\tau : (\cext \Gamma P) \sublist \Delta)
+          \; a
           % \;(a : \den P \Delta)
           . \
           f\; (\twk^P \rcomp \tau)\; a
         \right)
-      \;\tfresh^P_\Gamma
-    \right) \right)
+    \right)
+    \;\tfresh^P_\Gamma
+    % \tabs \left( \down[\cext \Gamma P] N
+    % \left( \trun^N_{\cext \Gamma P} \left(
+    % \stmap
+    %   \left(
+    %     \lambda
+    %       \,_\Delta
+    %       \, \tau \; a
+    %       % \;(\tau : (\cext \Gamma P) \sublist \Delta)
+    %       % \;(a : \den P \Delta)
+    %       . \
+    %       f\; (\twk^P \rcomp \tau)\; a
+    %     \right)
+    %   \;\tfresh^P_\Gamma
+    % \right) \right) \right)
     \\
 \end{array}
 \]
@@ -1791,21 +1880,25 @@ reflection.
 \]
 Putting things together, we obtain the normalization function
 \[
-  \tnorm\,(t : \Tm N \Gamma) = \trunNf\,
-    \left(
-      \tmap\,\left(\down N \comp \denty t\right)\,\idenv\Gamma
-    \right)
+  \tnorm\,(t : \Tm N \Gamma) = \left (\downG N
+    \comp \trun^N_\Gamma
+    \comp \tmap\,\denty t\right) \idenv\Gamma
+  % \tnorm\,(t : \Tm N \Gamma) = \downG N
+  %   \left(
+  %     \trun^N_\Gamma\,(\tmap\,\denty t\,\idenv\Gamma)
+  %   \right)
 .
 \]
 
 Taking stock, we have arrived at normal forms that eagerly introduce
 ($\tNf$) and eliminate ($\tNe$) negative types and also eagerly
 introduce positive types ($\tVnf$).  However, the elimination of
-positive types is still rather non-deterministic.
+positive types is still rather non-deterministic:
 It is possible to only partially break up a composite positive type
 and leave smaller, but still composite positive types for later
 pattern matching.
-The last refinement, chaining also the positive eliminations, will be
+The last refinement of normal forms,
+chaining also the positive eliminations, will be
 discussed in the following section.
 % The placement of $\tsplit$, $\tcase$, and $\tabort$ is only
 % constrained by the presence of the split variable
