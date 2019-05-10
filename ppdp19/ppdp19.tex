@@ -285,6 +285,34 @@ and 4 (partial, see \url{https://andreasabel.github.io/ipl/html-focusing/Polariz
 Agda was particularly helpful to correctly handle the renamings
 abundantly present when working with presheaves.
 
+To summarize, in this article we make the following contributions:
+\begin{itemize}
+\item We retell the story of normalization by evaluation (NbE) for intrinsically
+  typed lambda terms with weak sum through a generic monadic
+  interpreter.  We isolate the services the monad needs to offer in
+  order to facilitate reification.
+
+\item We observe that the placement of the monad in the process of the
+  type interpretation can be determined by polarization, \ie,
+  separating types into positive and negative types.
+  The most economic placement of the monad is achieved with deep
+  polarization such as in focused calculi.
+\item As a first focused calculus, we consider call-by-push-value
+  (CBPV) which identifies positive types with value types and negative
+  types with computation types.  To our best knowledge, we are the
+  first to study NbE for pure, effect-free CBPV.  Therein, we observe
+  that the structures of CBPV to control effects naturally structure
+  the NbE process as well.
+\item Finally, we define NbE for a fully focused calculus, the
+  polarized lambda calculus.
+  We use a factored presentation of terms and normal forms,
+  which uses advanced features of Agda (nested and sized types)
+  in our partial formalization.
+  % Again, we seem to be the first to define
+  % NbE for the polarized lambda calculus, in spite of the substantial
+  % proof-theoretic studies it has been subjected to.
+\end{itemize}
+
 % Weak coproducts.
 % Weak sheaf (non-unique pasting).
 
@@ -2293,18 +2321,25 @@ This completes the definition of the normalization function
 $\tnorm\, (t : \Tm N \Gamma)
   = \down N \dent t {\idenv\Gamma}$.
 
-\section{Conclusion}
+\section{Conclusion and Further Work}
 \label{sec:concl}
 
 We have defined NbE for CBPV and polarized lambda calculus,
 formulated with intrinsically well-typed syntax and presheaf
-semantics.  As a side result, we have proven semantically
+semantics.  At the heart of our development stands the notion of a
+cover monad, as alternative to the more common sheaf semantics, to
+handle sum types.
+
+As a side result, we have proven semantically
 that the normal forms of both systems are logically complete, \ie,
 each derivable judgement $\Gamma \der N$ has a normal derivation.
 It remains to show that NbE for these calculi is also computationally
 sound and complete, i.e., the computational behavior of term and
 normal form should agree, and normalization should decide a suitable
-equational theory on terms.
+equational theory on terms.  To this end, we may switch from the
+category of presheaves to the category of Kripke predicates, as
+investigated through an Agda formalization.%
+\footnote{\url{https://andreasabel.github.io/ipl/html/NbeModel.html}}
 
 Additionally, a natural question to investigate is whether known CBN
 and CBV NbE algorithms can be obtained from our NbE algorithms by
@@ -2312,7 +2347,9 @@ embedding simply-typed lambda calculus into our polarized calculi,
 using known CBN and CBV translations.  Further, we would like to study
 the NbE algorithm for STLC arising from the optimal translation, i.e.,
 the one inserting a minimal amount of $\tThunk$ and $\tComp$ transitions.
-
+Finally, we might revisit our interpretation of $\tThunk$ as a monoidal
+comonad as suggested by the categorical models of modal logic S4
+\cite{alechinaMendlerDePaivaRitter:csl01}.
 
 \begin{acks}
 The first author took initial inspiration from some
@@ -2320,7 +2357,16 @@ The first author took initial inspiration from some
 \emph{Another topological completeness proof for intuitionistic logic}
 received by email on 16th March 2000.
 Thorsten in turn credits his inspiration to an ALF proof by Thierry
-Coquand.  Thanks to Hugo Herbelin for feedback and spotting some typos.
+Coquand.  Thanks to Hugo Herbelin for encouraging feedback and spotting some
+typos.  Thanks to the anonymous referees of a previous version of this
+paper for the valuable feedback and remarks that helped improving the
+text of this article.
+
+The first author acknowledges financial support from
+VR Grant 2014-04864 \emph{Termination
+      Certificates for Dependently-Typed Programs and Proofs via
+      Refinement Types}
+and the EU Cost Action CA15123 EUTYPES \emph{Types for Programming and Verification}.
 \end{acks}
 
 \bibliographystyle{ACM-Reference-Format}
