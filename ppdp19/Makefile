@@ -67,7 +67,7 @@ deploy :
 
 pack : ppdp19.zip
 
-ppdp19.zip : ppdp19.pdf $(files) jfp1.cls harpoons.sty ppdp19.bbl jfp.bst auto-ppdp19.bib
+ppdp19.zip : ppdp19.pdf $(files) jfp1.cls harpoons.sty ppdp19.bbl jfp.bst auto-ppdp19.bib byhand.bib
 	zip $@ $^
 
 html : src-stlc/html/Everything.html
@@ -104,7 +104,7 @@ ppdp19_aux : ppdp19.tex $(files)
 	touch $@;
 
 # then, run bibtex
-ppdp19.bbl : ppdp19_aux auto-ppdp19.bib
+ppdp19.bbl : ppdp19_aux auto-ppdp19.bib byhand.bib
 	-bibtex ppdp19;
 
 # finally, finish by running latex twice again
