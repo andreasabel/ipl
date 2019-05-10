@@ -12,7 +12,10 @@ Version published 2019-02-16 on arXiv:
 
 * Article [Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus](https://arxiv.org/abs/1902.06097)
 * Formalization of Section 2, [NbE of IPL using a Cover Monad](https://andreasabel.github.io/ipl/html/NfModelMonad.html)
+* Partial formalization of Section 4, [Syntax and Semantics of Polarized Lambda-Calculus](https://andreasabel.github.io/ipl/html-focusing/Polarized.html)
+<!--
 * Partial formalization of Section 4, [Syntax and Semantics of Polarized Lambda-Calculus](https://github.com/andreasabel/ipl/blob/master/src-focusing/Formulas.agda)
+-->
 
 Version presented 2018-07-19 at the
 [Initial Types Club](https://github.com/InitialTypes/Club):
