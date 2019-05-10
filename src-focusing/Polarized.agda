@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 {-# OPTIONS --rewriting #-}
 
 open import Library
