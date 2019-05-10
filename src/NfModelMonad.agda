@@ -1,4 +1,15 @@
--- A Beth model of normal forms
+---------------------------------------------------------------------------
+-- Normalization by Evaluation for Intuitionistic Propositional Logic
+--
+-- We employ a monadic interpreter for the soundness part,
+-- and a special class of monads, called cover monads,
+-- for the completeness part.
+--
+-- Normalization is completeness after soundness.
+--
+-- We give two instances of a cover monad: the free cover monad
+-- and the continuation monad with normal forms as answer type.
+---------------------------------------------------------------------------
 
 {-# OPTIONS --postfix-projections #-}
 
@@ -9,62 +20,48 @@ module NfModelMonad (Base : Set) where
 import Formulas   ; open module Form = Formulas    Base
 import Derivations; open module Der  = Derivations Base
 
--- Beth model
+---------------------------------------------------------------------------
+-- Specification of a strong monad on presheaves.
+-- Devoid of monad laws.
 
-record CoverMonad : Set₁ where
+record Monad : Set₁ where
 
-  -- Presheaf transformer
+  -- Presheaf transformer.
 
   field
     Cover   : (P : Cxt → Set) (Γ : Cxt) → Set
-    monC    : ∀{P} → (monP : Mon P) → Mon (Cover P)
+    monC    : ∀{P} (monP : Mon P) → Mon (Cover P)
 
-  -- Strong functor
+  -- Strong functor.
 
   field
     mapC'   : ∀{P Q} → ⟨ P ⇒̂ Q ⊙ Cover P ⟩→̇ Cover Q
 
+  -- Ordinary functor: an instance of mapC'.
+
   mapC : ∀{P Q} → (P →̇ Q) → (Cover P →̇ Cover Q)
   mapC f = mapC' λ τ → f
 
-  -- Monad
+  -- Monad.
 
   field
     return : ∀{P} (monP : Mon P) → P →̇ Cover P
     joinC : ∀{P} → Cover (Cover P) →̇ Cover P
 
-  -- Kleisli extension
+  -- Kleisli extension.
 
   extC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
   extC f = joinC ∘ mapC f
 
-  -- Strong bind
+  -- Strong bind.
 
   bindC' : ∀{P Q} (monP : Mon P) → Cover P →̇ (P ⇒̂ Cover Q) ⇒̂ Cover Q
   bindC' monP c τ k = joinC (mapC' k (monC monP τ c))
 
-  -- Services
+---------------------------------------------------------------------------
+-- A model of IPL parametrized by a strong monad.
 
-  field
-    falseC  : ∀{P} → Ne' False →̇ Cover P
-    orC     : ∀{P Γ C D} (t : Ne Γ (C ∨ D))
-                (c : Cover P (Γ ∙ C))
-                (d : Cover P (Γ ∙ D)) → Cover P Γ
-  field
-    runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
-
-  -- A continuation version of runNf
-
-  runNf' : ∀ {A P} (monP : Mon P) → Cover P →̇ (P ⇒̂ Nf' A) ⇒̂ Nf' A
-  runNf' monP c τ k = runNf (mapC' k (monC monP τ c))
-
-
-module Beth (covM : CoverMonad) (open CoverMonad covM) where
-
-  -- The syntactic Beth model.
-
-  -- We interpret base propositions  Atom P  by their normal deriviations.
-  -- ("Normal" is important; "neutral is not sufficient since we need case trees here.)
+module Soundness (monad : Monad) (open Monad monad) where
 
   -- The negative connectives True, ∧, and ⇒ are explained as usual by η-expansion
   -- and the meta-level connective.
@@ -74,10 +71,10 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   -- In case A ∨ B, each leaf must be in the semantics of either A or B.
 
   T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
-  T⟦ Atom P ⟧ = Nf' (Atom P)
-  T⟦ True   ⟧ Γ = ⊤
+  T⟦ Atom P ⟧ = Cover (Ne' (Atom P))
   T⟦ False  ⟧ = Cover λ Δ → ⊥
   T⟦ A ∨ B  ⟧ = Cover λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
+  T⟦ True   ⟧ Γ = ⊤
   T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
   T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧ Δ
 
@@ -91,10 +88,10 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
 
   mutual
     monT : ∀ A → Mon T⟦ A ⟧
-    monT (Atom P) = monNf
-    monT True     = _
-    monT False    = monC λ τ ()
+    monT (Atom P) = monC monNe
+    monT False    = monC monFalse
     monT (A ∨ B)  = monC (monOr A B)
+    monT True     = _
     monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
     monT (A ⇒ B) τ f σ = f (σ • τ)
 
@@ -104,57 +101,30 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   returnOr : ∀ A B {Γ} → T⟦ A ⟧ Γ ⊎ T⟦ B ⟧ Γ → T⟦ A ∨ B ⟧ Γ
   returnOr A B = return (monOr A B)
 
-  -- Reflection / reification, proven simultaneously by induction on the proposition.
-
-  -- Reflection is η-expansion (and recursively reflection);
-  -- at positive connections we build a case tree with a single scrutinee: the neutral
-  -- we are reflecting.
-
-  -- At implication, we need reification, which produces introductions
-  -- and reifies the stored case trees.
-
-  mutual
-
-    fresh : ∀ {Γ} A → T⟦ A ⟧ (Γ ∙ A)
-    fresh A = reflect A (hyp top)
-
-    reflect : ∀ A → Ne' A →̇ T⟦ A ⟧
-    reflect (Atom P) t = ne t
-    reflect True     t = _
-    reflect False    t = falseC t
-    reflect (A ∨ B)  t = orC t (returnOr A B (inj₁ (fresh A)))
-                               (returnOr A B (inj₂ (fresh B)))
-    reflect (A ∧ B)  t = reflect A (andE₁ t) , reflect B (andE₂ t)
-    reflect (A ⇒ B)  t τ a = reflect B (impE (monNe τ t) (reify A a))
-
-    reify : ∀ A → T⟦ A ⟧ →̇ Nf' A
-    reify (Atom P) t      = t
-    reify True _          = trueI
-    reify False           = runNf ∘ mapC ⊥-elim
-    reify (A ∨ B)         = runNf ∘ mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
-    reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
-    reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (fresh A)))
-
-  -- Semantic paste.  (Sheaf condition -- algorithmic part.)
+  -- We can run computations of semantic values.
+  -- This replaces the paste (weak sheaf condition) of Beth models.
 
   run : ∀ A → Cover T⟦ A ⟧ →̇ T⟦ A ⟧
-  run (Atom P) = runNf
-  run True     = _
+  run (Atom P) = joinC
   run False    = joinC
   run (A ∨ B)  = joinC
+  run True     = _
   run (A ∧ B)  = < run A ∘ mapC proj₁ , run B ∘ mapC proj₂  >
   run (A ⇒ B) c τ a = run B $ mapC' (λ δ f → f id≤ (monT A δ a)) $ monC (monT (A ⇒ B)) τ c
 
+  -- Remark: A variant of run in the style of bind.
+
   run' : ∀ {P} (monP : Mon P) A → Cover P →̇ (P ⇒̂ T⟦ A ⟧) ⇒̂ T⟦ A ⟧
-  run' monP (Atom p) = runNf' monP
-  run' monP True     = _
+  run' monP (Atom p) = bindC' monP
   run' monP False    = bindC' monP
   run' monP (A ∨ B)  = bindC' monP
+  run' monP True     = _
   run' monP (A ∧ B) c τ k     = run' monP A c τ (λ σ → proj₁ ∘ k σ) , run' monP B c τ (λ σ → proj₂ ∘ k σ)
   run' monP (A ⇒ B) c τ k σ a = run' monP B c (σ • τ) λ σ' p → k (σ' • σ) p id≤ (monT A σ' a)
 
-  -- Fundamental theorem
-  -- Extension of T⟦_⟧ to contexts
+  -- Fundamental theorem (interpretation / soundness).
+
+  -- Pointwise extension of T⟦_⟧ to contexts.
 
   G⟦_⟧ : ∀ (Γ Δ : Cxt) → Set
   G⟦ ε     ⟧ Δ = ⊤
@@ -181,14 +151,10 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   orElim' A B C c g h = run' (monOr A B) C c id≤ λ τ → [ g τ , h τ ]
 
   -- A lemma for the falseE case.
-
   -- Casts an empty cover into any semantic value (by contradiction).
 
   falseElim : ∀ C → T⟦ False ⟧ →̇ T⟦ C ⟧
   falseElim C = run C ∘ mapC ⊥-elim
-
-  falseElim' : ∀ C → T⟦ False ⟧ →̇ T⟦ C ⟧
-  falseElim' C c =  run' monFalse C c id≤ λ τ → ⊥-elim
 
   -- The fundamental theorem
 
@@ -207,21 +173,95 @@ module Beth (covM : CoverMonad) (open CoverMonad covM) where
   eval {C} (falseE t) γ  = falseElim C (eval t γ)
   eval trueI       γ     = _
 
-  -- Identity environment
+---------------------------------------------------------------------------
+-- A strong monad with services to provide a cover.
+-- Devoid of laws.
 
-  ide : ∀ Γ → G⟦ Γ ⟧ Γ
-  ide ε = _
-  ide (Γ ∙ A) = monG (weak id≤) (ide Γ) , fresh A
+record CoverMonad : Set₁ where
+  field
+    monad : Monad
+  open Monad monad public
 
-  ide' : ∀ Γ {Δ} (τ : Δ ≤ Γ) → G⟦ Γ ⟧ Δ
-  ide' ε       τ = _
-  ide' (Γ ∙ A) τ = ide' Γ (τ • weak id≤) , monT A τ (fresh A)
+  -- Services for case distinction.
+
+  field
+    falseC  : ∀{P} → Ne' False →̇ Cover P
+    orC     : ∀{P Γ C D} (t : Ne Γ (C ∨ D))
+                (c : Cover P (Γ ∙ C))
+                (d : Cover P (Γ ∙ D)) → Cover P Γ
+
+  -- Service for reification of into case trees.
+
+  field
+    runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
+
+  -- A continuation version of runNf.
+
+  runNf' : ∀ {A P} (monP : Mon P) → Cover P →̇ (P ⇒̂ Nf' A) ⇒̂ Nf' A
+  runNf' monP c τ k = runNf (mapC' k (monC monP τ c))
+
+---------------------------------------------------------------------------
+-- Completeness of IPL via a cover monad.
+
+module Completeness (covM : CoverMonad) (open CoverMonad covM) where
+  open Soundness monad
+
+  -- Reflection / reification, proven simultaneously by induction on the proposition.
+
+  -- Reflection is η-expansion (and recursively reflection);
+  -- at positive connections we build a case tree with a single scrutinee: the neutral
+  -- we are reflecting.
+
+  -- At implication, we need reification, which produces introductions
+  -- and reifies the stored case trees.
+
+  mutual
+
+    fresh : ∀ {Γ} A → T⟦ A ⟧ (Γ ∙ A)
+    fresh A = reflect A (hyp top)
+
+    reflect : ∀ A → Ne' A →̇ T⟦ A ⟧
+    reflect (Atom P) t = return monNe t
+    reflect False    t = falseC t
+    reflect (A ∨ B)  t = orC t (returnOr A B (inj₁ (fresh A)))
+                               (returnOr A B (inj₂ (fresh B)))
+    reflect True     t = _
+    reflect (A ∧ B)  t = reflect A (andE₁ t) , reflect B (andE₂ t)
+    reflect (A ⇒ B)  t τ a = reflect B (impE (monNe τ t) (reify A a))
+
+    reify : ∀ A → T⟦ A ⟧ →̇ Nf' A
+    reify (Atom P)        = runNf ∘ mapC ne
+    reify False           = runNf ∘ mapC ⊥-elim
+    reify (A ∨ B)         = runNf ∘ mapC [ orI₁ ∘ reify A , orI₂ ∘ reify B ]
+    reify True _          = trueI
+    reify (A ∧ B) (a , b) = andI (reify A a) (reify B b)
+    reify (A ⇒ B) ⟦f⟧     = impI (reify B (⟦f⟧ (weak id≤) (fresh A)))
+
+---------------------------------------------------------------------------
+-- Normalization is completeness (reification) after soundness (evaluation)
+
+module Normalization (covM : CoverMonad) (open CoverMonad covM) where
+  open Soundness monad
+  open Completeness covM
+
+  -- Identity environment, constructed by reflection.
+
+  freshG : ∀ Γ → G⟦ Γ ⟧ Γ
+  freshG ε = _
+  freshG (Γ ∙ A) = monG (weak id≤) (freshG Γ) , fresh A
+
+  -- A variant (no improvement).
+
+  freshG' : ∀ Γ {Δ} (τ : Δ ≤ Γ) → G⟦ Γ ⟧ Δ
+  freshG' ε       τ = _
+  freshG' (Γ ∙ A) τ = freshG' Γ (τ • weak id≤) , monT A τ (fresh A)
 
   -- Normalization
 
   norm : ∀{A} → Tm A →̇ Nf' A
-  norm t = reify _ (eval t (ide _))
+  norm t = reify _ (eval t (freshG _))
 
+---------------------------------------------------------------------------
 -- Case tree instance of cover monad
 
 module CaseTree where
@@ -236,7 +276,7 @@ module CaseTree where
   return : ∀{P} (monP : Mon P) → P →̇ Cover P
   return monP p = returnC p
 
-  -- Syntactic paste
+  -- Syntactic paste.
 
   runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
   runNf (returnC p) = p
@@ -251,8 +291,7 @@ module CaseTree where
   monC monP τ (falseC t)  = falseC (monNe τ t)
   monC monP τ (orC t c d) = orC (monNe τ t) (monC monP (lift τ) c)
                                             (monC monP (lift τ) d)
-
-  -- Monad
+  -- Monad.
 
   mapC : ∀{P Q} → (P →̇ Q) → (Cover P →̇ Cover Q)
   mapC f (returnC p) = returnC (f p)
@@ -264,7 +303,7 @@ module CaseTree where
   joinC (falseC t)  = falseC t
   joinC (orC t c d) = orC t (joinC c) (joinC d)
 
-  -- Strong functoriality
+  -- Strong functoriality.
 
   mapC' : ∀{P Q Γ} → KFun P Q Γ → Cover P Γ → Cover Q Γ
   mapC' f (returnC p) = returnC (f id≤ p)
@@ -273,8 +312,13 @@ module CaseTree where
                               (mapC' (λ τ → f (τ • weak id≤)) d)
 
 caseTreeMonad : CoverMonad
-caseTreeMonad = record {CaseTree}
+caseTreeMonad = record {monad = record{CaseTree}; CaseTree}
 
+-- A normalization function using case trees.
+
+open Normalization caseTreeMonad using () renaming (norm to normCaseTree)
+
+---------------------------------------------------------------------------
 -- Continuation instance of cover monad
 
 module Continuation where
@@ -282,6 +326,8 @@ module Continuation where
   record Cover (P : Cxt → Set) (Γ : Cxt) : Set where
     field runNf' : ∀ {A} → ((P ⇒̂ Nf' A) ⇒̂ Nf' A) Γ
   open Cover
+
+  -- Services.
 
   runNf : ∀{A} → Cover (Nf' A) →̇ Nf' A
   runNf {A} {Γ} c = c .runNf' id≤ (λ τ → id)
@@ -296,6 +342,8 @@ module Continuation where
   orC t c d .runNf' τ k = orE (monNe τ t)
     (c .runNf' (lift τ) (λ δ → k (δ • weak id≤)))
     (d .runNf' (lift τ) (λ δ → k (δ • weak id≤)))
+
+  -- Monad infrastructure.
 
   monC : ∀{P} → (monP : Mon P) → Mon (Cover P)
   monC monP τ c .runNf' τ₁ k = c .runNf' (τ₁ • τ) k
@@ -319,8 +367,14 @@ module Continuation where
   bindC' c τ k .runNf' τ' k' = c .runNf' (τ' • τ) λ σ p → k (σ • τ') p .runNf' id≤ λ σ' → k' (σ' • σ)
 
 continuationMonad : CoverMonad
-continuationMonad = record{Continuation}
+continuationMonad = record{monad = record{Continuation}; Continuation}
 
--- Q.E.D. -}
+-- A normalization function using continuations.
+
+open Normalization continuationMonad using () renaming (norm to normContinuation)
+
+-- Q.E.D.
+
+-- -}
 -- -}
 -- -}
