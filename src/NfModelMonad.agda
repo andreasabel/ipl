@@ -29,33 +29,33 @@ record Monad : Set₁ where
   -- Presheaf transformer.
 
   field
-    Cover   : (P : Cxt → Set) (Γ : Cxt) → Set
-    monC    : ∀{P} (monP : Mon P) → Mon (Cover P)
+    C     : (P : Cxt → Set) (Γ : Cxt) → Set
+    monC  : ∀{P} (monP : Mon P) → Mon (C P)
 
   -- Strong functor.
 
   field
-    mapC'   : ∀{P Q} → ⟨ P ⇒̂ Q ⊙ Cover P ⟩→̇ Cover Q
+    mapC' : ∀{P Q} → ⟨ P ⇒̂ Q ⊙ C P ⟩→̇ C Q
 
   -- Ordinary functor: an instance of mapC'.
 
-  mapC : ∀{P Q} → (P →̇ Q) → (Cover P →̇ Cover Q)
+  mapC : ∀{P Q} → (P →̇ Q) → (C P →̇ C Q)
   mapC f = mapC' λ τ → f
 
   -- Monad.
 
   field
-    return : ∀{P} (monP : Mon P) → P →̇ Cover P
-    joinC : ∀{P} → Cover (Cover P) →̇ Cover P
+    return : ∀{P} (monP : Mon P) → P →̇ C P
+    joinC  : ∀{P} → C (C P) →̇ C P
 
   -- Kleisli extension.
 
-  extC : ∀{P Q} → (P →̇ Cover Q) → Cover P →̇ Cover Q
+  extC : ∀{P Q} → (P →̇ C Q) → C P →̇ C Q
   extC f = joinC ∘ mapC f
 
   -- Strong bind.
 
-  bindC' : ∀{P Q} (monP : Mon P) → Cover P →̇ (P ⇒̂ Cover Q) ⇒̂ Cover Q
+  bindC' : ∀{P Q} (monP : Mon P) → C P →̇ (P ⇒̂ C Q) ⇒̂ C Q
   bindC' monP c τ k = joinC (mapC' k (monC monP τ c))
 
 ---------------------------------------------------------------------------
@@ -71,9 +71,9 @@ module Soundness (monad : Monad) (open Monad monad) where
   -- In case A ∨ B, each leaf must be in the semantics of either A or B.
 
   T⟦_⟧ : (A : Form) (Γ : Cxt) → Set
-  T⟦ Atom P ⟧ = Cover (Ne' (Atom P))
-  T⟦ False  ⟧ = Cover λ Δ → ⊥
-  T⟦ A ∨ B  ⟧ = Cover λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
+  T⟦ Atom P ⟧   = C (Ne' (Atom P))
+  T⟦ False  ⟧   = C λ Δ → ⊥
+  T⟦ A ∨ B  ⟧   = C λ Δ → T⟦ A ⟧ Δ ⊎ T⟦ B ⟧ Δ
   T⟦ True   ⟧ Γ = ⊤
   T⟦ A ∧ B  ⟧ Γ = T⟦ A ⟧ Γ × T⟦ B ⟧ Γ
   T⟦ A ⇒ B  ⟧ Γ = ∀{Δ} (τ : Δ ≤ Γ) → T⟦ A ⟧ Δ → T⟦ B ⟧ Δ
@@ -88,12 +88,12 @@ module Soundness (monad : Monad) (open Monad monad) where
 
   mutual
     monT : ∀ A → Mon T⟦ A ⟧
-    monT (Atom P) = monC monNe
-    monT False    = monC monFalse
-    monT (A ∨ B)  = monC (monOr A B)
-    monT True     = _
+    monT (Atom P)          = monC monNe
+    monT False             = monC monFalse
+    monT (A ∨ B)           = monC (monOr A B)
+    monT True              = _
     monT (A ∧ B) τ (a , b) = monT A τ a , monT B τ b
-    monT (A ⇒ B) τ f σ = f (σ • τ)
+    monT (A ⇒ B) τ f σ     = f (σ • τ)
 
     monOr : ∀ A B → Mon (λ Γ → T⟦ A ⟧ Γ ⊎ T⟦ B ⟧ Γ)
     monOr A B τ = map-⊎ (monT A τ) (monT B τ)
@@ -104,21 +104,21 @@ module Soundness (monad : Monad) (open Monad monad) where
   -- We can run computations of semantic values.
   -- This replaces the paste (weak sheaf condition) of Beth models.
 
-  run : ∀ A → Cover T⟦ A ⟧ →̇ T⟦ A ⟧
-  run (Atom P) = joinC
-  run False    = joinC
-  run (A ∨ B)  = joinC
-  run True     = _
-  run (A ∧ B)  = < run A ∘ mapC proj₁ , run B ∘ mapC proj₂  >
+  run : ∀ A → C T⟦ A ⟧ →̇ T⟦ A ⟧
+  run (Atom P)      = joinC
+  run False         = joinC
+  run (A ∨ B)       = joinC
+  run True          = _
+  run (A ∧ B)       = < run A ∘ mapC proj₁ , run B ∘ mapC proj₂  >
   run (A ⇒ B) c τ a = run B $ mapC' (λ δ f → f id≤ (monT A δ a)) $ monC (monT (A ⇒ B)) τ c
 
   -- Remark: A variant of run in the style of bind.
 
-  run' : ∀ {P} (monP : Mon P) A → Cover P →̇ (P ⇒̂ T⟦ A ⟧) ⇒̂ T⟦ A ⟧
-  run' monP (Atom p) = bindC' monP
-  run' monP False    = bindC' monP
-  run' monP (A ∨ B)  = bindC' monP
-  run' monP True     = _
+  run' : ∀ {P} (monP : Mon P) A → C P →̇ (P ⇒̂ T⟦ A ⟧) ⇒̂ T⟦ A ⟧
+  run' monP (Atom p)          = bindC' monP
+  run' monP False             = bindC' monP
+  run' monP (A ∨ B)           = bindC' monP
+  run' monP True              = _
   run' monP (A ∧ B) c τ k     = run' monP A c τ (λ σ → proj₁ ∘ k σ) , run' monP B c τ (λ σ → proj₂ ∘ k σ)
   run' monP (A ⇒ B) c τ k σ a = run' monP B c (σ • τ) λ σ' p → k (σ' • σ) p id≤ (monT A σ' a)
 
@@ -133,7 +133,7 @@ module Soundness (monad : Monad) (open Monad monad) where
   -- monG : ∀{Γ Δ Φ} (τ : Φ ≤ Δ) → G⟦ Γ ⟧ Δ → G⟦ Γ ⟧ Φ
 
   monG : ∀{Γ} → Mon G⟦ Γ ⟧
-  monG {ε} τ _ = _
+  monG {ε}     τ _       = _
   monG {Γ ∙ A} τ (γ , a) = monG τ γ , monT A τ a
 
   -- Variable case.
@@ -180,7 +180,7 @@ module Soundness (monad : Monad) (open Monad monad) where
 record CoverMonad : Set₁ where
   field
     monad : Monad
-  open Monad monad public
+  open Monad monad public renaming (C to Cover)
 
   -- Services for case distinction.
 
@@ -221,12 +221,12 @@ module Completeness (covM : CoverMonad) (open CoverMonad covM) where
     fresh A = reflect A (hyp top)
 
     reflect : ∀ A → Ne' A →̇ T⟦ A ⟧
-    reflect (Atom P) t = return monNe t
-    reflect False    t = falseC t
-    reflect (A ∨ B)  t = orC t (returnOr A B (inj₁ (fresh A)))
-                               (returnOr A B (inj₂ (fresh B)))
-    reflect True     t = _
-    reflect (A ∧ B)  t = reflect A (andE₁ t) , reflect B (andE₂ t)
+    reflect (Atom P) t     = return monNe t
+    reflect False    t     = falseC t
+    reflect (A ∨ B)  t     = orC t (returnOr A B (inj₁ (fresh A)))
+                                   (returnOr A B (inj₂ (fresh B)))
+    reflect True     t     = _
+    reflect (A ∧ B)  t     = reflect A (andE₁ t) , reflect B (andE₂ t)
     reflect (A ⇒ B)  t τ a = reflect B (impE (monNe τ t) (reify A a))
 
     reify : ∀ A → T⟦ A ⟧ →̇ Nf' A
@@ -247,7 +247,7 @@ module Normalization (covM : CoverMonad) (open CoverMonad covM) where
   -- Identity environment, constructed by reflection.
 
   freshG : ∀ Γ → G⟦ Γ ⟧ Γ
-  freshG ε = _
+  freshG ε       = _
   freshG (Γ ∙ A) = monG (weak id≤) (freshG Γ) , fresh A
 
   -- A variant (no improvement).
