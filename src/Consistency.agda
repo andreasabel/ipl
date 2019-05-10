@@ -7,7 +7,7 @@ module Consistency (Base : Set) where
 import Formulas    ; open module Form = Formulas     Base
 import Derivations ; open module Der  = Derivations  Base
 import NfModelMonad; open module NfM  = NfModelMonad Base
-open Beth caseTreeMonad using (norm)
+open Normalization caseTreeMonad using (norm)
 
 -- No variable in the empty context.
 
