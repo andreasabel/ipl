@@ -403,7 +403,7 @@ propositional equality for all morphisms $\tau$.
 The singleton weakening $\twk^A_\Gamma : \Gamma \sublist \cext \Gamma A$,
 also written $\twk^A$ or $\twk$, is defined by $\twk = \tweak\,\tid$.
 
-In category theory, a presheaf $\A$ over category $\bC$ is a contravariant
+In category theory, a presheaf $\A$ over a category $\bC$ is a contravariant
 functor from $\bC$ into the category $\Set$ of sets and functions, \ie, a
 (covariant) functor from the category $\bC\op$ with flipped morphisms
 to $\Set$.
@@ -612,7 +612,7 @@ similar to the polymorphic quantifier in functional
 programming languages such as Haskell.  We may instantiate a
 polymorphic function such as $f : \A \todot \B$ silently, \eg, when $a
 : \A\,\Gamma$ then $f\,a : \B\,\Gamma$.  For clarity, we may sometimes
-provide the instantiation explicitely via subscript, \eg, $f_\Gamma :
+provide the instantiation explicitly via subscript, \eg, $f_\Gamma :
 \A\,\Gamma \to \B\,\Gamma$ and $f_\Gamma\,a : B\,\Gamma$.  Similarly,
 to introduce a polymorphic function we may provide the implicit
 abstraction as subscript, such as in
@@ -862,7 +862,7 @@ inhabitant of the empty set, which means that reflection at the empty
 type would not be definable.  Similarly, the setting
 $\den{A + B} = \den A \hatplus \den B$ is refuted by
 % $\up[\tyone + \tyone]^{\tyone + \tyone} \vv0 : \bone \bplus \bone$
-$\tfresh^{A + B}_{\cempty} : \den A (A{+}B) \bplus \den B (A{+}B)$
+$\tfresh^{A + B}_{\cempty} : \den A (A{+}B) \bplus \den B (A{+}B)$,
 % $\up[A + B]{A + B} \vv0 : \den A (A{+}B) \bplus \den B (A{+}B)$
 which would require us to make a decision of whether $A$ holds or $B$ holds
 while only be given a hypothesis of type $A + B$.
@@ -937,7 +937,7 @@ $\C\,\B\,\Gamma$,
 to ask the oracle about a neutral
 term $\NeP{A_1 + A_2}\Gamma$ of sum type.  We have to supply
 handlers for both possible answers:
-A computation $\C\,\B\,(\cext\Gamma{A_1})$ that can utilize an
+a computation $\C\,\B\,(\cext\Gamma{A_1})$ that can utilize an
 additional hypothesis of type $A_1$ in the case of a left injection,
 and analogously a computation $\C\,\B\,(\cext\Gamma{A_2})$ for the
 case of a right injection.
@@ -953,7 +953,10 @@ $\Cov$ defined
 %inductively by
 as an inductive family with constructors
 $\treturn[\Cov]$, $\tabort^{\Cov}$, and
-$\tcase^{\Cov}$.  One can visualize an element $c : \Cov\,\A\,\Gamma$ as
+$\tcase^{\Cov}$.
+% TODO: Shouldn't this better be trees with nullary and binary nodes
+% and leaves always an element of A?
+One can visualize an element $c : \Cov\,\A\,\Gamma$ as a
 binary case tree whose inner nodes ($\tcase$) are labeled by neutral terms
 of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
 and $A_2$, resp.  Leaves are either
@@ -961,7 +964,7 @@ labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
 or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
 replacing the labels of the $\treturn$-leaves, and the monadic bind
 (aka Kleisli extension) replaces
-these leaves by further case trees.  Bind is realized via $\tjoin[\Cov]$
+these leaves by further case trees.  Bind is realized via $\tjoin[\Cov]$,
 which flattens a 2-level case tree, \ie, a case tree with case trees as
 leaves, into a single one.
 Finally $\trunNf[\Cov]$ is a simple recursion on the tree, replacing $\tcase^{\Cov}$
@@ -1015,7 +1018,7 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
 %\end{gather*}
 
 Since positive types $P$ have a monadic interpretation, there is a
-natural transformation $\C\,\den P \todot \den P$ which is simply
+natural transformation $\C\,\den P \todot \den P$, which is simply
 $\tjoin[\C]$.  It
 can be extended to a
 natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
@@ -1082,7 +1085,7 @@ and the transported cover $\tren\;\tau\;c : \C\den{A \To B}\Delta$.
 
 We extend the type interpretation pointwise to contexts, \ie,
 $\den \cempty = \hatone$ and
-$\den{\cext \Gamma A} = \den \Gamma \hattimes \den A$
+$\den{\cext \Gamma A} = \den \Gamma \hattimes \den A$,
 and obtain a natural projection function
 $\tlookup\,(x : A \in \Gamma) : \den \Gamma \todot \den A$
 from the semantic environments.
