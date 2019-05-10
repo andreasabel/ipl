@@ -90,10 +90,10 @@
 
 \author{Christian Sattler}
 \affiliation{%
-  \institution{Nottingham University}
+  \institution{School for Computer Science, University of Nottingham}
   \streetaddress{}
   \city{Nottingham}
-  \country{UK}
+  \country{United Kingdom}
 }
 %\email{christian.sattler@gmail.com}
 
@@ -1067,7 +1067,8 @@ The typings are
 $c : \C \den{A \To B} \Gamma$ and
 $\tau : \Gamma \sublist \Delta$ and
 $a : \den A \Delta$, and now we want to apply every function
-$f : \den{A \To B}$ in the cover $c$ to argument $a$.  Clearly,
+$f : \den{A \To B}$ % TODO: this doesn't really typecheck...
+in the cover $c$ to argument $a$.  Clearly,
 $\tmap[\C]$ is not applicable since it would expect a
 global presheaf morphism
 $\den{A \to B} \todot \den B$, \ie, something that works in \emph{any}
@@ -1369,7 +1370,7 @@ and labeled records $\Pi_I (P_i)_{i : I}$ for up to countably infinite
 label sets $I$ while we only have finite sums $(\tyzero,+)$ and
 records $(\top,\ntimes)$.  However, this difference is not essential,
 our treatment extends directly to the infinite case, since we are
-working in type theory which allows infinitely branching inductive
+working in type theory, which allows infinitely branching inductive
 types.   As a last difference, CBPV does not consider base types; in
 anticipation of the next section, we add them as both positive atoms
 ($\patom$) and negative atoms ($\natom$).
@@ -1791,7 +1792,7 @@ In the following definition of reflection we use the abbreviation
 \]
 Reflection at positive pairs uses monoidal functoriality
 $\C\,\A_1 \todot \C\,\A_2 \todot \C\,(\A_1 \hattimes \A_2)$
-called $\star$ by McBride and Paterson \cite[Section 7]{mcbridePaterson:applicative}
+called $\star$ by McBride and Paterson \cite[Section 7]{mcbridePaterson:applicative},
 which for monads $\C$ can be defined by
 $c_1 \star c_2 =
    \tjoin \; (\tmap\;(\lambda\,a_1.\
@@ -2140,7 +2141,7 @@ value $\ttempty$ to $k$ in this case.
 Reflecting at $P_1 + P_2$ generates two branches, which may result in
 several uses of the continuation $k$.
 In the first branch, we recursively reflect at $P_1$.  Its
-continuation will receive a semantic value in $\den{P_1}$ which we
+continuation will receive a semantic value in $\den{P_1}$, which we
 inject via $\iota_1$ into $\den{P_1 + P_2}$ to pass it to $k$.  The
 second branch proceeds analogously.
 Finally reflecting at $P_1 \times P_2$ means we first have to analyze
@@ -2153,7 +2154,7 @@ first phase needs to be composed with the context extension $\tau_2$
 of the second phase to transport $k$ into the final context.  Further,
 the value $a_1$ was constructed relative to the target of
 $\tau_1$ and still needs
-to be transported with $\tau_2$ before paired up with $a_2$.
+to be transported with $\tau_2$ before being paired up with $a_2$.
 
 The method $\reflect P$ replaces previous uses of $\tfresh^P$ in
 reflection and reification at negative types.
@@ -2222,7 +2223,7 @@ straightforwardly using negative reflection.
 
 The terms \fbox{$\Tm N \Gamma$} of the focused lambda calculus are the
 ones of CBPV minus the positive eliminations ($\tsplit$, $\tcase$,
-$\tabort$), the added negative variable rule ($\nvar$) and the
+$\tabort$), the added negative variable rule ($\nvar$), and the
 necessary changes to the binders $\tabs$ and $\tbind$.
 \begin{gather*}
   \nru{\nvar}{N \in \Gamma}{\Tm N \Gamma}
@@ -2249,7 +2250,7 @@ Since a binder
 for $P$ performs a maximal splitting on $P$ and takes the form of a
 function defined by a case (and split) tree,
 applying it to a value $v$ of type $P$ amounts to a complete
-matching of $v$ against the case tree, and bind the remaining
+matching of $v$ against the case tree and binding the remaining
 atomic and negative crumbs.  This matching can be defined for a
 generic evaluation function of type
 $\Evvv \J \Delta \Gamma = \den \Gamma \Delta \to \J\,\Delta$.
