@@ -2116,7 +2116,7 @@ $\eta$-expansion via $\up N$.  Two more endings are possible:
 At type
 $\tyzero$, we have reached an absurd case, meaning that no
 continuation is necessary since we can conclude with
-\emph{ex falsum quod libet}.
+\emph{ex falso quodlibet}.
 At type $\tyone$, there is no need to add a new variable, as values
 of type $\tyone$ contain no information.  We simply pass the unit
 value $\ttempty$ to $k$ in this case.
@@ -2142,12 +2142,12 @@ The method $\reflect P$ replaces previous uses of $\tfresh^P$ in
 reflection and reification at negative types.
 % and identity environment creation.
 \[
-\begin{array}{l@{~}lcl}
+\begin{array}{l@{~}l@{~~}c@{~~}l}
   \downG {P \To N} & f & = & \tabs
     \left(
       \reflect[\Gamma] P
         \left(
-          \lambda \, (\tau : \Gamma \sublist \Delta) \; a .\
+          \lambda \, _\Delta \, (\tau : \Gamma \sublist \Delta) \; a .\
           \down[\Delta] P (f \; \tau \; a)
         \right)
     \right)
@@ -2279,7 +2279,7 @@ $\tnorm\, (t : \Tm N \Gamma)
 \section{Conclusion}
 \label{sec:concl}
 
-We have implemented NbE for CBPV and polarized lambda calculus
+We have defined NbE for CBPV and polarized lambda calculus,
 formulated with intrinsically well-typed syntax and presheaf
 semantics.  As a side result, we have proven semantically
 that the normal forms of both systems are logically complete, \ie,
