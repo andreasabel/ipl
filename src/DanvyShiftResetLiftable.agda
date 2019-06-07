@@ -138,7 +138,21 @@ record ◇ (G : Cxt → Set) (Γ : Cxt) : Set where
     γ   : G Δ
 
 mon◇ : ∀{P} → Mon (◇ P)
-mon◇ τ′ (dia τ x) = dia (τ′ • τ) x
+mon◇ τ′ (dia τ p) = dia (τ′ • τ) p
+
+-- NB: ◇ is a monad
+
+module Monad◇ where
+
+  return◇ : ∀{P} → P →̇ ◇ P
+  return◇ = dia id≤
+
+  join◇ : ∀{P} → ◇ (◇ P) →̇ ◇ P
+  join◇ (dia τ d) = mon◇ τ d
+  -- join◇ (dia τ (dia τ′ a)) = dia (τ • τ′) a
+
+  map◇ : ∀{P Q} → (P →̇ Q) → ◇ P →̇ ◇ Q
+  map◇ f (dia τ p) = dia τ (f p)
 
 -- Extension of T⟦_⟧ to contexts to classify semantic environments.
 
