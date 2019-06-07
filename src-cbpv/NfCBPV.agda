@@ -299,6 +299,14 @@ join (split x c) = split x (join c)
 
 _⋉_ = ◇-pair
 
+◇-pair-□ : ⟨ □ (◇ A) ⊙ □ (◇ (□ B)) ⟩→̇ □ (◇ (A ×̂ B))
+◇-pair-□ ca cb τ = ◇-pair (□-mon ca τ) (cb τ)
+
+□◇-pair : Mon B → ⟨ □ (◇ A) ⊙ □ (◇ B) ⟩→̇ □ (◇ (A ×̂ B))
+□◇-pair mB ca cb τ = join $
+  ◇-map! (λ τ₁ b → ◇-map! (λ τ₂ a → a , mB b τ₂) (ca (⊆-trans τ τ₁))) (cb τ)
+
+
 -- Runnability
 
 Run : (A : Cxt → Set) → Set
@@ -314,6 +322,13 @@ Run A = ◇ A →̇ A
 
 ⇒-run : Mon A → Run B → Run (A ⇒̂ B)
 ⇒-run mA rB f = rB ∘ ◇-fun mA f
+
+-- From ◇-mon we get □-run
+
+□-run : Run B → Run (□ B)
+□-run rB c = rB ∘ ◇-map extract ∘ ◇-mon □-mon c
+
+-- Bind for the ◇ monad
 
 ◇-elim : Run B → (A →̇ B) → ◇ A →̇ B
 ◇-elim rB f = rB ∘ ◇-map f
@@ -461,20 +476,47 @@ mutual
   -- reify⁻ (P ⇒̇ N)  f = abs (reify⁻ N {!◇-elim! (run⁻ N) ? fresh!})
 -- (run⁻ N (□-map {!!} (□-weak f)) fresh))
 
-freshG : (τ : Γ ⊆ Δ) → ◇ ⟦ Γ ⟧ᶜ Δ
-freshG [] = return []
-freshG (P ∷ʳ τ) = ◇-mon (monᶜ _) (freshG τ) (P ∷ʳ ⊆-refl)
-freshG (refl ∷ τ) = ◇-map (λ γa → proj₂ γa ∷ proj₁ γa) ((λ τ₁ → freshG (⊆-trans τ (⊆-trans (_ ∷ʳ ⊆-refl) τ₁))) ⋉ fresh◇)
+
+ext : (⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺) →̇ ⟦ P ∷ Γ ⟧ᶜ
+ext (γ , a) = a ∷ γ
+
+◇-ext : ◇ (⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺) →̇ ◇ ⟦ P ∷ Γ ⟧ᶜ
+◇-ext = ◇-map ext
+
+freshᶜ₀ : (Γ : Cxt) → ◇ ⟦ Γ ⟧ᶜ Γ
+freshᶜ₀ [] = return []
+freshᶜ₀ (P ∷ Γ) = ◇-ext $
+  □-weak (◇-mon (monᶜ Γ) (freshᶜ₀ Γ)) -- BAD, use of ◇-mon
+  ⋉ fresh◇
+-- freshᶜ (P ∷ Γ) = ◇-ext $
+--   (λ τ → ◇-mon (monᶜ Γ) (freshᶜ Γ) (⊆-trans (_ ∷ʳ ⊆-refl) τ))  -- BAD, use of ◇-mon
+--   ⋉ fresh◇
 
 
-freshᶜ : (Γ : Cxt) → ◇ ⟦ Γ ⟧ᶜ Γ
-freshᶜ [] = return []
-freshᶜ (P ∷ Γ) = ◇-map (λ γa → proj₂ γa ∷ proj₁ γa) $
-  (λ τ → ◇-mon (monᶜ Γ) (freshᶜ Γ) (⊆-trans (_ ∷ʳ ⊆-refl) τ)) ⋉ fresh◇
--- freshᶜ (P ∷ Γ) = ◇-map (λ{ (γ , a) → a ∷ γ }) ((λ τ → {!freshᶜ Γ!}) ⋉ {!!})
+freshG₀ : □ (◇ ⟦ Γ ⟧ᶜ) Γ
+-- freshG₀ : (τ : Γ ⊆ Δ) → ◇ ⟦ Γ ⟧ᶜ Δ
+freshG₀ [] = return []
+freshG₀ (P   ∷ʳ τ) = ◇-mon (monᶜ _) (freshG₀ τ) (P ∷ʳ ⊆-refl)  -- BAD, use of ◇-mon
+freshG₀ (refl ∷ τ) = ◇-ext $ (λ τ₁ → freshG₀ (⊆-trans τ (⊆-trans (_ ∷ʳ ⊆-refl) τ₁))) ⋉ fresh◇
+
+-- Without the use of ◇-mon!
+
+freshᶜ : (Γ : Cxt) → □ (◇ ⟦ Γ ⟧ᶜ) Γ
+freshᶜ []      = λ τ → return []
+freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair (mon⁺ P) (□-weak (freshᶜ Γ)) (fresh□ P)
+freshᶜ (P ∷ Γ) = ◇-ext ∘ ◇-pair-□ (□-weak (freshᶜ Γ)) (◇-map (mon⁺ P) ∘ (fresh□ P))
+-- freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
+freshᶜ (P ∷ Γ) = ◇-ext ∘ λ τ →
+  (□-weak (□-mon (freshᶜ Γ)) τ)
+  ⋉ ◇-map (mon⁺ P) (fresh□ P τ)
+freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
+  (□-mon (freshᶜ Γ) (⊆-trans ((_ ∷ʳ ⊆-refl)) τ))
+  ⋉ ◇-map (mon⁺ P) (fresh□ P τ)
+
+--  ⋉ ◇-map (mon⁺ P) (reflect⁺ P (monVar here! τ)))
 
 norm : Comp N →̇ Nf N
-norm {N = N} t = reify⁻ N $ run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshG
+norm {N = N} {Γ = Γ} t = reify⁻ N $ run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshᶜ Γ
 
 -- norm {N = N} t = reify⁻ N (run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshG)
 -- norm {N = N} t = reify⁻ N λ τ → run⁻ N $ (◇-map ⦅ t ⦆⁻ $ (freshG τ))
