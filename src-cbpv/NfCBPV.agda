@@ -20,41 +20,41 @@ mutual
 
   -- Value types
 
-  data VTy : Set where
-    base    : (o : Base) → VTy
-    _×̇_     : (P₁ P₂ : VTy) → VTy
-    Σ̇       : (I : set) (Ps : El I → VTy) → VTy
-    □̇       : (N : CTy) → VTy      -- U
+  data Ty⁺ : Set where
+    base    : (o : Base) → Ty⁺
+    _×̇_     : (P₁ P₂ : Ty⁺) → Ty⁺
+    Σ̇       : (I : set) (Ps : El I → Ty⁺) → Ty⁺
+    □̇       : (N : Ty⁻) → Ty⁺      -- U
 
   -- Computation types
 
-  data CTy : Set where
-    ◇̇   : (P : VTy) → CTy     -- F
-    Π̇      : (I : set) (Ns : El I → CTy) → CTy
-    _⇒̇_    : (P : VTy) (N : CTy) → CTy
+  data Ty⁻ : Set where
+    ◇̇   : (P : Ty⁺) → Ty⁻     -- F
+    Π̇      : (I : set) (Ns : El I → Ty⁻) → Ty⁻
+    _⇒̇_    : (P : Ty⁺) (N : Ty⁻) → Ty⁻
 
 -- Environments only contain values
 
-Cxt = List VTy
+Cxt = List Ty⁺
 
 variable
   Γ Δ Φ : Cxt
-  P P₁ P₂ P' P′ Q : VTy
-  N N₁ N₂ N' N′ : CTy
-  Ps : El I → VTy
-  Ns : El I → CTy
+  P P₁ P₂ P' P′ Q : Ty⁺
+  N N₁ N₂ N' N′ : Ty⁻
+  Ps : El I → Ty⁺
+  Ns : El I → Ty⁻
 
 pattern here! = here refl
 -- pattern suc  = there
 
 -- Generic values
 
-module _ (Var : VTy → Cxt → Set) (Comp : CTy → Cxt → Set) where
+module _ (Var : Ty⁺ → Cxt → Set) (Comp : Ty⁻ → Cxt → Set) where
 
   -- Right non-invertible
 
-  data Val' : (P : VTy) (Γ : Cxt) → Set where
-    var   : ∀{Γ P}     (x : Var P Γ)                       → Val' P Γ
+  data Val' : (P : Ty⁺) (Γ : Cxt) → Set where
+    var   : ∀{Γ P}     (x : Var P Γ)                     → Val' P Γ
     pair  : ∀{Γ P₁ P₂} (v₁ : Val' P₁ Γ) (v₂ : Val' P₂ Γ) → Val' (P₁ ×̇ P₂) Γ
     inj   : ∀{Γ I P} i (v : Val' (P i) Γ)                → Val' (Σ̇ I P) Γ
     thunk : ∀{Γ N}     (t : Comp N Γ)                    → Val' (□̇ N) Γ
@@ -65,7 +65,7 @@ mutual
 
   Val = Val' _∈_ Comp
 
-  data Comp : (N : CTy) (Γ : Cxt) → Set where
+  data Comp : (N : Ty⁻) (Γ : Cxt) → Set where
     -- introductions
     ret   : ∀{Γ P}       (v : Val P Γ)                → Comp (◇̇ P) Γ
     rec   : ∀{Γ I N}     (t : ∀ i → Comp (N i) Γ)     → Comp (Π̇ I N) Γ
@@ -86,17 +86,17 @@ mutual
 
 -- Normal values only reference variables of base type
 
-NVar : (P : VTy) (Γ : Cxt) → Set
+NVar : (P : Ty⁺) (Γ : Cxt) → Set
 NVar (base o) Γ = base o ∈ Γ
 NVar _ _ = ⊥
 
 -- Negative neutrals
 
-module _ (Val : VTy → Cxt → Set) where
+module _ (Val : Ty⁺ → Cxt → Set) where
 
   -- Right non-invertible
 
-  data Ne' : (N : CTy) (Γ : Cxt) → Set where
+  data Ne' : (N : Ty⁻) (Γ : Cxt) → Set where
     force : ∀{Γ N}     (x : □̇ N ∈ Γ)                     → Ne' N Γ
     prj   : ∀{Γ I N} i (t : Ne' (Π̇ I N) Γ)               → Ne' (N i) Γ
     app   : ∀{Γ P N}   (t : Ne' (P ⇒̇ N) Γ) (v : Val P Γ) → Ne' N Γ
@@ -109,12 +109,12 @@ mutual
   -- Cover monad
 
   data ◇ (J : Cxt → Set) (Γ : Cxt) : Set where
-    return : (j : J Γ)                                              → ◇ J Γ
-    bind   : ∀{P}     (u : Ne (◇̇ P) Γ)    (t :         ◇ J (P ∷ Γ)) → ◇ J Γ
-    case   : ∀{I P}   (x : Σ̇ I P ∈ Γ)     (t : ∀ i → ◇ J (P i ∷ Γ)) → ◇ J Γ
-    split  : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :   ◇ J (P₂ ∷ P₁ ∷ Γ)) → ◇ J Γ
+    return : (j : J Γ)                                               → ◇ J Γ
+    bind   : ∀{P}     (u : Ne (◇̇ P) Γ)    (t :          ◇ J (P ∷ Γ)) → ◇ J Γ
+    case   : ∀{I Ps}  (x : Σ̇ I Ps ∈ Γ)    (t : ∀ i → ◇ J (Ps i ∷ Γ)) → ◇ J Γ
+    split  : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :    ◇ J (P₂ ∷ P₁ ∷ Γ)) → ◇ J Γ
 
-  data NComp (Q : VTy) (Γ : Cxt) : Set where
+  data NComp (Q : Ty⁺) (Γ : Cxt) : Set where
     ret   :          (v : NVal Q Γ)   → NComp Q Γ   -- Invoke RFoc
     ne    :          (n : Ne (◇̇ Q) Γ) → NComp Q Γ   -- Finish with LFoc
       -- e.g. app (force f) x
@@ -123,12 +123,12 @@ mutual
     bind  : ∀{P}     (u : Ne (◇̇ P) Γ) (t : NComp Q (P ∷ Γ)) → NComp Q Γ
 
     -- Left invertible
-    split : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :   NComp Q (P₂ ∷ P₁ ∷ Γ)) → NComp Q Γ
-    case  : ∀{I P}   (x : Σ̇ I P ∈ Γ)     (t : ∀ i → NComp Q (P i ∷ Γ)) → NComp Q Γ
+    split : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :    NComp Q (P₂ ∷ P₁ ∷ Γ)) → NComp Q Γ
+    case  : ∀{I Ps}  (x : Σ̇ I Ps    ∈ Γ) (t : ∀ i → NComp Q (Ps i ∷ Γ)) → NComp Q Γ
 
   -- Right invertible
 
-  data Nf : (N : CTy) (Γ : Cxt) → Set where
+  data Nf : (N : Ty⁻) (Γ : Cxt) → Set where
     ret   : ∀{Γ P}   (v : ◇ (NVal P) Γ)     → Nf (◇̇ P) Γ   -- Invoke RFoc
     ne    : ∀{Γ o}   (let N = ◇̇ (base o))
                      (n : ◇ (Ne N) Γ)       → Nf N Γ
@@ -139,11 +139,11 @@ mutual
 -- Context-indexed sets
 ------------------------------------------------------------------------
 
-ISet = Cxt → Set
+ISet = (Γ : Cxt) → Set
 
 variable
   A B C : ISet
-  F G   : El I → ISet
+  F G   : (i : El I) → ISet
 
 -- Constructions on ISet
 
@@ -162,7 +162,7 @@ _⇒̂_ : (A B : ISet) → ISet
 Π̂ : (I : set) (F : El I → ISet) → ISet
 (Π̂ I F) Γ = ∀ i → F i Γ
 
-⟨_⟩ : (P : VTy) (A : ISet) → ISet
+⟨_⟩ : (P : Ty⁺) (A : ISet) → ISet
 ⟨ P ⟩ A Γ = A (P ∷ Γ)
 
 -- Morphisms between ISets
@@ -338,14 +338,14 @@ postulate
   monᵒ : ∀ o → Mon ⟦ o ⟧ᵒ
 
 mutual
-  ⟦_⟧⁺ : VTy → ISet
+  ⟦_⟧⁺ : Ty⁺ → ISet
   ⟦ base o  ⟧⁺ = base o ∈_
   -- ⟦ base o  ⟧⁺ = ⟦ o ⟧ᵒ
   ⟦ P₁ ×̇ P₂ ⟧⁺ = ⟦ P₁ ⟧⁺ ×̂ ⟦ P₂ ⟧⁺
   ⟦ Σ̇ I P   ⟧⁺ = Σ̂ I λ i → ⟦ P i ⟧⁺
   ⟦ □̇ N     ⟧⁺ = □ ⟦ N ⟧⁻
 
-  ⟦_⟧⁻ : CTy → ISet
+  ⟦_⟧⁻ : Ty⁻ → ISet
   ⟦ ◇̇ P   ⟧⁻ = ◇ ⟦ P ⟧⁺
   ⟦ Π̇ I N ⟧⁻ = Π̂ I λ i → ⟦ N i ⟧⁻
   ⟦ P ⇒̇ N ⟧⁻ = ⟦ P ⟧⁺ ⇒̂ ⟦ N ⟧⁻
@@ -359,13 +359,13 @@ mutual
 -- Positive types are monotone and negative types are runnable.
 
 mutual
-  mon⁺ : (P : VTy) → Mon ⟦ P ⟧⁺
+  mon⁺ : (P : Ty⁺) → Mon ⟦ P ⟧⁺
   mon⁺ (base o)  =  monVar
   mon⁺ (P₁ ×̇ P₂) = ×-mon (mon⁺ P₁) (mon⁺ P₂)
   mon⁺ (Σ̇ I P)   = Σ-mon (mon⁺ ∘ P)
   mon⁺ (□̇ N)     = □-mon
 
-  run⁻ : (N : CTy) → Run ⟦ N ⟧⁻
+  run⁻ : (N : Ty⁻) → Run ⟦ N ⟧⁻
   run⁻ (◇̇ P)   = ◇-run
   run⁻ (Π̇ I N) = Π-run (run⁻ ∘ N)
   run⁻ (P ⇒̇ N) = ⇒-run (mon⁺ P) (run⁻ N)
@@ -427,7 +427,7 @@ mutual
   fresh◇ : ∀ {P Γ} → ⟨ P ⟩ (◇ (□ ⟦ P ⟧⁺)) Γ
   fresh◇ {P} = ◇-map (mon⁺ P) fresh
 
-  reflect⁺ : (P : VTy) → (P ∈_) →̇ (◇ ⟦ P ⟧⁺)
+  reflect⁺ : (P : Ty⁺) → (P ∈_) →̇ (◇ ⟦ P ⟧⁺)
   reflect⁺ (base o)  x = return x
   reflect⁺ (P₁ ×̇ P₂) x = split x (□-weak (fresh□ P₁) ⋉ fresh◇)
   reflect⁺ (P₁ ×̇ P₂) x = split x (◇-pair (□-weak (fresh□ P₁)) fresh◇)
@@ -437,18 +437,18 @@ mutual
   reflect⁺ (Σ̇ I Ps)  x = case x λ i → ◇-map (i ,_) fresh
   reflect⁺ (□̇ N)     x = return λ τ → reflect⁻ N (force (monVar x τ))
 
-  reflect⁻ : (N : CTy) → Ne N →̇ ⟦ N ⟧⁻
+  reflect⁻ : (N : Ty⁻) → Ne N →̇ ⟦ N ⟧⁻
   reflect⁻ (◇̇ P)    u = bind u fresh
   reflect⁻ (Π̇ I Ns) u = λ i → reflect⁻ (Ns i) (prj i u)
   reflect⁻ (P ⇒̇ N)  u = λ a → reflect⁻ N (app u (reify⁺ P a))
 
-  reify⁺ : (P : VTy) → ⟦ P ⟧⁺ →̇ NVal P
+  reify⁺ : (P : Ty⁺) → ⟦ P ⟧⁺ →̇ NVal P
   reify⁺ (base o) = var
   reify⁺ (P₁ ×̇ P₂) (a₁ , a₂) = pair (reify⁺ P₁ a₁) (reify⁺ P₂ a₂)
   reify⁺ (Σ̇ I Ps)  (i  , a ) = inj i (reify⁺ (Ps i) a)
   reify⁺ (□̇ N) a = thunk (reify⁻ N a)
 
-  reify⁻ : (N : CTy) → □ ⟦ N ⟧⁻ →̇ Nf N
+  reify⁻ : (N : Ty⁻) → □ ⟦ N ⟧⁻ →̇ Nf N
   reify⁻ (◇̇ P)    f = ret (◇-map (reify⁺ P) (extract f))
   reify⁻ (Π̇ I Ns) f = rec λ i → reify⁻ (Ns i) (□-map (_$ i) f)
   reify⁻ (P ⇒̇ N)  f = abs $ reify⁻ N $ ◇-elim-□ (run⁻ N) (□-weak f) (fresh□ P)
