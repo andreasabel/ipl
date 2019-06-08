@@ -25,13 +25,19 @@
   % My modification: centered title with white background
   \setbeamercolor{frametitle}{bg=white}
   \setbeamertemplate{frametitle}{
-    %\begin{center}
       \Large\insertframetitle
-      \vspace{1ex}
-      %\hline
       \par
-    %\end{center}
+      %{\centering\large\insertframesubtitle}
+      %\par
   }
+  % \setbeamertemplate{frametitle}{
+  %   %\begin{center}
+  %     \Large\insertframetitle
+  %     \vspace{1ex}
+  %     %\hline
+  %     \par
+  %   %\end{center}
+  % }
   % %% Does not work
   % \setbeamercolor{frametitlecentered}{bg=white}
   % \setbeamertemplate{frametitlecentered}{
@@ -1170,6 +1176,8 @@ $$
 
 \begin{frame}%[fragile=singleslide]
   \frametitle{Reification $\den\tyB \todot \Tm\tyB$}
+%  \framesubtitle{
+%Requires $\den{\fun\tyA\tyB} = \forever{(\den\tyA \Todot \den\tyB)}$.
 \[
 \newcommand{\GGA}{\cext\GG\tyA}
 \xymatrix@C=0ex@R=8ex{
@@ -1205,46 +1213,127 @@ $$
 & \qquad\qquad\qquad
 & \hyp\tyA{\den\tyB} \ar[d]^{\hyp\tyA{\reify\tyB}}
 \\
-\hyp\tyA{\den{\fun \tyA \tyB}}
-  \ar[u]
+\hyp\tyA{(\den\tyA \Todot \den\tyB)}
+  \ar@{=}[u]
 & & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
 & 1 \ar[l]_{~\quad\tzero}
 & \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
 \\
-\den{\fun \tyA \tyB}
-  \ar[u]^{\mon[\fun\tyA\tyB]}
+\forever{(\den\tyA \Todot \den\tyB)}
+  \ar[u]%^{\mon[\fun\tyA\tyB]}
   \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
 & & & & \Nf{\fun \tyA \tyB}
 \\
+\den{\fun \tyA \tyB}
+  \ar@{=}[u]
 }
 \]
 \end{frame}
+
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Reification $\den\tyB \todot \Tm\tyB$}
+% %  \framesubtitle{
+% %Requires $\den{\fun\tyA\tyB} = \forever{(\den\tyA \Todot \den\tyB)}$.
+% \[
+% \newcommand{\GGA}{\cext\GG\tyA}
+% \xymatrix@C=0ex@R=8ex{
+% (\Den\tyA\GGA \to \Den\tyB\GGA)
+% & \times
+% & \Den\tyA\GGA \ar[rr]^{\tapply}
+% & \qquad\qquad\qquad
+% & \Den\tyB\GGA \ar[d]^{\reify\tyB}
+% \\
+% \Den{\fun \tyA \tyB}{\cext \GG \tyA}
+%   \ar[u]
+% & & \Var[\GGA]\tyA \ar[u]_{\treflect}
+% & 1 \ar[l]_{~\quad\tzero}
+% & \Nf[\GGA]\tyB \ar[d]^{\tabs}
+% \\
+% \Den{\fun \tyA \tyB}\GG
+%   \ar[u]^{\mon[\fun\tyA\tyB]}
+%   \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+% & & & & \Nf[\GG]{\fun \tyA \tyB}
+% \\
+% }
+% \]
+% \end{frame}
+
+
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Reification $\den\tyB \todot \Tm\tyB$}
+% \[
+% \xymatrix@C=0ex@R=8ex{
+% (\hyp\tyA{\den\tyA} \Todot \hyp\tyA{\den\tyB)}
+% & \dottimes
+% & \hyp\tyA{\den\tyA} \ar[rr]^{\tapply}
+% & \qquad\qquad\qquad
+% & \hyp\tyA{\den\tyB} \ar[d]^{\hyp\tyA{\reify\tyB}}
+% \\
+% \hyp\tyA{\den{\fun \tyA \tyB}}
+%   \ar[u]
+% & & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
+% & 1 \ar[l]_{~\quad\tzero}
+% & \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
+% \\
+% \den{\fun \tyA \tyB}
+%   \ar[u]^{\mon[\fun\tyA\tyB]}
+%   \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+% & & & & \Nf{\fun \tyA \tyB}
+% \\
+% }
+% \]
+% \end{frame}
 
 
 \begin{frame}%[fragile=singleslide]
   \frametitle{Reification $\forever{\den\tyB} \todot \Tm\tyB$}
 \[
 \xymatrix@C=0ex@R=8ex{
-(\hyp\tyA{\forever{\den\tyA}} \Todot \hyp\tyA{\forever{\den\tyB)}}
+\hyp\tyA{\forever{(\den\tyA \Todot \den\tyB)}}
 & \dottimes
-& \hyp\tyA{\forever{\den\tyA}} \ar[rr]^{\tapply}
+& \hyp\tyA{\forever{\den\tyA}} \ar[rr]^{\hyp\tyA{\tapply^\Box}}
 & \qquad\qquad\qquad
 & \hyp\tyA{\forever{\den\tyB}} \ar[d]^{\hyp\tyA{\reify\tyB}}
 \\
-\hyp\tyA{\forever{\den{\fun \tyA \tyB}}}
-  \ar@{=}[u]
+%\hyp\tyA{\forever{\den{\fun \tyA \tyB}}}
+\forever{(\den\tyA \Todot \den\tyB)}
+  \ar[u]^{\mon[\Box]}
 & & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
 & 1 \ar[l]_{~\quad\tzero}
 & \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
 \\
 \forever{\den{\fun \tyA \tyB}}
-  \ar[u]^{\mon[\Box]}
+  \ar@{=}[u]
   \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
 & & & & \Nf{\fun \tyA \tyB}
 \\
 }
 \]
 \end{frame}
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Reification $\forever{\den\tyB} \todot \Tm\tyB$}
+% \[
+% \xymatrix@C=0ex@R=8ex{
+% \hyp\tyA{\forever{(\den\tyA \Todot \den\tyB)}}
+% & \dottimes
+% & \hyp\tyA{\forever{\den\tyA}} \ar[rr]^{\hyp\tyA{\tapply^\Box}}
+% & \qquad\qquad\qquad
+% & \hyp\tyA{\forever{\den\tyB}} \ar[d]^{\hyp\tyA{\reify\tyB}}
+% \\
+% \hyp\tyA{\forever{\den{\fun \tyA \tyB}}}
+%   \ar@{=}[u]
+% & & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
+% & 1 \ar[l]_{~\quad\tzero}
+% & \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
+% \\
+% \forever{\den{\fun \tyA \tyB}}
+%   \ar[u]^{\mon[\Box]}
+%   \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+% & & & & \Nf{\fun \tyA \tyB}
+% \\
+% }
+% \]
+% \end{frame}
 
 
 
