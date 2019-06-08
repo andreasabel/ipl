@@ -1,0 +1,97 @@
+
+% ordinary color
+\newcommand{\ocol}[1]{\textcolor{black}{#1}}
+\newcommand{\ocolor}{\color{black}}
+\definecolor{DeepJungleGreen}{rgb}{0.0, 0.29, 0.29}
+\definecolor{DarkSpringGreen}{rgb}{0.09, 0.45, 0.27}
+\definecolor{ForestGreenTraditional}{rgb}{0.0, 0.27, 0.13}
+\definecolor{GreenPigment}{rgb}{0.0, 0.65, 0.31}
+\definecolor{CalPolyPomonaGreen}{rgb}{0.12, 0.3, 0.17}
+\definecolor{CSSGreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{DarkCerulean}{rgb}{0.03, 0.27, 0.49}
+\definecolor{DarkRaspberry}{rgb}{0.53, 0.15, 0.34}
+
+\colorlet{DarkBlue}{MidnightBlue!80!black} % greyish
+\definecolor{HanBlue}{rgb}{0.27, 0.42, 0.81}
+\definecolor{FrenchBlue}{rgb}{0.0, 0.45, 0.73}
+\definecolor{EgyptianBlue}{rgb}{0.06, 0.2, 0.65}
+
+\colorlet{TyColor}{EgyptianBlue} % ok
+%\colorlet{TyColor}{FrenchBlue} % too weak
+%\colorlet{TyColor}{HanBlue} % too weak
+%\colorlet{TyColor}{AgdaFunction} % too strong
+%\colorlet{TyColor}{AgdaFunction} %!70!gray} % DarkBlue
+\newcommand{\tycol}[1]{\textcolor{TyColor}{#1}}
+
+%\colorlet{TmColor}{BrickRed}
+\colorlet{TmColor}{Sepia}
+\newcommand{\tmcolor}{\color{TmColor}}
+\newcommand{\tmcol}[1]{\textcolor{TmColor}{#1}}
+\newcommand{\tmc}[1]{\ensuremath{\mathsf{\tmcol{#1}}}}
+
+\definecolor{SpiroDiscoBall}{rgb}{0.06, 0.75, 0.99}
+\definecolor{DeepSkyBlue}{rgb}{0.0, 0.75, 1.0}
+\definecolor{DodgerBlue}{rgb}{0.12, 0.56, 1.0}  % heavenly blue
+
+\colorlet{TyUseColor}{DodgerBlue}
+%\colorlet{TyUseColor}{DeepSkyBlue} % too light
+%\colorlet{TyUseColor}{SpiroDiscoBall} % too light
+%\colorlet{TyUseColor}{SkyBlue!80!black}
+%\colorlet{TyUseColor}{SkyBlue} % too light
+\newcommand{\tyuse}[1]{\textcolor{TyUseColor}{#1}}
+
+\colorlet{TmUseColor}{AgdaKeyword}%{Orange}
+\newcommand{\tmuse}[1]{\textcolor{TmUseColor}{#1}}
+\newcommand{\gam}[1][]{\ensuremath{\tmuse{\gamma_{#1}}}}
+
+% Positive things
+% \colorlet{PosColor}{BrickRed} %% too much red
+% \colorlet{PosColor}{DarkGreen} %% too dark
+% \colorlet{PosColor}{DeepJungleGreen}  %% still very dark
+\colorlet{PosColor}{DarkSpringGreen}
+\newcommand{\poscolor}{\color{PosColor}}
+\newcommand{\poscol}[1]{\textcolor{PosColor}{#1}}
+
+% Negative things
+\colorlet{NegColor}{TyColor}
+\newcommand{\negcolor}{\color{NegColor}}
+\newcommand{\negcol}[1]{\textcolor{NegColor}{#1}}
+
+% Semantics
+\colorlet{SemColor}{DodgerBlue}
+\newcommand{\semcolor}{\color{SemColor}}
+\newcommand{\semcol}[1]{\textcolor{SemColor}{#1}}
+
+% Reflection to heaven
+\colorlet{UpColor}{DodgerBlue}
+\newcommand{\upcolor}{\color{UpColor}}
+\newcommand{\upcol}[1]{\textcolor{UpColor}{#1}}
+
+% Reification to earth
+\colorlet{DownColor}{TmColor}
+\newcommand{\downcolor}{\color{DownColor}}
+\newcommand{\downcol}[1]{\textcolor{DownColor}{#1}}
+
+% Contexts
+%\colorlet{CxtColor}{AgdaModule}%{Sepia}
+\colorlet{CxtColor}{PosColor}
+\newcommand{\cxtcol}[1]{\textcolor{CxtColor}{#1}}
+\newcommand{\GG}{\cxtcol{\Gamma}}
+\newcommand{\GD}{\cxtcol{\Delta}}
+\newcommand{\Ge}{\cxtcol{\varepsilon}}
+
+% De Bruijn indices
+\colorlet{DBColor}{Gray!50!black}
+\newcommand{\dbcol}[1]{\textcolor{DBColor}{#1}}
+\newcommand{\indcol}[1]{\textcolor{DBColor}{#1}}
+
+% Named variables
+%\colorlet{VarColor}{Blue!80!black}}
+\colorlet{VarColor}{CxtColor}
+%\colorlet{VarColor}{RawSienna!80!black}
+\newcommand{\varcol}[1]{\textcolor{VarColor}{#1}}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "talkTYPES2019"
+%%% End:

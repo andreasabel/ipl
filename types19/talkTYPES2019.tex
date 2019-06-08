@@ -1,0 +1,1367 @@
+\nonstopmode
+\documentclass[t,fleqn,usenames,dvipsnames]{beamer}
+%\documentclass{article}\usepackage{beamerarticle}
+
+\makeatletter
+%\def\leqn{\tagsleft@true}
+%\def\reqn{\tagsleft@false}
+\def\fleq{\@fleqntrue\let\mathindent\@mathmargin \@mathmargin=\leftmargini}
+\def\cneq{\@fleqnfalse}
+\g@addto@macro{\endsubequations}{\addtocounter{equation}{-1}}
+\makeatother
+
+\mode<presentation>
+{
+  % \usetheme{AnnArbor}
+  \useinnertheme[shadow=true]{rounded}
+  \useoutertheme{infolines}
+  %\setbeamercolor*{title in head/foot}{parent=palette secondary}
+  %\useoutertheme{shadow}
+  \usecolortheme{wolverine}
+
+  \setbeamerfont{block title}{size={}}
+  \setbeamercolor{titlelike}{parent=structure,bg=yellow!85!orange}
+
+  % My modification: centered title with white background
+  \setbeamercolor{frametitle}{bg=white}
+  \setbeamertemplate{frametitle}{
+    %\begin{center}
+      \Large\insertframetitle
+      \vspace{1ex}
+      %\hline
+      \par
+    %\end{center}
+  }
+  % %% Does not work
+  % \setbeamercolor{frametitlecentered}{bg=white}
+  % \setbeamertemplate{frametitlecentered}{
+  %   \begin{center}
+  %     \Large\insertframetitle
+  %     \par
+  %   \end{center}
+  % }
+  % plus red emphasis
+  \setbeamercolor{alerted text}{fg=red!70!black}
+
+  % More space between items
+  %\defbeamertemplate*{itemize/enumerate body begin}{default}{\itemsep1ex}
+
+
+  \setbeamercolor{math text}{parent=titlelike}
+%  \setbeamercolor{math text displayed}{parent=palette primary}
+
+  % Fix background of theorems/proof
+  \setbeamercolor{block body}{parent=palette primary}%{bg=yellow!85!orange}
+  \setbeamercolor{block title}{parent=palette secondary}%{bg=orange}
+
+
+
+  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+
+} % end mode presentation
+
+%\usepackage{tcolorbox}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+%\usepackage{times}  % DYSFUNCTIONAL! looks awful when mixing mathtt and ordinary math.
+\usepackage{ifthen}
+%\usepackage[T1]{fontenc} %no effect
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+\usepackage{array} % for \newcolumntype
+\usepackage{bbm}
+\usepackage{calc} % for \widthof
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{alltt}
+\usepackage[normalem]{ulem} % strikethrough \sout
+\usepackage{cancel} % strikethrough math mode \cancel
+%\usepackage{enumitem} % set label in itemize
+\usepackage{pifont} % for \tickNo
+%\usepackage{}
+%\usepackage{listings}
+\usepackage[all]{xy}
+%\usepackage{proof}
+%\usepackage{eurosym}
+%\usepackage{graphics}
+\usepackage{bibentry}
+%\nobibliography{short}
+\bibliographystyle{plain}
+%\input{prooftree}
+
+\newtheorem{takehomemessage}[theorem]{\textbf{Take home message}}
+
+%\usepackage{agda}
+%\AgdaNoSpaceAroundCode{}
+
+\DeclareMathSymbol{\chkmark}{\mathord}{AMSa}{"58}
+
+% RGB colors
+\definecolor{darkred}{rgb}{0.5,0,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+\definecolor{dirtyred}{rgb}{0.7,0.2,0.1}
+\definecolor{dirtygreen}{rgb}{0.2,0.4,0.1}
+\definecolor{darkdirtygreen}{rgb}{0.13,0.25,0.07}
+\definecolor{dirtyblue}{rgb}{0.07,0.2,0.5}
+\definecolor{darkdirtyblue}{rgb}{0.1,0.15,0.35}
+\definecolor{lightblue}{rgb}{0.5,0.5,1}
+\definecolor{olivegreen}{rgb}{0.5,0.5,0}
+\definecolor{brown}{rgb}{0.65,0.35,0} % almost gold
+\definecolor{grey}{rgb}{0.33,0.33,0.33}
+\definecolor{darkbrown}{rgb}{0.35,0.15,0}
+\definecolor{darkgrey}{rgb}{0.16,0.16,0.16}
+
+\newcommand{\textred}[1]{{\color{dirtyred}\textbf{#1}}}
+
+%\newcommand{\tickYes}{{\color{darkgreen}\checkmark}} % does not work
+  %since checkmark invokes math mode
+\newcommand{\tickYes}{\ensuremath{\color{darkgreen}\chkmark}}
+\newcommand{\tickNo}{{\color{dirtyred}\hspace{1pt}\ding{55}}}
+
+%\usepackage[curve,matrix,arrow]{xy}
+%\usepackage{tikz} % Drawing diagrams
+%\usepackage{pgflibraryshapes} %Ellipses
+
+
+% MACROS:
+\newcommand{\inst}{}
+\input{colors}
+\input{macros}
+
+% Semantics
+\renewcommand{\den}[1]{\semcol{\lv} #1 \semcol{\rv}}
+\newcommand{\cden}[1]{\den{\cxtcol{#1}}}
+\renewcommand{\A}[1][]{\semcol{\mathcal{A}}_{\cxtcol{#1}}}
+\renewcommand{\B}[1][]{\semcol{\mathcal{B}}_{\cxtcol{#1}}}
+\renewcommand{\C}[1][]{\semcol{\mathcal{C}}_{\cxtcol{#1}}}
+
+% \renewcommand{\tmc}[1]{\mathsf{#1}}
+% \renewcommand{\tmcol}[1]{\mathsf{#1}}
+\renewcommand{\varcol}{\tmcol}
+
+\renewcommand{\Var}[2]{\tVar\;#1\;#2}
+\renewcommand{\ru}[2]{\dfrac{%
+  \begin{array}[b]{@{}l@{}} #1 \end{array}\hfill%
+  }{%
+  \begin{array}[t]{@{}l@{}} #2 \end{array}\hfill%
+  }}
+
+% black text in mbox
+\newcommand{\mybox}[1]{\mbox{\color{black}#1}}
+
+% meta-level logic
+\renewcommand{\mfor}{\ \mybox{for}\ }
+\renewcommand{\mforsome}{\ \mybox{for some}\ }
+\renewcommand{\mthen}{\ \mybox{then}\ }
+\renewcommand{\mif}{\ \mybox{if}\ }
+\renewcommand{\miff}{\ \mybox{iff}\ }
+\renewcommand{\motherwise}{\ \mybox{otherwise}}
+\renewcommand{\mundefined}{\mybox{undefined}}
+\renewcommand{\mnot}{\mybox{not}\ }
+\renewcommand{\mand}{\ \mybox{and}\ }
+\renewcommand{\mor}{\ \mybox{or}\ }
+\renewcommand{\mimplies}{\ \mybox{implies}\ }
+\renewcommand{\mimply}{\ \mybox{imply}\ }
+\renewcommand{\mforall}{\ \mybox{for all}\ }
+\renewcommand{\mexists}{\mybox{exists}\ }
+\renewcommand{\mexist}{\mybox{exist}\ }
+\renewcommand{\mtrue}{\mybox{true}}
+\renewcommand{\mwith}{\ \mybox{with}\ }
+\renewcommand{\mwhere}{\ \mybox{where}\ }
+\renewcommand{\mholds}{\ \mybox{holds}\ }
+\renewcommand{\munless}{\ \mybox{unless}\ }
+\renewcommand{\mboth}{\ \mybox{both}\ }
+\renewcommand{\msuchthat}{\ \mybox{such that}\ }
+% proofs
+\renewcommand{\msince}{\mybox{since}\ }
+\renewcommand{\mdef}{\mybox{by def.}}
+\renewcommand{\mass}{\mybox{assumption}}
+\renewcommand{\mhyp}{\mybox{by hyp.}}
+\renewcommand{\mlemma}[1]{\mybox{by Lemma~#1}}
+\renewcommand{\mih}[1][]{\mybox{by ind.hyp.}#1}
+\renewcommand{\mgoal}[1][]{\mybox{goal\ifthenelse{\equal{#1}{}}{}{~#1}}}
+\renewcommand{\mby}[1]{\mybox{by #1}}
+\renewcommand{\minfrule}{\mybox{by inference rule}}
+
+
+% \renewcommand{\tin}{\mathsf{inn}}
+% \renewcommand{\thead}{\cop{\mathsf{head}}}
+% \renewcommand{\ttail}{\cop{\mathsf{tail}}}
+% % start copattern color
+% \newcommand{\shead}{\cop{\mathsf{head}}}
+% \newcommand{\stail}{\cop{\mathsf{tail}}}
+% \newcommand{\phead}{\cop{\mathsf{.head}}}
+% \newcommand{\ptail}{\cop{\mathsf{.tail}}}
+% \newcommand{\vecQ}{\cop{\vec Q}}
+% \newcommand{\bDelta}{\boring{\Delta}}
+% \newcommand{\bcovered}{\mathrel{\boring{\ccovered}}}
+% \newcommand{\bA}{\boring{A}}
+% \newcommand{\bC}{\boring{C}}
+% \newcommand{\bder}{\mathrel{\boring{\vdash}}}
+% \newcommand{\bcolon}{\mathrel{\boring{:}}}
+% \newcommand{\blpar}{\boring{(}}
+% \newcommand{\brpar}{\boring{)}}
+% \renewcommand{\vbranches}{\boring{\mathit{branches}}}
+% \renewcommand{\tout}{\cop{\mathsf{out}}}
+% \renewcommand{\tforce}{\cop{\mathsf{force}}}
+% \newcommand{\kw}[1]{{\bf\texttt{#1}}}
+% \newcommand{\kwnewtype}{\kw{newtype}}
+% \newcommand{\kwrecord}{\kw{record}}
+% \newcommand{\kwwhere}{\kw{where}}
+% \newcommand{\kwinstance}{\kw{instance}}
+% \newcommand{\kwcoinductive}{\kw{coinductive}}
+% \newcommand{\kwCoInductive}{\kw{CoInductive}}
+% \newcommand{\kwCoFixpoint}{\kw{CoFixpoint}}
+% \newcommand{\kwfield}{\kw{field}}
+% \renewcommand{\tcase}{\mathbf{case}}
+% \renewcommand{\tof}{\mathbf{of}}
+% \renewcommand{\caseof}[3]{\tcase\,#1\,\tof~#2 \mathrel{\boldsymbol\To} #3}
+% \newcommand{\tthead}{\cop{\texttt{head}}}
+% \newcommand{\tttail}{\cop{\texttt{tail}}}
+\newcommand{\ONE}{\mathbf{1}}
+
+% DOES NOT WORK:
+% rule with "boring" default text
+\newcommand{\setboring}{\setbeamercolor{math text}{fg=grey}\setbeamercolor{math display}{fg=grey}}
+\newcommand{\bru}[2]{\setboring\dfrac{\setboring#1}{\setboring#2}}
+
+\renewcommand*\ttdefault{txtt} % for listing package
+
+% \newcommand{\defHaskelllistings}{%
+%   \lstset{%
+%     language=Haskell,%
+%     basicstyle=\ttfamily\small\color{darkdirtyblue},% \ttfamily
+%     keywordstyle=\ttfamily\bfseries,% \underbar
+%     identifierstyle=,%
+%     commentstyle=\itshape,%
+%     columns=flexible,%spaceflexible,% fixed,% flexible,%
+%     showstringspaces=false,%
+% %    xleftmargin=\codeindent,% defined below
+%     breaklines=true,%
+%     deletekeywords={succ,zero,head,tail,zipWith,Either,List},%
+%     morekeywords={Set,Size,fun,cofun,pattern},% ,left,right,nil,cons
+%     literate={\\}{{$\lambda$}}1 {->}{{$\rightarrow$~}}2
+%              {<=}{{$\leq$~}}2 {<}{{$<$~}}1
+% %     literate={map}{map~}4
+% %       {even}{even~}5
+% %       {odd}{odd~}4
+%      }%
+% }
+%\defHaskelllistings
+
+\title{Normalization by Evaluation for Call-by-Push-Value}
+\subtitle{Towards a Modal-Logical Reconstruction of NbE}
+
+\author[Abel]{
+  Andreas Abel\inst{1}
+}
+% \author{Andreas Abel\inst{1}
+%   \and Brigitte Pientka\inst{2}
+%   \and David Thibodeau\inst{2}
+%   \and Anton Setzer\inst{3}
+% }
+%{F.~Author\inst{1} \and S.~Another\inst{2}}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[] %Chalmers/GU/ENS Cachan] % (optional, but mostly needed)
+{
+  \inst{1}
+  Department of Computer Science and Engineering\\
+  Chalmers and Gothenburg University, Sweden \\[1ex]
+}
+%  \inst{1}%
+%  Department of Computer Science\\
+%  University of Somewhere
+%  \and
+%  \inst{2}%
+%  Department of Theoretical Philosophy\\
+%  University of Elsewhere}
+%% - Use the \inst command only if there are several affiliations.
+%% - Keep it simple, no one is interested in your street address.
+
+\date[TYPES 2019] % (optional, should be abbreviation of conference name)
+{ 25th Int. Conf. on Types for Proofs and Programs \\
+  TYPES 2019, Oslo, Norway \\
+  13 June 2019
+}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+%\subject{Software Verification}
+% This is only inserted into the PDF information catalog. Can be left
+% out.
+
+
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+
+%\AtBeginSubsection[]
+%\AtBeginSection[]
+%{
+%  \begin{frame}<beamer>
+%    \frametitle{Outline}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}
+
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command:
+
+%\beamerdefaultoverlayspecification{<+->}
+
+\makeatletter
+\def\MLine#1{\par\vspace{1ex}\hspace*{-\@totalleftmargin}\parbox{\textwidth}{\[#1\]}}
+\makeatother
+%\newenvironment{display}{\par\vspace{1ex}\hspace*{-\@totalleftmargin}\parbox{\textwidth}{\[}{\]}}
+
+
+%\newcommand{\List}{\mathsf{List}}
+\renewcommand{\Set}{\mathsf{Set}}
+\newcommand{\Tree}{\mathsf{Tree}}
+%\newcommand{\Prop}{\mathsf{Prop}}
+%\newcommand{\Type}{\mathsf{Type}}
+%\newcommand{\Size}{\mathsf{Size}}
+%\newcommand{\tfix}{\mathsf{fix}}
+%\newcommand{\Int}{\mathsf{Int}}
+%\newcommand{\tnil}{\mathsf{nil}}
+%\newcommand{\tcons}{\mathsf{cons}}
+%\newcommand{\vas}{\mathit{as}}
+%\newcommand{\ttuple}[1]{(#1)}
+
+%\newcommand{\oford}{\of\tord} \newcommand{\oftype}{\of\ttype}
+\newcommand{\oford}{}         \newcommand{\oftype}{}
+\newenvironment{prg}{\begin{quotation}\begin{tabbing}}{\end{tabbing}\end{quotation}}
+
+% COLORS
+\newcommand{\cHead}{\color{darkblue}}
+\newcommand{\cSub}{\color{brown}}
+\newcommand{\cWhite}{\color{white}}
+\newcommand{\cGray}{\color{gray}}
+\newcommand{\cGreen}{\color{olivegreen}}
+\newcommand{\cBrown}{\color{brown}}
+\newcommand{\cBlack}{\color{black}}
+\newcommand{\black}[1]{{\cBlack#1}}
+
+\newcommand{\cAnn}{\color{red!80!black}}%purple darkblue
+\newcommand{\cAside}{\color{gray}}
+\newcommand{\cEnum}{\color{darkgreen}}
+\newcommand{\cEm}{\cAnn} %\color{red}}
+\newcommand{\cCo}{\cAnn} %\color{red}} % copattern color
+\newcommand{\cop}[1]{{\cCo#1}}
+\newcommand{\cApp}{\color{violet}}
+\newcommand{\capp}[1]{{\cApp#1}}
+\newcommand{\cFocus}{\color{darkgreen}}
+\newcommand{\focus}[1]{{\cFocus#1}}
+\newcommand{\cMath}{\usebeamercolor[fg]{math text}}
+\newcommand{\cIdent}{\usebeamercolor[fg]{math text}}
+\newcommand{\ident}[1]{{\cIdent#1}}
+\newcommand{\cExp}{\cIdent}
+\newcommand{\cBoring}{\color{grey}}
+\newcommand{\boring}[1]{{\cBoring#1}}
+
+
+
+\renewcommand{\rulename}[1]{#1}
+
+% types
+\newcommand{\cType}{\color{orange!60!black}}
+
+
+\newcommand{\mlsays}[1]{}
+% {\begin{frame}%[fragile=singleslide]
+%   %\frametitle{Himself}
+%   \begin{minipage}[c]{0.5\linewidth}
+%    \includegraphics[height=0.9\textheight]{martin-loef-bw.png}
+%   \end{minipage}% NO SPACE HERE!
+%   \begin{minipage}[c]{0.5\linewidth}
+%    \begin{center}
+%      \bla \\[8ex]
+%      \Huge #1
+%    \end{center}
+%   \end{minipage}
+% \end{frame}
+% }
+
+\newcommand{\JOKE}[1]{} % No jokes.
+\renewcommand{\emph}[1]{\textit{\cType#1}}
+
+
+% \DeclareMathOperator*{\amp}{\&}
+% \DeclareMathOperator*{\bigamp}{\scalerel*{\&}{\sum}}
+% \usepackage{scalerel}
+
+\begin{document}
+
+\maketitle
+%\begin{frame}
+%  \titlepage
+%\end{frame}
+
+%\begin{frame}
+%  \frametitle{Outline}
+%  \tableofcontents
+%  % You might wish to add the option [pausesections]
+%\end{frame}
+
+
+\section{Simply-Typed Lambda-Calculus}
+
+%\newcommand{\tvar}{\mathsf{var}}
+%\newcommand{\tapp}{\mathsf{app}}
+%\newcommand{\tabs}{\mathsf{abs}}
+
+
+\newcommand{\fun}[2]{\negcol{\poscol{#1} \To \negcol{#2}}}
+\newcommand{\tyA}{\poscol{A}}
+\newcommand{\tyAp}{\poscol{A'}}
+\newcommand{\tyB}{\negcol{B}}
+\renewcommand{\cext}[2]{\cxtcol{#1.#2}}
+
+%% Version Z
+\newcommand{\JVarZ}[3]{\varcol{#1} : \poscol{#2} \in \cxtcol{#3}}
+\newcommand{\JTmZ}[3]{\cxtcol{#3} \der \tmcol{#1} : #2}
+\newcommand{\cextZ}[3]{\cxtcol{#3},\, \varcol{#1} \of #2}
+\newcommand{\varZ}[1]{\varcol{#1}}
+\newcommand{\appZ}[2]{\tmcol{#1\,#2}} % silent application
+\newcommand{\absZ}[2]{\tmcol{\lambda \varcol{#1}.\, #2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill Z}
+\[
+\begin{array}{l@{\qquad}l}
+\phantom{\tapp}
+  & \ru{\JVarZ x \tyA \GG
+      }{\JTmZ {\varZ x} \tyA \GG}
+\\
+\\
+  & \ru{\JTmZ t {\fun \tyA \tyB} \GG \qquad
+        \JTmZ u \tyA \GG
+      }{\JTmZ {\appZ t u} \tyB \GG}
+\\
+\\
+  & \ru{\JTmZ t \tyB {\cextZ x \tyA \GG}
+      }{\JTmZ {\absZ x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+%% Version Y
+\newcommand{\JVarY}[3]{\varcol{#1} : \poscol{#2} \in \cxtcol{#3}}
+\newcommand{\JTmY}[3]{\tmcol{#1} : \cxtcol{#3} \der #2}
+\newcommand{\cextY}[3]{\cxtcol{#3},\, \varcol{#1} \of #2}
+\newcommand{\varY}[1]{\varcol{#1}}
+\newcommand{\appY}[2]{\tmcol{#1\,#2}} % silent application
+\newcommand{\absY}[2]{\tmcol{\lambda \varcol{#1}.\, #2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill Y}
+\[
+\begin{array}{l@{\qquad}l}
+\phantom{\tapp}
+  & \ru{\JVarY x \tyA \GG
+      }{\JTmY {\varY x} \tyA \GG}
+\\
+\\
+  & \ru{\JTmY t {\fun \tyA \tyB} \GG \qquad
+        \JTmY u \tyA \GG
+      }{\JTmY {\appY t u} \tyB \GG}
+\\
+\\
+  & \ru{\JTmY t \tyB {\cextY x \tyA \GG}
+      }{\JTmY {\absY x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+
+%% Version X
+\newcommand{\JVarX}[3]{\varcol{#1} : (\poscol{#2} \in \cxtcol{#3})}
+\newcommand{\JTmX}[3]{\tmcol{#1} : (\cxtcol{#3} \der #2)}
+\newcommand{\cextX}[3]{\cxtcol{#3},\, \varcol{#1} \of #2}
+\newcommand{\varX}[1]{\varcol{#1}}
+\newcommand{\appX}[2]{\tmcol{#1\,#2}} % silent application
+\newcommand{\absX}[2]{\tmcol{\lambda \varcol{#1}.\, #2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill X}
+\[
+\begin{array}{l@{\qquad}l}
+\phantom{\tapp}
+  & \ru{\JVarX x \tyA \GG
+      }{\JTmX {\varX x} \tyA \GG}
+\\
+\\
+  & \ru{\JTmX t {\fun \tyA \tyB} \GG \qquad
+        \JTmX u \tyA \GG
+      }{\JTmX {\appX t u} \tyB \GG}
+\\
+\\
+  & \ru{\JTmX t \tyB {\cextX x \tyA \GG}
+      }{\JTmX {\absX x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+\renewcommand{\tvar}{\tmcol{\mathsf{var}}}
+\renewcommand{\var}[1]{\tvar\;#1}
+
+\renewcommand{\tapp}{\tmcol{\mathsf{app}}}
+\renewcommand{\app}[2]{\tmcol{\tapp\;#1\;#2}}
+
+\renewcommand{\tabs}{\tmcol{\mathsf{abs}}}
+\newcommand{\abs}[1]{\tmcol{\tabs\;#1}}
+
+\renewcommand{\tne}{\tmcol{\mathsf{ne}}}
+
+%% Version W
+\newcommand{\JVarW}[3]{\varcol{#1} : (\poscol{#2} \in \cxtcol{#3})}
+\newcommand{\JTmW}[3]{\tmcol{#1} : (\cxtcol{#3} \der #2)}
+\newcommand{\cextW}[3]{\cxtcol{#3}.#2}
+\newcommand{\varW}[1]{\var{#1}}
+\newcommand{\appW}[2]{\app{#1}{#2}}
+\newcommand{\absW}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill W}
+\[
+\begin{array}{l@{\qquad}l}
+\phantom{\tapp}
+  & \ru{\JVarW x \tyA \GG
+      }{\JTmW {\varW x} \tyA \GG}
+\\
+\\
+  & \ru{\JTmW t {\fun \tyA \tyB} \GG \qquad
+        \JTmW u \tyA \GG
+      }{\JTmW {\appW t u} \tyB \GG}
+\\
+\\
+  & \ru{\JTmW t \tyB {\cextW x \tyA \GG}
+      }{\JTmW {\absW x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+
+%% Version V
+\newcommand{\JVarV}[3]{\varcol{#1} : \poscol{#2} \in \cxtcol{#3}}
+\newcommand{\JTmV}[3]{\tmcol{#1} : \cxtcol{#3} \der #2}
+\newcommand{\cextV}[3]{\cxtcol{#3}.#2}
+\newcommand{\varV}[1]{\var{#1}}
+\newcommand{\appV}[2]{\app{#1}{#2}}
+\newcommand{\absV}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill V}
+\[
+\begin{array}{l@{\qquad}l}
+\phantom{\tapp}
+  & \ru{\JVarV x \tyA \GG
+      }{\JTmV {\varV x} \tyA \GG}
+\\
+\\
+  & \ru{\JTmV t {\fun \tyA \tyB} \GG \qquad
+        \JTmV u \tyA \GG
+      }{\JTmV {\appV t u} \tyB \GG}
+\\
+\\
+  & \ru{\JTmV t \tyB {\cextV x \tyA \GG}
+      }{\JTmV {\absV x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+%% Version U
+\newcommand{\JVarU}[3]{\poscol{#2} \in \cxtcol{#3}}
+\newcommand{\JTmU}[3]{\cxtcol{#3} \der #2}
+\newcommand{\cextU}[3]{\cxtcol{#3}.#2}
+\newcommand{\varU}[1]{\var{#1}}
+\newcommand{\appU}[2]{\app{#1}{#2}}
+\newcommand{\absU}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill U}
+\[
+\begin{array}{l@{\qquad}l}
+\tvar
+  & \ru{\JVarU x \tyA \GG
+      }{\JTmU {\varU x} \tyA \GG}
+\\
+\\
+\tapp
+  & \ru{\JTmU t {\fun \tyA \tyB} \GG \qquad
+        \JTmU u \tyA \GG
+      }{\JTmU {\appU t u} \tyB \GG}
+\\
+\\
+\tabs
+  & \ru{\JTmU t \tyB {\cextU x \tyA \GG}
+      }{\JTmU {\absU x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+\renewcommand{\Var}[2][]{\tVar_{#1}^{#2}}
+\renewcommand{\Tm}[2][]{\tTm_{#1}^{#2}}
+\renewcommand{\Nf}[2][]{\tNf_{#1}^{#2}}
+\renewcommand{\Ne}[2][]{\tNe_{#1}^{#2}}
+
+%% Version T
+\newcommand{\JVarT}[3]{\Var[\cxtcol{#3}]{\poscol{#2}}}
+\newcommand{\JTmT}[3]{\Tm[\cxtcol{#3}]{#2}}
+\newcommand{\cextT}[3]{\cxtcol{#3}.#2}
+\newcommand{\varT}[1]{\var{#1}}
+\newcommand{\appT}[2]{\app{#1}{#2}}
+\newcommand{\absT}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill T}
+\[
+\begin{array}{l@{\qquad}l}
+\tvar
+  & \ru{\JVarT x \tyA \GG
+      }{\JTmT {\varT x} \tyA \GG}
+\\
+\\
+\tapp
+  & \ru{\JTmT t {\fun \tyA \tyB} \GG \qquad
+        \JTmT u \tyA \GG
+      }{\JTmT {\appT t u} \tyB \GG}
+\\
+\\
+\tabs
+  & \ru{\JTmT t \tyB {\cextT x \tyA \GG}
+      }{\JTmT {\absT x t} {\fun \tyA \tyB} \GG}
+\\
+\end{array}
+\]
+\end{frame}
+
+
+%\newcommand{\phantomappargs}{\phantom{\JTmS t {\fun \tyA \tyB} \GG\times \JTmS u \tyA \GG}}
+\newlength{\colAlength}
+\settowidth{\colAlength}{$\JTmS t {\fun \tyA \tyB} \GG \times \JTmS u \tyA \GG$}
+\newcommand{\bappargs}[1]{\makebox[\colAlength][l]{#1}}
+
+\newcolumntype{A}{>{$}p{\colAlength}<{$}}
+
+%% Version S
+\newcommand{\JVarS}[3]{\Var[\cxtcol{#3}]{\poscol{#2}}}
+\newcommand{\JTmS}[3]{\Tm[\cxtcol{#3}]{#2}}
+\newcommand{\cextS}[3]{\cxtcol{#3}.#2}
+\newcommand{\varS}[1]{\var{#1}}
+\newcommand{\appS}[2]{\app{#1}{#2}}
+\newcommand{\absS}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill S}
+\[
+\begin{array}{lcA@{~~\to~~}l}
+\tvar
+  & :
+  & \JVarS x \tyA \GG
+  & \JTmS {\varS x} \tyA \GG
+\\
+\\
+\tapp
+  & :
+  & \JTmS t {\fun \tyA \tyB} \GG \times
+    \JTmS u \tyA \GG
+  & \JTmS {\appS t u} \tyB \GG
+\\
+\\
+\tabs
+  & :
+  & \JTmS t \tyB {\cextS x \tyA \GG}
+  & \JTmS {\absS x t} {\fun \tyA \tyB} \GG
+\\
+\\
+\phantom{\tzero}
+\end{array}
+\]
+\end{frame}
+
+%% Version R
+\newcommand{\JVarR}[3]{\Var[\cxtcol{#3}]{\poscol{#2}}}
+\newcommand{\JTmR}[3]{\Tm[\cxtcol{#3}]{#2}}
+\newcommand{\cextR}[3]{\cxtcol{#3}.#2}
+\newcommand{\varR}[1]{\var{#1}}
+\newcommand{\appR}[2]{\app{#1}{#2}}
+\newcommand{\absR}[2]{\abs{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill R}
+\[
+\begin{array}{lcA@{~~\to~~}l}
+\tvar
+  & :
+  & \JVarR x \tyA \GG
+  & \JTmR {\varR x} \tyA \GG
+\\
+\\
+\tapp
+  & :
+  & \JTmR t {\fun \tyA \tyB} \GG \times
+    \JTmR u \tyA \GG
+  & \JTmR {\appR t u} \tyB \GG
+\\
+\\
+\tabs
+  & :
+  & \JTmR t \tyB {\cextR x \tyA \GG}
+  & \JTmR {\absR x t} {\fun \tyA \tyB} \GG
+\\
+\\
+\phantom{\Nf B}
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \JVarR x \tyA {\cextR x \tyA \GG}
+\\
+\\
+\tsuc
+  & :
+  & \JVarR x \tyA \GG
+  & \JVarR x \tyA {\cextR x \tyAp \GG}
+\end{array}
+\]
+\end{frame}
+
+\newcommand{\jhyp}[2]{[\poscol{#1}]\,#2}
+\renewcommand{\hyp}[3][]{\ifthenelse{\equal{#1}{}}{\jhyp{#2}{#3}}{\left(\jhyp{#2}{#3}\right)_{\cxtcol{#1}}}}
+%\renewcommand{\hyp}[3][]{\ifthenelse{\equal{#1}{}}{\jhyp{#2}{#3}}{\jhyp{#2}{#3}_{\;\cxtcol{#1}}}}
+
+\newcommand{\jforever}[1]{\Box\,#1}
+\newcommand{\forever}[2][]{\ifthenelse{\equal{#1}{}}{\jforever{#2}}{\left(\jforever{#2}\right)_{\cxtcol{#1}}}}
+
+\newcommand{\jsometimes}[1]{\Diamond#1}
+\newcommand{\sometimes}[2][]{\ifthenelse{\equal{#1}{}}{\jsometimes{#2}}{\left(\jsometimes{#2}\right)_{\cxtcol{#1}}}}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Contexts $\Gamma \subseteq \Delta$: branching time}
+\[
+\xymatrix@=2ex{
+ \cdots & \cdots & \cxtcol{A.A.B} & & \cxtcol{A.B.A} & \cdots & \cdots & \cdots & \cdots &  \cdots \\
+ & & & & & & & & & \\
+ & \cxtcol{A.A} \ar[uul] \ar[uu] \ar[uur]
+ & % \circlearrowleft
+ & \cxtcol{A.B} \ar@/^/[uul] \ar@/_/[uul] \ar[uur] \ar[uur]
+ & \circlearrowleft
+ & \cxtcol{B.A} \ar[uul] \ar[uu] \ar[uur]
+ & & \cxtcol{D.C} \ar[uul] \ar[uu] \ar[uur] \ar[uurr]
+ & \cdots \\
+ & & & & & & & & \cdots \\
+ & & \cxtcol{A} \ar@/^/[uul] \ar@/_/[uul] \ar[uur]
+ & \circlearrowleft
+ & \cxtcol{B} \ar[uul] \ar[uur]
+ & & \cxtcol{C} \ar[uur] \ar[urr]
+ & & \cdots \\
+ & & & & & & & \cdots & \\
+ & & & & \cxtcol{\Ge}
+  \ar[uull] \ar[uu] \ar[uurr] \ar[uurrrr]
+ & & & & \\
+}
+\]
+\end{frame}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Context interpretation $\cden\Gamma$}
+\[
+\xymatrix@C=0ex@R=2ex{
+ \cdots \ar[ddr] &
+ \cdots \ar[dd] &
+ \cden{A.A.B} \ar[ddl]^{\pi_1}  \ar@/^/[ddr]^{\pi_1\times\tid}  \ar@/_/[ddr]_{\pi_2\times\tid} &
+ &
+ \cden{A.B.A} \ar[ddl]^{\pi_1} \ar[ddr]_{\pi_2\times\tid} &
+ \cdots \ar[dd] &
+ \cdots \ar[ddl] \ar[ddr] &
+ \cdots \ar[dd] &
+ \cdots \ar[ddl] &
+ \cdots \ar[ddll] \\
+ & & & & & & & & & \\
+ & \cden{A.A} \ar@/^/[ddr]^{\pi_2}  \ar@/_/[ddr]_{\pi_1}
+ & % \circlearrowleft
+ & \cden{A.B} \ar[ddl]_{\pi_1} \ar[ddr]^{\pi_2}
+ & \circlearrowleft
+ & \cden{B.A} \ar[ddl]_{\pi_1}
+ & & \cden{D.C} \ar[ddl]_{\pi_2}
+ & \cdots \\
+ & & & & & & & & \cdots \ar[dll] \\
+ & & \cden{A} \ar[ddrr]^{!}
+ & \circlearrowleft
+ & \cden{B} \ar[dd]^{!}
+ & & \cden{C} \ar[ddll]_{!}
+ & & \cdots  \ar[ddllll]_{!}\\
+ & & & & & & & \cdots & \\
+ & & & & \cden{\Ge} & & & & \\
+}
+\]
+$$
+  \cden{A_n.\ldots.A_1}
+  =
+  \cden{A_n} \dottimes \cdots \dottimes \cden{A_1}
+$$
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Context-indexed sets: %intuitionistic
+ temporal propositions!?}
+\[
+\begin{array}{rcl@{\qquad}l}
+  \A \todot \B & = & \forall \GG.\ \A[\GG] \to \B[\GG]
+    & \mbox{morphism}\\
+\\
+  (\A \dottimes \B)_\GG & = & \A[\GG] \times \B[\GG]
+    & \mbox{pointwise constructions}\\
+  (\A \Todot \B)_\GG    & = & \A[\GG] \to \B[\GG] \\
+  & \vdots \\
+\\
+  \hyp[\GG] A \B  & = & \B[\cext \GG A]
+    & \mbox{next-time (dynamic logic)}\\
+  \forever[\GG] \B & = & \forall \GD \supseteq \GG.\ \B[\GD]
+    & \mbox{forever} \\
+  \sometimes[\GG] \B & = & \exists \GD \supseteq \GG.\ \B[\GD]
+    & \mbox{sometimes} \\
+\\
+  \forever {(\A \Todot \B)} & = &
+    \forall \GD \supseteq \GG.\ \A[\GD] \to \B[\GD]
+    & \mbox{Kripke function space} \\
+\end{array}
+\]
+\end{frame}
+
+
+%% Version R again
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill R}
+\[
+\begin{array}{lcA@{~~\to~~}l}
+\tvar
+  & :
+  & \JVarR x \tyA \GG
+  & \JTmR {\varR x} \tyA \GG
+\\
+\\
+\tapp
+  & :
+  & \JTmR t {\fun \tyA \tyB} \GG \times
+    \JTmR u \tyA \GG
+  & \JTmR {\appR t u} \tyB \GG
+\\
+\\
+\tabs
+  & :
+  & \JTmR t \tyB {\cextR x \tyA \GG}
+  & \JTmR {\absR x t} {\fun \tyA \tyB} \GG
+\\
+\\
+\phantom{\Nf B}
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \JVarR x \tyA {\cextR x \tyA \GG}
+\\
+\\
+\tsuc
+  & :
+  & \JVarR x \tyA \GG
+  & \JVarR x \tyA {\cextR x \tyAp \GG}
+\end{array}
+\]
+\end{frame}
+
+
+%% Version Q
+\newcommand{\JVarQ}[3]{\Var[\cxtcol{#3}]{\poscol{#2}}}
+\newcommand{\JTmQ}[3]{\Tm[\cxtcol{#3}]{#2}}
+\newcommand{\cextQ}[3]{\cxtcol{#3}.#2}
+\newcommand{\varQ}[1]{\var{#1}}
+\newcommand{\appQ}[2]{\app{#1}{#2}}
+\newcommand{\absQ}[2]{\abs{#2}}
+\newcommand{\hypQ}[3]{\hyp[#3]{#1}{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill Q}
+\[
+\begin{array}{lcA@{~~\to~~}l}
+\tvar
+  & :
+  & \JVarQ x \tyA \GG
+  & \JTmQ {\varQ x} \tyA \GG
+\\
+\\
+\tapp
+  & :
+  & \JTmQ t {\fun \tyA \tyB} \GG \times
+    \JTmQ u \tyA \GG
+  & \JTmQ {\appQ t u} \tyB \GG
+\\
+\\
+\tabs
+  & :
+  & \hypQ \tyA {\Tm \tyB} \GG
+  & \JTmQ {\absQ x t} {\fun \tyA \tyB} \GG
+\\
+\\
+\phantom{\Nf B}
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \hypQ \tyA {\Var \tyA} \GG
+\\
+\\
+\tsuc
+  & :
+  & \JVarQ x \tyA \GG
+  & \hypQ \tyAp {\Var \tyA} \GG
+\end{array}
+\]
+\end{frame}
+
+
+%% Version P
+\newcommand{\JVarP}[3]{\Var{\poscol{#2}}}
+\newcommand{\JTmP}[3]{\Tm{#2}}
+\newcommand{\cextP}[3]{\cxtcol{#3}.#2}
+\newcommand{\varP}[1]{\var{#1}}
+\newcommand{\appP}[2]{\app{#1}{#2}}
+\newcommand{\absP}[2]{\abs{#2}}
+\renewcommand{\hypP}[3]{\hyp{#1}{#2}}
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill P}
+\[
+\begin{array}{lcA@{~~\todot~~}l}
+\tvar
+  & :
+  & \JVarP x \tyA \GG
+  & \JTmP {\varP x} \tyA \GG
+\\
+\\
+\tapp
+  & :
+  & \JTmP t {\fun \tyA \tyB} \GG \dottimes % \timesdot
+    \JTmP u \tyA \GG
+  & \JTmP {\appP t u} \tyB \GG
+\\
+\\
+\tabs
+  & :
+  & \hypP \tyA {\Tm \tyB} \GG
+  & \JTmP {\absP x t} {\fun \tyA \tyB} \GG
+\\
+\\
+\phantom{\Nf B}
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \hypP \tyA {\Var \tyA} \GG
+\\
+\\
+\tsuc
+  & :
+  & \JVarP x \tyA \GG
+  & \hypP \tyAp {\Var \tyA} \GG
+\end{array}
+\]
+\end{frame}
+
+
+%% Version N
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill N}
+\[
+\begin{array}{lcA@{~~\todot~~}l}
+\tvar
+  & :
+  & \Var \tyA
+  & \Ne \tyA
+\\
+\\
+\tapp
+  & :
+  & \Ne {\fun \tyA \tyB} \dottimes % \timesdot
+    \Nf \tyA
+  & \Ne \tyB
+\\
+\\
+\tabs
+  & :
+  & \hyp \tyA {\Nf \tyB}
+  & \Nf {\fun \tyA \tyB}
+\\
+\\
+\phantom{\Nf B}
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \hyp \tyA {\Var \tyA}
+\\
+\\
+\tsuc
+  & :
+  & \Var \tyA
+  & \hyp \tyAp {\Var \tyA}
+\end{array}
+\]
+\end{frame}
+
+
+% %% Version N
+
+% \begin{frame}%[fragile=singleslide]
+% \frametitle{Simply-typed lambda-calculus \hfill N}
+% \[
+% \begin{array}{lcA@{~~\todot~~}l}
+% \tvar
+%   & :
+%   & \Var \tyA
+%   & \Ne \tyA
+% \\[2ex]
+% \tapp
+%   & :
+%   & \Ne {\fun \tyA \tyB} \dottimes % \timesdot
+%     \Nf \tyA
+%   & \Ne \tyB
+% \\
+% \\
+% \tne
+%   & :
+%   & \Ne \tyB
+%   & \Nf \tyB
+% \\[2ex]
+% \tabs
+%   & :
+%   & \hyp \tyA {\Nf \tyB}
+%   & \Nf {\fun \tyA \tyB}
+% \\
+% \\
+% \tzero
+%   & :
+%   & 1
+%   & \hyp \tyA {\Var \tyA}
+% \\[2ex]
+% \tsuc
+%   & :
+%   & \Var \tyA
+%   & \hyp \tyAp {\Var \tyA}
+% \end{array}
+% \]
+% \end{frame}
+
+%% Version M
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Simply-typed lambda-calculus \hfill M}
+\[
+\begin{array}{lcA@{~~\todot~~}l}
+\tvar
+  & :
+  & \Var \tyA
+  & \Ne \tyA
+\\
+\\
+\tapp
+  & :
+  & \Ne {\fun \tyA \tyB} \dottimes % \timesdot
+    \Nf \tyA
+  & \Ne \tyB
+\\
+\\
+\tabs
+  & :
+  & \hyp \tyA {\Nf \tyB}
+  & \Nf {\fun \tyA \tyB}
+\\
+\\
+\tne
+  & :
+  & \Ne \tyB
+  & \Nf \tyB
+\\
+\\
+\tzero
+  & :
+  & 1
+  & \hyp \tyA {\Var \tyA}
+\\
+\\
+\tsuc
+  & :
+  & \Var \tyA
+  & \hyp \tyAp {\Var \tyA}
+\end{array}
+\]
+\end{frame}
+
+
+\section{Normalization by Evaluation}
+
+\newcommand{\Den}[2]{\den{#1}_{\cxtcol{#2}}}
+\newcommand{\tapply}{\semcol{\mathsf{apply}}}
+
+\renewcommand{\treify}{\downcol{\mathsf{reify}}}
+\renewcommand{\treflect}{\upcol{\mathsf{reflect}}}
+\renewcommand{\reify}[2][]{\treify_{#1}^{#2}}
+\renewcommand{\reflect}[2][]{\treflect_{#1}^{#2}}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Normalization by evaluation}
+\[
+\xymatrix@C=0ex@R=8ex{
+(\cden\GG \todot \den\tyB) & \times
+& \cden\GG_\GG \ar[rr]^{\tapply}
+& \qquad\qquad\qquad
+& \Den\tyB\GG \ar[dd]^{\reify\tyB}
+& \qquad & \Den\tyA\GG
+\\
+& & \GG \ar[u]_{\treflect} & & \\
+\Tm[\GG] \tyB
+  \ar[uu]^{\denty\_}
+  \ar@{.>}[rrrr]^{\tnorm}
+& & & & \Nf[\GG] \tyB
+& & \Var[\GG]\tyA \ar[uu]_{\reflect\tyA}
+\\
+}
+\]
+\end{frame}
+
+\newcommand{\tmon}{\semcol{\mathsf{mon}}}
+\newcommand{\mon}[1][]{\tmon^{#1}}
+
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Reification $\den\tyB \todot \Tm\tyB$}
+\[
+\newcommand{\GGA}{\cext\GG\tyA}
+\xymatrix@C=0ex@R=8ex{
+(\Den\tyA\GGA \to \Den\tyB\GGA)
+& \times
+& \Den\tyA\GGA \ar[rr]^{\tapply}
+& \qquad\qquad\qquad
+& \Den\tyB\GGA \ar[d]^{\reify\tyB}
+\\
+\Den{\fun \tyA \tyB}{\cext \GG \tyA}
+  \ar[u]
+& & \Var[\GGA]\tyA \ar[u]_{\treflect}
+& 1 \ar[l]_{~\quad\tzero}
+& \Nf[\GGA]\tyB \ar[d]^{\tabs}
+\\
+\Den{\fun \tyA \tyB}\GG
+  \ar[u]^{\mon[\fun\tyA\tyB]}
+  \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+& & & & \Nf[\GG]{\fun \tyA \tyB}
+\\
+}
+\]
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Reification $\den\tyB \todot \Tm\tyB$}
+\[
+\xymatrix@C=0ex@R=8ex{
+(\hyp\tyA{\den\tyA} \Todot \hyp\tyA{\den\tyB)}
+& \dottimes
+& \hyp\tyA{\den\tyA} \ar[rr]^{\tapply}
+& \qquad\qquad\qquad
+& \hyp\tyA{\den\tyB} \ar[d]^{\hyp\tyA{\reify\tyB}}
+\\
+\hyp\tyA{\den{\fun \tyA \tyB}}
+  \ar[u]
+& & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
+& 1 \ar[l]_{~\quad\tzero}
+& \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
+\\
+\den{\fun \tyA \tyB}
+  \ar[u]^{\mon[\fun\tyA\tyB]}
+  \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+& & & & \Nf{\fun \tyA \tyB}
+\\
+}
+\]
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Reification $\forever{\den\tyB} \todot \Tm\tyB$}
+\[
+\xymatrix@C=0ex@R=8ex{
+(\hyp\tyA{\forever{\den\tyA}} \Todot \hyp\tyA{\forever{\den\tyB)}}
+& \dottimes
+& \hyp\tyA{\forever{\den\tyA}} \ar[rr]^{\tapply}
+& \qquad\qquad\qquad
+& \hyp\tyA{\forever{\den\tyB}} \ar[d]^{\hyp\tyA{\reify\tyB}}
+\\
+\hyp\tyA{\forever{\den{\fun \tyA \tyB}}}
+  \ar@{=}[u]
+& & \hyp\tyA{\Var\tyA} \ar[u]_{\hyp\tyA{\treflect}}
+& 1 \ar[l]_{~\quad\tzero}
+& \hyp\tyA{\Nf\tyB} \ar[d]^{\tabs}
+\\
+\forever{\den{\fun \tyA \tyB}}
+  \ar[u]^{\mon[\Box]}
+  \ar@{.>}[rrrr]^{\reify{\fun\tyA\tyB}}
+& & & & \Nf{\fun \tyA \tyB}
+\\
+}
+\]
+\end{frame}
+
+
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Conclusion}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Future work}
+%   %\vspace{-3ex}
+%   \begin{itemize}
+%   \item
+%   \end{itemize}
+% \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END DOC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \bibliography{short}
+
+\end{document}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+\end{document}
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -4,6 +4,7 @@
 %\RequirePackage{amsfonts}
 \RequirePackage{stmaryrd} % \shortuparrow
 \RequirePackage{amssymb}
+\RequirePackage{mathabx}
 %\RequirePackage{dsfont}
 
 % evergreens
@@ -299,6 +300,7 @@
 \newcommand{\trunNf}[1][]{\mathsf{runNf}^{#1}}
 \newcommand{\stmap}[1][]{\widehat{\mathsf{map}}^{#1}}
 \newcommand{\Ge}{\varepsilon}
+\newcommand{\GG}{\Gamma}
 \newcommand{\dencase}{\denty{\tcase}}
 \newcommand{\denabort}{\denty{\tabort}}
 \newcommand{\CC}{\mathsf{CC}}
@@ -442,6 +444,9 @@
 \newcommand{\PSh}{\mathsf{PSh}}
 \newcommand{\SET}{\mathsf{SET}}
 \newcommand{\todot}{\stackrel{\cdot}{\to}}
+\newcommand{\Todot}{\stackrel{\cdot}{\To}}
+\newcommand{\timesdot}{\dottimes}
+\newcommand{\onedot}{\stackrel{\cdot}{1}}
 
 %NbE
 %\newcommand{\tnorm}{\mathsf{norm}}
@@ -1454,9 +1459,9 @@
 \newcommand{\cxt}{\ \mathsf{cxt}}
 
 % calligraphic capital letters
-\newcommand{\A}{\mathcal{A}}
-\newcommand{\B}{\mathcal{B}}
-\newcommand{\C}{\mathcal{C}}
+\newcommand{\A}[1][]{\mathcal{A}_{#1}}
+\newcommand{\B}[1][]{\mathcal{B}_{#1}}
+\newcommand{\C}[1][]{\mathcal{C}_{#1}}
 \newcommand{\DD}{\mathcal{D}}
 \newcommand{\E}{\mathcal{E}}
 \newcommand{\F}{\mathcal{F}}
@@ -1946,5 +1951,5 @@
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "fscd19"
+%%% TeX-master: "talkTYPES2019"
 %%% End:
