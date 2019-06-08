@@ -299,13 +299,18 @@ join (split x c) = split x (join c)
 
 _⋉_ = ◇-pair
 
-◇-pair-□ : ⟨ □ (◇ A) ⊙ □ (◇ (□ B)) ⟩→̇ □ (◇ (A ×̂ B))
-◇-pair-□ ca cb τ = ◇-pair (□-mon ca τ) (cb τ)
+□◇-pair' : ⟨ □ (◇ A) ⊙ □ (◇ (□ B)) ⟩→̇ □ (◇ (A ×̂ B))
+□◇-pair' ca cb τ = ◇-pair (□-mon ca τ) (cb τ)
 
 □◇-pair : Mon B → ⟨ □ (◇ A) ⊙ □ (◇ B) ⟩→̇ □ (◇ (A ×̂ B))
 □◇-pair mB ca cb τ = join $
   ◇-map! (λ τ₁ b → ◇-map! (λ τ₂ a → a , mB b τ₂) (ca (⊆-trans τ τ₁))) (cb τ)
 
+◇□-pair' : ⟨ ◇ (□ A) ⊙ □ (◇ (□ B)) ⟩→̇ ◇ (□ (A ×̂ B))
+◇□-pair' ca cb = join (◇-map! (λ τ a → ◇-map! (λ τ₁ b τ₂ → a (⊆-trans τ₁ τ₂) , b τ₂) (cb τ)) ca)
+
+◇□-pair : ⟨ □ (◇ (□ A)) ⊙ ◇ (□ B) ⟩→̇ ◇ (□ (A ×̂ B))
+◇□-pair ca cb = join (◇-map! (λ τ b → ◇-map! (λ τ₁ a τ₂ → a τ₂ , b (⊆-trans τ₁ τ₂)) (ca τ)) cb)
 
 -- Runnability
 
@@ -371,22 +376,23 @@ mutual
 -- ⟦ []    ⟧ᶜ = 1̂
 -- ⟦ P ∷ Γ ⟧ᶜ = ⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺
 
--- Positive types are monotone and negative types are runnable.
+-- Positive types are monotone.
 
-mutual
-  mon⁺ : (P : Ty⁺) → Mon ⟦ P ⟧⁺
-  mon⁺ (base o)  =  monVar
-  mon⁺ (P₁ ×̇ P₂) = ×-mon (mon⁺ P₁) (mon⁺ P₂)
-  mon⁺ (Σ̇ I P)   = Σ-mon (mon⁺ ∘ P)
-  mon⁺ (□̇ N)     = □-mon
-
-  run⁻ : (N : Ty⁻) → Run ⟦ N ⟧⁻
-  run⁻ (◇̇ P)   = ◇-run
-  run⁻ (Π̇ I N) = Π-run (run⁻ ∘ N)
-  run⁻ (P ⇒̇ N) = ⇒-run (mon⁺ P) (run⁻ N)
+mon⁺ : (P : Ty⁺) → Mon ⟦ P ⟧⁺
+mon⁺ (base o)  = monVar
+mon⁺ (P₁ ×̇ P₂) = ×-mon (mon⁺ P₁) (mon⁺ P₂)
+mon⁺ (Σ̇ I P)   = Σ-mon (mon⁺ ∘ P)
+mon⁺ (□̇ N)     = □-mon
 
 monᶜ : (Γ : Cxt) → Mon ⟦ Γ ⟧ᶜ
 monᶜ Γ γ τ = All.map (λ {P} v → mon⁺ P v τ) γ
+
+-- Negative types are runnable.
+
+run⁻ : (N : Ty⁻) → Run ⟦ N ⟧⁻
+run⁻ (◇̇ P)   = ◇-run
+run⁻ (Π̇ I N) = Π-run (run⁻ ∘ N)
+run⁻ (P ⇒̇ N) = ⇒-run (mon⁺ P) (run⁻ N)
 
 -- monᶜ []      = 1-mon
 -- monᶜ (P ∷ Γ) = ×-mon (monᶜ Γ) (mon⁺ P)
@@ -433,14 +439,27 @@ mutual
   -- fresh : ∀ {P Γ} → ◇ ⟦ P ⟧⁺ (P ∷ Γ)
   -- fresh□ : ∀ {P Γ} → □ (⟨ P ⟩ (◇ ⟦ P ⟧⁺)) Γ
 
+  fresh□◇□ : ∀ P {Γ} → ⟨ P ⟩ (□ (◇ (□ ⟦ P ⟧⁺))) Γ
+  fresh□◇□ P = reflect⁺□ P ∘ monVar here!
+
   fresh□ : ∀ P {Γ} → ⟨ P ⟩ (□ (◇ ⟦ P ⟧⁺)) Γ
+  fresh□ P = ◇-map extract ∘ reflect⁺□ P ∘ monVar here!
   fresh□ P = reflect⁺ P ∘ monVar here!
 
   fresh : ∀ {P Γ} → ⟨ P ⟩ (◇ ⟦ P ⟧⁺) Γ
+  fresh {P} = ◇-map extract (reflect⁺□ P here!)
   fresh {P} = reflect⁺ P here!
 
   fresh◇ : ∀ {P Γ} → ⟨ P ⟩ (◇ (□ ⟦ P ⟧⁺)) Γ
+  fresh◇ {P} = reflect⁺□ P here!
   fresh◇ {P} = ◇-map (mon⁺ P) fresh
+
+  -- saves us use of Mon P in freshᶜ
+  reflect⁺□ : (P : Ty⁺) → (P ∈_) →̇ (◇ (□ ⟦ P ⟧⁺))
+  reflect⁺□ (base o)  x = return (monVar x)
+  reflect⁺□ (P₁ ×̇ P₂) x = split x (◇□-pair (reflect⁺□ P₁ ∘ monVar (there here!)) fresh◇)
+  reflect⁺□ (Σ̇ I Ps)  x = case x λ i → ◇-map (□-map (i ,_)) fresh◇
+  reflect⁺□ (□̇ N)     x = return (□-mon (reflect⁻ N ∘ force ∘ monVar x))
 
   reflect⁺ : (P : Ty⁺) → (P ∈_) →̇ (◇ ⟦ P ⟧⁺)
   reflect⁺ (base o)  x = return x
@@ -476,7 +495,6 @@ mutual
   -- reify⁻ (P ⇒̇ N)  f = abs (reify⁻ N {!◇-elim! (run⁻ N) ? fresh!})
 -- (run⁻ N (□-map {!!} (□-weak f)) fresh))
 
-
 ext : (⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺) →̇ ⟦ P ∷ Γ ⟧ᶜ
 ext (γ , a) = a ∷ γ
 
@@ -503,8 +521,9 @@ freshG₀ (refl ∷ τ) = ◇-ext $ (λ τ₁ → freshG₀ (⊆-trans τ (⊆-t
 
 freshᶜ : (Γ : Cxt) → □ (◇ ⟦ Γ ⟧ᶜ) Γ
 freshᶜ []      = λ τ → return []
+freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair' (□-weak (freshᶜ Γ)) (fresh□◇□ P)
 freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair (mon⁺ P) (□-weak (freshᶜ Γ)) (fresh□ P)
-freshᶜ (P ∷ Γ) = ◇-ext ∘ ◇-pair-□ (□-weak (freshᶜ Γ)) (◇-map (mon⁺ P) ∘ (fresh□ P))
+freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair' (□-weak (freshᶜ Γ)) (◇-map (mon⁺ P) ∘ (fresh□ P))
 -- freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
 freshᶜ (P ∷ Γ) = ◇-ext ∘ λ τ →
   (□-weak (□-mon (freshᶜ Γ)) τ)
@@ -516,6 +535,7 @@ freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
 --  ⋉ ◇-map (mon⁺ P) (reflect⁺ P (monVar here! τ)))
 
 norm : Comp N →̇ Nf N
+norm {N = N} {Γ = Γ} t = reify⁻ N $ □-map (run⁻ N ∘ ◇-map ⦅ t ⦆⁻) $ freshᶜ Γ
 norm {N = N} {Γ = Γ} t = reify⁻ N $ run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshᶜ Γ
 
 -- norm {N = N} t = reify⁻ N (run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshG)
