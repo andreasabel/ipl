@@ -283,6 +283,7 @@
 
 \author[Abel]{
   Andreas Abel\inst{1}
+  \and Christian Sattler\inst{2}
 }
 % \author{Andreas Abel\inst{1}
 %   \and Brigitte Pientka\inst{2}
@@ -296,9 +297,13 @@
 
 \institute[] %Chalmers/GU/ENS Cachan] % (optional, but mostly needed)
 {
-  \inst{1}
+  \inst{1}%
   Department of Computer Science and Engineering\\
   Chalmers and Gothenburg University, Sweden \\[1ex]
+  \and
+  \inst{2}%
+  School of Computer Science\\
+  University of Nottingham, UK \\[1ex]
 }
 %  \inst{1}%
 %  Department of Computer Science\\
@@ -445,6 +450,31 @@
 %  \tableofcontents
 %  % You might wish to add the option [pausesections]
 %\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{Trailer}
+\begin{itemize}
+\item Setting \\[2ex]
+    \begin{tabular}{@{}lcl@{}}
+normalization-by-evaluation & = & completeness $\comp$ soundness \\
+soundness & = & interpretiation (into any model) \\
+completeness & = & reification (from syntactic model) \\
+    \end{tabular}
+\\[1ex]
+
+\item Story \\[2ex]
+  \begin{tabular}{@{}llll@{}}
+Reason & semantics needs & std. solution & our solution \\
+\hline
+Reification $\To$ & monotonicity & presheaves & comonad coalgebras \\
+Reflection  $+$   & case distinction & sheaves & monad algebra \\
+  \end{tabular}
+\\[1ex]
+
+\item Suspension: what's call-by-push-value to do with this?
+\end{itemize}
+\end{frame}
 
 
 \section{Simply-Typed Lambda-Calculus}
@@ -1337,14 +1367,17 @@ $$
 \\
   & \P
 }
+\qquad
+\mbox{comonad coalgebra}
 \]
 \[
-\begin{array}{lll@{\qquad}l}
+\begin{array}{lrl@{\qquad}l}
   \P & ::= & \forever\N
       \mid \dotone  \mid \P \dottimes \Pp
       \mid \dotzero \mid \P \dotplus  \Pp
 %     & \mbox{value types}
 \\
+& \mid & \Var{\tyA} \mid \Ne{\tyA} \mid \Nf{\tyA} \mid \Tm{\tyA}
 \end{array}
 \]
 \end{frame}
@@ -1509,8 +1542,8 @@ $$
 & \cover{\den{\tyAi + \tyAii}}
 \\
 \\
-&& \hyp\tyAi{\den{\tyAi}}   \ar[uu]_{\hyp\tyAi{\inject1}}
-&& \hyp\tyAii{\den{\tyAii}} \ar[uu]_{\hyp\tyAii{\inject2}}
+&& \hyp\tyAi{\cover{\den{\tyAi}}}   \ar[uu]_{\hyp\tyAi{\cover{\inject1}}}
+&& \hyp\tyAii{\cover{\den{\tyAii}}} \ar[uu]_{\hyp\tyAii{\cover{\inject2}}}
 \\
 \\
 && \hyp\tyAi{\Var{\tyAi}}   \ar[uu]_{\hyp\tyAi{\reflect{\tyAi}}}
@@ -1559,6 +1592,8 @@ $$
 \\
   \N \ar[u]^{\covreturn} \ar@{=}[ur]
 }
+\qquad
+\mbox{monad algebra}
 \]
 \[
 \begin{array}{lll@{\qquad}l}
@@ -1566,7 +1601,9 @@ $$
      \mid \dotone \mid \N \dottimes \Np
      \mid \P \Todot \N
      & \mbox{computation types}
-\\[1ex]
+\\
+& \mid & \Nf\tyA \mid \Tm\tyA
+\\[2ex]
   \P & ::= & \forever\N
       \mid \dotone  \mid \P \dottimes \Pp
       \mid \dotzero \mid \P \dotplus  \Pp
@@ -1718,11 +1755,76 @@ $$
 
 
 
+\begin{frame}[c]%[fragile=singleslide]
+  \frametitle{Cliffhanger?}
+  \begin{center}
+Normalization by Evaluation for Call-by-Push-Value \\ and Polarized Lambda-Calculus
+\\[3ex]
+
+Andreas Abel, Christian Sattler
+
+\url{https://arxiv.org/abs/1902.06097}
+  \end{center}
+\end{frame}
+
+
+
+\begin{frame}[c]%[fragile=singleslide]
+  \frametitle{Making Of}
+  \begin{center}
+Agda code \\[4ex]
+
+\url{https://github.com/andreasabel/ipl/}
+  \end{center}
+\end{frame}
+
+
+
 \begin{frame}%[fragile=singleslide]
-  \frametitle{Conclusion}
-  \begin{itemize}
-  \item
-  \end{itemize}
+\frametitle{Credits}
+\begin{itemize}
+\begin{small}
+
+\item
+\textbf{Catarina Coquand}:
+From Semantics to Rules: A Machine Assisted Analysis.
+CSL 1993.
+
+\item
+\textbf{Achim Jung, Jerzy Tiuryn}:
+A New Characterization of Lambda Definability. TLCA 1993.
+
+\item
+\textbf{Thorsten Altenkirch, Martin Hofmann, Thomas Streicher}:
+Categorical Reconstruction of a Reduction Free Normalization Proof.
+CTCS 1995.
+
+\item
+\textbf{Olivier Danvy}:
+Type-Directed Partial Evaluation. POPL 1996.
+
+\item
+\textbf{Thorsten Altenkirch, Peter Dybjer, Martin Hofmann, Philip Scott}:
+Normalization by Evaluation for Typed Lambda Calculus with Coproducts.
+LICS 2001.
+
+\item
+\textbf{Paul Blain Levy}:
+Call-by-push-value: Decomposing call-by-value and call-by-name.
+HOSC 19(4), 2006.
+
+\item
+\textbf{Freiric Barral}:
+Decidability for non-standard conversions in lambda-calculus.
+PhD thesis, LMU Munich, 2008.
+
+\item
+\textbf{Gabriel Scherer}:
+Deciding equivalence with sums and the empty type.
+POPL 2017.
+
+\end{small}
+\end{itemize}
 \end{frame}
 
 
