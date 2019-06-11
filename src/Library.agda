@@ -20,7 +20,7 @@ open import Data.List.Relation.Sublist.Propositional   public using (_⊆_; []; 
 
 open import Function     public using (_∘_; _∘′_; id; _$_; _ˢ_; case_of_; const; flip)
 
-open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst)
+open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym; trans; cong; cong₂; subst; _≗_)
 
 {-# BUILTIN REWRITE _≡_ #-}
 
@@ -38,6 +38,9 @@ postulate
   funExt : ∀{a b} {A : Set a} {B : A → Set b} {f g : (x : A) → B x}
     → (∀ x → f x ≡ g x)
     → f ≡ g
+  funExtH : ∀{a b} {A : Set a} {B : A → Set b} {f g : {x : A} → B x}
+    → (∀ {x} → f {x} ≡ g {x})
+    → (λ {x} → f {x}) ≡ g
 
 ⊥-elim-ext : ∀{a b} {A : Set a} {B : Set b} {f : A → ⊥} {g : A → B} → ⊥-elim {b} {B} ∘ f ≡ g
 ⊥-elim-ext {f = f} = funExt λ a → ⊥-elim (f a)

@@ -284,12 +284,6 @@ join (split x c) = split x (join c)
 ◇-fun : Mon A → ◇ (A ⇒̂ B) →̇ (A ⇒̂ ◇ B)
 ◇-fun mA c a = ◇-map! (λ τ f → f (mA a τ)) c
 
-◇-mon : Mon A → Mon (◇ A)
-◇-mon mA (return a) τ = return (mA a τ)
-◇-mon mA (bind u c) τ = bind {!!} (◇-mon mA c (refl ∷ τ)) -- need monotonicity of Ne
-◇-mon mA (case x t) τ = case (monVar x τ) (λ i → ◇-mon mA (t i) (refl ∷ τ))
-◇-mon mA (split x c) τ = split (monVar x τ) (◇-mon mA c (refl ∷ refl ∷ τ))
-
 -- Monoidal functoriality
 
 -- ◇-pair : ⟨ ◇ A ⊙ ◇ B ⟩→̇ ◇ (A ×̂ B)  -- does not hold!
@@ -327,11 +321,6 @@ Run A = ◇ A →̇ A
 
 ⇒-run : Mon A → Run B → Run (A ⇒̂ B)
 ⇒-run mA rB f = rB ∘ ◇-fun mA f
-
--- From ◇-mon we get □-run
-
-□-run : Run B → Run (□ B)
-□-run rB c = rB ∘ ◇-map extract ∘ ◇-mon □-mon c
 
 -- Bind for the ◇ monad
 
@@ -500,22 +489,6 @@ ext (γ , a) = a ∷ γ
 
 ◇-ext : ◇ (⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺) →̇ ◇ ⟦ P ∷ Γ ⟧ᶜ
 ◇-ext = ◇-map ext
-
-freshᶜ₀ : (Γ : Cxt) → ◇ ⟦ Γ ⟧ᶜ Γ
-freshᶜ₀ [] = return []
-freshᶜ₀ (P ∷ Γ) = ◇-ext $
-  □-weak (◇-mon (monᶜ Γ) (freshᶜ₀ Γ)) -- BAD, use of ◇-mon
-  ⋉ fresh◇
--- freshᶜ (P ∷ Γ) = ◇-ext $
---   (λ τ → ◇-mon (monᶜ Γ) (freshᶜ Γ) (⊆-trans (_ ∷ʳ ⊆-refl) τ))  -- BAD, use of ◇-mon
---   ⋉ fresh◇
-
-
-freshG₀ : □ (◇ ⟦ Γ ⟧ᶜ) Γ
--- freshG₀ : (τ : Γ ⊆ Δ) → ◇ ⟦ Γ ⟧ᶜ Δ
-freshG₀ [] = return []
-freshG₀ (P   ∷ʳ τ) = ◇-mon (monᶜ _) (freshG₀ τ) (P ∷ʳ ⊆-refl)  -- BAD, use of ◇-mon
-freshG₀ (refl ∷ τ) = ◇-ext $ (λ τ₁ → freshG₀ (⊆-trans τ (⊆-trans (_ ∷ʳ ⊆-refl) τ₁))) ⋉ fresh◇
 
 -- Without the use of ◇-mon!
 
