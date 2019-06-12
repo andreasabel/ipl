@@ -255,9 +255,11 @@ short.bib
 
 /github-pages-token.txt
 
+/docs/
 /src/Bug*
 /src/Issue*
 /src/html/
+/src-cbpv/html/
 /src-focusing/html/
 
 /fscd19/acmart-master/

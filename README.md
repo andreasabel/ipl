@@ -3,15 +3,16 @@ Agda formalization of Intuitionistic Propositional Logic (IPL)
 
 [Agda HTML listing](https://andreasabel.github.io/ipl/html/Everything.html).
 
-## Normalization by Evaluation for IPL (without soundness)
+## Normalization by Evaluation for IPL, Call-By-Push-Value, and Polarized Lambda Calculus (without soundness)
 
 The simple Normalization by Evaluation (NbE) algorithm
-that produces from every IPL derivation a normal derivation.
+that produces from every IPL (CBPV, resp.) derivation a normal derivation.
 
 Version published 2019-02-16 on arXiv:
 
 * Article [Normalization by Evaluation for Call-by-Push-Value and Polarized Lambda-Calculus](https://arxiv.org/abs/1902.06097)
 * Formalization of Section 2, [NbE of IPL using a Cover Monad](https://andreasabel.github.io/ipl/html/NfModelMonad.html)
+* Formalization of (a variant of) Section 3, [NbE for Call-by-Push-Value](https://andreasabel.github.io/ipl/html-cbpv/NfCBPV.html)
 * Partial formalization of Section 4, [Syntax and Semantics of Polarized Lambda-Calculus](https://andreasabel.github.io/ipl/html-focusing/Polarized.html)
 <!--
 * Partial formalization of Section 4, [Syntax and Semantics of Polarized Lambda-Calculus](https://github.com/andreasabel/ipl/blob/master/src-focusing/Formulas.agda)

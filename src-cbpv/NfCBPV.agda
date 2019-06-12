@@ -1,51 +1,80 @@
 {-# OPTIONS --rewriting #-}
 
+-- Normalization by Evaluation for Call-By-Push-Value
+
 module NfCBPV where
+
+-- Imports from the Agda standard library.
 
 open import Library hiding (_×̇_)
 
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
 
+pattern here! = here refl
+
+-- We postulate a set of generic value types.
+-- There are no operations defined on these types, thus,
+-- they play the type of (universal) type variables.
+
 postulate Base : Set
+
+-- Variants (Σ) (and records (Π), resp.) can in principle have any number of
+-- constructors (fields, resp.), including infinitely one.
+-- In general, the constructor (field, resp.) names are given by a set I.
+-- However, I : Set would make syntax already a big type, living in Set₁.
+-- To keep it in Set₀, we only consider variants (records) with finitely
+-- many constructors (fields), thus, I : ℕ.
+-- Branching over I is then realized as functions out of El I, where
+-- El I = { i | i < I} = Fin I.
 
 set = ℕ
 El  = Fin
 
+-- Let I range over arities (constructor/field sets) and i over
+-- constructor/field names.
+
 variable
   I : set
   i : El I
+
+-- The types of CBPV are classified into value types P : Ty⁺ which we
+-- refer to as positive types, and computation types N : Ty⁻ which we
+-- refer to as negative types.
 
 mutual
 
   -- Value types
 
   data Ty⁺ : Set where
-    base    : (o : Base) → Ty⁺
-    _×̇_     : (P₁ P₂ : Ty⁺) → Ty⁺
-    Σ̇       : (I : set) (Ps : El I → Ty⁺) → Ty⁺
-    □̇       : (N : Ty⁻) → Ty⁺      -- U
+    base  : (o : Base) → Ty⁺                   -- Base type.
+    _×̇_   : (P₁ P₂ : Ty⁺) → Ty⁺                -- Finite product (tensor).
+    Σ̇     : (I : set) (Ps : El I → Ty⁺) → Ty⁺  -- Variant (sum).
+    □̇     : (N : Ty⁻) → Ty⁺                    -- Thunk (U).
 
   -- Computation types
 
   data Ty⁻ : Set where
-    ◇̇   : (P : Ty⁺) → Ty⁻     -- F
-    Π̇      : (I : set) (Ns : El I → Ty⁻) → Ty⁻
-    _⇒̇_    : (P : Ty⁺) (N : Ty⁻) → Ty⁻
+    ◇̇    : (P : Ty⁺) → Ty⁻                     -- Comp (F).
+    Π̇    : (I : set) (Ns : El I → Ty⁻) → Ty⁻   -- Record (lazy product).
+    _⇒̇_  : (P : Ty⁺) (N : Ty⁻) → Ty⁻           -- Function type.
 
--- Environments only contain values
+-- In CBPV, a variable stands for a value.
+-- Thus, environments only contain values,
+-- and typing contexts only value types.
+
+-- We use introduce syntax in an intrinsically well-typed way
+-- with variables being de Bruijn indices into the typing context.
+-- Thus, contexts are just lists of types.
 
 Cxt = List Ty⁺
 
 variable
-  Γ Δ Φ : Cxt
-  P P₁ P₂ P' P′ Q : Ty⁺
-  N N₁ N₂ N' N′ : Ty⁻
-  Ps : El I → Ty⁺
-  Ns : El I → Ty⁻
-
-pattern here! = here refl
--- pattern suc  = there
+  Γ Δ Φ            : Cxt
+  P P₁ P₂ P' P′ Q  : Ty⁺
+  N N₁ N₂ N' N′    : Ty⁻
+  Ps               : El I → Ty⁺
+  Ns               : El I → Ty⁻
 
 -- Generic values
 
@@ -396,7 +425,6 @@ mutual
   ⦅ pair v₁ v₂ ⦆⁺ = < ⦅ v₁ ⦆⁺ , ⦅ v₂ ⦆⁺ >
   ⦅ inj i v ⦆⁺    = (i ,_) ∘ ⦅ v ⦆⁺
   ⦅ thunk t ⦆⁺    = □-intro (monᶜ _) ⦅ t ⦆⁻
-  -- ⦅ thunk t ⦆⁺      = □-map ⦅ t ⦆⁻ ∘ monᶜ _
 
   λ⦅_⦆⁻ : Comp N (P ∷ Γ) → ⟦ Γ ⟧ᶜ →̇ ⟦ P ⇒̇ N ⟧⁻
   λ⦅ t ⦆⁻ γ a = ⦅ t ⦆⁻ (a ∷ γ)
@@ -408,25 +436,14 @@ mutual
   ⦅ split v t ⦆⁻ γ = let (a₁ , a₂) = ⦅ v ⦆⁺ γ in ⦅ t ⦆⁻ (a₂ ∷ (a₁ ∷ γ))
   ⦅ case v t ⦆⁻  γ = let (i , a) = ⦅ v ⦆⁺ γ in  ⦅ t i ⦆⁻ (a ∷ γ)
   ⦅ bind {Γ = Γ} {N = N} t t₁ ⦆⁻ = bind! (monᶜ Γ) (run⁻ N) ⦅ t ⦆⁻ λ⦅ t₁ ⦆⁻
-  -- ⦅ bind {N = N} t t₁ ⦆⁻ γ = ◇-elim! (run⁻ N) (λ τ a → ⦅ t₁ ⦆⁻ (a ∷ monᶜ _ γ τ)) (⦅ t ⦆⁻ γ)
-  -- ⦅ bind {N = N} t t₁ ⦆⁻ γ = ◇-elim (run⁻ N) {!λ a → ⦅ t₁ ⦆⁻ (a ∷ γ)!} (⦅ t ⦆⁻ γ)
-  -- ⦅ bind {N = N} t t₁ ⦆⁻ =  ⦅ t₁ ⦆⁻ ∘ λ γ → {!!} ∷ γ
-  -- ⦅ bind {N = N} t t₁ ⦆⁻ =  ⦅ t₁ ⦆⁻ ∘ {! ◇-elim (run⁻ N) {!(_∷ _)!} ∘ ⦅ t ⦆⁻ !}
-  -- ⦅ bind t t₁ ⦆⁻ = {!◇-elim ? ∘ ⦅ t ⦆⁻ !}
   ⦅ force v ⦆⁻  = extract ∘ ⦅ v ⦆⁺
   ⦅ prj i t ⦆⁻  = (_$ i) ∘ ⦅ t ⦆⁻
   ⦅ app t v ⦆⁻  = ⦅ t ⦆⁻  ˢ ⦅ v ⦆⁺
   ⦅ letv v t ⦆⁻ = λ⦅ t ⦆⁻ ˢ ⦅ v ⦆⁺
-  -- ⦅ letv v t ⦆⁻ γ = ⦅ t ⦆⁻ (⦅ v ⦆⁺ γ ∷ γ)
-
-  -- rec⦅_⦆⁻ : (∀ i → Comp (Ns i) Γ) → ⟦ Γ ⟧ᶜ →̇ Π̂ I λ i → ⟦ Ns i ⟧⁻
-  -- rec⦅ t ⦆⁻ γ i = ⦅ t i ⦆⁻ γ
 
 -- Reflection and reification
 
 mutual
-  -- fresh : ∀ {P Γ} → ◇ ⟦ P ⟧⁺ (P ∷ Γ)
-  -- fresh□ : ∀ {P Γ} → □ (⟨ P ⟩ (◇ ⟦ P ⟧⁺)) Γ
 
   fresh□◇□ : ∀ P {Γ} → ⟨ P ⟩ (□ (◇ (□ ⟦ P ⟧⁺))) Γ
   fresh□◇□ P = reflect⁺□ P ∘ monVar here!
@@ -453,10 +470,6 @@ mutual
   reflect⁺ : (P : Ty⁺) → (P ∈_) →̇ (◇ ⟦ P ⟧⁺)
   reflect⁺ (base o)  x = return x
   reflect⁺ (P₁ ×̇ P₂) x = split x (□-weak (fresh□ P₁) ⋉ fresh◇)
-  reflect⁺ (P₁ ×̇ P₂) x = split x (◇-pair (□-weak (fresh□ P₁)) fresh◇)
-  reflect⁺ (P₁ ×̇ P₂) x = split x (◇-pair (□-weak (fresh□ P₁)) (◇-map (mon⁺ P₂) (fresh {P₂})))
-  reflect⁺ (P₁ ×̇ P₂) x = split x (◇-pair (fresh□ P₁ ∘ ⊆-trans (P₂ ∷ʳ ⊆-refl)) (◇-map (mon⁺ P₂) (fresh {P₂})))
-  reflect⁺ (P₁ ×̇ P₂) x = split x (join $ ◇-map! (λ τ a₂ → ◇-map! (λ τ′ a₁ → a₁ , mon⁺ P₂ a₂ τ′) (fresh□ P₁ (⊆-trans (_ ∷ʳ ⊆-refl) τ))) (fresh {P₂}))
   reflect⁺ (Σ̇ I Ps)  x = case x λ i → ◇-map (i ,_) fresh
   reflect⁺ (□̇ N)     x = return λ τ → reflect⁻ N (force (monVar x τ))
 
@@ -474,15 +487,7 @@ mutual
   reify⁻ : (N : Ty⁻) → □ ⟦ N ⟧⁻ →̇ Nf N
   reify⁻ (◇̇ P)    f = ret (◇-map (reify⁺ P) (extract f))
   reify⁻ (Π̇ I Ns) f = rec λ i → reify⁻ (Ns i) (□-map (_$ i) f)
-  reify⁻ (P ⇒̇ N)  f = abs $ reify⁻ N $ ◇-elim-□ (run⁻ N) (□-weak f) (fresh□ P)
-
-  reify⁻ (P ⇒̇ N)  f = abs $ reify⁻ N λ τ →
-    ◇-elim! (run⁻ N)
-      (□-mon (□-weak f) τ) -- (□-mon f (⊆-trans (_ ∷ʳ ⊆-refl) τ))
-      (fresh□ P τ) -- (reflect⁺ P (monVar here! τ))
- -- (□-map {!◇-elim! (run⁻ N) ? fresh!})
-  -- reify⁻ (P ⇒̇ N)  f = abs (reify⁻ N {!◇-elim! (run⁻ N) ? fresh!})
--- (run⁻ N (□-map {!!} (□-weak f)) fresh))
+  reify⁻ (P ⇒̇ N)  f = abs $ reify⁻ N $ ◇-elim-□ (run⁻ N) (□-weak f) $ fresh□ P
 
 ext : (⟦ Γ ⟧ᶜ ×̂ ⟦ P ⟧⁺) →̇ ⟦ P ∷ Γ ⟧ᶜ
 ext (γ , a) = a ∷ γ
@@ -497,22 +502,13 @@ freshᶜ []      = λ τ → return []
 freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair' (□-weak (freshᶜ Γ)) (fresh□◇□ P)
 freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair (mon⁺ P) (□-weak (freshᶜ Γ)) (fresh□ P)
 freshᶜ (P ∷ Γ) = ◇-ext ∘ □◇-pair' (□-weak (freshᶜ Γ)) (◇-map (mon⁺ P) ∘ (fresh□ P))
--- freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
 freshᶜ (P ∷ Γ) = ◇-ext ∘ λ τ →
   (□-weak (□-mon (freshᶜ Γ)) τ)
   ⋉ ◇-map (mon⁺ P) (fresh□ P τ)
-freshᶜ (P ∷ Γ) = λ τ → ◇-ext $
-  (□-mon (freshᶜ Γ) (⊆-trans ((_ ∷ʳ ⊆-refl)) τ))
-  ⋉ ◇-map (mon⁺ P) (fresh□ P τ)
-
---  ⋉ ◇-map (mon⁺ P) (reflect⁺ P (monVar here! τ)))
 
 norm : Comp N →̇ Nf N
 norm {N = N} {Γ = Γ} t = reify⁻ N $ □-map (run⁻ N ∘ ◇-map ⦅ t ⦆⁻) $ freshᶜ Γ
 norm {N = N} {Γ = Γ} t = reify⁻ N $ run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshᶜ Γ
-
--- norm {N = N} t = reify⁻ N (run⁻ N ∘ ◇-map ⦅ t ⦆⁻ ∘ freshG)
--- norm {N = N} t = reify⁻ N λ τ → run⁻ N $ (◇-map ⦅ t ⦆⁻ $ (freshG τ))
 
 -- -}
 -- -}
