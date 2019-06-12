@@ -560,7 +560,7 @@ shall not consider them in this article.
 }
 are logically characterized as those fulfilling the
 \emph{subformula} property \cite{prawitz:natded,matthes:shortproofs}.
-Normal forms \fbox{$n : \tNf A\, \Gamma$} are mutually defined with
+Normal forms \fbox{$n : \Nf A \Gamma$} are mutually defined with
 \emph{neutral} normal forms \fbox{$u : \Ne A \Gamma$}.
 In the following inductive definition, we reuse the rule names from the
 term constructors.
@@ -957,7 +957,7 @@ $\treturn[\C]$; instead, the information contained in $\C$ is reified and
 becomes part of the normal form delivered by $\trunNf[\C]$.
 
 Method $\tabort^\C_\Gamma$ allows us to end a computation by exhibiting an
-inconsistency witnessed by a neutral term $u : \Nf A \Gamma$.
+inconsistency witnessed by a neutral term $u : \Ne 0 \Gamma$.
 Remember that, ultimately, computations in $\C$ produce a normal form
 extracted by $\trunNf[\C]$.  With $\tabort^\C$ we notify the oracle
 that we are in an absurd case and the desired normal form can be
@@ -1608,7 +1608,7 @@ put into the design of CBPV.
 \end{array}
 \]
 Since $\tThunk$ serves only as an embedding of negative into positive
-types and has no semantic effect,
+types in our semantics,
 we interpret thunking and forcing by the identity.
 The eliminations for positive types deal now only with values, thus,
 need not reference the monad operations.
