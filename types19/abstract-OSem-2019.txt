@@ -1,0 +1,35 @@
+Normalization-by-evaluation for call-by-push-value
+
+Normalization by evaluation (NbE) is a technique to implement a
+normalizer for λ-terms using the evaluator of the implementation
+language (host language).  Ulrich Berger and Helmut Schwichtenberg
+discovered this technique to implement normalization for MINLOG which
+was implemented in the functional language Scheme (LiCS 1991).
+
+On the other hand, NbE is the computational content of the correctness
+proof of Intuitionistic Propositional Logic (IPL): soundness of the
+proof rules w.r.t. the Kripke semantics corresponds to the evaluation
+of terms to objects of the host language, and completeness to the
+reification of such objects back to terms in normal form.
+
+For my habilitation thesis, I looked exclusively at NbE for negative
+types: function types, polymorphic quantification, and dependent
+types.  Positive types require an extension of the NbE technique,
+especially when they come with extensionality principles.  For
+instance, extensional disjoint sum types (coproducts) have been
+treated by Altenkirch, Dybjer, Hofmann and Scott using sheaf semantics
+(LiCS 2001).
+
+Coproducts can also be treated using a monad for case distinction.
+This approach has been researched by Freiric Barral under the
+supervision of Martin Hofmann.
+
+In this talk, I explain the use of the case distinction monad for NbE
+and a comonad (not monad!) for fresh variable generation.  It turns
+out that the semantic types used for NbE follow the polarization of
+the call-by-push-value (CBPV) calculus: comonadic positive types (aka
+value types) and monadic negative types (aka computation types).
+Consequently, NbE for CBPV enjoys a natural formulation.  If time
+permits, I will also talk about call-by-value (CBV) and call-by-name
+(CBN) style NbE and how it relates to the CBV and CBN translations of
+IPL into the CBPV calculus.

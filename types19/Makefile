@@ -29,13 +29,18 @@ files=macros.tex
 types19tex=types19.tex
 typesbibliography=short.bib
 
-default : types19.pdf # talkTYPES19.pdf talkTYPES19-with-notes.pdf talkTYPES19.zip
+default : talkOSemJun2019.pdf # types19.pdf # talkTYPES19.pdf talkTYPES19-with-notes.pdf talkTYPES19.zip
 
 all : default ship
 
 ship : $(destdir)/types19.pdf
 
 $(destdir)/types19.pdf : types19.pdf
+	cp -p $< $@
+
+shipTalk : $(destdir)/talkTYPES2019.pdf
+
+$(destdir)/talkTYPES2019.pdf : talkTYPES2019.pdf
 	cp -p $< $@
 
 #$(destdir)/types19.lagda : types19.lagda
