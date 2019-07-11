@@ -133,6 +133,7 @@
 %\usepackage{pgflibraryshapes} %Ellipses
 
 \newcommand{\SKIP}[1]{}
+\newcommand{\LESS}[1]{}
 
 % MACROS:
 \newcommand{\inst}{}
@@ -458,7 +459,7 @@
 \item Setting \\[2ex]
     \begin{tabular}{@{}lcl@{}}
 normalization-by-evaluation & = & completeness $\comp$ soundness \\
-soundness & = & interpretiation (into any model) \\
+soundness & = & interpretation (into any model) \\
 completeness & = & reification (from syntactic model) \\
     \end{tabular}
 \\[1ex]
@@ -1419,8 +1420,8 @@ $$
 & \den{\tyAi + \tyAii}
 \\
 \\
-&& \hyp\tyAi{\den{\tyAi}}   \ar[uu]_{\hyp\tyAi{\inject1}}
-&& \hyp\tyAii{\den{\tyAii}} \ar[uu]_{\hyp\tyAii{\inject2}}
+&& \hyp\tyAi{\den{\tyAi}}   \ar[uu]\LESS{_{\hyp\tyAi{\inject1}}}
+&& \hyp\tyAii{\den{\tyAii}} \ar[uu]\LESS{_{\hyp\tyAii{\inject2}}}
 \\
 \\
 && \hyp\tyAi{\Var{\tyAi}}   \ar[uu]_{\hyp\tyAi{\reflect{\tyAi}}}
@@ -1542,8 +1543,8 @@ $$
 & \cover{\den{\tyAi + \tyAii}}
 \\
 \\
-&& \hyp\tyAi{\cover{\den{\tyAi}}}   \ar[uu]_{\hyp\tyAi{\cover{\inject1}}}
-&& \hyp\tyAii{\cover{\den{\tyAii}}} \ar[uu]_{\hyp\tyAii{\cover{\inject2}}}
+&& \hyp\tyAi{\cover{\den{\tyAi}}}   \ar[uu]\LESS{_{\hyp\tyAi{\cover{\inject1}}}}
+&& \hyp\tyAii{\cover{\den{\tyAii}}} \ar[uu]\LESS{_{\hyp\tyAii{\cover{\inject2}}}}
 \\
 \\
 && \hyp\tyAi{\Var{\tyAi}}   \ar[uu]_{\hyp\tyAi{\reflect{\tyAi}}}
@@ -1804,7 +1805,7 @@ CTCS 1995.
 Type-Directed Partial Evaluation. POPL 1996.
 
 \item
-\textbf{Thorsten Altenkirch, Peter Dybjer, Martin Hofmann, Philip Scott}:
+\textbf{T. Altenkirch, P. Dybjer, M. Hofmann, Ph. Scott}:
 Normalization by Evaluation for Typed Lambda Calculus with Coproducts.
 LICS 2001.
 
@@ -1815,14 +1816,17 @@ HOSC 19(4), 2006.
 
 \item
 \textbf{Freiric Barral}:
-Decidability for non-standard conversions in lambda-calculus.
+Decidability for non-standard conversions in $\lambda$-calculus. \\
 PhD thesis, LMU Munich, 2008.
 
 \item
 \textbf{Gabriel Scherer}:
 Deciding equivalence with sums and the empty type.
 POPL 2017.
-
+\item
+\textbf{G. Allais, R. Atkey, J. Chapman, C. McBride, J. McKinna}: \\
+A type and scope safe universe of syntaxes with binding. %: their semantics and proofs.
+ICFP 2018.
 \end{small}
 \end{itemize}
 \end{frame}
