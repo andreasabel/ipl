@@ -1,9 +1,9 @@
 %
 % The first command in your LaTeX source must be the \documentclass command.
-\documentclass[sigplan,screen,fleqn,review]{acmart} % review for draft
+\documentclass[sigconf,screen,fleqn]{acmart} % review for draft
 %% DRAFT only:
-\settopmatter{printacmref=false} % Removes citation information below abstract
-\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+%\settopmatter{printacmref=false} % Removes citation information below abstract
+%\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
 \sloppy
 
 \newcommand\hmmax{0}
@@ -2252,7 +2252,7 @@ straightforwardly using negative reflection.
 % \end{array}
 \]
 
-The terms \fbox{$\Tm N \Gamma$} of the focused lambda calculus are the
+The terms \fbox{$\Tm N \Gamma$} of the polarized lambda calculus are the
 ones of CBPV minus the positive eliminations ($\tsplit$, $\tcase$,
 $\tabort$), the added negative variable rule ($\nvar$), and the
 necessary changes to the binders $\tabs$ and $\tbind$.
