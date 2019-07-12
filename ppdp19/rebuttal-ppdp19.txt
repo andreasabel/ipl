@@ -1,0 +1,71 @@
+First, we'd like to thank the reviewers for carefully reading our submission, spotting mistakes and suggesting improvements, and stimulating a discussion how to complete the picture.
+
+We'd like to briefly answer some of the questions raised, to the extent that the rebuttal format permits it.
+
+> ----------------------- REVIEW 1 ---------------------
+
+> I would like to find a simple sentence that the Levy's  "A value is, a computation does"-mantra does not play a role in the NbE proof, because NbE naturally considers a more logical form of normalisation which also reduces inside abstraction or other normally reduction-blocking constructs (like thunks in case of CBPV).
+
+Might add just your sentence, if you don't mind.
+
+> The paper comes with a partial Agda formalization (fully done for simply-typed, not done for CBPV, partially done for polarized).
+
+A formalization of NbE for pure CBPV (with Levy's original syntax) is now done, albeit in some variation to the development of section 3:
+
+  https://andreasabel.github.io/ipl/html-cbpv/NfCBPV.html
+
+> I would like to see a sentence or two what is exactly missing in the polarized formalization.
+
+The current formalization covers normal forms, semantics, reflection and reification, but still lacks terms and evaluation.  We shall complete the formalization for the final version.
+
+> 283 The spacing for Nf A Γ and Ne A Γ is chosen differently, which reads strange.
+> 485 Shouldn't it be Ne 0 Γ here?
+
+Thanks for spotting; fixed these.
+
+> 840 - "Thunk has no semantic effect" reads a bit strange.
+
+You are right; deleted this phrase.
+
+
+> ----------------------- REVIEW 2 ---------------------
+
+> * What are the relationships between these NbE algorithms? Each of these algorithms has a different notion of normal form, a different notion of context, and often a different source (either terms or cbpv). Is there some way to translate one reflect/reify algorithm into another?
+
+Very good point, but we don't have the answers yet.  It seems like these algorithms are refinements of each other, for instance, there should be a translation from STLC (Λ⇒×+01) to CBPV and a reverse translation of their normal forms such that we get finer Nfs for STLC by going through CBPV, and similarly for CBPV and polarized Λ.  However, this is just speculation for now.
+
+> I was especially curious about the different notions of context in play -- how do they relate? In particular, I've always wondered what exactly is the relationship between CBPV and focalization? The type structure is almost identical but the treatment of variables is almost exactly opposite.
+
+If you decorate each negative hypothesis with a "Thunk" coercion, then each focalized context is also a CBPV context (but not vice versa).  The point we are trying to make is that focalization is a refinement of CBPV by also requiring eager splitting of non-atomic positive hypotheses.
+
+> Could the case monad be decomposed further into a pair of adjoints?
+
+Shall look into this.
+
+> * I was not sure what was a theorem and what wasn't. The paper remarks that section 4 has not yet been formalized in Agda, but has it been proved on paper?
+
+Yes, if you accept section 4 as a paper proof.
+
+> * Some comment about how much bureaucracy there was in the Agda development would be useful. Presheaves on paper are pretty miserable -- does Agda help with this?
+
+Yes, but notice that since we only define a function from terms to normal forms without soundness, i.e., a proof that term and normal form have the same denotation, we are not needing the category laws for the context category and the functor laws for our presheaves a lot.  A more serious test is version including soundness as formalized in
+
+  https://andreasabel.github.io/ipl/html/NbeModel.html
+
+Here we profit from Agda's REWRITE extension that allows us to turn e.g. the category laws into definitional equalities automatically handled by Agda.
+
+> ----------------------- REVIEW 3 ---------------------
+
+> * In section 3, a specific monad is constructed. Would an axiomatic approach
+>    be possible to cover a range of models?
+
+The specific monad here should be generalizable just as in section 2, to allow, for instance its implementation by the continuation monad.  Of course, we would still need this specific monad (or an inlining of it) for the definition of normal forms of CBPV.
+
+> * L.969-972: This should be given by any strong monad
+
+Well spotted, thank you!  Indeed, we need strong functoriality to define (a useful version of) it.
+DONE
+
+> * L.1169: Focused -> polarized
+
+Fixed.
