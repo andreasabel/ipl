@@ -1,4 +1,5 @@
 {-# OPTIONS --rewriting #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 module NfCBPVLaws where
 
@@ -41,6 +42,13 @@ module RunIsMonadAlgebra where
   -- Associativity: run⁻ N ∘ ◇-map (run⁻ N) ≡ run⁻ N ∘ join
 
 
+
+monNe : ∀{N} → Mon (Ne N)
+monNe = {!!}
+
+monNf : ∀{N} → Mon (Nf N)
+monNf = {!!}
+
 -- ◇ preserves monotonicity
 ------------------------------------------------------------------------
 
@@ -48,7 +56,7 @@ module RunIsMonadAlgebra where
 
 ◇-mon : Mon A → Mon (◇ A)
 ◇-mon mA (return a) τ = return (mA a τ)
-◇-mon mA (bind u c) τ = bind {!!} (◇-mon mA c (refl ∷ τ)) -- need monotonicity of Ne
+◇-mon mA (bind u c) τ = bind (monNe u τ) (◇-mon mA c (refl ∷ τ)) -- need monotonicity of Ne
 ◇-mon mA (case x t) τ = case (monVar x τ) (λ i → ◇-mon mA (t i) (refl ∷ τ))
 ◇-mon mA (split x c) τ = split (monVar x τ) (◇-mon mA c (refl ∷ refl ∷ τ))
 
@@ -57,6 +65,33 @@ module RunIsMonadAlgebra where
 □-run : Run B → Run (□ B)
 □-run rB c = rB ∘ ◇-map extract ∘ ◇-mon □-mon c
 
+-- Run for Nf?
+-- Seems to need a category of renamings rather just OPE
+
+bindNf : ∀ {N} {Γ} {P} →
+         Ne (◇̇ P) Γ → Nf N (P ∷ Γ) → Nf N Γ
+bindNf u (ret v) = ret (bind u v)
+bindNf u (ne n)  = ne  (bind u n)
+bindNf u (rec t) = rec λ i → bindNf u (t i)
+bindNf u (abs t) = abs (bindNf (monNe u (_ ∷ʳ ⊆-refl)) (monNf t {!!}))
+  -- The remaining goal Q ∷ P ∷ Γ ⊆ P ∷ Q ∷ Γ
+  -- cannot be filled since OPEs do not support swap.
+
+runNf : ∀{N} → ◇ (Nf N) →̇ Nf N
+runNf (return j) = j
+runNf (bind u c) = bindNf u (runNf c)  -- Problem!
+runNf (case x t) = {!!}
+runNf (split x c) = {!!}
+
+-- Monoidal functoriality ★
+
+module _ {A B : ISet} (mA : Mon A) (mB : Mon B) where
+
+  zip : ⟨ ◇ A ⊙ ◇ B ⟩→̇ ◇ (A ×̂ B)
+  zip cA cB = join (◇-map! (λ τ a → ◇-map! (λ τ' b → mA a τ' , b) (◇-mon mB cB τ)) cA)
+
+
+-- Alternative definitions of freshᶜ
 
 freshᶜ₀ : (Γ : Cxt) → ◇ ⟦ Γ ⟧ᶜ Γ
 freshᶜ₀ [] = return []

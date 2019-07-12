@@ -83,10 +83,10 @@ module _ (Var : Ty⁺ → Cxt → Set) (Comp : Ty⁻ → Cxt → Set) where
   -- Right non-invertible
 
   data Val' : (P : Ty⁺) (Γ : Cxt) → Set where
-    var   : ∀{Γ P}     (x : Var P Γ)                     → Val' P Γ
-    pair  : ∀{Γ P₁ P₂} (v₁ : Val' P₁ Γ) (v₂ : Val' P₂ Γ) → Val' (P₁ ×̇ P₂) Γ
-    inj   : ∀{Γ I P} i (v : Val' (P i) Γ)                → Val' (Σ̇ I P) Γ
-    thunk : ∀{Γ N}     (t : Comp N Γ)                    → Val' (□̇ N) Γ
+    var    : ∀{Γ P}      (x : Var P Γ)                      → Val' P Γ
+    pair   : ∀{Γ P₁ P₂}  (v₁ : Val' P₁ Γ) (v₂ : Val' P₂ Γ)  → Val' (P₁ ×̇ P₂) Γ
+    inj    : ∀{Γ I P} i  (v : Val' (P i) Γ)                 → Val' (Σ̇ I P) Γ
+    thunk  : ∀{Γ N}      (t : Comp N Γ)                     → Val' (□̇ N) Γ
 
 -- Terms
 
@@ -96,19 +96,19 @@ mutual
 
   data Comp : (N : Ty⁻) (Γ : Cxt) → Set where
     -- introductions
-    ret   : ∀{Γ P}       (v : Val P Γ)                → Comp (◇̇ P) Γ
-    rec   : ∀{Γ I N}     (t : ∀ i → Comp (N i) Γ)     → Comp (Π̇ I N) Γ
-    abs   : ∀{Γ P N}     (t : Comp N (P ∷ Γ))         → Comp (P ⇒̇ N) Γ
+    ret    : ∀{Γ P}        (v : Val P Γ)             → Comp (◇̇ P) Γ
+    rec    : ∀{Γ I N}      (t : ∀ i → Comp (N i) Γ)  → Comp (Π̇ I N) Γ
+    abs    : ∀{Γ P N}      (t : Comp N (P ∷ Γ))      → Comp (P ⇒̇ N) Γ
     -- positive eliminations
-    split : ∀{Γ P₁ P₂ N} (v : Val (P₁ ×̇ P₂) Γ) (t : Comp N (P₂ ∷ P₁ ∷ Γ)) → Comp N Γ
-    case  : ∀{Γ I Ps N}  (v : Val (Σ̇ I Ps) Γ) (t : ∀ i → Comp N (Ps i ∷ Γ)) → Comp N Γ
-    bind  : ∀{Γ P N}     (u : Comp (◇̇ P) Γ) (t : Comp N (P ∷ Γ)) → Comp N Γ
-    -- negative elimination
-    force : ∀{Γ N}       (v : Val (□̇ N) Γ)   → Comp N Γ
-    prj   : ∀{Γ I Ns} i  (t : Comp (Π̇ I Ns) Γ)                       → Comp (Ns i) Γ
-    app   : ∀{Γ P N}     (t : Comp (P ⇒̇ N) Γ)   (v : Val P Γ)        → Comp N Γ
+    split  : ∀{Γ P₁ P₂ N}  (v : Val (P₁ ×̇ P₂) Γ)  (t : Comp N (P₂ ∷ P₁ ∷ Γ))     → Comp N Γ
+    case   : ∀{Γ I Ps N}   (v : Val (Σ̇ I Ps) Γ)   (t : ∀ i → Comp N (Ps i ∷ Γ))  → Comp N Γ
+    bind   : ∀{Γ P N}      (u : Comp (◇̇ P) Γ)     (t : Comp N (P ∷ Γ))           → Comp N Γ
     -- cut
-    letv  : ∀{Γ P N}     (v : Val P Γ)         (t : Comp N (P ∷ Γ)) → Comp N Γ
+    letv   : ∀{Γ P N}      (v : Val P Γ)          (t : Comp N (P ∷ Γ))           → Comp N Γ
+    -- negative eliminations
+    force  : ∀{Γ N}        (v : Val (□̇ N) Γ)                     → Comp N Γ
+    prj    : ∀{Γ I Ns} i   (t : Comp (Π̇ I Ns) Γ)                 → Comp (Ns i) Γ
+    app    : ∀{Γ P N}      (t : Comp (P ⇒̇ N) Γ)   (v : Val P Γ)  → Comp N Γ
 
 -- Normal forms
 ------------------------------------------------------------------------
@@ -126,9 +126,9 @@ module _ (Val : Ty⁺ → Cxt → Set) where
   -- Right non-invertible
 
   data Ne' : (N : Ty⁻) (Γ : Cxt) → Set where
-    force : ∀{Γ N}     (x : □̇ N ∈ Γ)                     → Ne' N Γ
-    prj   : ∀{Γ I N} i (t : Ne' (Π̇ I N) Γ)               → Ne' (N i) Γ
-    app   : ∀{Γ P N}   (t : Ne' (P ⇒̇ N) Γ) (v : Val P Γ) → Ne' N Γ
+    force  : ∀{Γ N}      (x : □̇ N ∈ Γ)                      → Ne' N Γ
+    prj    : ∀{Γ I N} i  (t : Ne' (Π̇ I N) Γ)                → Ne' (N i) Γ
+    app    : ∀{Γ P N}    (t : Ne' (P ⇒̇ N) Γ) (v : Val P Γ)  → Ne' N Γ
 
 mutual
 
@@ -138,32 +138,32 @@ mutual
   -- Cover monad
 
   data ◇ (J : Cxt → Set) (Γ : Cxt) : Set where
-    return : (j : J Γ)                                               → ◇ J Γ
-    bind   : ∀{P}     (u : Ne (◇̇ P) Γ)    (t :          ◇ J (P ∷ Γ)) → ◇ J Γ
-    case   : ∀{I Ps}  (x : Σ̇ I Ps ∈ Γ)    (t : ∀ i → ◇ J (Ps i ∷ Γ)) → ◇ J Γ
-    split  : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :    ◇ J (P₂ ∷ P₁ ∷ Γ)) → ◇ J Γ
+    return  : (j : J Γ)                                                  → ◇ J Γ
+    bind    : ∀{P}      (u : Ne (◇̇ P) Γ)     (t :          ◇ J (P ∷ Γ))  → ◇ J Γ
+    case    : ∀{I Ps}   (x : Σ̇ I Ps ∈ Γ)     (t : ∀ i → ◇ J (Ps i ∷ Γ))  → ◇ J Γ
+    split   : ∀{P₁ P₂}  (x : (P₁ ×̇ P₂) ∈ Γ)  (t :    ◇ J (P₂ ∷ P₁ ∷ Γ))  → ◇ J Γ
 
   data NComp (Q : Ty⁺) (Γ : Cxt) : Set where
-    ret   :          (v : NVal Q Γ)   → NComp Q Γ   -- Invoke RFoc
-    ne    :          (n : Ne (◇̇ Q) Γ) → NComp Q Γ   -- Finish with LFoc
+    ret    :           (v : NVal Q Γ)    → NComp Q Γ   -- Invoke RFoc
+    ne     :           (n : Ne (◇̇ Q) Γ)  → NComp Q Γ   -- Finish with LFoc
       -- e.g. app (force f) x
 
     -- Use lemma LFoc
-    bind  : ∀{P}     (u : Ne (◇̇ P) Γ) (t : NComp Q (P ∷ Γ)) → NComp Q Γ
+    bind   : ∀{P}      (u : Ne (◇̇ P) Γ)     (t : NComp Q (P ∷ Γ))           → NComp Q Γ
 
     -- Left invertible
-    split : ∀{P₁ P₂} (x : (P₁ ×̇ P₂) ∈ Γ) (t :    NComp Q (P₂ ∷ P₁ ∷ Γ)) → NComp Q Γ
-    case  : ∀{I Ps}  (x : Σ̇ I Ps    ∈ Γ) (t : ∀ i → NComp Q (Ps i ∷ Γ)) → NComp Q Γ
+    split  : ∀{P₁ P₂}  (x : (P₁ ×̇ P₂) ∈ Γ)  (t :    NComp Q (P₂ ∷ P₁ ∷ Γ))  → NComp Q Γ
+    case   : ∀{I Ps}   (x : Σ̇ I Ps    ∈ Γ)  (t : ∀ i → NComp Q (Ps i ∷ Γ))  → NComp Q Γ
 
   -- Right invertible
 
   data Nf : (N : Ty⁻) (Γ : Cxt) → Set where
-    ret   : ∀{Γ P}   (v : ◇ (NVal P) Γ)     → Nf (◇̇ P) Γ   -- Invoke RFoc
-    ne    : ∀{Γ o}   (let N = ◇̇ (base o))
-                     (n : ◇ (Ne N) Γ)       → Nf N Γ
+    ret   : ∀{Γ P}    (v : ◇ (NVal P) Γ)      → Nf (◇̇ P) Γ   -- Invoke RFoc
+    ne    : ∀{Γ o}    (let N = ◇̇ (base o))
+                      (n : ◇ (Ne N) Γ)        → Nf N Γ
     -- comp  : ∀{Γ P}   (t : NComp P Γ)        → Nf (◇̇ P) Γ
-    rec   : ∀{Γ I N} (t : ∀ i → Nf (N i) Γ) → Nf (Π̇ I N) Γ
-    abs   : ∀{Γ P N} (t : Nf N (P ∷ Γ))     → Nf (P ⇒̇ N) Γ
+    rec   : ∀{Γ I N}  (t : ∀ i → Nf (N i) Γ)  → Nf (Π̇ I N) Γ
+    abs   : ∀{Γ P N}  (t : Nf N (P ∷ Γ))      → Nf (P ⇒̇ N) Γ
 
 -- Context-indexed sets
 ------------------------------------------------------------------------
@@ -371,14 +371,9 @@ bind! mC rB f k γ = ◇-elim! rB (λ τ a → k (mC γ τ) a) (f γ)
 -- Type interpretation
 ------------------------------------------------------------------------
 
-postulate
-  ⟦_⟧ᵒ : Base → ISet
-  monᵒ : ∀ o → Mon ⟦ o ⟧ᵒ
-
 mutual
   ⟦_⟧⁺ : Ty⁺ → ISet
   ⟦ base o  ⟧⁺ = base o ∈_
-  -- ⟦ base o  ⟧⁺ = ⟦ o ⟧ᵒ
   ⟦ P₁ ×̇ P₂ ⟧⁺ = ⟦ P₁ ⟧⁺ ×̂ ⟦ P₂ ⟧⁺
   ⟦ Σ̇ I P   ⟧⁺ = Σ̂ I λ i → ⟦ P i ⟧⁺
   ⟦ □̇ N     ⟧⁺ = □ ⟦ N ⟧⁻
