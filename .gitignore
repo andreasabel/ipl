@@ -267,7 +267,16 @@ short.bib
 /fscd19/lipics-v2019-authors.tgz
 /fscd19/lipics-v2019-authors/
 
-/ppdp19/acmart-master/
 /ppdp19/comment.cut
 
 /types19/talkTYPES2019
+/ppdp19/acmart-master/.gitignore
+/ppdp19/acmart-master/ACM-Reference-Format.bbx
+/ppdp19/acmart-master/ACM-Reference-Format.cbx
+/ppdp19/acmart-master/ACM-Reference-Format.dbx
+/ppdp19/acmart-master/Makefile
+/ppdp19/acmart-master/README
+/ppdp19/acmart-master/acmart.bib
+/ppdp19/acmart-master/acmart.dtx
+/ppdp19/acmart-master/acmart.ins
+/ppdp19/acmart-master/samples/
