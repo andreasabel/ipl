@@ -65,7 +65,7 @@
 \def\rv{\mathclose{{]\kern-0.14em]}}}   % closing ]] value delimiter
 \newcommand{\den}[1]{\lv #1 \rv}
 \newcommand{\Den}[2]{\den{#1}_{#2}}
-\newcommand{\dent}[2]{\denty{#1}_{#2}}
+\newcommand{\dent}[2]{\ensuremath{\denty{#1}_{#2}}}
 \newcommand{\denty}[1]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis}
 % \newcommand{\dent}[2]{\llparenthesis\kern0.3ex#1\kern0.3ex\rrparenthesis_{#2}}
 % \newcommand{\denty}[1]{\llparenthesis#1\rrparenthesis}
@@ -335,7 +335,8 @@
 \newcommand{\tComp}{\mathit{Comp}}
 \newcommand{\Thunk}[1]{\tThunk\,#1}
 \newcommand{\Comp}[1]{\tComp\,#1}
-\newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
+%\newcommand{\Add}[1]{\langle\!\langle #1 \rangle\!\rangle}
+\newcommand{\Add}[1]{[#1]}
 \newcommand{\AddHyp}[3]{\Add{#1}\,#2\,#3}
 \newcommand{\AddHypP}[3]{\Add{#1}\,(#2)\,#3}
 \newcommand{\Tm}[3][]{\tTm^{#1\,}#2\,#3}

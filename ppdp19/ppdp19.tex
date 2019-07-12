@@ -5,7 +5,7 @@
 %\settopmatter{printacmref=false} % Removes citation information below abstract
 %\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
 \sloppy
-
+%\usepackage{array}
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
 \usepackage{bm} % bold math
@@ -172,8 +172,8 @@
 \label{sec:intro}
 
 The idea behind \emph{normalization by evaluation} (NbE) is to utilize a
-standard interpreter, usually evaluating closed terms, to compute the
-normal form of an open term.
+standard interpreter that evaluates closed terms to compute the
+normal form of an open term, \ie, a term that may contain free variables.
 The normal form is obtained by a type-directed \emph{reification}
 procedure after evaluating the open term to a semantic value, mapping
 (\emph{reflecting})
@@ -183,7 +183,7 @@ can be achieved for the pure simply-typed lambda-calculus
 \cite{bergerSchwichtenberg:lics91,filinski:semaccounttdpe}
 by modelling uninterpreted base types as sets of neutral (aka atomic)
 terms.   More precisely, base types are interpreted
-as presheaves or sets of neutral term
+as presheaves, or sets of neutral term
 families, in order to facilitate the generation of
 fresh variables of base type during
 reification of functions to lambdas.
@@ -198,7 +198,7 @@ base and function type which can be faithfully reified to normal forms.
 % \cite{gregoireleroy:icfp02}).
 
 For the extension to \emph{sum} types (logically, disjunctions, and categorically,
-weak coproducts), this reflection trick does not work anymore.  A
+weak coproducts), this reflection trick does no longer work.  A
 semantic value of binary sum type is either a left or a right
 injection, but the decision between left or right cannot be taken at
 reflection time, since a variable of sum type does not provide us with
@@ -212,17 +212,22 @@ oracle can be modeled in a \emph{monad} $\C$,
 % with the service $\tNe\,(A + B) \to \C\,(\den A + \den B)$
 which records the questions asked and the continuation of the
 interpreter for each of the possible answers.
-A monadic semantic value is thus a \emph{case tree} where the leaves
-are occupied by non-monadic values \cite{altenkirchUustalu:flops04}.
-In this article we only consider weak sum types, producing non-unique
-normal forms.  In particular, case trees are not normalized, allowing,
+A monadic semantic value is thus a \emph{case tree} where the inner
+nodes are labeled with unknowns and the leaves
+with non-monadic values \cite{altenkirchUustalu:flops04}.
+
+In this article, we only consider weak sum types, lacking the universal
+property of coproducts.  As a consequence, terms with the same
+denotation may have different normal forms under NbE.
+In particular, case trees are not normalized, allowing,
 \eg, redundant case splits (\ie, asking the same question twice).
 Further, the order of case splits is not normalized: changing the
 order in which the questions are asked (commuting case splits),
 alters the normal form.
 The model would need refinement for extensional sums (strong
 coproducts) with unique normal forms
-\cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17}.
+\cite{altenkirchDybjerHofmannScott:lics01,altenkirchUustalu:flops04,balatDiCosmoFiore:popl04,barral:PhD,scherer:popl17},
+\ie, where NbE decides equality of denotations.
 
 Filinski \cite{filinski:tlca01} studied NbE for Moggi's computational lambda
 calculus \cite{moggi:infcomp91}, shedding light on the difference
@@ -244,9 +249,9 @@ In this work, we formulate NbE for CBPV
 % later whether CBN and CBV NbE can be recovered from CBPV NbE via the
 % standard translations of the CBN and CBV calculi into CBPV.
 %
-In contrast to the normal forms of CBN NbE, which is the algorithmic
+In contrast to the normal forms of CBN NbE---which is the algorithmic
 counterpart of the completeness proof for intuitionistic propositional
-logic (IPL) using Beth models, CBPV NbE gives us more restrained
+logic (IPL) using Beth models---CBPV NbE gives us more restrained
 normal forms, where the production of a value via injections cannot be
 interrupted by more questions to the oracle.  In the research field of
 focalization \cite{andreoli:focusing,liangMiller:csl07} we speak of
@@ -263,7 +268,7 @@ in Section~\ref{sec:fipl}.
 
 
 In our presentation of the various lambda calculi we ignore the
-concrete syntax, only consider the abstract syntax obtained by the
+concrete syntax, only considering the abstract syntax obtained by the
 Curry-Howard-Isomorphism.  A term is simply a derivation tree whose
 nodes are rule invocations.  Thus, an intrinsically typed,
 nameless syntax is most natural,
@@ -283,7 +288,9 @@ pattern matching using a separate context of variables to be matched
 on.
 
 Our design choices were guided by an Agda formalization of sections 2
-(complete, see \url{https://andreasabel.github.io/ipl/html/NfModelMonad.html})
+(complete, see
+\url{https://andreasabel.github.io/ipl/html/NfModelMonad.html}),
+3 (in a variantion, see \url{https://andreasabel.github.io/ipl/html-cbpv/NfCBPV.html})
 and 4 (partial, see \url{https://andreasabel.github.io/ipl/html-focusing/Polarized.html}).
 Agda was particularly helpful to correctly handle the renamings
 abundantly present when working with presheaves.
@@ -533,7 +540,7 @@ could in concrete syntax be rendered as
 We leave the exact connection to a printable
 syntax of the STLC to the imagination of the reader,
 as we shall not be concerned with considering
-concrete terms in this article.
+\emph{concrete} terms in this article.
 
 Terms of type $A$ form a presheaf
 $A{\from}\_$ as witnessed by the standard weakening operation%
@@ -747,7 +754,8 @@ From a logical perspective, we will compute for each derivation of $A
 % followed by
 % \emph{reification}
 % \nofbox{$\downG A : \Den A \Gamma \to \Nf A \Gamma$}.
-\emph{Normalization by evaluation} (NbE)
+The method
+\emph{normalization by evaluation} (NbE)
 %\fbox{\(
 %  \norm[\Gamma] A (t : A \from \Gamma)
 \[
@@ -921,7 +929,7 @@ the monad laws.
 
 We are looking for a monad $\C$, called a \emph{cover monad}, that
 takes the role of the \emph{oracle} alluded to in the introduction,
-and offers us these services:
+and offers us the following services:
 % \begin{enumerate}
 % \item Elimination of absurd neutrals
 % $\tabort^\C : \tNe\, \tyzero \todot \C\,\A$.
@@ -952,9 +960,23 @@ and offers us these services:
 \]
 Method $\trunNf[\C]$ enables us to \emph{run} a monadic computation of
 a normal form, $\C\,(\tNf\,P)\,\Gamma$, and delivers a normal form
-$\Nf P \Gamma$.  However, $\trunNf[\C]$ is not just the inverse of
-$\treturn[\C]$; instead, the information contained in $\C$ is reified and
+$\Nf P \Gamma$.
+% However, $\trunNf[\C]$ is not just the inverse of
+% $\treturn[\C]$; instead, the information contained in $\C$ is reified and
+% becomes part of the normal form delivered by $\trunNf[\C]$.
+While $\trunNf[\C]$ is a left inverse of
+$\treturn[\C]$, the converse is not true.
+Instead, the information contained in $\C$ is reified and
 becomes part of the normal form delivered by $\trunNf[\C]$.
+Technically, $(\tNf\,P, \trunNf[\C])$ is a
+\emph{monad algebra} for monad $\C$.
+Besides $\trunNf[\C] \circ \treturn[\C] = \tid_{\tNf\,P}$, the square
+$\trunNf[\C] \circ \tjoin[\C] = \trunNf[\C] \circ
+ \tmap[\C]\trunNf[\C]$ stands.  This means that given a case tree whose
+leaves are again case trees ending in normal forms, it does not
+matter whether we first join the nested case trees and then assemble
+the normal form, or whether we first turn the inner case trees into
+normal forms via $\tmap[\C]\trunNf[\C]$, and then the outer one.
 
 Method $\tabort^\C_\Gamma$ allows us to end a computation by exhibiting an
 inconsistency witnessed by a neutral term $u : \Ne 0 \Gamma$.
@@ -972,44 +994,9 @@ a computation $\C\,\B\,(\cext\Gamma{A_1})$ that can utilize an
 additional hypothesis of type $A_1$ in the case of a left injection,
 and analogously a computation $\C\,\B\,(\cext\Gamma{A_2})$ for the
 case of a right injection.
-
-The similarity of the monad services $\tabort^\C$ and $\tcase^\C$ to
-the corresponding constructors for normal forms, or their
-generalization of \Cref{rem:abort}, is hard to miss.
-Unsurprisingly, just \emph{case trees} are a first instance of a cover monad,
-% To make things concrete,
-% we shall immediately construct an instance of such a cover monad:
-the free cover monad
-$\Cov$ defined
-%inductively by
-as an inductive family with constructors
-$\treturn[\Cov]$, $\tabort^{\Cov}$, and
-$\tcase^{\Cov}$.
-% TODO: Shouldn't this better be trees with nullary and binary nodes
-% and leaves always an element of A?
-One can visualize an element $c : \Cov\,\A\,\Gamma$ as a
-binary case tree whose inner nodes ($\tcase$) are labeled by neutral terms
-of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
-and $A_2$, resp.  Leaves are either
-labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
-or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
-replacing the labels of the $\treturn$-leaves, and the monadic bind
-(aka Kleisli extension) replaces
-these leaves by further case trees.  Bind is realized via $\tjoin[\Cov]$,
-which flattens a 2-level case tree, \ie, a case tree with case trees as
-leaves, into a single one.
-Finally $\trunNf[\Cov]$ is a simple recursion on the tree, replacing $\tcase^{\Cov}$
-and $\tabort^{\Cov}$
-by the $\tcase$ and $\tabort$ constructions on normal forms, and
-$\treturn[\Cov]$ by the identity.
-
-% the following constructions:
-% \begin{gather*}
-%   \nru{\treturn[\Cov]}{\A\,\Gamma}{\Cov\,\A\,\Gamma}
-% \end{gather*}
-
-Using the services of a generic cover monad $\C$, we can complete our semantics:
-%\begin{gather*}
+\newcommand{\figdenpos}{
+\begin{figure}[bthp]
+\hrulefill
 \[
 \def\arraystretch{1.3}
 \begin{array}{lcl}
@@ -1035,6 +1022,10 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
     \tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B] \\
 \end{array}
 \]
+\hrulefill
+  \caption{Interpretation of positive types.}
+  \label{fig:denpos}
+\end{figure}
 % \[
 % \begin{array}{lcl}
 %   \den {A+B} & = & \C\,(\den A \hatplus \den B) \\
@@ -1046,24 +1037,52 @@ Using the services of a generic cover monad $\C$, we can complete our semantics:
 %     (\tmap[\C] [\tinj_1 \comp \down A,\; \tinj_2 \comp \down B]\;m) \\
 % \end{array}
 % \]
-%\end{gather*}
+} % END \newcommand
+\figdenpos
+
+The similarity of the monad services $\tabort^\C$ and $\tcase^\C$ to
+the corresponding constructors for normal forms, or their
+generalization of \Cref{rem:abort}, is hard to miss.
+Unsurprisingly, just \emph{case trees} are a first instance of a cover monad:
+the free cover monad
+$\Cov$ defined
+as an inductive family with constructors
+$\treturn[\Cov]$, $\tabort^{\Cov}$, and
+$\tcase^{\Cov}$.
+% TODO: Shouldn't this better be trees with nullary and binary nodes
+% and leaves always an element of A?
+One can visualize an element $c : \Cov\,\A\,\Gamma$ as a
+binary case tree whose inner nodes ($\tcase$) are labeled by neutral terms
+of sum type $A_1+A_2$ and its two branches by the context extensions $A_1$
+and $A_2$, resp.  Leaves are either
+labeled by a neutral term of empty type $\tyzero$ (see $\tabort$),
+or by an element of $\A$ (see $\treturn$).  Functoriality amounts to
+replacing the labels of the $\treturn$-leaves, and the monadic bind
+(aka Kleisli extension) replaces
+these leaves by further case trees.  Bind is realized via $\tjoin[\Cov]$,
+which flattens a 2-level case tree, \ie, a case tree with case trees as
+leaves, into a single one.
+Finally, $\trunNf[\Cov]$ is a simple recursion on the tree, replacing $\tcase^{\Cov}$
+and $\tabort^{\Cov}$
+by the $\tcase$ and $\tabort$ constructions on normal forms, and
+$\treturn[\Cov]$ by the identity.
+
+Using the services of a generic cover monad $\C$, we can complete our
+semantics, see \Cref{fig:denpos}.
 
 Since positive types $P$ have a monadic interpretation, there is a
-natural transformation $\C\,\den P \todot \den P$, which is simply
+monad algebra %natural transformation
+$\C\,\den P \todot \den P$, which is simply
 $\tjoin[\C]$.  It
 can be extended to a
-natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
+monad algebra %natural transformation
+$\trun^A : \C\,\den A \todot \den A$ for any simple
 type $A$, meaning we can \emph{run} the monad,
-pushing its effects into $\den A$.%
 \footnote{In categorical terminology, the existence of
 $\trun^A$ means that
 all semantic types $\den{A}$ fulfill the \emph{weak sheaf condition},
 aka \emph{weak pasting}.}
-% All semantic types fulfill the weak sheaf condition aka weak pasting,
-% meaning there is
-% a natural transformation $\trun^A : \C\,\den A \todot \den A$ for any simple
-% type $A$.  In other words, we can \emph{run} the monad, pushing its
-% effects into $\den A$.
+pushing its effects into $\den A$.%
 We proceed by induction on $A$.
 At negative types we can recurse pointwise at a smaller type,
 exploiting that values of negative types are essentially
@@ -1136,13 +1155,17 @@ from the semantic environments.
 The evaluation function
 \fbox{$\denty {t : A \from \Gamma}  : \den \Gamma \todot \den A$}
 % \fbox{$\dent {t : A \from \Gamma} \_ : \den \Gamma \todot \den A$}
-can now be defined by recursion on $t$.
+can now be defined by recursion on $t$, see \Cref{fig:eval}.
 % using an auxiliary definition
 % \fbox{$\fden{t : B \from \cext \Gamma A} : \den \Gamma \todot \den{A \To B}$}.
 Herein, the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
-% Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den A \Delta$.
+% Herein, $\gamma : \den \Gamma \Delta$, thus, $\dent t \gamma : \den
+% A \Delta$.
+\begin{figure}[htbp]
+\hrulefill
 \[
 \begin{array}{lcl}
+  \denty {t : A \from \Gamma}  & : & \den \Gamma \todot \den A \\
   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
   \dent{\tabs\,t}\gamma & = & \fdent t \gamma \\
   \dent{\tapp\,t\,u} \gamma & = &
@@ -1157,8 +1180,7 @@ Herein, the environment $\gamma$ lives in $\den \Gamma \Delta$, thus, $\dent t \
   \dent{\tabort\,u}\gamma & = & \denabort\;\dent u \gamma \\
 \end{array}
 \]
-For the interpretation of the binders $\tabs$ and $\tcase$ we use the
-mutually defined $\fden{\_}$.
+\dotfill
 \[
 \begin{array}{l}
   \fden{t : B \from \cext \Gamma A}
@@ -1179,10 +1201,7 @@ mutually defined $\fden{\_}$.
   %     \dent t {(\tren\,\tau\,\gamma,\ a)} \\
 \end{array}
 \]
-The coproduct eliminations $\denabort$ and $\dencase$
-targeting an arbitrary semantic type $\den B$ are definable thanks to
-the weak sheaf property, \ie, the presence of pasting via $\trun^B$
-for any type $B$, and strong functoriality of $\C$.
+\dotfill
 \[
 \begin{array}{l@{~}c@{~}l}
   \denabort^B & : & \den \tyzero \todot \den B \\
@@ -1196,6 +1215,16 @@ for any type $B$, and strong functoriality of $\C$.
     \trun^B (\stmap[\C]\;(\lambda\,\tau.\ [f_1\,\tau,\ f_2\,\tau])\;c) \\
 \end{array}
 \]
+\hrulefill
+  \caption{Evaluation of terms.}
+  \label{fig:eval}
+\end{figure}
+For the interpretation of the binders $\tabs$ and $\tcase$ we use the
+mutually defined $\fden{\_}$.
+The coproduct eliminations $\denabort$ and $\dencase$
+targeting an arbitrary semantic type $\den B$ are definable thanks to
+the weak sheaf property, \ie, the presence of pasting via $\trun^B$
+for any type $B$, and strong functoriality of $\C$.
 It is noteworthy that the interpreter $\denty{\_}$ does not use any of
 the services of the cover monad; in fact, it only requires the monad
 $\C$ to be strong.  The interpreter is completely \emph{generic} for
@@ -1203,7 +1232,7 @@ the CBN monadic semantics of types.  This restores the spirit of STLC
 NbE for sum types:  Take an \emph{off-the-shelf} interpreter for terms,
 implement reflection and reification after interpreting base types as sets
 (presheaves) of neutrals, plug them together with the interpreter, and
-voila!, there is your normalizer!
+\emph{voila!}, there is your normalizer!
 Our insight here is that \emph{off-the-shelf interpreter} means
 \emph{monadic} in the presence of positive types.
 
@@ -1248,7 +1277,8 @@ $\B$ defined by
   .
 \]
 The answer type of this continuation monad is always $\tNf$, however,
-we are polymorphic in the positive type $P$ of normal forms we produce.%
+we are polymorphic in the positive type $P$ of normal forms we emit in
+the end.%
 
 Agda has been really helpful to produce the rather technical but
 straightforward evidence that $\CC$ is a strong monad.
@@ -1260,7 +1290,7 @@ enables matching on neutrals:
 \renewcommand{\left}{}
 \renewcommand{\right}{}
 \begin{array}{l}
-  \tabort^{\CC}_\Gamma \, (u : \Ne \tyzero \Gamma) ~:~  \CC\,\B\,\Gamma \\[0.2ex]
+  \tabort^{\CC}_\Gamma \, (u : \Ne \tyzero \Gamma) ~:~  \CC\,\B\,\Gamma \\[0.4ex]
   \tabort^{\CC}_\Gamma
     \; u
     \, _\Delta
@@ -1301,11 +1331,17 @@ enables matching on neutrals:
   \end{array}
 \end{array}
 \]
+It is noteworthy (yet unsurprising) that $\tabort^\CC$ discards continuation $k$, while
+$\tcase^\CC$ uses it twice, once in each case.  Thus, normal forms can
+be of exponential size; for example, the normal form of the identity
+function over $n$-tuples of booleans has a case tree of height $n$,
+hence, size $\Theta(2^n)$.
+
 The NbE algorithm using $\CC$ is comparable to Danvy's type-directed
-partial evaluation \cite[Figure~8]{danvy:popl96}.  However, he uses
-shift-reset style continuations, which can be programmed in the
+partial evaluation \cite[Figure~8]{danvy:popl96}.  However, Danvy uses
+shift-reset style continuations, which can be expressed via the
 continuation monad, and relies on Scheme's \texttt{gensym} to produce
-fresh variables names rather than using the Kripke function space / presheaves.
+fresh variables names rather than presheaves and the Kripke function space.
 
 
 % \subsection{Term normalization}
@@ -1402,7 +1438,8 @@ label sets $I$ while we only have finite sums $(\tyzero,+)$ and
 records $(\top,\ntimes)$.  However, this difference is not essential,
 our treatment extends directly to the infinite case, since we are
 working in type theory, which allows infinitely branching inductive
-types.   As a last difference, CBPV does not consider base types; in
+types.
+As a last difference, CBPV does not consider uninterpreted base types; in
 anticipation of the next section, we add them as both positive atoms
 ($\patom$) and negative atoms ($\natom$).
 
@@ -1452,7 +1489,7 @@ types.  They are built from positive eliminations captured in $\C$ and negative
 eliminations chained together as neutral $\tNe\,\natom$, which we
 shall define below.
 The multiplication $\tjoin[\C]$ of the strong monad $\C$ can be
-extended to a natural transformation
+extended to a monad algebra % natural transformation
 $\trun^N : \C \den N \todot \den N$ for negative types $N$.
 The construction proceeds by recursion on $N$, exactly as in \Cref{sec:normstlc}.
 This makes the effects of $\C$ available at any negative type,
@@ -1482,9 +1519,8 @@ and negative types.
 % The terms of pure CBPV are given by the inductive family \fbox{$\Tm N \Gamma$}.
 % It repeats the introductions and eliminations of negative types,
 % except
-Note
-that application is restricted to values.  Values of type
-$\Thunk N$ are embedded via $\tforce$.
+Note that function application is restricted to value arguments.
+Values of type $\Thunk N$ are embedded by $\tforce$.
 Further, values of type $P$ can be embedded
 via $\tret$, producing a term of type $\Comp P$.  Such terms are
 eliminated by $\tbind$ which is, unlike the usual monadic bind, not
@@ -1576,44 +1612,53 @@ types, by virtue of $\trun^N$.
 \end{figure}
 
 
-Interpretation of values
+\Cref{fig:evalcbpv} defines
+interpretation of values
 $\denty{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
 and terms
-$\denty{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
-is straightforward, thanks to the pioneering work of
-Moggi \cite{moggi:infcomp91} and the work that
-Levy \cite{levy:hosc06}
-put into the design of CBPV.
+$\denty{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$.
+% Interpretation of values
+% $\denty{ v : \PValTm P \Gamma } : \den \Gamma \todot \den P$
+% and terms
+% $\denty{ t : \Tm N \Gamma } : \den \Gamma \todot \den N$
+% is displayed in \Cref{fig:evalcbpv}.
+It is straightforward, thanks to the pioneering work of
+Moggi \cite{moggi:infcomp91} and the
+design of CBPV by Levy \cite{levy:hosc06}.
+\begin{figure}[htbp]
+\hrulefill
 \[
-\begin{array}{lcl}
-  \\
+\begin{array}{p{13ex}cl}
   \dent{\tvar\,x}\gamma & = & \tlookup\,x\,\gamma \\
   \dent{\punit}\gamma   & = & \ttempty \\
   \dent{\ppair\,v_1\,v_2}\gamma & = &
     (\dent{v_1}\gamma,\ \dent{v_2}\gamma) \\
   \dent{\inj i v}\gamma & = & \iota_i \dent v \gamma \\
   \dent{\tthunk\,t}\gamma & = & \dent t \gamma \\
-% \end{array}
-% \quad
-% \begin{array}{lcl}
+\end{array}
+\]
+\dotfill
+\[
+\begin{array}{p{13ex}cl}
   \dent{\tabs\,t}\gamma
       & = & \fdent t \gamma \\
-  \dent{\tapp\,t\,v} \gamma & = &
-     \dent t \gamma\;\tid\;\dent v \gamma \\
   \dent{\nunit}\gamma & = & \ttempty \\
   \dent{\npair\,t_1\,t_2}\gamma & = &
     (\dent{t_1}\gamma,\ \dent{t_2}\gamma) \\
+\end{array}
+\]
+\dotfill
+\[
+\begin{array}{p{13ex}cl}
+  \dent{\tapp\,t\,v} \gamma & = &
+     \dent t \gamma\;\tid\;\dent v \gamma \\
   \dent{\prj i t}\gamma & = & \pi_i \dent t \gamma \\
   \dent{\tforce\,v}\gamma & = & \dent v \gamma \\
 \end{array}
 \]
-Since $\tThunk$ serves only as an embedding of negative into positive
-types in our semantics,
-we interpret thunking and forcing by the identity.
-The eliminations for positive types deal now only with values, thus,
-need not reference the monad operations.
+\dotfill
 \[
-\begin{array}{lcl}
+\begin{array}{p{13ex}cl}
   \dent{\tsplit\,v\,t}\gamma & = & (\lambda\,(a_1,a_2).\
     \dent{t}{(\gamma,a_1,a_2)} ) \; \dent v \gamma \\
   \dent{\tcase\,v\,t_1\,t_2}\gamma & = &
@@ -1623,16 +1668,27 @@ need not reference the monad operations.
   \dent{\tabort\,v}\gamma & = & \tmagic\,\dent v \gamma \\
 \end{array}
 \]
-The use of the monad is confined to $\tret$ and $\tbind$.
-Note the availability of $\trun^\C : \C \den N \to \den N$
-at any negative type $N$ for the interpretation of $\tbind$.
+\dotfill
 \[
-\begin{array}{lcl}
+\begin{array}{p{13ex}cl}
   \dent{\tret\,v}\gamma & = & \treturn[\C] \; \dent v \gamma \\
   \dent{\tbind\,u\,t}\gamma & = & \trun^\C\,
     (\stmap[\C] \; \fdent t \gamma\; \dent u \gamma) \\
 \end{array}
 \]
+\hrulefill
+  \caption{Evaluation (CBPV).}
+  \label{fig:evalcbpv}
+\end{figure}
+Since $\tThunk$ serves only as an embedding of negative into positive
+types in our semantics,
+we interpret thunking and forcing by the identity.
+The eliminations $\tsplit$, $\tcase$ and $\tabort$
+for positive types deal now only with values, thus,
+need not reference the monad operations.
+The use of the monad is confined to $\tret$ and $\tbind$.
+Note the availability of $\trun^\C : \C \den N \to \den N$
+at any negative type $N$ for the interpretation of $\tbind$.
 
 \subsection{Normal forms and normalization}
 
@@ -1747,10 +1803,25 @@ of a base neutral ($\tNe\,\natom$) or a normal value.
       {\Nf N {\cext \Gamma P}}
       {\NfP {P \To N} \Gamma}
 \end{gather*}
+% The analogue of $\trunNf$ from \Cref{sec:normstlc} would be a map
+% $\C\,(\tVNf\,P) \todot \tNf\,(\Comp P)$
 Note that we do not have a function
-$\trunNf[\Cov] : \Cov\,(\tNf\,N) \todot \tNf\,N$ this time, instead, we
-directly employ $\Cov$ in the definition of $\tNf$ at the base case
+$\trunNf[\Cov]$
+% $\trunNf[\Cov] : \Cov\,(\tNf\,N) \todot \tNf\,N$
+this time,\footnote{%
+A trivial $\trunNf[\Cov] : \Cov\,(\tNf\,N_0) \todot \tNf\,N_0$
+for $N_0 ::= \natom \mid \Comp P$ could be given by induction on the
+cover, essentially being a $\tjoin$.  However its extension to
+arbitrary negative types $N$ would fail for the case of pushing a
+binder ($\tbind$, $\tsplit$ or $\tcase$) under an $\tabs$traction.
+This is because
+our base category $\Cxt$ of order-preserving embeddings
+does not permit swapping of variables in the context.
+}
+instead, we
+directly employ $\Cov$ in the definition of $\tNf$ at the base cases
 $\natom$ and $\Comp P$.
+
 
 Reification $\down P : \den P \todot \tVNf\,P$ at positive types $P$ produces
 a normal value, and $\down N : \den N \todot \tNf\,N$ at negative
@@ -1768,8 +1839,8 @@ reify at type $N$.
 % Luckily, as $\down N$ produces a normal
 % form, monadic intermediate computations are permitted under a final
 % $\trunNf$.
-Negative reflection $\up N : \tNe\,N \todot \den N$ is as
-before generalized from variables to neutrals, to handle the breaking
+Negative reflection $\up N : \tNe\,N \todot \den N$ is, as
+before, generalized from variables to neutrals, to handle the breaking
 down of $N$ via eliminations.
 %
 In the following definition of reflection we use the abbreviation
@@ -1824,19 +1895,26 @@ In the following definition of reflection we use the abbreviation
 Reflection at positive pairs uses monoidal functoriality
 $\C\,\A_1 \todot \C\,\A_2 \todot \C\,(\A_1 \hattimes \A_2)$
 called $\star$ by McBride and Paterson \cite[Section 7]{mcbridePaterson:applicative},
-which for monads $\C$ can be defined by
+which in our case can be defined by \eg\
 $c_1 \star c_2 =
-   \tjoin \; (\tmap\;(\lambda\,a_1.\
-   \tmap\;(\lambda\,a_2.\ (a_1,a_2))
-    \;c_2)
+   \tjoin \; (\stmap\;(\lambda\,\tau_1\,a_1.\
+   \stmap\;(\lambda\,\tau_2\,a_2.\ (\tren\;\tau_2\;a_1,\;a_2))
+    \;(\tren\;\tau_1\;c_2))
     \;c_1)$.
+
+% which for monads $\C$ can be defined by
 % $c_1 \star c_2 =
 %    \tjoin \; (\tmap\;(\lambda\,a_1.\
-%    \tjoin \; (\tmap\;(\lambda\,a_2.\ \treturn\,(a_1,a_2))
-%     \;c_2))
+%    \tmap\;(\lambda\,a_2.\ (a_1,a_2))
+%     \;c_2)
 %     \;c_1)$.
-% $c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
-% $\tzip\;c = \tjoin \comp \tmap\,(\lambda\,a.\ (c,\, \treturn\,a)$.
+% % $c_1 \star c_2 =
+% %    \tjoin \; (\tmap\;(\lambda\,a_1.\
+% %    \tjoin \; (\tmap\;(\lambda\,a_2.\ \treturn\,(a_1,a_2))
+% %     \;c_2))
+% %     \;c_1)$.
+% % $c \star d = \tjoin \; (\tmap\;(\lambda\,b.\ (c,\, \treturn\,b))\;d$.
+% % $\tzip\;c = \tjoin \comp \tmap\,(\lambda\,a.\ (c,\, \treturn\,a)$.
 
 For negative types, reflection and reification works as before:
 \[
@@ -1890,7 +1968,7 @@ expects a value argument now.
      \comp \stmap
       \left(
         \lambda
-          \,_\Delta
+          % \,_\Delta
           \, \tau
           % \,(\tau : (\cext \Gamma P) \sublist \Delta)
           \; a
@@ -1917,7 +1995,23 @@ expects a value argument now.
     \\
 \end{array}
 \]
-The identity environment $\idenv \Gamma : \Cover {\den \Gamma} \Gamma$
+For reification of a (Kripke) function $f : \den{P \To N} \Gamma$ we extend context
+$\Gamma$ to $\cext \Gamma P$ and create a case tree
+$\tfresh^P_\Gamma : \Cover {\den P} {(\cext \Gamma P)}$ representing the new
+variable.  Using strong functoriality $\stmap$,
+we then apply $f$ to all leaves $a$ of that case tree,
+which may live in further extended contexts $\Delta$ reachable by
+$\tau : \cext \Gamma P \sublist \Delta$.
+The resulting case tree
+$\Cover {\den N} {(\cext \Gamma P)}$ is then $\trun$ giving us a value
+in $\den N {(\cext \Gamma P)}$, which can be reified to a
+$\Nf N {(\cext \Gamma P)}$.  Finally, abstraction gives the desired
+normal form in $\NfP {P \To N} \Gamma$.
+
+
+
+
+This time, the identity environment $\idenv \Gamma : \Cover {\den \Gamma} \Gamma$
 can only be generated in the monad, due to monadic positive
 reflection.
 \[
@@ -1988,11 +2082,13 @@ Polarized lambda-calculus
 is a focused calculus, it eagerly employs
 so-called \emph{invertible} rules: the introduction rules for negative types and the
 elimination rules for positive types.  As a consequence of the latter,
-variables are either of atomic or negative type $H ::= \patom \mid N$.
-%($\HTy$).
-Contexts $\Gamma,\Delta$ are lists of $H$s.
-%$\HTy$s.
-%\fbox{$X ::= \patom \mid P$}.
+variables are either of atomic or negative type.
+%  $H ::= \patom \mid N$.
+% %($\HTy$).
+% Contexts $\Gamma,\Delta$ are lists of $H$s.
+% %$\HTy$s.
+% %\fbox{$X ::= \patom \mid P$}.
+Types in contexts $\Gamma,\Delta$ are of one of the forms $\patom$ or $N$.
 
 To add a variable of positive type $P$ to the context, we need to
 break it apart until only atoms and negative bits remain.  This is
@@ -2043,6 +2139,22 @@ by recursion on $P$.   It is tempting to name $\bsplit$
 since $\Add P$ is a graded monad on the monoid $(1,\times)$
 of product types;
 however, this coincidence shall not matter for our further considerations.
+
+\begin{remark}
+The notation $\Add P$ is chosen in analogy of the next-time operator
+of dynamic logic \citep{pratt:focs76}.
+The deeper reason is that the category $\Cxt$ can be seen as
+branching time where a context represents a point in time and an
+extension a possible future.  The modality $\Add P$ picks a certain
+future, the ``proposition'' $\Add P\,\J$ states that
+$\J$ should hold in the future determined by $P$.
+
+While in dynamic logic $P$ would be a regular expression, our positive
+types represent the fragment featuring choice $(\tyzero, +)$ and
+sequence $(1, \times)$.  The introduction rules for $\Add P\,\J$
+resemble the axioms of choice $(\nbranch, \bbranch)$
+and sequence $(\nsplit,\bsplit)$ in dynamic logic.
+\end{remark}
 
 Focalization is a technique to remove don't-care non-determinism from
 proof search, and as such, polarized lambda calculus is foremost a
@@ -2124,14 +2236,18 @@ now lives in the graded monad $\Add P$ rather than $\Cov$.  Further,
 as pattern matching may produce $n \geq 0$ cases, reflection cannot simply
 produce a single positive semantic value; instead, one such value is needed
 for every branch.  We implement
-\fbox{$\reflect P : (\den P \hatto \J) \todot \Add P \J$}
+$\reflect P : (\den P \hatto \J) \todot \Add P \J$
+%\fbox{$\reflect P : (\den P \hatto \J) \todot \Add P \J$}
 as a higher-order function expecting a continuation $k$ which is
 invoked for each generated branch with the semantic value of type $P$
-constructed for this branch.
+constructed for this branch, see \Cref{fig:posrefl}.
+\begin{figure}[htbp]
+\hrulefill
 \[
 \renewcommand{\left}{}
 \renewcommand{\right}{}
 \begin{array}{l@{~}lcl}
+  \multicolumn 2 l {\reflect P} & : & (\den P \hatto \J) \todot \Add P \J \\
   \reflect {\patom} & k & = &
     \phyp \left( k\;\twk^{\patom}\,(\pvar\,\tzero) \right) \\
   \reflect {\Thunk N} & k & = &
@@ -2155,6 +2271,11 @@ constructed for this branch.
     \right)
 \end{array}
 \]
+\hrulefill
+  \caption{Positive reflection (polarized lambda calculus).}
+  \label{fig:posrefl}
+\end{figure}
+
 Reflecting at a positive atomic type $\patom$ is the regular ending of a
 reflection pass: we call continuation $k$ with a fresh variable
 $\pvar\,\tzero$ of type $\patom$, making space for the variable
@@ -2217,10 +2338,14 @@ reflection and reification at negative types.
 % extend $\Add\_$ to contexts, following the intuition that
 %Due to the strong limitation on context entries,
 Due to the absence of composite positive types in contexts,
-the identity environment $\idenv \Gamma$ can be built
+the identity environment
+$\idenv \Gamma$
+%$\idenv \Gamma : \den \Gamma \Gamma$
+can be built
 straightforwardly using negative reflection.
 \[
 \begin{array}{lcl}
+  \idenv \Gamma & : & \den \Gamma \Gamma \\
   \idenv{\cempty} & = & \ttempty \\
   \idenv{\cext \Gamma {\patom}} & = &
     (
@@ -2362,7 +2487,7 @@ The first author took initial inspiration from some
 received by email on 16th March 2000.
 Thorsten in turn credits his inspiration to an ALF proof by Thierry
 Coquand.  Thanks to Hugo Herbelin for encouraging feedback and spotting some
-typos.  Thanks to the anonymous referees of a previous version of this
+typos.  Thanks to the anonymous referees of previous versions of this
 paper for the valuable feedback and remarks that helped improving the
 text of this article.
 
