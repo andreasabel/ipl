@@ -93,9 +93,7 @@
 % \dotminus from http://tex.stackexchange.com/questions/114188/special-character-dot-over-dash
 \makeatletter
 \newcommand{\dotminus}{\mathbin{\text{\@dotminus}}}
-\newcommand{\@dotminus}{%
-  \ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}%
-}
+\newcommand{\@dotminus}{\ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}}
 \makeatother
 
 % type equality
@@ -1013,8 +1011,7 @@
 \newcommand{\skelcxt}[1]{|#1|}
 
 \newcommand{\resurrecttwice}[1]{#1^{\mathord{\oplus}\mathord{\oplus}}}
-\newcommand{\resurrect}[2][]{#2^{\ifthenelse{\equal{#1}{}}{\oplus}{%\overline{
-#1}}}%}
+\newcommand{\resurrect}[2][]{#2^{\ifthenelse{\equal{#1}{}}{\oplus}{#1}}}%\overline{#1}}}}
 \newcommand{\eresurrect}[1]{\resurrect[\evar]{#1}}
 \newcommand{\erresurrect}{\resurrect[\div]}
 \newcommand{\nsresurrect}{\resurrect[\nonstrict]}
@@ -1686,9 +1683,7 @@
 %\renewcommand{\circledS}{\ensuremath{\mathrel{\fbox{K}}}}
 \newcommand{\Seq}{\mathrel{\circledS}}
 \newcommand{\Ceq}{\mathrel{\copyright}}
-\newcommand{\circlerel}[1]{%
-  \mathrel{\ensuremath{\textcircled{\ensuremath{#1}}}}%
-}
+\newcommand{\circlerel}[1]{\mathrel{\ensuremath{\textcircled{\ensuremath{#1}}}}}
 \newcommand{\Seqcum}{\circlerel{\cum}}
 \newcommand{\Seqcocum}{\circlerel{\cocum}}
 

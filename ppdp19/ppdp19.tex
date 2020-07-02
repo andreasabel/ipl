@@ -6,8 +6,9 @@
 %\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
 \sloppy
 %\usepackage{array}
-\newcommand\hmmax{0}
-\newcommand\bmmax{0}
+% The following commands are for package bm to shut off error "Too many alphabets"
+\newcommand\hmmax{0} % default 3
+\newcommand\bmmax{0} % default 4
 \usepackage{bm} % bold math
 
 %%\usepackage{nccmath} %ceqn  %% NOT COMPATIBLE
@@ -32,18 +33,20 @@
 % the commands and values with those provided to you when you complete the rights form.
 %
 % These commands are for a PROCEEDINGS abstract or paper.
+%\setcopyright{acmlicensed}
+% \acmConference[PPDP 2019]{PPDP 2019: 21st International Symposium on Principles
+%   and Practice of Declarative Programming}{7-9 October 2019}{Porto, Portugal}
+% \acmBooktitle{PPDP 2019: 21st International Symposium on Principles
+%   and Practice of Declarative Programming, 7-9 October 2019, Porto, Portugal}
+
 \copyrightyear{2019}
 \acmYear{2019}
-\setcopyright{acmlicensed}
-\acmConference[PPDP 2019]{PPDP 2019: 21st International Symposium on Principles
-  and Practice of Declarative Programming}{7-9 October 2019}{Porto, Portugal}
-\acmBooktitle{PPDP 2019: 21st International Symposium on Principles
-  and Practice of Declarative Programming, 7-9 October 2019, Porto, Portugal}
-\acmPrice{0.00}
-\acmDOI{10.1145/1122445.1122456}
-\acmISBN{978-1-4503-9999-9/18/06}
+\acmConference[PPDP '19]{Principles and Practice of Programming Languages 2019}{October 7--9, 2019}{Porto, Portugal}
+\acmBooktitle{Principles and Practice of Programming Languages 2019 (PPDP '19), October 7--9, 2019, Porto, Portugal}
+\acmPrice{15.00}
+\acmDOI{10.1145/3354166.3354168}
+\acmISBN{978-1-4503-7249-7/19/10}
 
-%
 % These commands are for a JOURNAL article.
 %\setcopyright{acmcopyright}
 %\acmJournal{TOG}

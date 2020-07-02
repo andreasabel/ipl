@@ -59,11 +59,24 @@ img=adnrv/texlive
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
 
-default : ppdp19.pdf
+default : talkPPDP19.pdf # ppdp19.pdf
 
 mnt=/home
 deploy :
 	docker run -v $(shell pwd):$(mnt) -w $(mnt) $(img) latexmk -pdf ppdp19.tex
+
+proceedings : final/ppdp19.tex final/macros.tex
+
+final/ppdp19.tex : ppdp19.tex
+	sed -f $(HOME)/play/sed/striplatex.sed < $< > $@
+
+final/macros-nocomments.tex : macros.tex
+	sed -f $(HOME)/play/sed/striplatex.sed < $< > $@
+
+final/macros.tex : final/macros-nocomments.tex final/ppdp19.tex Makefile
+	# cp $< $@
+	runhaskell $(HOME)/bin/src/macro-clean/macroclean.hs $< final/ppdp19.tex > $@
+
 
 pack : ppdp19.zip
 
