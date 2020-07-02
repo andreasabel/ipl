@@ -1,0 +1,827 @@
+%% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
+\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% For double-blind review submission, w/ CCS and ACM Reference
+%\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true}
+%% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
+%\documentclass[acmsmall,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% For single-blind review submission, w/ CCS and ACM Reference
+%\documentclass[acmsmall,review]{acmart}\settopmatter{printfolios=true}
+%% For final camera-ready submission, w/ required CCS and ACM Reference
+%\documentclass[acmsmall]{acmart}\settopmatter{}
+
+
+%% Journal information
+%% Supplied to authors by publisher for camera-ready submission;
+%% use defaults for review submission.
+\acmJournal{PACMPL}
+\acmVolume{5}
+\acmNumber{POPL} % CONF = POPL or ICFP or OOPSLA
+\acmArticle{1}
+\acmYear{2021}
+\acmMonth{1}
+\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+\startPage{1}
+
+%% Copyright information
+%% Supplied to authors (based on authors' rights management selection;
+%% see authors.acm.org) by publisher for camera-ready submission;
+%% use 'none' for review submission.
+\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+%\copyrightyear{2018}           %% If different from \acmYear
+
+%% Bibliography style
+\bibliographystyle{ACM-Reference-Format}
+%% Citation style
+%% Note: author/year citations are required for papers published as an
+%% issue of PACMPL.
+\citestyle{acmauthoryear}   %% For author/year citations
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Note: Authors migrating a paper from PACMPL format to traditional
+%% SIGPLAN proceedings format must update the '\documentclass' and
+%% topmatter commands above; see 'acmart-sigplanproc-template.tex'.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Some recommended packages.
+\usepackage{booktabs}   %% For formal tables:
+                        %% http://ctan.org/pkg/booktabs
+\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
+                        %% http://ctan.org/pkg/subcaption
+
+\usepackage{stmaryrd}
+\usepackage{xspace}
+\usepackage{xypic}
+
+\usepackage{dashrule}
+\newcommand{\dashruler}{\hdashrule[0.5ex]{\textwidth}{0.2pt}{1ex}}
+\newcommand{\ruler}{\rule{\textwidth}{0.2pt}}
+
+% % https://tex.stackexchange.com/questions/46828/how-to-highlight-important-parts-with-a-gray-background
+% \usepackage[breakable, theorems, skins]{tcolorbox}
+% \tcbset{enhanced}
+
+% \DeclareRobustCommand{\graytextbox}[2][gray!20]{%
+% \begin{tcolorbox}[   %% Adjust the following parameters at will.
+%         breakable,
+%         left=0pt,
+%         right=0pt,
+%         top=0pt,
+%         bottom=0pt,
+%         colback=#1,
+%         colframe=#1,
+%         width=\dimexpr\textwidth\relax,
+%         enlarge left by=0mm,
+%         boxsep=5pt,
+%         arc=0pt,outer arc=0pt,
+%         ]
+%         #2
+% \end{tcolorbox}
+% }
+
+% https://tex.stackexchange.com/questions/502652/define-tcolorbox-in-math-mode
+\usepackage{tcolorbox}
+\newtcbox{\grayboxtext}{on line,colback=gray!20,colframe=gray!20,size=fbox,arc=0pt,boxrule=0pt}
+\newcommand{\graybox}[1]{\grayboxtext{$#1$}}
+
+\newtheorem{remark}{Remark}
+
+\begin{document}
+
+%% Title information
+\title[Graded CBPV]{Graded Call-By-Push-Value}         %% [Short Title] is optional;
+                                        %% when present, will be used in
+                                        %% header instead of Full Title.
+%\titlenote{with title note}             %% \titlenote is optional;
+                                        %% can be repeated if necessary;
+                                        %% contents suppressed with 'anonymous'
+%\subtitle{Subtitle}                     %% \subtitle is optional
+%\subtitlenote{with subtitle note}       %% \subtitlenote is optional;
+                                        %% can be repeated if necessary;
+                                        %% contents suppressed with 'anonymous'
+
+
+%% Author information
+%% Contents and number of authors suppressed with 'anonymous'.
+%% Each author should be introduced by \author, followed by
+%% \authornote (optional), \orcid (optional), \affiliation, and
+%% \email.
+%% An author may have multiple affiliations and/or emails; repeat the
+%% appropriate command.
+%% Many elements are not rendered, but should be provided for metadata
+%% extraction tools.
+
+%% Author with single affiliation.
+\author{Andreas Abel}
+%\authornote{with author1 note}          %% \authornote is optional;
+                                        %% can be repeated if necessary
+\orcid{0000-0003-0420-4492}             %% \orcid is optional
+\affiliation{
+  \department{Department of Computer Science and Engineering}
+  \institution{Gothenburg University}
+  \streetaddress{Rännvägen 6b}
+  \city{Göteborg}
+%  \state{State1}
+  \postcode{41296}
+  \country{Sweden}
+}
+\email{andreas.abel@@gu.se}          %% \email is recommended
+
+% %% Author with two affiliations and emails.
+% \author{First2 Last2}
+% \authornote{with author2 note}          %% \authornote is optional;
+%                                         %% can be repeated if necessary
+% \orcid{nnnn-nnnn-nnnn-nnnn}             %% \orcid is optional
+% \affiliation{
+%   \position{Position2a}
+%   \department{Department2a}             %% \department is recommended
+%   \institution{Institution2a}           %% \institution is required
+%   \streetaddress{Street2a Address2a}
+%   \city{City2a}
+%   \state{State2a}
+%   \postcode{Post-Code2a}
+%   \country{Country2a}                   %% \country is recommended
+% }
+% \email{first2.last2@inst2a.com}         %% \email is recommended
+% \affiliation{
+%   \position{Position2b}
+%   \department{Department2b}             %% \department is recommended
+%   \institution{Institution2b}           %% \institution is required
+%   \streetaddress{Street3b Address2b}
+%   \city{City2b}
+%   \state{State2b}
+%   \postcode{Post-Code2b}
+%   \country{Country2b}                   %% \country is recommended
+% }
+% \email{first2.last2@inst2b.org}         %% \email is recommended
+
+
+%% Abstract
+%% Note: \begin{abstract}...\end{abstract} environment must come
+%% before \maketitle command
+\begin{abstract}
+Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
+types into value and computation types and can thus express both
+call-by-name and call-by-value evaluation in the presence of effects.
+Semantically, effects are modeled by a monad, and computation types as
+algebras over this monad.
+Effect type systems usually express more information than the presence
+of an effect; typically effects are structured as pre-ordered monoid
+where the monoid operation represents accumulation of effects and the
+order subsumption, in analogy to subtyping.
+In this work, a \emph{graded} version of is presented where the typing
+of computations likens effect typing.  Semantically, computation types
+are then represented as graded monad algebras.
+Further we present a version of CBPV which additionally has graded coeffects.
+\end{abstract}
+
+
+%% 2012 ACM Computing Classification System (CSS) concepts
+%% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
+ \begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10003752.10003790.10011740</concept_id>
+<concept_desc>Theory of computation~Type theory</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10003752.10010124.10010125.10010130</concept_id>
+<concept_desc>Theory of computation~Type structures</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10003752.10010124.10010138.10010142</concept_id>
+<concept_desc>Theory of computation~Program verification</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10003752.10010124.10010131.10010134</concept_id>
+<concept_desc>Theory of computation~Operational semantics</concept_desc>
+<concept_significance>100</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Theory of computation~Type theory}
+\ccsdesc[500]{Theory of computation~Type structures}
+\ccsdesc[300]{Theory of computation~Program verification}
+\ccsdesc[100]{Theory of computation~Operational semantics}
+%% End of generated code
+
+%% Keywords
+%% comma separated list
+\keywords{effects, coeffects, call-by-name, call-by-value, linear types}  %% \keywords are mandatory in final camera-ready submission
+
+
+%% \maketitle
+%% Note: \maketitle command must come after title commands, author
+%% commands, abstract environment, Computing Classification System
+%% environment and commands, and keywords command.
+\maketitle
+
+
+\section{Introduction}
+
+Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
+types into value and computation types and can thus express both
+call-by-name and call-by-value evaluation in the presence of effects.
+Semantically, effects are modeled by a monad, and computation types as
+algebras over this monad.
+Effect type systems usually express more information than the presence
+of an effect; typically effects are structured as pre-ordered monoid
+where the monoid operation represents accumulation of effects and the
+order subsumption, in analogy to subtyping.
+In this work, a \emph{graded} version of is presented where the typing
+of computations likens effect typing.  Semantically, computation types
+are then represented as graded monad algebras.
+Further we present a version of CBPV which additionally has graded coeffects.
+
+
+\section{An effect-graded version of CBPV}
+
+%\newcommand{}{\ensuremath{}}
+\newcommand{\ie}{\emph{i.e.}}
+\newcommand{\eg}{\emph{e.g.}}
+\newcommand{\Eg}{\emph{E.g.}}
+\newcommand{\loccit}{\emph{loc.\,cit.}}
+\newcommand{\den}[1]{\llbracket#1\rrbracket}
+\newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
+\newcommand{\To}{\ensuremath{\Rightarrow}}
+\newcommand{\bN}{\ensuremath{\mathbb{N}}}
+\newcommand{\tEff}{\ensuremath{\mathsf{Eff}}}
+\newcommand{\Eff}{\ensuremath{\mathsf{Eff}}}
+\newcommand{\bu}{\ensuremath{\bullet}}
+\newcommand{\Ge}{\ensuremath{\varepsilon}}
+\newcommand{\GG}{\ensuremath{\Gamma}}
+\newcommand{\GS}{\ensuremath{\Sigma}}
+\newcommand{\CC}{\ensuremath{\mathcal{C}}}
+\newcommand{\SET}{\mathsf{SET}}
+\newcommand{\CPO}{\mathsf{CPO}}
+\newcommand{\T}[1][]{\mathsf{T}_{#1}}
+\newcommand{\trun}{\mathsf{run}}
+\newcommand{\run}[1][]{\mathsf{run}_{#1}}
+\newcommand{\tA}{\mathsf{A}}
+\newcommand{\tB}{\mathsf{B}}
+\newcommand{\A}{\mathsf{A}}
+\newcommand{\B}{\mathsf{B}}
+\newcommand{\tExc}{\mathsf{Exc}}
+\newcommand{\Exc}{\mathsf{Exc}}
+\newcommand{\String}{\mathsf{String}}
+\newcommand{\StringLe}[1]{\mathsf{String}{\leq}\,#1}
+\newcommand{\tfmap}{\mathsf{fmap}}
+\newcommand{\treturn}{\mathsf{return}}
+\newcommand{\tjoin}{\mathsf{join}}
+\newcommand{\join}{\mathsf{join}}
+\newcommand{\append}{\ensuremath{\mathbin{\mathtt{++}}}}
+\newcommand{\tcast}{\mathsf{cast}}
+\newcommand{\tid}{\mathsf{id}}
+
+% Types
+\newcommand{\tTy}{\mathsf{Ty}}
+\newcommand{\Ty}[1]{\tTy^{#1}}
+\newcommand{\PTy}{\Ty+}
+\newcommand{\NTy}{\Ty-}
+\newcommand{\extr}[2]{#1.#2}
+\newcommand{\ext}[3]{#1.#2{:}#3}
+
+
+\newcommand{\sumt}   [2]{\ensuremath{\Sigma_{#1} #2}}
+\newcommand{\tupt}   [2]{\ensuremath{\otimes_{#1} #2}}
+\newcommand{\rect}   [2]{\ensuremath{\Pi_{#1} #2}}
+\newcommand{\sumty}  [3]{\ensuremath{\Sigma_{#1:#2} #3_{#1}}}
+\newcommand{\tupty}  [3]{\ensuremath{\otimes_{#1:#2} #3_{#1}}}
+\newcommand{\recty}  [3]{\ensuremath{\Pi_{#1:#2} #3_{#1}}}
+\newcommand{\thunkty}[2]{\ensuremath{[#1]#2}}
+\newcommand{\compty} [1]{\ensuremath{\diamond#1}}
+
+% Terms
+\newcommand{\tTm}{\mathsf{Tm}}
+\newcommand{\Tm}[1]{\tTm^{#1}}
+\newcommand{\PTm}{\Tm+}
+\newcommand{\NTm}{\Tm-}
+\newcommand{\tthunk}{\mathsf{thunk}}
+\newcommand{\thunk}[1]{\tthunk\,#1}
+\newcommand{\tforce}{\mathsf{force}}
+\newcommand{\force}[1]{\tforce\,#1}
+\newcommand{\tin}[1]{\mathsf{in}_{#1}}
+\newcommand{\inj}[2]{\tin{#1}\,#2}
+\newcommand{\ttup}[1]{\mathsf{tup}^{#1}}
+\newcommand{\tup}[2]{\ttup{#1}\,{#2}}
+\newcommand{\ptup}[1]{\ttup\,{#1}}
+% \newcommand{\ptup}[1]{\ttup{+}\,{#1}}
+\newcommand{\ntup}[1]{\ttup{-}\,{#1}}
+\newcommand{\tret}{\mathsf{ret}}
+%\newcommand{\vlet}[3]{#1\,{=}\,#2;\,#3}
+\newcommand{\ret}[1]{\tret\,#1}
+\newcommand{\vlet}[3]{#2\,{\mathsf{be}}\,#1.\,#3}
+% \newcommand{\let}[3]{#1\,{\leftarrow}\,#2;\,#3}
+\newcommand{\bind}[3]{#2\,{\mathsf{to}}\,#1.\,#3}
+% \newcommand{\bind}[3]{\ret #1\,{\leftarrow}\,#2;\,#3}
+\newcommand{\tsplit}{\mathsf{split}}
+\newcommand{\splits}[3]{#1\,{\tsplit}\,#2.\,#3}
+\newcommand{\tcases}{\mathsf{cases}}
+\newcommand{\case}[2]{#1\,{\tcases}\,\{#2\}}
+\newcommand{\caser}[2]{#1\,{\tcases}\,#2}
+% \newcommand{\split}[3]{\ptup #1\,{\leftarrow}\,#2;\,#3}
+\newcommand{\lam}[2]{\lambda#1.\,#2}
+\newcommand{\app}[2]{#1\,#2}
+\newcommand{\trecord}{\mathsf{record}}
+\newcommand{\recrd}[2]{\trecord_{#1}\,#2}
+\newcommand{\record}[2]{\trecord_{#1}\{#2\}}
+\newcommand{\tproj}{\mathsf{proj}}
+\newcommand{\proj}[2]{\tproj_{#1}\,{#2}}
+
+% Judgements
+\newcommand{\ValTy}[3]{#1 \vdash #2 : #3}
+\newcommand{\CompTy}[4]{#1 \vdash #2 : #4 \mid #3}
+% \newcommand{\CompTy}[4]{#1 \vdash #2 \mathrel{{:}\langle #3 \rangle} #4}
+\newcommand{\ru}{\dfrac}
+\newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
+\newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
+
+\newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
+\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}}
+\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}}
+\newcommand{\rvar}{\rulename{var}}
+\newcommand{\rlet}{\rulename{let}}
+\newcommand{\rsub}{\rulename{sub}}
+
+As effect algebra, we assume a pre-ordered monoid
+$(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
+preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
+  effect} and the operation $\_{\bu}\_$ serves to accumulate effects,
+possibly in a sequential order---unless the monoid is commutative.  The
+preorder represents effect subsumption, i.e., loss in precision of the
+effect analysis.  Note that the unit $\Ge$ is not necessarily the least element
+wrt.\ $\leq$.
+
+\subsection{Recapitulation: modelling effects via monads}
+
+Consider a categorical model $\CC$ of the simply-typed lambda calculus
+(STLC), i.e., where types $\tau$ and contexts $\GG$ are interpreted as
+objects $\den \tau$ and $\den \Gamma$ of $\CC$ and terms
+$\GG \vdash t : \tau$ as morphisms $\dent t \in \CC(\den\GG,\den\tau)$.
+Such a category could be $\SET$, interpreting types as sets and terms
+as functions, mapping the valuation of their free variables to their
+value, or $\CPO$, interpreting types as complete partial orders and
+terms as monotone functions, or another model of the STLC.
+Typically $\CC$ is a cartesian-closed category, i.e., has products
+$A_1 \times A_2$ of objects modelling product types and exponentials $A \To
+B$ modeling function types.  Further $\CC$ maybe be distributive,
+\ie, have coproducts $A_1 + A_2$ that distribute over products, to
+model variants aka disjoint sum types.
+
+Recall that effects are modeled by a suitable monad $\T$ in
+$\CC$.  An example would be the \emph{writer monad} $\T\,A = \String \times
+A$ that models the effect \emph{output}.
+Another example would be the \emph{exception monad} $\Exc + \_$ where
+the result of a computation is either an exception $e : \Exc$ or a
+regular result.
+The monad operations, with
+their implementation for writer in $\SET$, are the following:
+\[
+\begin{array}{lcl}
+\tfmap & : & (A \to B) \to \T\,A \to \T\,B \\
+\tfmap\, f\, (s,\; a) & = & (s,\, f\, b)
+\\[1ex]
+\treturn & : & A \to \T\,A \\
+\treturn\, a & = & (\verb|""|, a)
+\\[1ex]
+\tjoin & : & \T\,(\T\,A) \to \T\,A \\
+\tjoin\,(s_1,(s_2,a)) & = & (s_1 \append s_2,\; a) \\
+\end{array}
+\]
+Herein, \verb|""| shall denote the empty string and $\append$ string
+concatenation.
+
+We assume familiarity with the functor laws $\tfmap\,\tid = \tid$ and
+$\tfmap\,(f \circ g) = \tfmap\,f \circ \tfmap\,g$.
+The three equational
+laws of $\tjoin$ can be visualized compactly in the following
+commutative diagram.
+\[
+\xymatrix@C=12ex{
+  \T\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T\,(\T\,A) \ar[d]^{\tjoin}
+& \T\,(\T\,(\T\,A)) \ar[l]_{\tjoin} \ar[d]^{\tfmap\,\tjoin}
+\\
+& \T\,A       \ar@{=}[dr]^{\tid}
+& \T\,(\T\,A) \ar[l]_{\tjoin}
+\\
+&
+& \T\,A \ar[u]_{\tfmap\,\treturn}
+}
+\]
+
+\subsection{Effect algebras and graded monads}
+
+We can obtain more information about effects using a monad $\T[e]$
+\emph{graded} over elements $e$ of a suitable effect algebra $\Eff$.
+Say we want to track an upper bound on the length of the output
+produced by a program.  To this end, we can use the preordered monoid
+$\Eff = \bN \cup \{\infty\}$ under addition $\_{\bu}\_ = \_{+}\_$
+with unit $\Ge = 0$ and the
+natural order $\leq$.  The effect $\infty$ then denotes unbounded output, or
+output whose length we cannot track in the type system (\eg, when it
+depends on some variable).  Increasing the upper bound along $\leq$
+means loss of precision of our analysis, with $\infty$ the least
+precise information, meaning no upper bound.  The corresponding graded
+writer monad is $\T[e]\,A = (\StringLe e) \times A$ where the output is an
+element of $\StringLe e$, a string of length at most $e \in \bN \cup
+\{\infty\}$.  The operations of a graded monad are, again given with
+their $\SET$-implementation for the graded writer:
+\[
+\begin{array}{lcl}
+\tfmap & : & (A \to B) \to \T[e]\,A \to \T[e]\,B \\
+\tfmap\, f\, (s,\; a) & = & (s,\, f\, b)
+\\[1ex]
+\treturn & : & A \to \T[\Ge]\,A \\
+\treturn\, a & = & (\verb|""|, a)
+\\[1ex]
+\tjoin & : & \T[e_1]\,(\T[e_2]\,A) \to \T[e_1 \bu e_2]\,A \\
+\tjoin\,(s_1,(s_2,a)) & = & (s_1 \append s_2,\; a)
+\\[1ex]
+\tcast & : & \T[e] \to \T[e'] \mbox{ for } e \leq e'\\
+\tcast & = & \tid \\
+\end{array}
+\]
+A graded version of the exception monad would use effect algebra
+$\Eff = \P(\Exc)$ under union and subset; an effect $e$ is a set of
+possible exceptions thrown by a computation.\footnote{An example of a
+  exception-tracing type system is the Java language.}
+
+The interesting laws for graded monads are given by the following
+commutative diagrams.
+\[
+\xymatrix@C=8ex{
+  \T[e]\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,(\T[e]\,A) \ar[d]^{\tjoin}
+\\
+& \T[e]\,A
+}
+\quad
+\xymatrix@C=10ex{
+  \T[e]\,A     \ar[r]^{\tfmap\,\treturn} \ar@{=}[dr]^{\tid}
+& \T[e]\,(\T[\Ge]\,A) \ar[d]^{\tjoin}
+\\
+& \T[e]\,A
+}
+\quad
+\xymatrix@C=8ex{
+  \T[e_1 \bu e_2]\,(\T[e_3]\,A) \ar[d]^{\tjoin}
+& \T[e_1]\,(\T[e_2]\,(\T[e_3]\,A)) \ar[l]_{\tjoin} \ar[d]^{\tfmap\,\tjoin}
+\\
+  \T[e_1 \bu e_2 \bu e_3]\,A
+& \T[e_1]\,(\T[e_2 \bu e_3]\,A) \ar[l]_{\tjoin}
+}
+\]
+Further, $\tcast$ commutes with $\tfmap$, namely $\tfmap\,f \circ
+\tcast = \tcast \circ \tfmap\,f$, and $\tjoin$, in two ways with
+the latter: $\tjoin \circ \tcast = \tcast \circ \tjoin$ and $\tjoin
+\circ \tfmap\,\tcast = \tcast \circ \tjoin$.
+
+\subsection{CBPV, monad algebras, and their graded version}
+
+Call-by-push value \cite{levy:hosc06} is a refinement of Moggi's
+computational lambda-calculus \cite{moggi:infcomp91} that allows effects
+not only in monadic types, \ie, in objects $\T\,A$, but more generally
+in computation types.  These correspond to monad algebras for $\T$ in $\CC$,
+aka $\T$-algebras.
+Those are objects $B$ together with a morphism $\run[B] : \T\,B
+\to B$ that allows to formally \emph{run} the monad, ``merging'' its
+effects into $B$.
+The prime example of a monad algebra is a monadic
+type, because $\run[\T\,A] : \T\,(\T\,A) \to \T\,A$ is simply
+$\tjoin$.  Levy \citeyearpar{levy:hosc06} shows that monad algebras are
+closed under products and exponentiation with arbitrary objects.  \Eg,
+in $\SET$ we can define:
+\[
+\begin{array}{lcl}
+%   \run[B_1 \times B_2] & : & \T\,(B_1 \times B_2) \to B_1 \times B_2 \\
+%   \run[B_1 \times B_2]\, (s,(b_1,b_2)) & = & (\run[B_1] (s,b_1),\
+%                                            \run[B_2] (s,b_2))
+% \\[1ex]
+  \run[B \times B'] & : & \T\,(B \times B') \to B \times B' \\
+  \run[B \times B']\, (s,(b,b')) & = & (\run[B] (s,b),\
+                                           \run[B'] (s,b'))
+\\[1ex]
+  \run[A \To B] & : & \T\,(A \To B) \to (A \To B) \\
+  \run[A \To B]\, (s,f) & = & \lambda a.\; \run[B]\,(s,\,f\,a)
+\\
+\end{array}
+\]
+These definition implement \emph{lazy} effects that cannot be observed
+at computation types such as $A \To B$, but only at value types; the
+$\run[]$ of the monad algebra pushes the effects towards result types
+that are eventually types of observable objects (values).
+
+With $\run[]$ being a generalization of $\tjoin$, the laws for $\run[]$
+are in analogy of those for $\tjoin$:
+\[
+\xymatrix@C=10ex{
+  B     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T\,B \ar[d]^{\run[]}
+& \T\,(\T\,B) \ar[l]_{\tjoin} \ar[d]^{\tfmap\,\run[]}
+\\
+& B
+& \T\,B \ar[l]_{\run[]}
+}
+\]
+
+In graded CBPV, monad algebras get replaced by \emph{graded monad
+  algebras}.  Given a graded monad $\T$, a $\T$-algebra is a family of
+objects $\left(B_e\right)_{e:\Eff}$ and morphisms
+$\run[B] : \T[e_1]\,B_{e_2} \to B_{e_1 \bu e_2}$ satisfying these
+laws:
+\[
+\xymatrix@C=10ex{
+  B_e     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,B_e \ar[d]^{\run[]}
+\\
+& B_e
+}
+\qquad
+\xymatrix@C=10ex{
+  \T[e_1 \bu e_2]\,B_{e_3} \ar[d]^{\run[]}
+& \T[e_1]\,(\T[e_2]\,B_{e_3}) \ar[l]_{\tjoin} \ar[d]^{\tfmap\,\run[]}
+\\
+  B_{e_1 \bu e_2 \bu e_3}
+& \T[e_1]\,B_{e_2 \bu e_3} \ar[l]_{\run[]}
+}
+\]
+Further the family $B$ should be functorial in the sense that there is
+a family of coercion morphisms $B_{e_1 \leq e_2} : B_{e_1} \to B_{e_2}$ with
+$B_{e \leq e} = \tid$ and $B_{e_2 \leq e_3} \circ B_{e_1 \leq e_2} =
+B_{e_1 \leq e_3}$.
+
+Graded monad algebras are as well closed under pointwise products and
+exponentiation with objects, here the graded writer example:
+\[
+\begin{array}{lcl}
+  \run[B \times B'] & : & \T[e_1]\,(B \times B')_{e_2} \to (B \times
+                          B')_{e_1 \bu e_2} \\
+  \run[B \times B']\, (s,(b,b')) & = & (\run[B] (s,b),\
+                                           \run[B'] (s,b'))
+\\[1ex]
+  \run[A \To B] & : & \T[e_1]\,(A \To B_{e_2}) \to (A \To B_{e_1 \bu e_2}) \\
+  \run[A \To B]\, (s,f) & = & \lambda a.\; \run[B]\,(s,\,f\,a)
+\\
+\end{array}
+\]
+
+\begin{figure}[htbp]
+\flushleft
+\ruler{}
+Types.
+\[
+\begin{array}{lllrl@{\qquad}l}
+\PTy & \ni & P
+  & ::= & \graybox{\thunkty e N}
+     \mid o \mid \sumty i I P \mid \tupty i I P
+  & \mbox{Value types (positive types)} \\
+\NTy & \ni & N
+  & ::= & \compty P
+     \mid P \To N \mid \recty i I N
+  & \mbox{Computation types (negative types)} \\
+\end{array}
+\]
+\dashruler{}
+Terms.
+\[
+\begin{array}{lllrl@{\qquad}l}
+\PTm & \ni & v,w
+  & ::= & x
+     \mid \thunk t
+     \mid \inj i v
+     \mid \ptup{\bar v}
+  & \mbox{Values (positive terms)} \\
+\NTm & \ni & t,u
+  & ::= &
+         \vlet x v t
+  & \mbox{Computations (negative terms):}
+\\ &&& \mid &
+        \force v
+    \mid \case v {\overline{x.\,t}}
+    \mid \splits v {\bar x} t
+  & \mbox{value eliminations}
+\\ &&& \mid &
+         \ret v        \mid \bind x u t
+  & \mbox{monad operations}
+\\ &&& \mid &
+         \lam x t      \mid \app t v
+  & \mbox{functions}
+\\ &&& \mid &
+         \trecord\{\overline{i:t}\} % \ntup{\bar t}
+       \mid \proj i t
+  & \mbox{lazy tuples (records)}
+\end{array}
+\]
+\dashruler{}
+Value typing \fbox{$\ValTy \Gamma v P$}\,.
+\begin{gather*}
+ \nru{\rvar}
+     {x{:}P \in \Gamma
+    }{\ValTy \Gamma x P}
+\qquad
+ \nru{\rintro\Box}
+     {\CompTy \Gamma t {\graybox e} N
+    }{\ValTy \Gamma {\thunk t} {\thunkty {\graybox e} N}}
+\\[1.5ex]
+ \nru{\rintro\GS}
+     {\ValTy \Gamma v {P_i}
+    }{\ValTy \Gamma {\inj i v} {\sumt I P}}
+\qquad
+ \nru{\rintro\otimes}
+     {\forall i{:}I, \ \ValTy \Gamma {v_i} {P_i}
+    }{\ValTy \Gamma {\ptup v} {\tupt I P}}
+    % }{\ValTy \Gamma {\ptup{\overline{v_i}^{i:I}}} {\tupt I P}}
+%    }{\ValTy \Gamma {\ptup (v_i)_{i:I}} {\tupt I P}}
+\end{gather*}
+\dashruler{}
+Computation typing \fbox{$\CompTy \Gamma t {\graybox{e}} N$}\,.
+\begin{gather*}
+ \nru{\rlet}
+     {\ValTy \Gamma v P \qquad
+      \CompTy {\ext \Gamma x P} t e N
+    }{\CompTy \Gamma {\vlet x v t} e N}
+\qquad
+ \nru{\relim\Box}
+     {\ValTy \Gamma v {\thunkty {\graybox e} N}
+    }{\CompTy \Gamma {\force v} {\graybox e} N}
+\\[1.5ex]
+ \nru{\relim\GS}
+     {\ValTy \Gamma v {\sumt I P} \qquad
+      \forall i{:}I,\ \CompTy {\ext \Gamma {x_i} {P_i}} {t_i} e N
+    }{\CompTy \Gamma {\caser v {\{x_i.\, t_i\}_{i:I}}} e N}
+\qquad
+ \nru{\relim\otimes}
+     {\ValTy \Gamma v {\tupt I P} \qquad
+      \CompTy {\extr \Gamma {\overline{x_i{:}P_i}^{i:I}}} t e N
+    }{\CompTy \Gamma {\splits v {\bar x} t} e N}
+\\[1.5ex]
+ \nru{\rintro\diamond}
+     {\ValTy \Gamma v P
+    }{\CompTy \Gamma {\ret v} {\graybox \Ge} {\compty P}}
+\qquad
+ \nru{\relim\diamond}
+     {\CompTy \Gamma u {\graybox{e_1}} {\compty P} \qquad
+      \CompTy {\ext \Gamma x P} t {\graybox{e_2}} N
+    }{\CompTy \Gamma {\bind x u t} {\graybox{e_1 \bu e_2}} N}
+\\[1.5ex]
+ \nru{\rintro\To}
+     {\CompTy {\ext \Gamma x P} t e N
+    }{\CompTy \Gamma {\lam x t} e {P \To N}}
+\qquad
+ \nru{\relim\To}
+     {\CompTy \Gamma t e {P \To N} \qquad
+      \ValTy \Gamma v P
+    }{\CompTy \Gamma {\app t v} e N}
+\\[1.5ex]
+ \nru{\rintro\Pi}
+     {\forall i{:}I,\ \CompTy \Gamma {t_i} e {N_i}
+    }{\CompTy \Gamma {\trecord {\{i : t_i\}_{i:I}}} e {\rect I N}}
+    % }{\CompTy \Gamma {\ntup{\overline{t_i}^{i:I}}} e {\rect I N}}
+\qquad
+ \nru{\relim\Pi}
+     {\CompTy \Gamma t e {\rect I N}
+    }{\CompTy \Gamma {\proj i t} e  {N_i}}
+\\[1.5ex]
+\graybox{
+ \nrux{\rsub}
+      {\CompTy \Gamma t e N}
+      {\CompTy \Gamma t {e'} N}
+      {e \leq e'}
+}
+\end{gather*}
+\rule{\textwidth}{0.2pt}
+  \caption{Effect-graded call-by-push-value.}
+  \label{fig:cbpv}
+\end{figure}
+
+\subsection{Effect-graded CBPV: syntax and typing}
+
+The syntax and typing rules for effect-graded CBPV are given in
+Fig.~\ref{fig:cbpv}.  The differences to pure CBPV are in
+\graybox{\mbox{gray boxes}}.
+
+Types are classified into value types $P \in \PTy$ ($A$ in
+\citet{levy:hosc06}) and computation types ($\underline B$ in
+\loccit).  These are positive and negative types in the terminology of
+focusing.  Positive types are generated from base types $o$ via
+disjoint sums $\sumty i I P$ with tag set $I$, eager products $\tupty
+i I P$ of arity $I$ (composed
+from $1$ and $A_1 \times A_2$ in \loccit) and thunking $\thunkty e N$
+(written $U\,\underline B$ in \loccit).  In contrast to pure CBPV,
+thunk types $\thunkty e N$ are annotated with an effect $e$ that can
+be triggered when the thunk is forced.  Negative types are just as in
+pure CBPV: monadic types $\compty P$ (written $F\,A$ in \loccit),
+function types $P \To N$ (written $A \to \underline B$) in \loccit)
+and record types $\recty i I N$ with label set $I$.
+Records are \emph{lazy} tuples whose components are only computed by demand.
+We abbreviate $\sumty i I P$ by its ``meta-level $\eta$-contraction''
+$\sumt I P$; notations $\tupt I P$ and
+$\rect I N$ are understood analogously.
+
+Terms are separated into values $v \in \PTm$ and computations $t \in
+\NTm$ and identical to pure CBPV, modulo changes in the concrete
+syntax.  Values introduce positive types,
+computations introduce
+negative types and
+eliminate both positive and negative types.
+We use bars to indicate sequences, e.g., $\bar v$ for a
+sequence of values, but drop the bar when the context of discourse
+makes clear that we are dealing with sequences rather than single
+objects.  For instance, ``$v_i$'' (where $i : I$) in the premise of
+\rintro\otimes indicates that $v$ is a sequence of values with
+elements $(v_i)_{i:I}$.  We may abbreviate $\trecord \{i :
+t_i\}_{i:I}$ by $\recrd I t$ where $I$ is the label set and $t$ a
+mapping from labels $i:I$ to terms $t_i$.
+
+The meaning of the term constructors is best understood via their
+typing.  Typing contexts $\Gamma$ are finite maps from variables $x$
+to value types $P$, with $\ext \Gamma x P$ denoting the update of the
+finite map $\Gamma$ at key $x$ with value $P$.
+
+Value typing $\ValTy \Gamma v P$ is just as in pure CBPV, however,
+computation typing $\CompTy \Gamma t e N$ also records effects $e :
+\Eff$ potentially produced at runtime by computation $t$.  Thunking a
+computation (rule \rintro\Box) stores the inferred effect classifier
+$e$ in the thunk type $\thunkty e N$.
+
+Effects are accumulated via the introduction and elimination rule for
+the graded monad.  The unit $\ret v$ of the monad is effect-free
+(\rintro\diamond), running this computation just produces the pure
+value $v$.  Sequencing computations $u$ and $t$ via the \emph{bind}
+construct $\bind x u t$ composes the effects $e_1$ of $u$ with the
+effects $e_2$ of $t$ in that order.  The intuition is that first $u$
+is run, producing effects classified by $e_1$, and its result is bound
+to $x$ to run $t$, producing effects classified by $e_2$.  The sum of
+the effects is classified by $e_1 \bu e_2$.
+
+The other introduction and elimination rules are just as in pure
+CBPV, except that they propagate the effect classifier $e$ from
+hypothesis to conclusion.  Note that in case distinction (\relim\GS)
+and record construction (\rintro\Pi) all subterms $t_i$ are required
+to produce effects classified by the same $e$.  However, in reality,
+different branches of a case distinction, for instance, may produce
+very different effects.  To end up with a unique classifier $e$, the
+branches may have to be typed using effect subsumption (\rsub).  In
+fact, the uses of \rsub can be confined to the hypotheses of \relim\GS
+and \rintro\Pi, except for a final invokation of \rsub at the very end
+of the typing derivation.  Alternatively, we could have introduced
+effect algebras with suprema $\sup_{i:I} e_i$ instead of a preorder $e
+\leq e'$.  However, suprema might not always exist; by using
+subsumption \rsub, we delegate the problem of partiality to the
+construction of a typing derivation.
+
+\begin{remark}\label{rem:cbpv}
+  We recover pure CBPV from graded CBPV using the trivial effect
+  algebra $\Eff = \{\Ge\}$.
+\end{remark}
+
+\begin{example}
+
+\end{example}
+
+
+
+%% Acknowledgments
+\begin{acks}                            %% acks environment is optional
+                                        %% contents suppressed with 'anonymous'
+  %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
+  %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
+  %% acknowledge financial support and will be used by metadata
+  %% extraction tools.
+
+  This material is based upon work supported by the
+  Swedish Research Council (Vetenskapsrådet)
+  under Grant
+  No.~2019-04216 \emph{Modal Dependent Type Theory}.
+
+  % This material is based upon work supported by the
+  % \grantsponsor{GS100000001}{National Science
+  %   Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
+  % No.~\grantnum{GS100000001}{nnnnnnn} and Grant
+  % No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
+  % conclusions or recommendations expressed in this material are those
+  % of the author and do not necessarily reflect the views of the
+  % National Science Foundation.
+\end{acks}
+
+
+%% Bibliography
+\bibliography{medium}
+
+
+%% Appendix
+\appendix
+\section{Appendix}
+
+Text of appendix \ldots
+
+\end{document}
