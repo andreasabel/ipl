@@ -85,7 +85,7 @@
 
 % https://tex.stackexchange.com/questions/502652/define-tcolorbox-in-math-mode
 \usepackage{tcolorbox}
-\newtcbox{\grayboxtext}{on line,colback=gray!20,colframe=gray!20,size=fbox,arc=0pt,boxrule=0pt}
+\newtcbox{\grayboxtext}{on line,colback=gray!20,colframe=gray!20,size=fbox,arc=0pt,boxrule=0pt}%,beforeafter skip=0pt,leftright skip=0pt}
 \newcommand{\graybox}[1]{\grayboxtext{$#1$}}
 
 \newtheorem{remark}{Remark}
@@ -170,10 +170,10 @@ call-by-name and call-by-value evaluation in the presence of effects.
 Semantically, effects are modeled by a monad, and computation types as
 algebras over this monad.
 Effect type systems usually express more information than the presence
-of an effect; typically effects are structured as pre-ordered monoid
+of an effect; often effects are categorized by pre-ordered monoid
 where the monoid operation represents accumulation of effects and the
-order subsumption, in analogy to subtyping.
-In this work, a \emph{graded} version of is presented where the typing
+order expresses effect subsumption, in analogy to subtyping.
+In this work, a \emph{graded} version of CBPV is presented where the typing
 of computations likens effect typing.  Semantically, computation types
 are then represented as graded monad algebras.
 Further we present a version of CBPV which additionally has graded coeffects.
@@ -249,22 +249,53 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\eg}{\emph{e.g.}}
 \newcommand{\Eg}{\emph{E.g.}}
 \newcommand{\loccit}{\emph{loc.\,cit.}}
-\newcommand{\den}[1]{\llbracket#1\rrbracket}
+\newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
 \newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
 \newcommand{\To}{\ensuremath{\Rightarrow}}
+%\newcommand{\todot}{\stackrel\cdot\to}
+\newcommand{\todot}{\mathbin{\dot{\to}}}
 \newcommand{\bN}{\ensuremath{\mathbb{N}}}
+\newcommand{\dom}{\mathop{\mathrm{dom}}\nolimits}
+\newcommand{\Pot}[1]{\mathcal{P}\,#1}
+%\newcommand{\defiff}{:\iff}
+\newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
+
+\newcommand{\denp}{\den[+]}
+\newcommand{\denn}{\den[-]}
+\newcommand{\Denn}[2]{\denn{#1}_{#2}}
+
 \newcommand{\tEff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\Eff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\bu}{\ensuremath{\bullet}}
 \newcommand{\Ge}{\ensuremath{\varepsilon}}
+\newcommand{\Ga}{\ensuremath{\alpha}}
+\newcommand{\Gl}{\ensuremath{\lambda}}
+\newcommand{\Gr}{\ensuremath{\rho}}
 \newcommand{\GG}{\ensuremath{\Gamma}}
 \newcommand{\GS}{\ensuremath{\Sigma}}
+\newcommand{\R}{\mathsf{R}}
+\newcommand{\I}{\mathsf{I}}
+\newcommand{\LL}{\mathcal{L}}
+\newcommand{\W}{\mathsf{W}}
+\newcommand{\M}{\mathsf{M}}
+\newcommand{\wleq}{\sqsubseteq}
+\newcommand{\winf}{\sqcap}
+\newcommand{\wsup}{\sqcup}
+%\newcommand{\winf}{\bigsqcap}
+\newcommand{\emp}{0_{\W}}
+% \newcommand{\emp}{\varepsilon}
+% \newcommand{\emp}{\emptyset}
+
 \newcommand{\CC}{\ensuremath{\mathcal{C}}}
+\newcommand{\Hom}[2]{\CC\,(#1,\,#2)}
 \newcommand{\SET}{\mathsf{SET}}
 \newcommand{\CPO}{\mathsf{CPO}}
 \newcommand{\T}[1][]{\mathsf{T}_{#1}}
+\newcommand{\D}[1][]{\mathsf{D}_{#1}}
 \newcommand{\trun}{\mathsf{run}}
 \newcommand{\run}[1][]{\mathsf{run}_{#1}}
+\newcommand{\texpose}{\mathsf{expose}}
+\newcommand{\expose}[1][]{\texpose_{#1}}
 \newcommand{\tA}{\mathsf{A}}
 \newcommand{\tB}{\mathsf{B}}
 \newcommand{\A}{\mathsf{A}}
@@ -274,12 +305,25 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\String}{\mathsf{String}}
 \newcommand{\StringLe}[1]{\mathsf{String}{\leq}\,#1}
 \newcommand{\tfmap}{\mathsf{fmap}}
+\newcommand{\fmap}[2][]{\tfmap_{#1}\,#2}
 \newcommand{\treturn}{\mathsf{return}}
 \newcommand{\tjoin}{\mathsf{join}}
 \newcommand{\join}{\mathsf{join}}
 \newcommand{\append}{\ensuremath{\mathbin{\mathtt{++}}}}
 \newcommand{\tcast}{\mathsf{cast}}
+\newcommand{\Id}{\mathsf{Id}}
 \newcommand{\tid}{\mathsf{id}}
+\newcommand{\teval}{\mathsf{eval}}
+\newcommand{\tstrength}{\mathsf{strength}}
+\newcommand{\strengthl}{\tstrength^{\tl}}
+\newcommand{\strengthr}{\tstrength^{\tr}}
+\newcommand{\tl}{\mathsf{l}}
+\newcommand{\tr}{\mathsf{r}}
+\newcommand{\tcurry}{\mathsf{curry}}
+\newcommand{\comp}{\circ}
+\newcommand{\tweaken}{\mathsf{weaken}}
+\newcommand{\tcontract}{\mathsf{contract}}
+
 
 % Types
 \newcommand{\tTy}{\mathsf{Ty}}
@@ -288,6 +332,8 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\NTy}{\Ty-}
 \newcommand{\extr}[2]{#1.#2}
 \newcommand{\ext}[3]{#1.#2{:}#3}
+\newcommand{\qext}[5]{#1#2.#3#4{:}#5}
+\newcommand{\gqext}[5]{\graybox{#1}#2.\graybox{#3}#4{:}#5}
 
 
 \newcommand{\sumt}   [2]{\ensuremath{\Sigma_{#1} #2}}
@@ -297,7 +343,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\tupty}  [3]{\ensuremath{\otimes_{#1:#2} #3_{#1}}}
 \newcommand{\recty}  [3]{\ensuremath{\Pi_{#1:#2} #3_{#1}}}
 \newcommand{\thunkty}[2]{\ensuremath{[#1]#2}}
-\newcommand{\compty} [1]{\ensuremath{\diamond#1}}
+\newcommand{\compty} [2]{\ensuremath{\langle#1\rangle#2}}
 
 % Terms
 \newcommand{\tTm}{\mathsf{Tm}}
@@ -306,6 +352,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\NTm}{\Tm-}
 \newcommand{\tthunk}{\mathsf{thunk}}
 \newcommand{\thunk}[1]{\tthunk\,#1}
+\newcommand{\tforced}{\mathsf{forced}}
 \newcommand{\tforce}{\mathsf{force}}
 \newcommand{\force}[1]{\tforce\,#1}
 \newcommand{\tin}[1]{\mathsf{in}_{#1}}
@@ -327,6 +374,28 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\tcases}{\mathsf{cases}}
 \newcommand{\case}[2]{#1\,{\tcases}\,\{#2\}}
 \newcommand{\caser}[2]{#1\,{\tcases}\,#2}
+\newcommand{\qlet}[4]{#3\,{\mathsf{be}}\,#1\,#2.\,#4}
+\newcommand{\qbind}[4]{#3\,{\mathsf{to}}\,#1\,#2.\,#4}
+\newcommand{\qsplits}[4]{#2\,{\tsplit}\,#1\,#3.\,#4}
+\newcommand{\qforced}[4]{#2\,{\tforced}\,#1\,#3.\,#4}
+\newcommand{\qcase}[3]{#2\,{\tcases}\,\{#1\,#3\}}
+\newcommand{\gqlet}[4]{#3\,{\mathsf{be}}\,\graybox{#1}#2.\,#4}
+\newcommand{\gqbind}[4]{#3\,{\mathsf{to}}\,\graybox{#1}#2.\,#4}
+\newcommand{\gqsplits}[4]{#2\,{\tsplit}\,\graybox{#1}#3.\,#4}
+\newcommand{\gqforced}[4]{#2\,{\tforced}\,\graybox{#1}#3.\,#4}
+\newcommand{\gqcase}[3]{#2\,{\tcases}\,\{\graybox{#1}#3\}}
+% \newcommand{\qlet}[4]{#1\,#3\,{\mathsf{be}}\,#2.\,#4}
+% \newcommand{\qbind}[4]{#1\,#3\,{\mathsf{to}}\,#2.\,#4}
+% \newcommand{\qsplits}[4]{#1\,#2\,{\tsplit}\,#3.\,#4}
+% \newcommand{\qforced}[4]{#1\,#2\,{\tforced}\,#3.\,#4}
+% \newcommand{\qcase}[3]{#1\,#2\,{\tcases}\,\{#3\}}
+% \newcommand{\qcaser}[3]{#1\,#2\,{\tcases}\,#3}
+% \newcommand{\gqlet}[4]{\graybox{#1}\,#3\,{\mathsf{be}}\,#2.\,#4}
+% \newcommand{\gqbind}[4]{\graybox{#1}\,#3\,{\mathsf{to}}\,#2.\,#4}
+% \newcommand{\gqsplits}[4]{\graybox{#1}\,#2\,{\tsplit}\,#3.\,#4}
+% \newcommand{\gqforced}[4]{\graybox{#1}\,#2\,{\tforced}\,#3.\,#4}
+% \newcommand{\gqcase}[3]{\graybox{#1}\,#2\,{\tcases}\,\{#3\}}
+% \newcommand{\gqcaser}[3]{\graybox{#1}\,#2\,{\tcases}\,#3}
 % \newcommand{\split}[3]{\ptup #1\,{\leftarrow}\,#2;\,#3}
 \newcommand{\lam}[2]{\lambda#1.\,#2}
 \newcommand{\app}[2]{#1\,#2}
@@ -338,29 +407,40 @@ Further we present a version of CBPV which additionally has graded coeffects.
 
 % Judgements
 \newcommand{\ValTy}[3]{#1 \vdash #2 : #3}
+\newcommand{\oCompTy}{\ValTy}
 \newcommand{\CompTy}[4]{#1 \vdash #2 : #4 \mid #3}
-% \newcommand{\CompTy}[4]{#1 \vdash #2 \mathrel{{:}\langle #3 \rangle} #4}
+\newcommand{\gpValTy}[4]{\graybox{(#1)}#2 \vdash #3 : #4}
+\newcommand{\gqValTy}[4]{\graybox{#1}#2 \vdash #3 : #4}
+\newcommand{\gpCompTy}[4]{\graybox{(#1)}#2 \vdash #3 : #4}
+\newcommand{\gqCompTy}[4]{\graybox{#1}#2 \vdash #3 : #4}
+\newcommand{\pValTy}[4]{(#1)#2 \vdash #3 : #4}
+\newcommand{\qValTy}[4]{#1#2 \vdash #3 : #4}
+\newcommand{\pCompTy}[4]{(#1)#2 \vdash #3 : #4}
+\newcommand{\qCompTy}[4]{#1#2 \vdash #3 : #4}
+%\newcommand{\CompTy}[4]{#1 \vdash #2 \mathrel{{:}\langle #3 \rangle} #4}
 \newcommand{\ru}{\dfrac}
 \newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
 \newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
 
 \newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
-\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}}
-\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}}
+\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}\xspace}
+\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}\xspace}
 \newcommand{\rvar}{\rulename{var}}
 \newcommand{\rlet}{\rulename{let}}
 \newcommand{\rsub}{\rulename{sub}}
+\newcommand{\rweak}{\rulename{weak}}
 
-As effect algebra, we assume a pre-ordered monoid
-$(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
-preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
-  effect} and the operation $\_{\bu}\_$ serves to accumulate effects,
-possibly in a sequential order---unless the monoid is commutative.  The
-preorder represents effect subsumption, i.e., loss in precision of the
-effect analysis.  Note that the unit $\Ge$ is not necessarily the least element
-wrt.\ $\leq$.
+% As effect algebra, we assume a pre-ordered monoid
+% $(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
+% preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
+%   effect} and the operation $\_{\bu}\_$ serves to accumulate effects,
+% possibly in a sequential order---unless the monoid is commutative.  The
+% preorder represents effect subsumption, i.e., loss in precision of the
+% effect analysis.  Note that the unit $\Ge$ is not necessarily the least element
+% wrt.\ $\leq$.
 
 \subsection{Recapitulation: modelling effects via monads}
+\label{sec:ccc}
 
 Consider a categorical model $\CC$ of the simply-typed lambda calculus
 (STLC), i.e., where types $\tau$ and contexts $\GG$ are interpreted as
@@ -369,9 +449,10 @@ $\GG \vdash t : \tau$ as morphisms $\dent t \in \CC(\den\GG,\den\tau)$.
 Such a category could be $\SET$, interpreting types as sets and terms
 as functions, mapping the valuation of their free variables to their
 value, or $\CPO$, interpreting types as complete partial orders and
-terms as monotone functions, or another model of the STLC.
-Typically $\CC$ is a cartesian-closed category, i.e., has products
-$A_1 \times A_2$ of objects modelling product types and exponentials $A \To
+terms as monotone functions, or a presheaf model of the STLC etc.
+Typically, $\CC$ is a cartesian-closed category, i.e., has products
+$A_1 \times A_2$ of objects modelling product types and contexts,
+and exponentials $A \To
 B$ modeling function types.  Further $\CC$ maybe be distributive,
 \ie, have coproducts $A_1 + A_2$ that distribute over products, to
 model variants aka disjoint sum types.
@@ -382,8 +463,8 @@ A$ that models the effect \emph{output}.
 Another example would be the \emph{exception monad} $\Exc + \_$ where
 the result of a computation is either an exception $e : \Exc$ or a
 regular result.
-The monad operations, with
-their implementation for writer in $\SET$, are the following:
+The monad operations, together with
+their implementation for \emph{writer} in $\SET$, are the following:
 \[
 \begin{array}{lcl}
 \tfmap & : & (A \to B) \to \T\,A \to \T\,B \\
@@ -419,9 +500,20 @@ commutative diagram.
 \]
 
 \subsection{Effect algebras and graded monads}
+\label{sec:graded_monad}
 
-We can obtain more information about effects using a monad $\T[e]$
+Following \citet{katsumata:popl14}
+we can obtain more information about effects using a monad $\T[e]$
 \emph{graded} over elements $e$ of a suitable effect algebra $\Eff$.
+An effect algebra be a pre-ordered monoid
+$(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
+preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
+  effect} and the operation $\_{\bu}\_$ serves to accumulate effects,
+possibly in a sequential order---unless the monoid is commutative.  The
+preorder represents effect subsumption, i.e., loss in precision of the
+effect analysis.  Note that the unit $\Ge$ is not necessarily the least element
+wrt.\ $\leq$.
+
 Say we want to track an upper bound on the length of the output
 produced by a program.  To this end, we can use the preordered monoid
 $\Eff = \bN \cup \{\infty\}$ under addition $\_{\bu}\_ = \_{+}\_$
@@ -451,7 +543,7 @@ their $\SET$-implementation for the graded writer:
 \end{array}
 \]
 A graded version of the exception monad would use effect algebra
-$\Eff = \P(\Exc)$ under union and subset; an effect $e$ is a set of
+$\Eff = \Pot\Exc$ under union and subset; an effect $e$ is a set of
 possible exceptions thrown by a computation.\footnote{An example of a
   exception-tracing type system is the Java language.}
 
@@ -481,11 +573,12 @@ commutative diagrams.
 }
 \]
 Further, $\tcast$ commutes with $\tfmap$, namely $\tfmap\,f \circ
-\tcast = \tcast \circ \tfmap\,f$, and $\tjoin$, in two ways with
-the latter: $\tjoin \circ \tcast = \tcast \circ \tjoin$ and $\tjoin
+\tcast = \tcast \circ \tfmap\,f$, and in two ways with $\tjoin$, namely
+$\tjoin \circ \tcast = \tcast \circ \tjoin$ and $\tjoin
 \circ \tfmap\,\tcast = \tcast \circ \tjoin$.
 
 \subsection{CBPV, monad algebras, and their graded version}
+\label{sec:graded_algebra}
 
 Call-by-push value \cite{levy:hosc06} is a refinement of Moggi's
 computational lambda-calculus \cite{moggi:infcomp91} that allows effects
@@ -495,11 +588,11 @@ aka $\T$-algebras.
 Those are objects $B$ together with a morphism $\run[B] : \T\,B
 \to B$ that allows to formally \emph{run} the monad, ``merging'' its
 effects into $B$.
-The prime example of a monad algebra is a monadic
-type, because $\run[\T\,A] : \T\,(\T\,A) \to \T\,A$ is simply
+The prime example of a monad algebra is simply a monadic
+type, because $\run[\T\,A] : \T\,(\T\,A) \to \T\,A$ is just
 $\tjoin$.  Levy \citeyearpar{levy:hosc06} shows that monad algebras are
 closed under products and exponentiation with arbitrary objects.  \Eg,
-in $\SET$ we can define:
+in $\SET$ we can define, for \emph{writer} algebras:
 \[
 \begin{array}{lcl}
 %   \run[B_1 \times B_2] & : & \T\,(B_1 \times B_2) \to B_1 \times B_2 \\
@@ -521,7 +614,7 @@ $\run[]$ of the monad algebra pushes the effects towards result types
 that are eventually types of observable objects (values).
 
 With $\run[]$ being a generalization of $\tjoin$, the laws for $\run[]$
-are in analogy of those for $\tjoin$:
+are in analogy of those for $\tjoin$ (if $B$ were $\T\,A$):
 \[
 \xymatrix@C=10ex{
   B     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
@@ -559,8 +652,10 @@ a family of coercion morphisms $B_{e_1 \leq e_2} : B_{e_1} \to B_{e_2}$ with
 $B_{e \leq e} = \tid$ and $B_{e_2 \leq e_3} \circ B_{e_1 \leq e_2} =
 B_{e_1 \leq e_3}$.
 
-Graded monad algebras are as well closed under pointwise products and
-exponentiation with objects, here the graded writer example:
+Graded monad algebras are as well closed under
+pointwise products $(B \times B')_e = B_e \times B'_e$ and
+exponentiation with objects $(A \To B)_e = A \to B_e$;
+here the graded writer example:
 \[
 \begin{array}{lcl}
   \run[B \times B'] & : & \T[e_1]\,(B \times B')_{e_2} \to (B \times
@@ -568,7 +663,8 @@ exponentiation with objects, here the graded writer example:
   \run[B \times B']\, (s,(b,b')) & = & (\run[B] (s,b),\
                                            \run[B'] (s,b'))
 \\[1ex]
-  \run[A \To B] & : & \T[e_1]\,(A \To B_{e_2}) \to (A \To B_{e_1 \bu e_2}) \\
+  \run[A \To B] & : & \T[e_1]\,(A \To B)_{e_2} \to (A \To B)_{e_1 \bu e_2} \\
+  % \run[A \To B] & : & \T[e_1]\,(A \To B_{e_2}) \to (A \To B_{e_1 \bu e_2}) \\
   \run[A \To B]\, (s,f) & = & \lambda a.\; \run[B]\,(s,\,f\,a)
 \\
 \end{array}
@@ -585,7 +681,7 @@ Types.
      \mid o \mid \sumty i I P \mid \tupty i I P
   & \mbox{Value types (positive types)} \\
 \NTy & \ni & N
-  & ::= & \compty P
+  & ::= & \diamond P
      \mid P \To N \mid \recty i I N
   & \mbox{Computation types (negative types)} \\
 \end{array}
@@ -666,10 +762,10 @@ Computation typing \fbox{$\CompTy \Gamma t {\graybox{e}} N$}\,.
 \\[1.5ex]
  \nru{\rintro\diamond}
      {\ValTy \Gamma v P
-    }{\CompTy \Gamma {\ret v} {\graybox \Ge} {\compty P}}
+    }{\CompTy \Gamma {\ret v} {\graybox \Ge} {\diamond P}}
 \qquad
  \nru{\relim\diamond}
-     {\CompTy \Gamma u {\graybox{e_1}} {\compty P} \qquad
+     {\CompTy \Gamma u {\graybox{e_1}} {\diamond P} \qquad
       \CompTy {\ext \Gamma x P} t {\graybox{e_2}} N
     }{\CompTy \Gamma {\bind x u t} {\graybox{e_1 \bu e_2}} N}
 \\[1.5ex]
@@ -709,17 +805,19 @@ The syntax and typing rules for effect-graded CBPV are given in
 Fig.~\ref{fig:cbpv}.  The differences to pure CBPV are in
 \graybox{\mbox{gray boxes}}.
 
-Types are classified into value types $P \in \PTy$ ($A$ in
-\citet{levy:hosc06}) and computation types ($\underline B$ in
+Types are classified into value types $P \in \PTy$ (written $A$ in
+\citet{levy:hosc06}) and computation types $N \in \NTy$
+(written $\underline B$ in
 \loccit).  These are positive and negative types in the terminology of
-focusing.  Positive types are generated from base types $o$ via
+focusing \cite{zeilberger:PhD}.
+Positive types are generated from base types $o$ via
 disjoint sums $\sumty i I P$ with tag set $I$, eager products $\tupty
 i I P$ of arity $I$ (composed
 from $1$ and $A_1 \times A_2$ in \loccit) and thunking $\thunkty e N$
 (written $U\,\underline B$ in \loccit).  In contrast to pure CBPV,
 thunk types $\thunkty e N$ are annotated with an effect $e$ that can
 be triggered when the thunk is forced.  Negative types are just as in
-pure CBPV: monadic types $\compty P$ (written $F\,A$ in \loccit),
+pure CBPV: monadic types $\diamond P$ (written $F\,A$ in \loccit),
 function types $P \To N$ (written $A \to \underline B$) in \loccit)
 and record types $\recty i I N$ with label set $I$.
 Records are \emph{lazy} tuples whose components are only computed by demand.
@@ -784,9 +882,743 @@ construction of a typing derivation.
   algebra $\Eff = \{\Ge\}$.
 \end{remark}
 
-\begin{example}
+\subsection{Effect graded CBPV: denotational semantics}
 
-\end{example}
+The denotational semantics of graded CBPV has been informally explained in
+sections \ref{sec:ccc} to \ref{sec:graded_algebra} already; in the following,
+we spell out the details.  We assume a distributive cartesian-closed
+category $\CC$ with a strong graded monad $\T : \Eff \to \CC \to \CC$.
+Let us agree on some notation for the constructions on objects and
+morphisms:
+\begin{itemize}
+\item Product $\prod_{i:I} A_i$ with projections $\pi_i : \CC(\prod_I
+  A, A_i)$ and tupling $\langle f_i
+  \rangle_{i:I} : \CC(C,\prod_i A)$ for $f_i : \CC(C,A_i)$.  Binary
+  products $\prod_{\{1,2\}} A$ are written $A_1 \times A_2$.
+\item Coproduct $\coprod_{i:I} A_i$ with injections $\iota_i :
+  \CC(A_i,\coprod_I A)$ and cotupling $[f_i]_{i:I} : \CC(\coprod_I A,
+  B)$ for $f_i : \CC(A_i,B)$.
+\item Exponential $A \To B$ with $\Lambda : \CC(C \times A, B) \to
+  \CC(C, A \To B)$ and $\teval : \CC((A \To B) \times A, B)$.
+\item Graded monad $\T$ with functoriality $\fmap[\T] f :
+  \CC(\T[e]A,\T[e]B)$ for $f : \CC(A,B)$,
+  unit $\treturn : \CC(A,\T[\Ge]A)$,
+  multiplication $\tjoin : \CC(\T[e_1](\T[e_2]A),\T[e_1 \bu e_2]A)$,
+  strength $\strengthl : \CC(A \times \T[e]B, \T[e](A \times B))$ and
+  coercion $\tcast : \CC(\T[e]A,\T[e']A)$ for $e \leq e'$.
+  Costrength $\strengthr : \CC(\T[e]A \times B, \T[e](A \times B))$
+  is derivable in the standard way.
+\end{itemize}
+
+\subsubsection{Interpretation of types}
+
+Positive types $P$ are interpreted as objects $\denp P$ of $\CC$,
+where a denotation $\denp o : \CC$ of base types $o$ is assumed.
+This interpretation lifts to contexts $\Gamma$ via $\denp \Gamma =
+\prod_{x:\dom(\Gamma)} \denp{\Gamma(x)}$.
+
+Negative types $N$ are interpreted
+as functors $\denn N : (\Eff,\leq) \to \CC$ mapping
+effect classifiers $e$ to objects $\Denn N e$ and effect subsumption $e
+\leq e'$ to morphisms $\Denn N {e \leq e'} : \Denn N e \to \Denn N {e'}$.
+\[
+\begin{array}{lcl}
+  \denp\_ & : & \PTy \to \CC \\
+  \denp{\thunkty e N} & = & \Denn N e \\
+  \denp{\sumt I P} & = & \coprod_{i:I} \denp{P_i} \\
+  \denp{\tupt I P} & = & \prod_{i:I} \denp{P_i} \\
+\end{array}
+\qquad\qquad
+\begin{array}{lcl}
+  \Denn\_\_ & : & \NTy \to \Eff \to \CC \\
+  \Denn{\diamond P} e & = & \T[e] \denp P \\
+  \Denn{P \To N}   e & = & \denp P \To \Denn N e \\
+  \Denn{\rect I N} e & = & \prod_{i:I} \Denn{N_i}e \\
+  % \denn{P \To N}   e & = & \denp P \To (\denn N e) \\
+  % \denn{\rect I N} e & = & \prod_{i:I} \left(\denn{N_i}e\right) \\
+\end{array}
+\]
+The graded $\T$-algebra structure $\run{\denn N}$ is constructed by
+induction on $N$:
+\[
+\begin{array}{lcl}
+  \run{\denn N} & : & \Hom {\T[e_1](\Denn N {e_2})} {\Denn N {e_1 \bu e_2}} \\
+  \run{\denn {\diamond P}} & = & \tjoin \\
+  \run{\denn {P \To N}}   & = & \Lambda(\run{\denn N} \circ
+                                \fmap[\T]\teval \circ \strengthr) \\
+  \run{\denn {\rect I N}} & = & \langle \run{\denn{N_i}} \comp
+                                \fmap[\T]{\pi_i} \rangle_{i:I} \\
+\end{array}
+\]
+This construction is the same as \citet{levy:hosc06}, modulo grading.
+The algebra laws ensue.
+
+The coercion morphisms $\Denn N {e_1 \leq e_2}$ are obtained
+analogously:
+\[
+\begin{array}{rcl}
+  \Denn N {e_1 \leq e_2} & : & \Hom {\Denn N {e_1}} {\Denn N {e_2}} \\
+  \Denn {\diamond P} {e_1 \leq e_2} & = & \tcast \\
+  \Denn {P \To N}   {e_1 \leq e_2} & = &
+    \Lambda(\Denn N {e_1 \leq e_2} \comp \teval) \\
+  \Denn {\rect I N} {e_1 \leq e_2} & = &
+    \langle \Denn N {e_1 \leq e_2} \comp \pi_i {} \rangle_{i:I} \\
+\end{array}
+\]
+That these coercions satify the identity and composition---the functor
+laws for $\denn N$---is easy to verify.
+
+\subsubsection{Interpretation of terms}
+
+Values $\ValTy \Gamma v P$ are interpreted as morphisms $\dent v :
+\Hom {\denp \Gamma} {\denp P}$ just as in pure CBPV.  Computations
+$\CompTy \Gamma t e N$ are interpreted as morphisms $\dent t : \Hom
+{\denp \Gamma} {\Denn N e}$.  Most of the cases are straightforward
+and in analogy to CBPV, let us thus focus on the
+\graybox{\mbox{modified}} rules where grading comes into play.  A
+subtlety is that we interpret \emph{typing derivations} rather than terms,
+because rule \rsub is a silent construction on raw terms but becomes a
+coercion in the denotational semantics.  The most natural way to make
+this precise is to use intrinsically well-typed syntax; from typing
+rules to such well-typed syntax is a routine transformation which we
+do not spell out here.  The reader interested in well-typed syntax for
+CBPV is referred to \citet{abelSattler:ppdp19}.
+The other subtlety, that we ignore variable names in the
+interpretation, can also be made precise by well-typed syntax which
+uses de Bruijn indices.
+
+As in Levy's algebra semantics \citeyearpar{levy:hosc06}, creation and
+forcing of thunks is invisible in the model.  The bind operation
+(\relim\diamond) utilizes the generalization of $\tjoin$ to $\trun$.
+Subsumption is interpreted by functoriality in $\Eff$.
+\[
+\begin{array}{llcl}
+\rintro\Box & \dent{\thunk t} & = & \dent t \\
+\relim\Box  & \dent{\force v} & = & \dent v
+\\[1ex]
+\rintro\diamond & \dent{\ret v} & = & \treturn \comp \dent v \\
+\relim\diamond  & \dent{\bind x u t} & = &
+  \run{\denn N} \comp \fmap[\T]\teval \comp \strengthl \comp
+  \langle \Lambda\dent t,\,\dent u \rangle
+\\[1ex]
+\rsub & \dent t & = & \Denn N {e \leq e'} \comp \dent t
+\\
+\end{array}
+\]
+These definitions are understood in the context of the given typing rules.
+
+\subsection{Grading via a partial monoid}
+
+Not all sequences of effects are always meaningful: For instance,
+reading from a file before it was opened is impossible and could be
+prevented statically by graded effect typing.  This could be modelled
+by adding a maximal element $\top : \Eff$---with $e \leq top$ for all
+$e : \Eff$ that signifies an inconsistent state.  This error element
+would also be dominant in sequences, \ie,
+$\top \bu e = e \bu \top = \top$.
+A program $\CompTy \Gamma t e N$ would only be accepted if $e \not= \top$.
+
+Alternatively, we could work with a partial monoid, \ie, a carrier $\Eff$ with a predicate $\Ge{\leq}\_$ and a ternary relation $\_{\bu}\_{\leq}\_$ such that
+the following laws hold:
+\begin{enumerate}
+\item Unit: $e \leq e' \defiff \exists e_0.\, \Ge \leq e_0 \land e_0 \bu e \leq e'$ iff $\exists e_0.\, \Ge \leq e_0 \land e \bu e_0 \leq e'$.
+% \item Unit: $e \leq e' \defiff (\exists e_0.\, \Ge \leq e_0 \land e_0 \bu e \leq e')$ iff $(\exists e_0.\, \Ge \leq e_0 \land e \bu e_0 \leq e')$.
+\item Associativity: $\exists e_{12}.\ e_1 \bu e_2 \leq e_{12} \land e_{12} \bu e_3 \leq e_{123}$ iff $\exists e_{23}.\ e_1 \bu e_{23} \leq e_{123} \land e_2 \bu e_3 \leq e_{23}$.
+\item Monotonicity of $\Ge{\leq}\_$: If $\Ge \leq e$ and $e \leq e'$ then $\Ge \leq e'$.
+\item Monotonicity of $\_{\bu}\_{\leq}\_$:  If $e_1' \leq e_1$ and $e_2' \leq e_2$ and $e \leq e'$ and $e_1 \bu e_2 \leq e$ then $e_1' \bu e_2' \leq e'$.
+\item Reflexivity and transitivity of $\leq$.
+\end{enumerate}
+The typing rules for $\diamond$ would change accordingly.
+\begin{gather*}
+ \nrux{\rintro\diamond}
+     {\ValTy \Gamma v P
+    }{\CompTy \Gamma {\ret v} e {\diamond P}
+    }{\graybox{\Ge \leq e}}
+\qquad
+ \nrux{\relim\diamond}
+     {\CompTy \Gamma u {e_1} {\diamond P} \qquad
+      \CompTy {\ext \Gamma x P} t {e_2} N
+    }{\CompTy \Gamma {\bind x u t} e N
+    }{\graybox{e_1 \bu e_2 \leq e}}
+\end{gather*}
+Rule $\rsub$ would be admissible.
+
+A monad $\T : \Eff \to [\CC \to \CC]$ graded by a partial monoid
+$\Eff$ has natural transformations $\Id \todot \T[e]$ for $\Ge \leq e$
+and $\T[e_1] \circ \T[e_2] \todot \T[e]$ for $e_1 \bu e_2 \leq e$.  A
+$\T$-algebra $B$ has morphism $\run[B] : \T[e_1]B_{e_2} \to B_{e}$
+for $e_1 \bu e_2 \leq e$.
+
+
+
+\section{Coeffect-graded CBPV}
+\label{sec:coeff}
+
+\newcommand{\lolli}{\multimap}
+\newcommand{\qfun}[3]{#1#2 \lolli #3}
+\newcommand{\gqfun}[3]{\graybox{#1#2 \lolli #3}}
+\renewcommand{\CompTy}[3]{#1 \vdash #2 : #3}
+\newcommand{\nbox}[1]{}
+\newcommand{\tzip}{\mathsf{zip}}
+\newcommand{\textract}{\mathsf{extract}}
+\newcommand{\extract}[1][]{\textract_{#1}}
+\newcommand{\tduplicate}{\mathsf{duplicate}}
+\newcommand{\duplicate}[1][]{\tduplicate_{#1}}
+\newcommand{\tcobind}{\mathsf{cobind}}
+\newcommand{\tbind}{\mathsf{bind}}
+\newcommand{\tget}{\mathsf{get}}
+\newcommand{\tmodify}{\mathsf{modify}}
+\newcommand{\thead}{\mathsf{head}}
+\newcommand{\ttail}{\mathsf{tail}}
+\newcommand{\suc}{(\_{+}1)}
+\newcommand{\Float}{\mathsf{Float}}
+
+CBPV places the monad $\diamond P$ at the transition from positive
+types to negative types.  Dually, the transition $\Box N$ from
+negative types to positive types is a vessel that can be filled with a
+comonad.  Just like negative types $N$ are monad algebras, positive
+types $P$ can be \emph{comonad coalgebras}.
+
+\subsection{Comonadic CBPV and their comonad coalgebras}
+
+% Let us consider the \emph{context comonad} $\D\,B = S \times B$ that
+% gives us access to a value in $S$.
+% \footnote{\url{https://bartoszmilewski.com/2017/01/02/comonads/}}
+% Besides functoriality, a comonad
+% has the natural transformations $\textract$ and $\duplicate$, dual to
+% $\treturn$ and $\tjoin$.  The implementation of the context comonad is
+% as follows:
+% \[
+% \begin{array}{lcl}
+%   \textract & : & \D\,B \to B \\
+%   \textract\,(s,b) & = & b
+% \\[1.5ex]
+%   \tduplicate & : & \D,\B \to \D\,(\D\,B) \\
+%   \tduplicate\,(s,b) & = & (s, (s, b))
+% \\[1.5ex]
+%   \tget & : & \D\,B \to S \\
+%   \tget\,(s,b) & = & s
+% \\[1.5ex]
+%   \tmodify
+% \end{array}
+% \]
+% The context comonad is not monoidal.
+
+Let us consider the \emph{stream comonad}%
+\footnote{\url{https://bartoszmilewski.com/2017/01/02/comonads/}}
+$\D\,B = \bN \to B$,
+with $\thead\,s = s\,0$ and $\ttail\,s = s \comp \suc$.
+The stream comonad lets us work in a setting where values are not
+single data points, but streams of data.
+Besides functoriality, a
+comonad has the natural transformations $\textract$ and $\duplicate$,
+dual to $\treturn$ and $\tjoin$.  The implementation of the stream
+comonad in $\SET$ is as follows:
+\[
+\begin{array}{lcl}
+  \textract & : & \D\,B \to B \\
+  \textract\,s & = & \thead\,s
+\\[1.5ex]
+  \tduplicate & : & \D\,B \to \D\,(\D\,B) \\
+  \thead\,(\tduplicate\,s) & = & s \\
+  \ttail\,(\tduplicate\,s) & = & \tduplicate\,(\ttail\,s) \\
+\end{array}
+\]
+The comonad laws are a simple dualization of the monad laws:
+\[
+\xymatrix@C=10ex{
+\D\,B  \ar@{=}[dr]
+  & \D\,(\D\,B) \ar[l]_{\textract} \ar[r]^{\tduplicate}
+  & \D\,(\D\,(\D\,B))
+\\
+  & \D\,B \ar[u]_{\tduplicate} \ar[r]^{\tduplicate} \ar@{=}[dr]
+  & \D\,(\D\,B) \ar[u]_{\tfmap\,\tduplicate} \ar[d]^{\tfmap\,\textract}
+\\
+  &
+  & \D\,B
+}
+\]
+
+A \emph{monoidal} comonad implements an morphism $\tzip$ that combines
+a tuples of comonadic values into one comonadic tuple:
+\[
+\begin{array}{lcl}
+  \tzip & : & \tupt {i:I} {(\D\,B_i)} \to \D(\tupt I B) \\
+  \tzip\,(s_i)_{i:I}\,n & = & (s_i\,n)_{i:I} \\
+\end{array}
+\]
+Many other comonads are monoidal,
+like the store comonad $(S \To \_) \times S$,
+though not all, \eg, the context comonad $S{\times}\_$.
+In this article, we consider only monoidal comonads.
+
+If type constructor $\Box$ is interpreted as a monoidal comonad $\D$,
+then all positive types $P$ can be intepreted as $\D$-coalgebras
+$A = \den P$, \ie, implement a morphism $\expose[A] : A \to \D\,A$
+satisfying the laws of a comonad coalgebra:
+\[
+\xymatrix@C=10ex{
+A  \ar@{=}[dr]
+  & \D\,A \ar[l]_{\textract} \ar[r]^{\tduplicate}
+  & \D\,(\D\,A)
+\\
+  & A \ar[u]_{\texpose} \ar[r]^{\texpose}
+  & \D\,A \ar[u]_{\tfmap\,\texpose}
+}
+\]
+The implementation of $\expose{\den P}$ proceeds by induction on $P$.
+\[
+\begin{array}{lcl}
+  \expose{\den{\Box N}} & : & {\D\,\den N} \to {\D\,(\D\,\den N)} \\
+  \expose{\den{\Box N}} & = & \duplicate
+\\[1ex]
+  \expose{\den{\tupt I P}} & : & \tupt {i:I} {\den{P_i}} \to \D\,(\tupt {i:I} {\den{P_i}}) \\
+  \expose{\den{\tupt I P}} & = & \tzip \comp \tupt {i:I} \expose{\den{P_i}}
+\\[1ex]
+  \expose{\den{\sumt I P}} & : & \sumt {i:I} {\den{P_i}} \to \D\,(\sumt {i:I} {\den{P_i}}) \\
+  \expose{\den{\sumt I P}} & = & [\tfmap\,\iota_i \comp \expose{\den{P_i}}]_{i:I} \\
+\end{array}
+\]
+Positive base types $o \in \PTy$ are required to be $\D$-coalgebras.
+For instance, elements of a base type like
+$\Float \in \PTy$ could represent streams of floating point numbers,
+\eg, continuous measurements from a sensor.
+
+Because comonad coalgebras are closed under products for monoidal
+coalgebras, contexts $\Gamma$ are interpreted as comonad coalgebras
+$\den\Gamma$.  In the presence of a comonad interpretation of $\Box$,
+the operations $\tthunk$ and $\tforce$ are no longer the identity, but
+``generalized cobind'' and $\extract$:
+\[
+\begin{array}{lllcl}
+ \rintro\Box
+  & \ru{\oCompTy \Gamma t N
+      }{\ValTy \Gamma {\thunk t} {\Box N}}
+  & \dent{\thunk t} & = & \fmap[\D]{\dent t} \comp \expose[\den\Gamma]
+\\[3ex]
+ \relim\Box
+  & \ru{\ValTy \Gamma v {\Box N}
+      }{\oCompTy \Gamma {\force v} N}
+  & \dent{\force v} & = & \textract \comp \dent v
+\end{array}
+\]
+The map $\dent\tthunk : \Hom A B \to \Hom A {\D\,B}$ generalizes
+$\tcobind : \Hom{\D\,A} B \to \Hom{\D\,A}{\D\,B}$ to $\D$-coalgebras
+$A$ in the same way that the monadic
+$\tbind : \Hom{A}{\T\,B} \to \Hom{\T\,A}{\T\,B}$ is generalized to
+$\Hom{A}{B} \to \Hom{\T\,A}{B}$ for $\T$-algebras $B$ in CBPV.
+
+
+% In a stream-valued instance of CBPV, elements of a base type like
+% $\Float \in \PTy$ would represent streams of floating point numbers,
+% \eg, continuous measurements from a sensor.
+% However, a single comonad $\D$ may not sufficient to express what we
+% want.  In the next section, we look at \emph{graded comonads}.
+
+\subsection{Graded comonads and their coalgebras}
+
+Graded comonads have been utilized to give semantics to
+context-dependent computation \citep{orchard:icfp14}.  For grading,
+loccit uses a \emph{resource algebra} in form of a pre-ordered
+semiring
+$(\R,{+},0,{\cdot},1,\leq)$.
+% $(\R,\_{+}\_,0,\_{\cdot}\_,1,\leq)$.
+%
+The semantics is \emph{resource aware} and thus not constructed in a
+cartesian-closed category but in a symmetric monoidal closed category
+$(\CC,\otimes,\I,\lolli)$.
+%
+As a running example, we use the semiring $\R = \Pot\bN \setminus \emptyset$ of
+\emph{multiplicities} ordered by $\supseteq$ with pointwise sum and
+product, \eg, $r + s = \{ n + m \mid n \in r, m \in s \}$.
+Subsemirings of $\R$ have been used for quantitative typing
+\cite{sergeyVytiniotisPeytonJones:popl14,mcBride:wadler60,atkey:lics08}.
+The order expresses precision of the quantities, \eg,
+$\{1\} \geq \{0,1\} \geq \bN$ states that linear use of a variable is more informative than affine use than unrestricted use.
+
+A matching symmetric monoidal closed category $\CC$ can be obtained as
+follows:
+% Assume a preordered commutative monoid $(\W,\oplus,\emp,\wleq,\winf)$
+% that is also a $\winf$-semilattice with distribution law $\winf_{i:I} (w_i \oplus w'_i) \wleq \winf_I w \oplus \winf_I w'$.  The elements (``worlds'') can be
+% seen as collection of available resources under uncertainty.  The
+% order $w \wleq w'$ again expresses precision of information, \ie, if
+% we can construct something from resources $w$ we can also construct it
+% from $w'$.  The infimum $\winf_{i:I}w_i$ expresses we can build the
+% ``thing'' from any of the $w_i$.  Multiplication $n \cdot w$ is
+% understood as $w \oplus \dots \oplus w$ with $n$ summands.
+% %
+% Given a commutative monoid $(\M,\uplus,\emptyset)$ whose elements can
+% be thought of as bags of atomic resources, an instance for $\W$ would
+% be $\W = \Pot \M$ under ${\wleq} = {\subseteq}$ and pointwise union
+% $w \oplus w' = \{ m \uplus m' \mid m \in w, m' \in w' \}$.
+%
+% Resource qualifiers $r \in \R$ operate on worlds via $r \cdot w = \winf_{n \in r} (n \cdot w)$.  It is routine to verify that $\W$ is almost a left semimodule to $\R$, \ie, the following laws hold:
+% \[
+% \begin{array}{rclclcl}
+%   1 \cdot w
+%     & = & \winf_{n \in \{1\}} nw
+%     & = & 1w
+%     & = & w
+% \\
+%   (rs) \cdot w
+%     & = & \winf_{n \in r, m \in s} (nm)w
+%     & = & \winf_{n \in r} n(\winf_{m \in s} mw)
+%     & = & r \cdot (s \cdot w)
+% \\
+%   0 \cdot w
+%     & = & \winf_{n \in \{0\}} nw
+%     & = & 0w
+%     & = & \emp
+% \\
+%   (r + s) \cdot w
+%     & = & \winf_{n \in r, m \in s} (n+m)w
+%     & = & \winf_{n \in r} \winf_{m \in s} (nw \oplus mw)
+%     & = & (r \cdot w) \oplus (s \cdot w)
+% \\
+%   r \cdot \emp
+%     & = & \winf_{n \in r} n\emp
+%     & = & \winf_{n \in r} \emp
+%     & = & \emp
+% \\
+%   r \cdot (w \oplus w')
+%     & = & \winf_{n \in r} n(w \oplus w')
+%     & \wleq & \winf_{n \in r} nw \oplus \winf_{n \in r} nw'
+%     & = & (r \cdot w) \oplus (r \cdot w')
+% \\
+% \end{array}
+% \]
+Assume a preordered commutative monoid $(\W,\oplus,\emp,\wleq,\wsup)$
+that is also a $\wsup$-semilattice with distribution law $\wsup_{i:I} (w_i \oplus w'_i) \wleq \wsup_I w \oplus \wsup_I w'$.  The elements (``worlds'') can be
+seen as collection of available resources under choice.  The
+order $w \wleq w'$ again expresses precision of information, \ie, if
+we can construct something from resources $w$ we can also construct it
+from $w'$ where we have additional choices.
+The supremum $\wsup_{i:I}w_i$ expresses we can build the
+``thing'' from any of the $w_i$.  Multiplication $n \cdot w$ is
+understood as $w \oplus \dots \oplus w$ with $n$ summands.
+%
+Given a commutative monoid $(\M,\uplus,\emptyset)$ whose elements can
+be thought of as bags of atomic resources, an instance for $\W$ would
+be $\W = \Pot \M$ under ${\wleq} = {\subseteq}$ and pointwise union
+$w \oplus w' = \{ m \uplus m' \mid m \in w, m' \in w' \}$.
+
+Resource qualifiers $r \in \R$ operate on worlds via
+$r \cdot w = \wsup_{n \in r} (n \cdot w)$.
+%
+For instance the \emph{affine} qualifier $\{0,1\}w = \emp \oplus w$
+gives us the choice of using resources $w$ or not ($\emp$).
+%
+It is routine to verify that $\W$ is almost a left semimodule to $\R$,
+\ie, the following laws hold:
+\[
+\begin{array}{rclclcl}
+  1 \cdot w
+    & = & \wsup_{n \in \{1\}} nw
+    & = & 1w
+    & = & w
+\\
+  (rs) \cdot w
+    & = & \wsup_{n \in r, m \in s} (nm)w
+    & = & \wsup_{n \in r} n(\wsup_{m \in s} mw)
+    & = & r \cdot (s \cdot w)
+\\
+  0 \cdot w
+    & = & \wsup_{n \in \{0\}} nw
+    & = & 0w
+    & = & \emp
+\\
+  (r + s) \cdot w
+    & = & \wsup_{n \in r, m \in s} (n+m)w
+    & = & \wsup_{n \in r} \wsup_{m \in s} (nw \oplus mw)
+    & = & (r \cdot w) \oplus (s \cdot w)
+\\
+  r \cdot \emp
+    & = & \wsup_{n \in r} n\emp
+    & = & \wsup_{n \in r} \emp
+    & = & \emp
+\\
+  r \cdot (w \oplus w')
+    & = & \wsup_{n \in r} n(w \oplus w')
+    & \wleq & \wsup_{n \in r} nw \oplus \wsup_{n \in r} nw'
+    & = & (r \cdot w) \oplus (r \cdot w')
+\\
+\end{array}
+\]
+Because the last law is not an equality but just the inequality
+$r (w \oplus w') \wleq rw \oplus rw'$, we have ``almost'' a
+semimodule.
+
+Objects of $\CC$ are functors $A : (\W,\wleq) \to \SET$ and morphisms
+$f : \Hom A B$ are natural transformations
+$(f_w : A_w \to B_w)_{w:W}$, \ie,
+$B_{w \wleq w'} \comp f_w = f_{w'} \comp A_{w \wleq w'}$.  The tensor
+$A \otimes B$ is Day's convolution
+$(A \otimes B)_w = \bigcup_{w_1 \oplus w_2 \wleq w} (A_{w_1} \times B_{w_2})$
+% $(A \otimes B)_w = \bigcup_{w_1,w_2 \mid w \geq w_1 \oplus w_2} A_{w_1} \times A_{w_2}$
+with unit $\I_w = \bigcup_{\emp \wleq w} 1$.  The unit $\I$ is
+constructible at world $w$ from nothing (set $1$) if $\emp \wleq w$,
+\ie, if the world $w$ includes the choice of using no resources.  A
+tensor $A \otimes B$ is constructible at world $w$ if $w$ includes the
+choice to split the resources into $w_1$ and $w_2$ to construct $A$
+and $B$, resp.  The exponential $A \lolli B$ is determined by currying
+$C \otimes A \lolli B \cong C \lolli (A \lolli B)$ and given by
+$(A \lolli B)_w = \bigcap_{w_1 \oplus w \wleq w_2} (A_{w_1} \to
+B_{w_2})$.
+
+The thus constructed symmetric monoidal closed category $\CC$ has a
+$\R$-graded comonad
+\[
+\begin{array}{lcl}
+  \D & : & (\R,\leq) \to [\CC \to \CC] \\
+(\D[r] A)_w & = &
+  \bigcup_{rw' \wleq w} A_{w'}
+  % \bigcup_{w' \mid w \wleq rw'} A_{w'}
+\end{array}
+\]
+implementing trivially the following natural transformations.  Herein, we use the
+pointwise tensor product of functors
+$(\dot\otimes_{i:I}F_i)\,A = \otimes_{i:I}(F_i\,A)$ in
+$[\CC \to \CC]$, in particular $\dot\I\,A = \I$.
+\[
+\begin{array}{lcl@{~}c@{~}l}
+  \textract   & : & \D[1]   & \todot & \Id \\
+  \tduplicate & : & \D[rs]  & \todot & \D[r] \comp \D[s] \\
+  \tweaken    & : & \D[0]   & \todot & \dot{\I} \\
+  \tcontract  & : & \D[r+s] & \todot & \D[r] \mathbin{\dot\otimes} \D[s] \\
+  % \tweaken    & : & \Hom {\D[0]\,A} A \\
+  % \tcontract  & : & \Hom {\D[r+s]\,A} {\D[r]\,\A \otimes \D[s]\,A} \\
+\end{array}
+\]
+For example, $\tcontract$ takes
+$a \in \bigcup_{rw' \oplus sw' \wleq w} A_{w'}$ to
+$(a,a) \in \bigcup_{w_1 \oplus w_2 \wleq w} \bigcup_{rw_1' \leq w_1}
+\bigcup_{sw_2' \leq w_2} A_{w'_1} \times A_{w'_2}$.
+The intermediate worlds are $w_1' = w_2' = w'$ and $w_1 = rw'$ and $w_2 = sw'$.
+
+The monoidal character of $\D$ is witnessed by the trivial morphism $\tzip$:
+\[
+%\newcommand{\Aiw}{(A_i)_{w'_i}}
+\newcommand{\Aiw}{A_{iw'_i}}
+\begin{array}{lcl}
+  \tzip       & : & \Hom {\tupt {i:I} {(\D[r]\,A_i)}} {\D[r]\,(\tupt I A)} \\
+  \tzip_w     & : & \bigcup_{\oplus_{i:I}w_i \wleq w} \Pi_{i:I} (\D[r]\,A_i)_{w_i} \to \bigcup_{rw' \wleq w} (\tupt I A)_{w'} \\
+  \tzip_w     & : & \bigcup_{\oplus_{i:I} w_i \wleq w} \Pi_{i:I} (\bigcup_{rw'_i \wleq w_i} \Aiw) \to \bigcup_{rw' \wleq w} \bigcup_{\oplus_{i:I} w'_i \wleq w'} \Pi_{i:I} \Aiw \\
+   \tzip_w\,(a_i)_{i:I} & = & (a_i)_{i:I} \\
+\end{array}
+\]
+
+The comonad laws generalize to graded comonads as follows:
+\[
+\xymatrix@C=10ex{
+\D[r]\,B  \ar@{=}[dr]
+  & \D[1]\,(\D[r]\,B) \ar[l]_{\textract}
+\\
+  & \D[r]\,B \ar[u]_{\tduplicate}
+}
+\qquad
+\xymatrix@C=10ex{
+\D[r]\,B  \ar[r]^{\tduplicate} \ar@{=}[dr]
+  & \D[r]\,(\D[1]\,B)  \ar[d]^{\tfmap\,\textract}
+\\
+  & \D[r]\,B
+}
+\]
+\[
+\xymatrix@C=10ex{
+\D[q]\,(\D[rs]\,B) \ar[r]^{\tduplicate}
+  & \D[q]\,(\D[r]\,(\D[s]\,B))
+\\
+\D[qrs]\,B \ar[u]_{\tduplicate} \ar[r]^{\tduplicate}
+  & \D[qr]\,(\D[s]\,B) \ar[u]_{\tfmap\,\tduplicate}
+}
+\]
+These laws reflect that $\D$ maps the multiplicative monoid
+$(\R,{\cdot},1)$ to the monoid structure $([\CC \to \CC],{\circ},\Id)$
+of composition in the functor category $[\CC \to \CC]$.  Similar laws
+need to hold for the additive monoid and distributivity.
+\[
+\xymatrix@C=12ex{
+\D[0]\,B \otimes \D[r]\,B \ar[d]_{\tweaken \otimes \tid}
+& \D[r]\,B \ar[l]_{\tcontract} \ar[r]^{\tcontract} \ar@{=}[d]
+& \D[r]\,B \otimes \D[0]\,B \ar[d]^{\tid \otimes \tweaken}
+\\
+\I \otimes \D[r]\,B \ar[r]^{\Gl}
+& \D[r]\,B
+& \D[r]\,B \otimes \I \ar[l]_{\Gr}
+}
+\]
+\[
+\xymatrix@C=10ex{
+\D[q]\,B \otimes \D[r+s]\,B  \ar[d]_{\tid \otimes \tcontract}
+& \D[q+r+s]\,B \ar[l]_{\tcontract} \ar[r]^{\tcontract}
+& \D[q+r]\,B \otimes \D[s]\,B \ar[d]^{\tcontract \otimes \tid}
+\\
+\D[q]\,B \otimes (\D[r]\,B \otimes \D[s]\,B) \ar[rr]^{\Ga}
+& & (\D[q]\,B \otimes \D[r]\,B) \otimes \D[s]\,B
+}
+\]
+\[
+\xymatrix{
+\D[qr]\,B \otimes \D[qs]\,B \ar[d]_{\duplicate \otimes \duplicate}
+  & \D[q(r+s)]\,B \ar[l]_{\tcontract} \ar[r]^{\duplicate}
+  & \D[q](\D[r+s]\,B) \ar[d]^{\fmap\tcontract}
+\\
+\D[q](\D[r]\,B) \otimes \D[q](\D[s]\,B) \ar[rr]^{\tzip}
+&&
+\D[q](\D[r]\,B \otimes \D[s]\,B)
+}
+\]
+\[
+\xymatrix@C=22ex{
+\D[(q+r)s]\,B \ar[r]^{\tduplicate} \ar[d]_{\tcontract}
+& \D[q+r]\,(\D[s]\,B) \ar[d]^{\tcontract}
+\\
+\D[qs]\,B \otimes \D[rs]\,B \ar[r]^{\tduplicate \otimes \tduplicate}
+& \D[q](\D[s]\,B) \otimes \D[r](\D[s]\,B)
+}
+\]
+
+
+\begin{figure}[htbp]
+\flushleft
+\ruler{}
+Types.
+\[
+\begin{array}{lllrl@{\qquad}l}
+\PTy & \ni & P
+  & ::= & \Box N
+     \mid o \mid \sumty i I P \mid \tupty i I P
+  & \nbox{Value types (positive types)} \\
+\NTy & \ni & N
+  & ::= & \diamond P % \graybox{\compty r P}
+     \mid \gqfun r P N \mid \recty i I N
+  & \nbox{Computation types (negative types)} \\
+\end{array}
+\]
+\dashruler{}
+Terms.
+\[
+\begin{array}{lllrl@{\qquad}l}
+\PTm & \ni & v,w
+  & ::= & x
+     \mid \thunk t
+     \mid \inj i v
+     \mid \ptup{\bar v}
+  & \nbox{Values (positive terms)} \\
+\NTm & \ni & t,u
+  & ::= & \graybox{y} \mid \graybox{\qlet r y u t}
+     \mid \qlet {\graybox r} x v t
+  & \nbox{Computations (negative terms):}
+\\ &&& \mid &
+         \graybox{\qforced r v y t}
+    \mid \qcase {\graybox r} v {\overline{x.\,t}}
+    \mid \qsplits {\graybox r} v {\bar x} t
+  & \nbox{value eliminations}
+\\ &&& \mid &
+         \ret v        \mid \qbind {\graybox r} x u t
+  & \nbox{monad operations}
+\\ &&& \mid &
+         \lam x t      \mid \app t v
+  & \nbox{functions}
+\\ &&& \mid &
+         \trecord\{\overline{i:t}\} % \ntup{\bar t}
+       \mid \proj i t
+  & \nbox{lazy tuples (records)}
+\end{array}
+\]
+\dashruler{}
+Value typing \fbox{$\gqValTy \gamma \Gamma v P$}\,.
+\begin{gather*}
+ \nru{\rvar^+}{}
+     {\ValTy {\gqext 0\Gamma 1x P} x P}
+\qquad
+ \nru{\rintro\Box}
+     {\qCompTy \gamma \Gamma t N
+    }{\qValTy \gamma \Gamma {\thunk t} {\Box N}}
+\\[1.5ex]
+ \nru{\rintro\GS}
+     {\qValTy \gamma \Gamma v {P_i}
+    }{\qValTy \gamma \Gamma {\inj i v} {\sumt I P}}
+\qquad
+ \nru{\rintro\otimes}
+     {\forall i{:}I, \ \gqValTy {\gamma_i} \Gamma {v_i} {P_i}
+    }{\gpValTy {\GS_{i:I}\gamma_i} \Gamma {\ptup v} {\tupt I P}}
+\end{gather*}
+\dashruler{}
+Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
+\vspace{-2ex}
+\begin{gather*}
+\graybox{
+ \nru{\rvar^-}{}
+     {\ValTy {\gqext 0 \Gamma 1 y N} y N}
+}
+\qquad
+\graybox{
+ \nru{\rlet^-}
+     {\qCompTy \gamma \Gamma u N \qquad
+      \CompTy {\qext \delta \Gamma r y N} t {N'}
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\qlet r y u t} {N'}}
+}
+\\[1.5ex]
+ \nru{\rlet^+}
+     {\gqValTy \gamma \Gamma v P \qquad
+      \CompTy {\gqext \delta \Gamma r x P} t N
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqlet r x v t} N}
+\qquad
+ \nru{\relim\Box}
+     {\gqValTy \gamma \Gamma v {\Box N} \qquad
+      \CompTy {\gqext \delta \Gamma r y N} t {N'}
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqforced r v y t} {N'}}
+\\[1.5ex]
+ \nru{\relim\GS}
+     {\gqValTy \gamma \Gamma v {\sumt I P} \qquad
+      \forall i{:}I,\ \CompTy {\gqext \delta \Gamma r {x_i} {P_i}} {t_i} N
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\caser v {\{\graybox{r} x_i.\, t_i\}_{i:I}}} N}
+\qquad
+ \nru{\relim\otimes}
+     {\gqValTy \gamma \Gamma v {\tupt I P} \qquad
+      \gqCompTy \delta {\extr \Gamma {\overline{\graybox{r}x_i{:}P_i}^{i:I}}} t N
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqsplits r v {\bar x} t} N}
+\\[1.5ex]
+ \nru{\rintro\diamond}
+     {\qValTy \gamma \Gamma v P
+    }{\qCompTy \gamma \Gamma {\ret v} {\diamond P}}
+\qquad
+ \nru{\relim\diamond}
+     {\gqCompTy \gamma \Gamma u {\diamond P} \qquad
+      \CompTy {\gqext \delta \Gamma r x P} t  N
+    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqbind r x u t} N}
+\\[1.5ex]
+ \nru{\rintro\lolli}
+     {\CompTy {\gqext \gamma \Gamma r x P} t N
+    }{\gqCompTy \gamma \Gamma {\lam x t} {\gqfun r P N}}
+\qquad
+ \nru{\relim\lolli}
+     {\gqCompTy \gamma \Gamma t {\gqfun r P N} \qquad
+      \gqValTy \delta \Gamma v P
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\app t v} N}
+\\[1.5ex]
+ \nru{\rintro\Pi}
+     {\forall i{:}I,\ \qCompTy \gamma \Gamma {t_i} {N_i}
+    }{\qCompTy \gamma \Gamma {\trecord {\{i : t_i\}_{i:I}}} {\rect I N}}
+    % }{\qCompTy \gamma \Gamma {\ntup{\overline{t_i}^{i:I}}} {\rect I N}}
+\qquad
+ \nru{\relim\Pi}
+     {\qCompTy \gamma \Gamma t {\rect I N}
+    }{\qCompTy \gamma \Gamma {\proj i t}  {N_i}}
+\\[1.5ex]
+\graybox{
+ \nrux{\rweak}
+      {\gqCompTy {\gamma'} \Gamma t N}
+      {\gqCompTy \gamma \Gamma t N}
+      {\gamma \leq \gamma'}
+}
+\end{gather*}
+\rule{\textwidth}{0.2pt}
+  \caption{Coeffect-graded call-by-push-value.}
+  \label{fig:cbpv}
+\end{figure}
+
 
 
 
