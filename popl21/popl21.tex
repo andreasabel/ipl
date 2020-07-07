@@ -263,8 +263,10 @@ Further we present a version of CBPV which additionally has graded coeffects.
 
 \newcommand{\denp}{\den[+]}
 \newcommand{\denn}{\den[-]}
+\newcommand{\Denp}[2]{\denp{#1}_{#2}}
 \newcommand{\Denn}[2]{\denn{#1}_{#2}}
 \newcommand{\Den}[2]{\den{#1}_{#2}}
+\newcommand{\denv}[2]{\dent{#1}_{#2}}
 
 \newcommand{\tEff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\Eff}{\ensuremath{\mathsf{Eff}}}
@@ -272,6 +274,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\Ge}{\ensuremath{\varepsilon}}
 \newcommand{\Ga}{\ensuremath{\alpha}}
 \newcommand{\Gd}{\ensuremath{\delta}}
+\newcommand{\Gg}{\ensuremath{\gamma}}
 \newcommand{\Gl}{\ensuremath{\lambda}}
 \newcommand{\Gr}{\ensuremath{\rho}}
 \newcommand{\GG}{\ensuremath{\Gamma}}
@@ -309,13 +312,15 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\StringLe}[1]{\mathsf{String}{\leq}\,#1}
 \newcommand{\tfmap}{\mathsf{fmap}}
 \newcommand{\fmap}[2][]{\tfmap_{#1}\,#2}
+\newcommand{\fmapt}[2][]{\tfmap_{#1}#2}
 \newcommand{\treturn}{\mathsf{return}}
 \newcommand{\tjoin}{\mathsf{join}}
 \newcommand{\join}{\mathsf{join}}
 \newcommand{\append}{\ensuremath{\mathbin{\mathtt{++}}}}
 \newcommand{\tcast}{\mathsf{cast}}
+\newcommand{\tdist}{\mathsf{dist}}
 \newcommand{\Id}{\mathsf{Id}}
-\newcommand{\tid}{\mathsf{id}}
+\newcommand{\tid}[1][]{\mathsf{id}_{#1}}
 \newcommand{\teval}{\mathsf{eval}}
 \newcommand{\tstrength}{\mathsf{strength}}
 \newcommand{\strengthl}{\tstrength^{\tl}}
@@ -345,10 +350,10 @@ Further we present a version of CBPV which additionally has graded coeffects.
 
 
 \newcommand{\sumt}   [2]{\ensuremath{\Sigma_{#1} #2}}
-\newcommand{\tupt}   [2]{\ensuremath{\otimes_{#1} #2}}
+\newcommand{\tupt}   [2]{\ensuremath{\mathop\otimes_{#1} #2}}
 \newcommand{\rect}   [2]{\ensuremath{\Pi_{#1} #2}}
 \newcommand{\sumty}  [3]{\ensuremath{\Sigma_{#1:#2} #3_{#1}}}
-\newcommand{\tupty}  [3]{\ensuremath{\otimes_{#1:#2} #3_{#1}}}
+\newcommand{\tupty}  [3]{\ensuremath{\mathop\otimes_{#1:#2} #3_{#1}}}
 \newcommand{\recty}  [3]{\ensuremath{\Pi_{#1:#2} #3_{#1}}}
 \newcommand{\thunkty}[2]{\ensuremath{[#1]#2}}
 \newcommand{\compty} [2]{\ensuremath{\langle#1\rangle#2}}
@@ -812,6 +817,7 @@ Computation typing \fbox{$\CompTy \Gamma t {\graybox{e}} N$}\,.
 \end{figure}
 
 \subsection{Effect-graded CBPV: syntax and typing}
+\label{sec:effect-cbpv}
 
 The syntax and typing rules for effect-graded CBPV are given in
 Fig.~\ref{fig:cbpv}.  The differences to pure CBPV are in
@@ -1670,7 +1676,8 @@ interpreting contexts.
 $\gamma : \R^I$ form a left $\R$-semimodule under pointwise addition
 $(\gamma + \delta)(i) = \gamma(i) + \delta(i)$ and scaling
 $(r \cdot \gamma)(i) = r \cdot \gamma(i)$.  Contexts $\Gamma$ can thus
-be interpreted as $R^{\dom \Gamma}$-graded $\D$-coalgebras $C$ with
+be interpreted as \emph{$R^{\dom \Gamma}$-graded}
+(or \emph{structured}) $\D$-coalgebras $C$ with
 the following operations:
 \[
 \begin{array}{lcl}
@@ -1681,7 +1688,9 @@ the following operations:
 \end{array}
 \]
 The second, generalized form of $\tduplicate$ will be used to split
-resources accumulated from $I$ parties.
+resources accumulated from $I$ parties.  Note that
+$A_r := C_{r\gamma}$ flattens a structured $\D$-coalgebra $C$ into an
+ordinary one ($A$).
 
 We will also need to interpret context extension.  To this end, we
 shall employ a structured product
@@ -1693,6 +1702,7 @@ and $\R$-graded $\D$-coalgebras $A : \R \to \CC$ and define
 \[
 \den{\ext \Gamma x P}
   = \den \Gamma \boxtimes \denp P
+  ,
 \]
 sweeping name issues under the carpet (to be handled by de Bruijn indices).
 
@@ -1708,7 +1718,8 @@ Types.
      \mid o \mid \sumty i I P \mid \tupty i I P
   & \nbox{Value types (positive types)} \\
 \NTy & \ni & N
-  & ::= & \diamond P % \graybox{\compty r P}
+  & ::= & %\diamond P %
+          \graybox{\compty r P}
      \mid \gqfun r P N \mid \recty i I N
   & \nbox{Computation types (negative types)} \\
 \Cxt & \ni & \Gamma
@@ -1744,7 +1755,9 @@ Terms.
     \mid \qsplits {\graybox r} v {\bar x} t
   & \nbox{value eliminations}
 \\ &&& \mid &
-         \ret v        \mid \qbind {\graybox r} x u t
+         \ret v
+    \mid \bind x u t
+    % \mid \qbind {\graybox r} x u t
   & \nbox{monad operations}
 \\ &&& \mid &
          \lam x t      \mid \app t v
@@ -1784,39 +1797,47 @@ Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
 \qquad
 \graybox{
  \nru{\rlet^-}
-     {\qCompTy \gamma \Gamma u N \qquad
-      \CompTy {\qext \delta \Gamma r y N} t {N'}
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\qlet r y u t} {N'}}
+     {\qCompTy \delta \Gamma u N \qquad
+      \CompTy {\qext \gamma \Gamma r y N} t {N'}
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\qlet r y u t} {N'}}
 }
 \\[1.5ex]
  \nru{\rlet^+}
-     {\gqValTy \gamma \Gamma v P \qquad
-      \CompTy {\gqext \delta \Gamma r x P} t N
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqlet r x v t} N}
+     {\gqValTy \delta \Gamma v P \qquad
+      \CompTy {\gqext \gamma \Gamma r x P} t N
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\gqlet r x v t} N}
 \qquad
  \nru{\relim\Box}
-     {\gqValTy \gamma \Gamma v {\Box N} \qquad
-      \CompTy {\gqext \delta \Gamma r y N} t {N'}
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqforced r v y t} {N'}}
+     {\gqValTy \delta \Gamma v {\Box N} \qquad
+      \CompTy {\gqext \gamma \Gamma r y N} t {N'}
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\gqforced r v y t} {N'}}
 \\[1.5ex]
  \nru{\relim\GS}
-     {\gqValTy \gamma \Gamma v {\sumt I P} \qquad
-      \forall i{:}I,\ \CompTy {\gqext \delta \Gamma r {x_i} {P_i}} {t_i} N
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\caser v {\{\graybox{r} x_i.\, t_i\}_{i:I}}} N}
+     {\gqValTy \delta \Gamma v {\sumt I P} \qquad
+      \forall i{:}I,\ \CompTy {\gqext \gamma \Gamma r {x_i} {P_i}} {t_i} N
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\caser v {\{\graybox{r} x_i.\, t_i\}_{i:I}}} N}
 \qquad
  \nru{\relim\otimes}
-     {\gqValTy \gamma \Gamma v {\tupt I P} \qquad
+     {\gqValTy \delta \Gamma v {\tupt I P} \qquad
       \gqCompTy \delta {\extr \Gamma {\overline{\graybox{r}x_i{:}P_i}^{i:I}}} t N
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqsplits r v {\bar x} t} N}
+    }{\gpCompTy {\gamma + r\delta} \Gamma {\gqsplits r v {\bar x} t} N}
 \\[1.5ex]
  \nru{\rintro\diamond}
      {\qValTy \gamma \Gamma v P
-    }{\qCompTy \gamma \Gamma {\ret v} {\diamond P}}
+    }{\qCompTy {\graybox r\gamma} \Gamma {\ret v} {\compty {\graybox r} P}}
 \qquad
  \nru{\relim\diamond}
-     {\gqCompTy \gamma \Gamma u {\diamond P} \qquad
-      \CompTy {\gqext \delta \Gamma r x P} t  N
-    }{\gpCompTy {r\gamma + \delta} \Gamma {\gqbind r x u t} N}
+     {\gqCompTy \delta \Gamma u {\compty {\graybox r} P} \qquad
+      \CompTy {\gqext \gamma \Gamma r x P} t  N
+    }{\gpCompTy {\gamma + \delta} \Gamma {\bind x u t} N}
+%  \nru{\rintro\diamond}
+%      {\qValTy \gamma \Gamma v P
+%     }{\qCompTy \gamma \Gamma {\ret v} {\diamond P}}
+% \qquad
+%  \nru{\relim\diamond}
+%      {\gqCompTy \gamma \Gamma u {\diamond P} \qquad
+%       \CompTy {\gqext \delta \Gamma r x P} t  N
+%     }{\gpCompTy {r\gamma + \delta} \Gamma {\gqbind r x u t} N}
 \\[1.5ex]
  \nru{\rintro\lolli}
      {\CompTy {\gqext \gamma \Gamma r x P} t N
@@ -1850,10 +1871,10 @@ Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
 \end{figure}
 
 
-\subsection{Coeffect-graded CBPV: typing and semantics}
+\subsection{Coeffect-graded CBPV: syntax and typing}
 
 We now have the mathematical structures in place to define a
-coeffect-graded variant of CBPV (see Fig.~\ref{coeff-cbpv}).
+coeffect-graded variant of CBPV (see Fig.~\ref{fig:coeff-cbpv}).
 The difference to pure CBPV is laid out in \emph{gray boxes}.
 
 The fundamental novelty is that the typing judgements
@@ -1864,29 +1885,31 @@ of the subterms are added when both subterms are or maybe evaluated at
 runtime (rules \rintro\otimes, $\rlet^{+/-}$,
 \relim{\Box/\GS/\otimes/\diamond/\lolli}).  Note that in \relim\GS,
 the branches $t_i$ of the case statement (\relim\GS) share a resource
-context $\delta$, since only one of the branches is executed at
-runtime.  The different resource requirements of the branches can be
-subsumed under their maximum using rule \rweak.  Similarly, the
-components $t_i$ of a record (\rintro\Pi) share a resource context,
-since projection retrieves a single component (\relim\Pi).  This is
-the opposite of eager tuples (\rintro\otimes) where their eliminations
+context $\gamma$, since only one of the branches is executed at
+runtime.  Via rule $\rweak$,
+the different resource requirements of the branches can be
+subsumed under their maximum wrt.\ $\leq_\R$.  Similarly, the
+components $t_i$ of a record (\rintro\Pi) share a resource context
+since projection only retrieves one of the components (\relim\Pi).  This is
+the opposite of eager tuples (\rintro\otimes) where the elimination
 makes all components available at the same time (\relim\otimes), thus,
-all have to be evaluated at runtime.
+all components have to be evaluated at runtime.
 
 Function types $\qfun r P N$ are now graded by a resource qualifier
 $r$ that specifies how the function argument is to be used in the
-function body.  In quantitative type with $\R = \Pot \bN$, qualifier
-$r$ gives the possible usage quantities of the function argument,
-e.g. $\{1\}$ for exactly one use (linear), $\{0,1\}$ for at most one
-use (affine), $\{0\}$ for no use (constant), and $\bN$ for arbitrary
-use (unrestricted).  A resource qualifier could also be a security
-level (public or private), and many other instances of $\R$ exist.  If
-a lambda abstraction $\lam x t$ is typed with $\qfun r P N$, qualifier
-$r$ is attached to variable $x$ in the resource context (rule
-\rintro\lolli).  If a function $t : \qfun r P N$ is applied (rule
-\relim\lolli), we need an $r$-qualified argument $v : rP$.  We could
-have given a qualified value typing judgement
-$\qValTy \gamma \Gamma v {rP}$ in the style of
+function body.  (This type is often written $!_{r}P \lolli N$.)  In
+quantitative typing with $\R = \Pot \bN$, qualifier $r$ gives the
+possible usage quantities of the function argument, e.g. $\{1\}$ for
+exactly one use (linear), $\{0,1\}$ for at most one use (affine),
+$\{0\}$ for no use (constant), and $\bN$ for arbitrary use
+(unrestricted).  A resource qualifier could also be a security level
+(public or private), or a sensitivity level (a non-negative real)
+\citep{reedPeirce:icfp10}.  If a lambda abstraction $\lam x t$ is
+typed with $\qfun r P N$, qualifier $r$ is attached to variable $x$ in
+the resource context (rule \rintro\lolli).  If a function
+$t : \qfun r P N$ is applied (rule \relim\lolli), we need an
+$r$-qualified argument $v : rP$.  We could have given a qualified
+value typing judgement $\qValTy \gamma \Gamma v {rP}$ in the style of
 \citet{mcBride:wadler60} that---in the quantitative
 interpretation---provides $r$ copies of $v$ to be consumed by the
 function.  Such a judgement could come with a scaling rule
@@ -1894,17 +1917,28 @@ function.  Such a judgement could come with a scaling rule
 \ru{\qValTy \gamma \Gamma v {sP}
   }{\qValTy{r\gamma}\Gamma v {(rs)P}}
 \]
-that allow to scale the production of $v$ by $r$ if the resources are
-scaled accordingly (from $\gamma$ to $r\gamma$).  We bake scaling into
-the elimination rules instead.  Thus, $\relim\lolli$ receives an
+that allows to scale the production of $v$ by $r$ if the resources are
+scaled accordingly (from $\gamma$ to $r\gamma$).  We bake scaling instead
+into the transition from values to computations.
+Thus, $\relim\lolli$ receives an
 argument $\qValTy \delta \Gamma v P$, and to satisfy the demands of
 the function $\qCompTy \gamma \Gamma t {\qfun r P N}$, the resources
 $\delta$ for the argument are scaled by $r$, summing the resource
 requirements for the application to $\gamma + r\delta$.
 %
 Analogous scaling of the eliminatee is baked into the other value
-eliminators (\relim\Box, \relim\GS, \relim\otimes) and into the
-\rlet-rules.
+eliminators (\relim\Box, \relim\GS, \relim\otimes), into the
+\rlet-rules, and into \rintro\diamond.
+
+The monadic type $\compty r P$ records the multiplicity $r$ of the
+value of type $P$ resulting from the computation.  This construction
+is dual to the comonadic type $\thunkty e N$ from effect-graded CBPV
+(Section~\ref{sec:effect-cbpv}).  Since negative types are not
+$\D$-coalgebras and do not support scaling, the scaling in
+$\rintro\diamond$ is the last opportunity for scaling before entering
+the monad.  Typing of bind ($\bind x u t$) attaches the resource qualifier $r$ store in $\compty r P$ to the variable $x$ (\relim\diamond).
+
+
 
 As a consequence of eliminatee scaling, $\relim\Box$ is no longer
 ``natural-deduction'' style like projection, but ``sequent-calculus''
@@ -1922,6 +1956,138 @@ keep CBPV's polarization of types where positive types stand for
 comonad coalgebras and negative types for monad algebras.
 
 
+\subsection{Coeffect-graded CBPV: denotational semantics}
+
+
+%\subsubsection{Interpretation of types}
+
+Positive types $P$ are interpreted as $\D$-algebras
+$\denp P : (\R,\leq) \to \CC$ and negative types $N$ as objects
+$\denn N : \CC$, except for in contexts, where they are interpreted as
+$\D$-algebras $\Den N r = \D[r]\,\denn N$.  With $\den P = \denp P$,
+the interpretation of contexts is thus
+$\den \Gamma = \boxtimes_{x:\dom\Gamma} \den{\Gamma(x)}$.
+\[
+\begin{array}{lcl}
+  \Denp\_\_ & : & \PTy \to [(\R,\leq) \to \CC] \\
+  \Denp{\Box N}    r & = & \D[r]\, \denn N \\
+  \Denp{\sumt I P} r & = & \coprod_{i:I} \Denp{P_i} r \\
+  \Denp{\tupt I P} r & = & \otimes_{i:I} \Denp{P_i} r \\
+\end{array}
+\qquad\qquad
+\begin{array}{lcl}
+  \denn\_\_ & : & \NTy \to \CC \\
+  \denn{\compty r P} & = & \T \Denp P r \\
+  \denn{\qfun r P N} & = & \Denp P r \lolli \denn N \\
+  \denn{\rect I N}   & = & \prod_{i:I} \denn{N_i} \\
+\end{array}
+\]
+The symmetric monoidal category $\CC$ needs to come with cartesian
+products $\rect I B$ as well as with distributive coproducts
+$\coprod_I A$ with
+$\tdist : \Hom {C \otimes \coprod_I A} {\coprod_{i:I} {(C \otimes A_i)}}$.
+
+Computations $\qCompTy \gamma \Gamma t N$ are interpreted as morphisms
+$\dent t : \Hom {\Den\Gamma\gamma} {\denn N}$ and values
+$\qValTy \gamma \Gamma v P$ as families
+$\denv v r : \Hom {\Den\Gamma{r\gamma}} {\Denp P r}$ natural in $r$.
+Naturality here means that
+$\Denp P {r \leq s} \comp \denv v r = \denv v s \comp \left(\Den \Gamma {(\_
+    \cdot \gamma)}\right)_{r \leq s}$.
+Again, because of $\rweak$, we interpret typing derivations rather than terms.
+The interpretation is now rather straightforward, but we spell it out for reference.
+\[
+\begin{array}{llcl}
+\rvar^+
+  & \denv {\ValTy{\qext 0 \Gamma 1 x P} x P} r
+  & = & \Gr \comp (\tdrop[\den\Gamma] \otimes \tid[\Denp P r])
+\\
+\rintro\Box
+  & \denv {\qValTy \gamma \Gamma {\thunk t} {\Box N}} r
+  & = & \fmapt[{\D[r]}]{\dent t} \comp \expose{\den \Gamma}
+\\
+\rintro\GS
+  & \denv{\qValTy \gamma \Gamma {\inj i v} {\sumt I P}} r
+  & = & \iota_i \comp \denv v r
+\\
+\rintro\otimes
+  & \denv{\pValTy {\sumt I \gamma} \Gamma {\tup v} {\tupt I P}} r
+  & = & \tupt {i:I} \denv {v_i}r \comp \duplicate
+\\
+\end{array}
+\]
+\[
+\begin{array}{llcl}
+\rvar^-
+  & \dent {\oCompTy{\qext 0 \Gamma 1 y N} y N}
+  & = & \Gr \comp (\tdrop[\den\Gamma] \otimes \extract[\denn N])
+\\
+\rlet^{-}
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\qlet r y u t} {N'}}
+  & = & \dent t
+  \comp (\tid[\Den \Gamma \gamma] \otimes
+           (\fmapt[{\D[r]}] \dent u \comp \expose[\den \Gamma]))
+\\ &&& {~}
+  \comp \duplicate
+\\
+\rlet^{+}
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\qlet r x v t} {N}}
+  & = & \dent t
+  \comp (\tid[\Den \Gamma \gamma] \otimes
+           (\expose[\denp P] \comp \denv v r))
+  \comp \duplicate
+\\
+\relim\Box
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\qforced r v y t} {N'}}
+  & = & \dent t
+  \comp (\tid[\Den \Gamma \gamma] \otimes \denv v r)
+  \comp \duplicate
+\\
+\relim\GS
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\caser v \{r x_i.\, t_i\}_{i:I}} {N}}
+  & = & [\dent {t_i}]_{i:I} \comp \tdist
+  \comp (\tid[\Den \Gamma \gamma] \otimes \denv v r)
+  \comp \duplicate
+\\
+\relim\otimes
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\qsplits r v {\bar x} t} {N}}
+  & = & \dent t \comp \isot
+  \comp (\tid[\Den \Gamma \gamma] \otimes \denv v r)
+  \comp \duplicate
+\\
+\rintro\diamond
+  & \dent {\pCompTy {r\gamma} \Gamma {\ret v} {\compty r P}}
+  & = & \treturn \comp \denv v r
+\\
+\relim\diamond
+  & \dent {\pCompTy {\gamma + r\delta} \Gamma {\qbind r x u t} {N}}
+  & = & \run[\den N] \comp \fmapt[\T]{\dent t} \comp \strengthl
+\\ &&& {~}
+  \comp (\tid[\Den \Gamma \gamma] \otimes \dent u)
+  \comp \duplicate
+\\
+\rintro\lolli
+  & \dent {\qCompTy \gamma \Gamma {\lam x t} {\qfun r P N}}
+  & = & \Lambda \dent t
+\\
+\relim\lolli
+  & \dent{\pCompTy {\gamma + r\delta} \Gamma {\app t v} N}
+  & = & \teval \comp (\dent t \otimes \denv v r) \comp \duplicate
+\\
+\rintro\Pi
+  & \dent {\qCompTy \gamma \Gamma {\recrd I t} {\rect I N}}
+  & = & \langle \dent {t_i} \rangle_{i:I}
+\\
+\relim\Pi
+  & \dent {\qCompTy \gamma \Gamma {\proj i t} {N_i}}
+  & = & \pi_i \comp \dent t
+\\
+\rweak
+  & \dent {\qCompTy \gamma \Gamma t N}
+  & = & \dent t \comp \Den \Gamma {\gamma \leq \gamma'}
+\\
+\end{array}
+\]
 
 
 
@@ -1953,10 +2119,10 @@ comonad coalgebras and negative types for monad algebras.
 \bibliography{medium}
 
 
-%% Appendix
-\appendix
-\section{Appendix}
+% %% Appendix
+% \appendix
+% \section{Appendix}
 
-Text of appendix \ldots
+% Text of appendix \ldots
 
 \end{document}
