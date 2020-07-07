@@ -1,3 +1,4 @@
+\nonstopmode
 %% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
 \documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 %% For double-blind review submission, w/ CCS and ACM Reference
@@ -263,12 +264,14 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\denp}{\den[+]}
 \newcommand{\denn}{\den[-]}
 \newcommand{\Denn}[2]{\denn{#1}_{#2}}
+\newcommand{\Den}[2]{\den{#1}_{#2}}
 
 \newcommand{\tEff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\Eff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\bu}{\ensuremath{\bullet}}
 \newcommand{\Ge}{\ensuremath{\varepsilon}}
 \newcommand{\Ga}{\ensuremath{\alpha}}
+\newcommand{\Gd}{\ensuremath{\delta}}
 \newcommand{\Gl}{\ensuremath{\lambda}}
 \newcommand{\Gr}{\ensuremath{\rho}}
 \newcommand{\GG}{\ensuremath{\Gamma}}
@@ -322,14 +325,19 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\tcurry}{\mathsf{curry}}
 \newcommand{\comp}{\circ}
 \newcommand{\tweaken}{\mathsf{weaken}}
+\newcommand{\tdrop}[1][]{\mathsf{drop}_{#1}}
+%\newcommand{\drop}[1][]{\tdrop_{#1}} % Name clash
 \newcommand{\tcontract}{\mathsf{contract}}
-
+\newcommand{\contract}[1][]{\tcontract_{#1}}
 
 % Types
 \newcommand{\tTy}{\mathsf{Ty}}
 \newcommand{\Ty}[1]{\tTy^{#1}}
 \newcommand{\PTy}{\Ty+}
 \newcommand{\NTy}{\Ty-}
+\newcommand{\Cxt}{\mathsf{Cxt}}
+\newcommand{\RCxt}{\mathsf{RCxt}}
+\newcommand{\cempty}{\emptyset}
 \newcommand{\extr}[2]{#1.#2}
 \newcommand{\ext}[3]{#1.#2{:}#3}
 \newcommand{\qext}[5]{#1#2.#3#4{:}#5}
@@ -684,6 +692,10 @@ Types.
   & ::= & \diamond P
      \mid P \To N \mid \recty i I N
   & \mbox{Computation types (negative types)} \\
+\Cxt & \ni & \Gamma
+  & ::= & \cempty \mid \ext \Gamma x P
+  & \mbox{Typing context}
+\\
 \end{array}
 \]
 \dashruler{}
@@ -1062,6 +1074,10 @@ for $e_1 \bu e_2 \leq e$.
 \newcommand{\tzip}{\mathsf{zip}}
 \newcommand{\textract}{\mathsf{extract}}
 \newcommand{\extract}[1][]{\textract_{#1}}
+\newcommand{\tdisplay}{\mathsf{display}}
+\newcommand{\display}[1][]{\tdisplay_{#1}}
+% \newcommand{\tduplicate}{\mathsf{display}}
+% \newcommand{\duplicate}[1][]{\tdisplay_{#1}}
 \newcommand{\tduplicate}{\mathsf{duplicate}}
 \newcommand{\duplicate}[1][]{\tduplicate_{#1}}
 \newcommand{\tcobind}{\mathsf{cobind}}
@@ -1072,6 +1088,8 @@ for $e_1 \bu e_2 \leq e$.
 \newcommand{\ttail}{\mathsf{tail}}
 \newcommand{\suc}{(\_{+}1)}
 \newcommand{\Float}{\mathsf{Float}}
+\newcommand{\tiso}{\mathsf{iso}}
+\newcommand{\isot}{\tiso^\otimes}
 
 CBPV places the monad $\diamond P$ at the transition from positive
 types to negative types.  Dually, the transition $\Box N$ from
@@ -1085,7 +1103,7 @@ types $P$ can be \emph{comonad coalgebras}.
 % gives us access to a value in $S$.
 % \footnote{\url{https://bartoszmilewski.com/2017/01/02/comonads/}}
 % Besides functoriality, a comonad
-% has the natural transformations $\textract$ and $\duplicate$, dual to
+% has the natural transformations $\textract$ and $\display$, dual to
 % $\treturn$ and $\tjoin$.  The implementation of the context comonad is
 % as follows:
 % \[
@@ -1093,8 +1111,8 @@ types $P$ can be \emph{comonad coalgebras}.
 %   \textract & : & \D\,B \to B \\
 %   \textract\,(s,b) & = & b
 % \\[1.5ex]
-%   \tduplicate & : & \D,\B \to \D\,(\D\,B) \\
-%   \tduplicate\,(s,b) & = & (s, (s, b))
+%   \tdisplay & : & \D,\B \to \D\,(\D\,B) \\
+%   \tdisplay\,(s,b) & = & (s, (s, b))
 % \\[1.5ex]
 %   \tget & : & \D\,B \to S \\
 %   \tget\,(s,b) & = & s
@@ -1111,7 +1129,8 @@ with $\thead\,s = s\,0$ and $\ttail\,s = s \comp \suc$.
 The stream comonad lets us work in a setting where values are not
 single data points, but streams of data.
 Besides functoriality, a
-comonad has the natural transformations $\textract$ and $\duplicate$,
+comonad has the natural transformations $\textract$ and $\display$
+(in category theory called $\Ge$ and $\Gd$),
 dual to $\treturn$ and $\tjoin$.  The implementation of the stream
 comonad in $\SET$ is as follows:
 \[
@@ -1119,20 +1138,24 @@ comonad in $\SET$ is as follows:
   \textract & : & \D\,B \to B \\
   \textract\,s & = & \thead\,s
 \\[1.5ex]
-  \tduplicate & : & \D\,B \to \D\,(\D\,B) \\
-  \thead\,(\tduplicate\,s) & = & s \\
-  \ttail\,(\tduplicate\,s) & = & \tduplicate\,(\ttail\,s) \\
+  \tdisplay & : & \D\,B \to \D\,(\D\,B) \\
+  \thead\,(\tdisplay\,s) & = & s \\
+  \ttail\,(\tdisplay\,s) & = & \tdisplay\,(\ttail\,s) \\
 \end{array}
 \]
+The generic operations of a comonad allow us to \emph{extract} the
+value wrapped in a comonadic structure and to \emph{display} another
+layer of that structure.
+
 The comonad laws are a simple dualization of the monad laws:
 \[
 \xymatrix@C=10ex{
 \D\,B  \ar@{=}[dr]
-  & \D\,(\D\,B) \ar[l]_{\textract} \ar[r]^{\tduplicate}
+  & \D\,(\D\,B) \ar[l]_{\textract} \ar[r]^{\tdisplay}
   & \D\,(\D\,(\D\,B))
 \\
-  & \D\,B \ar[u]_{\tduplicate} \ar[r]^{\tduplicate} \ar@{=}[dr]
-  & \D\,(\D\,B) \ar[u]_{\tfmap\,\tduplicate} \ar[d]^{\tfmap\,\textract}
+  & \D\,B \ar[u]_{\tdisplay} \ar[r]^{\tdisplay} \ar@{=}[dr]
+  & \D\,(\D\,B) \ar[u]_{\tfmap\,\tdisplay} \ar[d]^{\tfmap\,\textract}
 \\
   &
   & \D\,B
@@ -1159,24 +1182,24 @@ satisfying the laws of a comonad coalgebra:
 \[
 \xymatrix@C=10ex{
 A  \ar@{=}[dr]
-  & \D\,A \ar[l]_{\textract} \ar[r]^{\tduplicate}
+  & \D\,A \ar[l]_{\textract} \ar[r]^{\tdisplay}
   & \D\,(\D\,A)
 \\
   & A \ar[u]_{\texpose} \ar[r]^{\texpose}
   & \D\,A \ar[u]_{\tfmap\,\texpose}
 }
 \]
-The implementation of $\expose{\den P}$ proceeds by induction on $P$.
+The implementation of $\expose[\den P]$ proceeds by induction on $P$.
 \[
 \begin{array}{lcl}
-  \expose{\den{\Box N}} & : & {\D\,\den N} \to {\D\,(\D\,\den N)} \\
-  \expose{\den{\Box N}} & = & \duplicate
+  \expose[\den{\Box N}] & : & {\D\,\den N} \to {\D\,(\D\,\den N)} \\
+  \expose[\den{\Box N}] & = & \display
 \\[1ex]
-  \expose{\den{\tupt I P}} & : & \tupt {i:I} {\den{P_i}} \to \D\,(\tupt {i:I} {\den{P_i}}) \\
-  \expose{\den{\tupt I P}} & = & \tzip \comp \tupt {i:I} \expose{\den{P_i}}
+  \expose[\den{\tupt I P}] & : & \tupt {i:I} {\den{P_i}} \to \D\,(\tupt {i:I} {\den{P_i}}) \\
+  \expose[\den{\tupt I P}] & = & \tzip \comp \tupt {i:I} \expose[\den{P_i}]
 \\[1ex]
-  \expose{\den{\sumt I P}} & : & \sumt {i:I} {\den{P_i}} \to \D\,(\sumt {i:I} {\den{P_i}}) \\
-  \expose{\den{\sumt I P}} & = & [\tfmap\,\iota_i \comp \expose{\den{P_i}}]_{i:I} \\
+  \expose[\den{\sumt I P}] & : & \sumt {i:I} {\den{P_i}} \to \D\,(\sumt {i:I} {\den{P_i}}) \\
+  \expose[\den{\sumt I P}] & = & \left[\tfmap\,\iota_i \comp \expose[\den{P_i}]\right]_{i:I} \\
 \end{array}
 \]
 Positive base types $o \in \PTy$ are required to be $\D$-coalgebras.
@@ -1226,9 +1249,28 @@ $(\R,{+},0,{\cdot},1,\leq)$.
 %
 The semantics is \emph{resource aware} and thus not constructed in a
 cartesian-closed category but in a symmetric monoidal closed category
-$(\CC,\otimes,\I,\lolli)$.
-%
-As a running example, we use the semiring $\R = \Pot\bN \setminus \emptyset$ of
+$(\CC,\otimes,\I,\lolli)$.  We overload the operators on
+exponentials, $\Lambda : \Hom {C \otimes A} B \to \Hom C {A \lolli B}$
+and $\teval : \Hom{(A \lolli B) \otimes A} B$.  The tensor product
+$\otimes$ is a bifunctor and it is customary to overload $\otimes$ for
+the functorial action
+$f_1 \otimes f_2 : \Hom{A_1 \otimes A_2}{B_1 \otimes B_2}$ where
+$f_i : \Hom{A_i}{B_i}$.  We shall also use $I$-ary products
+$\tupt {i:I} {A_i}$ and their functorial action $\tupt {i:I} {f_i}$.
+Further, the symmetric monoidal structure is usually witnessed by
+isomorphisms for left $\lambda_A : \Hom {\I \otimes A} A$ and right
+unit $\rho_A : \Hom {A \otimes I} A$, associativity
+$\Ga_{A,B,C} : \Hom{A \otimes (B \otimes C)} {(A \otimes B) \otimes
+  C}$
+and swap $\sigma_{A,B} : \Hom {A \otimes B} {B \otimes A}$.  We shall
+summarize combinations of these isomorphisms under the name
+$\isot : \Hom {\tupt I A} {\tupt J B}$ when the multisets
+$\{A_i\}_{i:I}$ and $\{B_j\}_{j:J}$ coincide modulo addition and
+deletion of $\I$s.
+
+
+As a running example for resource accounting,
+we use the semiring $\R = \Pot\bN \setminus \emptyset$ of
 \emph{multiplicities} ordered by $\supseteq$ with pointwise sum and
 product, \eg, $r + s = \{ n + m \mid n \in r, m \in s \}$.
 Subsemirings of $\R$ have been used for quantitative typing
@@ -1382,14 +1424,14 @@ $[\CC \to \CC]$, in particular $\dot\I\,A = \I$.
 \[
 \begin{array}{lcl@{~}c@{~}l}
   \textract   & : & \D[1]   & \todot & \Id \\
-  \tduplicate & : & \D[rs]  & \todot & \D[r] \comp \D[s] \\
-  \tweaken    & : & \D[0]   & \todot & \dot{\I} \\
-  \tcontract  & : & \D[r+s] & \todot & \D[r] \mathbin{\dot\otimes} \D[s] \\
-  % \tweaken    & : & \Hom {\D[0]\,A} A \\
-  % \tcontract  & : & \Hom {\D[r+s]\,A} {\D[r]\,\A \otimes \D[s]\,A} \\
+  \tdisplay & : & \D[rs]  & \todot & \D[r] \comp \D[s] \\
+  \tdrop    & : & \D[0]   & \todot & \dot{\I} \\
+  \tduplicate  & : & \D[r+s] & \todot & \D[r] \mathbin{\dot\otimes} \D[s] \\
+  % \tdrop    & : & \Hom {\D[0]\,A} A \\
+  % \tduplicate  & : & \Hom {\D[r+s]\,A} {\D[r]\,\A \otimes \D[s]\,A} \\
 \end{array}
 \]
-For example, $\tcontract$ takes
+For example, $\tduplicate$ takes
 $a \in \bigcup_{rw' \oplus sw' \wleq w} A_{w'}$ to
 $(a,a) \in \bigcup_{w_1 \oplus w_2 \wleq w} \bigcup_{rw_1' \leq w_1}
 \bigcup_{sw_2' \leq w_2} A_{w'_1} \times A_{w'_2}$.
@@ -1410,37 +1452,54 @@ The monoidal character of $\D$ is witnessed by the trivial morphism $\tzip$:
 The comonad laws generalize to graded comonads as follows:
 \[
 \xymatrix@C=10ex{
-\D[r]\,B  \ar@{=}[dr]
-  & \D[1]\,(\D[r]\,B) \ar[l]_{\textract}
-\\
-  & \D[r]\,B \ar[u]_{\tduplicate}
-}
-\qquad
-\xymatrix@C=10ex{
-\D[r]\,B  \ar[r]^{\tduplicate} \ar@{=}[dr]
+\D[r]\,B  \ar[d]_{\tdisplay} \ar[r]^{\tdisplay} \ar@{=}[dr]
   & \D[r]\,(\D[1]\,B)  \ar[d]^{\tfmap\,\textract}
 \\
+\D[1]\,(\D[r]\,B) \ar[r]^{\textract}
   & \D[r]\,B
 }
-\]
-\[
-\xymatrix@C=10ex{
-\D[q]\,(\D[rs]\,B) \ar[r]^{\tduplicate}
-  & \D[q]\,(\D[r]\,(\D[s]\,B))
+\qquad
+\xymatrix@C=12ex{
+\D[qrs]\,B \ar[d]_{\tdisplay} \ar[r]^{\tdisplay}
+  & \D[qr]\,(\D[s]\,B) \ar[d]^{\tdisplay}
 \\
-\D[qrs]\,B \ar[u]_{\tduplicate} \ar[r]^{\tduplicate}
-  & \D[qr]\,(\D[s]\,B) \ar[u]_{\tfmap\,\tduplicate}
+\D[q]\,(\D[rs]\,B) \ar[r]^{\tfmap\,\tdisplay}
+  & \D[q]\,(\D[r]\,(\D[s]\,B))
 }
 \]
+% \[
+% \xymatrix@C=10ex{
+% \D[r]\,B  \ar@{=}[dr]
+%   & \D[1]\,(\D[r]\,B) \ar[l]_{\textract}
+% \\
+%   & \D[r]\,B \ar[u]_{\tdisplay}
+% }
+% \qquad
+% \xymatrix@C=10ex{
+% \D[r]\,B  \ar[r]^{\tdisplay} \ar@{=}[dr]
+%   & \D[r]\,(\D[1]\,B)  \ar[d]^{\tfmap\,\textract}
+% \\
+%   & \D[r]\,B
+% }
+% \]
+% \[
+% \xymatrix@C=10ex{
+% \D[q]\,(\D[rs]\,B) \ar[r]^{\tdisplay}
+%   & \D[q]\,(\D[r]\,(\D[s]\,B))
+% \\
+% \D[qrs]\,B \ar[u]_{\tdisplay} \ar[r]^{\tdisplay}
+%   & \D[qr]\,(\D[s]\,B) \ar[u]_{\tfmap\,\tdisplay}
+% }
+% \]
 These laws reflect that $\D$ maps the multiplicative monoid
 $(\R,{\cdot},1)$ to the monoid structure $([\CC \to \CC],{\circ},\Id)$
 of composition in the functor category $[\CC \to \CC]$.  Similar laws
 need to hold for the additive monoid and distributivity.
 \[
 \xymatrix@C=12ex{
-\D[0]\,B \otimes \D[r]\,B \ar[d]_{\tweaken \otimes \tid}
-& \D[r]\,B \ar[l]_{\tcontract} \ar[r]^{\tcontract} \ar@{=}[d]
-& \D[r]\,B \otimes \D[0]\,B \ar[d]^{\tid \otimes \tweaken}
+\D[0]\,B \otimes \D[r]\,B \ar[d]_{\tdrop \otimes \tid}
+& \D[r]\,B \ar[l]_{\tduplicate} \ar[r]^{\tduplicate} \ar@{=}[d]
+& \D[r]\,B \otimes \D[0]\,B \ar[d]^{\tid \otimes \tdrop}
 \\
 \I \otimes \D[r]\,B \ar[r]^{\Gl}
 & \D[r]\,B
@@ -1449,34 +1508,193 @@ need to hold for the additive monoid and distributivity.
 \]
 \[
 \xymatrix@C=10ex{
-\D[q]\,B \otimes \D[r+s]\,B  \ar[d]_{\tid \otimes \tcontract}
-& \D[q+r+s]\,B \ar[l]_{\tcontract} \ar[r]^{\tcontract}
-& \D[q+r]\,B \otimes \D[s]\,B \ar[d]^{\tcontract \otimes \tid}
+\D[q]\,B \otimes \D[r+s]\,B  \ar[d]_{\tid \otimes \tduplicate}
+& \D[q+r+s]\,B \ar[l]_{\tduplicate} \ar[r]^{\tduplicate}
+& \D[q+r]\,B \otimes \D[s]\,B \ar[d]^{\tduplicate \otimes \tid}
 \\
 \D[q]\,B \otimes (\D[r]\,B \otimes \D[s]\,B) \ar[rr]^{\Ga}
 & & (\D[q]\,B \otimes \D[r]\,B) \otimes \D[s]\,B
 }
 \]
 \[
+\xymatrix@C=22ex{
+\D[(q+r)s]\,B \ar[r]^{\tdisplay} \ar[d]_{\tduplicate}
+& \D[q+r]\,(\D[s]\,B) \ar[d]^{\tduplicate}
+\\
+\D[qs]\,B \otimes \D[rs]\,B \ar[r]^{\tdisplay \otimes \tdisplay}
+& \D[q](\D[s]\,B) \otimes \D[r](\D[s]\,B)
+}
+\]
+\[
 \xymatrix{
-\D[qr]\,B \otimes \D[qs]\,B \ar[d]_{\duplicate \otimes \duplicate}
-  & \D[q(r+s)]\,B \ar[l]_{\tcontract} \ar[r]^{\duplicate}
-  & \D[q](\D[r+s]\,B) \ar[d]^{\fmap\tcontract}
+\D[qr]\,B \otimes \D[qs]\,B \ar[d]_{\display \otimes \display}
+  & \D[q(r+s)]\,B \ar[l]_{\tduplicate} \ar[r]^{\display}
+  & \D[q](\D[r+s]\,B) \ar[d]^{\fmap\tduplicate}
 \\
 \D[q](\D[r]\,B) \otimes \D[q](\D[s]\,B) \ar[rr]^{\tzip}
 &&
 \D[q](\D[r]\,B \otimes \D[s]\,B)
 }
 \]
+
+A $\D$-coalgebra is a functor $A : (\R,\leq) \to \CC$ with family of
+morphisms $\expose[r,s] : A_{rs} \to \D[r]\,A_s$ natural in $r$ and
+$s$.  For the $\D$-coalgebra $\D[\_]\,B$ the family $\expose$ is just
+$\tdisplay$, and the suitably generalizable laws for $\tdisplay$ are
+required to hold for $\texpose$:
 \[
-\xymatrix@C=22ex{
-\D[(q+r)s]\,B \ar[r]^{\tduplicate} \ar[d]_{\tcontract}
-& \D[q+r]\,(\D[s]\,B) \ar[d]^{\tcontract}
+\xymatrix@C=10ex{
+A_r  \ar[d]_{\texpose} \ar@{=}[dr]
 \\
-\D[qs]\,B \otimes \D[rs]\,B \ar[r]^{\tduplicate \otimes \tduplicate}
-& \D[q](\D[s]\,B) \otimes \D[r](\D[s]\,B)
+\D[1]\,A_r \ar[r]^{\textract}
+  & A_r
+}
+\qquad
+\xymatrix@C=12ex{
+A_{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
+  & \D[qr]\,A_s \ar[d]^{\tdisplay}
+\\
+\D[q]\,A_{rs} \ar[r]^{\tfmap\,\texpose}
+  & \D[q]\,(\D[r]\,A_s)
 }
 \]
+Further, $A$ needs to map the additive monoidal structure $(\R,+,0)$
+to the monoidal structure $(\CC,\otimes,\I)$ associated with the
+tensor product in $\CC$.  We choose to overload the names
+$\tduplicate$ and $\tdrop$ here to accommodate for the generalization
+from $\R$-comonads to $\R$-comonad algebras:
+\[
+\begin{array}{lcl}
+  \tduplicate & : & \Hom {A_{r+s}} {A_r \otimes A_s} \\
+  \tdrop      & : & \Hom {A_0} {\I} \\
+\end{array}
+\]
+The laws of $\tduplicate$ and $\tdrop$ for comonadic objects
+$\D[r]\,B$ immediately generalize to comonad algebras $A_r$:
+\[
+\xymatrix@C=12ex{
+A_{0} \otimes A_r \ar[d]_{\tdrop \otimes \tid}
+& A_r \ar[l]_{\tduplicate} \ar[r]^{\tduplicate} \ar@{=}[d]
+& A_r \otimes A_{0} \ar[d]^{\tid \otimes \tdrop}
+\\
+\I \otimes A_r \ar[r]^{\Gl}
+& A_r
+& A_r \otimes \I \ar[l]_{\Gr}
+}
+\]
+\[
+\xymatrix@C=10ex{
+A_q \otimes A_{r+s}  \ar[d]_{\tid \otimes \tduplicate}
+& A_{q+r+s} \ar[l]_{\tduplicate} \ar[r]^{\tduplicate}
+& A_{q+r} \otimes A_s \ar[d]^{\tduplicate \otimes \tid}
+\\
+A_q \otimes (A_r \otimes A_s) \ar[rr]^{\Ga}
+& & (A_q \otimes A_r) \otimes A_s
+}
+\]
+\[
+\xymatrix@C=22ex{
+A_{(q+r)s} \ar[r]^{\texpose} \ar[d]_{\tduplicate}
+& \D[q+r]\,A_s \ar[d]^{\tduplicate}
+\\
+A_{qs} \otimes A_{rs} \ar[r]^{\texpose \otimes \texpose}
+& \D[q]A_s \otimes \D[r]A_s
+}
+\]
+\[
+\xymatrix{
+A_{qr} \otimes A_{qs} \ar[d]_{\expose \otimes \expose}
+  & A_{q(r+s)} \ar[l]_{\tduplicate} \ar[r]^{\expose}
+  & \D[q]\,A_{r+s} \ar[d]^{\fmap\tduplicate}
+\\
+\D[q]A_r \otimes \D[q]A_s \ar[rr]^{\tzip}
+&&
+\D[q](A_r \otimes A_s)
+}
+\]
+
+Graded comonad algebras are closed under pointwise sums $(\sumt I A)_r = \sumt {i:I} {A_{i,r}}$ and products $(\tupt I A)_r = \tupt {i:I} {A_{i,r}}$.
+\[
+\begin{array}{lcl}
+  \expose[\sumt I A] & : & \Hom {(\sumt I A)_{rs}} {\D[r](\sumt I A)_s} \\
+  \expose[\sumt I A] & = & \left[  \fmap{\iota_i} \comp \expose[A_i] \right]_{i:I}
+\\[1ex]
+  \tdrop[\sumt I A] & : & \Hom {(\sumt I A)_0} \I \\
+  \tdrop[\sumt I A] & = & \left[ \tdrop[A_i] \right]_{i:I}
+\\[1ex]
+  \duplicate[\sumt I A] & : & \Hom {(\sumt I A)_{r+s}} {(\sumt I A)_r \otimes (\sumt I A)_s} \\
+  \duplicate[\sumt I A] & = & \left[ (\iota_i \otimes \iota_i) \comp \duplicate[A_i] \right]_{i:I}
+\\[2ex]
+  \expose[\tupt I A] & : & \Hom {(\tupt I A)_{rs}} {\D[r](\tupt I A)_s} \\
+  \expose[\tupt I A] & = & \tzip \comp \tupt {i:I} {\expose[A_i]}
+\\[1ex]
+  \tdrop[\tupt I A] & : & \Hom {(\tupt I A)_0} \I \\
+  \tdrop[\tupt I A] & = & \isot \comp \tupt {i:I} {\tdrop[A_i]}
+\\[1ex]
+  \duplicate[\tupt I A] & : & \Hom {(\tupt I A)_{r+s}} {(\tupt I A)_r \otimes (\tupt I A)_s} \\
+  \duplicate[\tupt I A] & = & \isot \comp \tupt {i:I} {\duplicate[A_i]}
+\end{array}
+\]
+This enables us to interpret all positive types of CBPV as graded
+comonad coalgebras.
+
+
+\subsection{Structured graded comonads and their algebras}
+
+Coeffect, quantitative, and many modal type systems maintain a typing
+context where each variable $x$ is annotated by a resource qualifier
+$r$ in addition to its type $\tau$.  Such a typing context
+$(r_1x_1{:}\tau_1, \dots, r_nx_n{:}\tau_n) =: \gamma\Gamma$ can be
+split into a pure typing context
+$\Gamma = x_1{:}\tau_1, \dots, x_n{:}\tau_n$ and a resource context
+$\gamma = x_1{:}r_1, \dots, x_n{:}r_n$ such that
+$\dom \gamma = \dom \Gamma$.  We shall freely mix the two notations as
+it suits our purpose.
+
+In coeffect-graded CBPV, we wish to interpret each type in the context
+as a $\D$-coalgebra for a fixed graded comonad $\D$.  The
+interpretation $\den \Gamma$ of the context $\Gamma$ should then be a
+comonad coalgebra over the grading $\gamma$ such that judgements
+$\qCompTy \gamma \Gamma t N$ can be interpreted as morphisms
+$\dent t : \Hom {\Den\Gamma \gamma} {\denn N}$.  Since each variable
+comes with its own resource qualifier, we cannot simply model the
+context as a tensor product $\tupt {z:\dom\Gamma} \den{\Gamma(z)}$ of
+$\D$-coalgebras since this product would indexed by a single resource
+qualifier $r \in \R$ rather than a resource context
+$\gamma : \dom\Gamma \to \R$.  The solution offered by
+\citet{orchard:icfp14} are \emph{structured indexed comonads}.  We
+shall generalize this to comonad coalgebras to the extend needed for
+interpreting contexts.
+
+\citet{mcBride:wadler60} observed that resource contexts
+$\gamma : \R^I$ form a left $\R$-semimodule under pointwise addition
+$(\gamma + \delta)(i) = \gamma(i) + \delta(i)$ and scaling
+$(r \cdot \gamma)(i) = r \cdot \gamma(i)$.  Contexts $\Gamma$ can thus
+be interpreted as $R^{\dom \Gamma}$-graded $\D$-coalgebras $C$ with
+the following operations:
+\[
+\begin{array}{lcl}
+  \tdrop[C]     & : & \Hom {C_0} {\I} \\
+  \duplicate[C] & : & \Hom {C_{\gamma+\delta}} {C_\gamma \otimes C_\delta} \\
+  \duplicate[C] & : & \Hom {C_{\sumt I \gamma}} {\tupt {i:I} C_{\gamma_i}} \\
+  \expose[C]    & : & \Hom {C_{r\gamma}} {\D[r]\,C_\gamma} \\
+\end{array}
+\]
+The second, generalized form of $\tduplicate$ will be used to split
+resources accumulated from $I$ parties.
+
+We will also need to interpret context extension.  To this end, we
+shall employ a structured product
+$(C \boxtimes D)_{\gamma.\delta} = C_\gamma \otimes D_\delta$ where
+$\gamma : \R^I$ and $\delta : \R^J$ and thus $C \boxtimes D$ is a
+$\R^{I+J}$-graded $\D$-coalgebra.  Further, we implicitely use the
+isomorphism between $1$-structured $\D$-coalgebras $C : \R^1 \to \CC$
+and $\R$-graded $\D$-coalgebras $A : \R \to \CC$ and define
+\[
+\den{\ext \Gamma x P}
+  = \den \Gamma \boxtimes \denp P
+\]
+sweeping name issues under the carpet (to be handled by de Bruijn indices).
 
 
 \begin{figure}[htbp]
@@ -1493,6 +1711,17 @@ Types.
   & ::= & \diamond P % \graybox{\compty r P}
      \mid \gqfun r P N \mid \recty i I N
   & \nbox{Computation types (negative types)} \\
+\Cxt & \ni & \Gamma
+  & ::= & \cempty \mid \ext \Gamma x P \mid \graybox{\ext \Gamma y N}
+  & \nbox{Typing context}
+\\
+\R & \ni & \graybox{r,s}
+   & ::= & 0 \mid 1 \mid r + s \mid rs
+   & \mbox{Resource qualifiers}
+\\
+\RCxt & \ni & \graybox{\gamma,\delta}
+  & ::= & \cempty \mid \ext \gamma x r \mid \ext \gamma y r
+  & \mbox{Resource context}
 \end{array}
 \]
 \dashruler{}
@@ -1606,7 +1835,8 @@ Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
  \nru{\relim\Pi}
      {\qCompTy \gamma \Gamma t {\rect I N}
     }{\qCompTy \gamma \Gamma {\proj i t}  {N_i}}
-\\[1.5ex]
+%\\[1.5ex]
+\qquad
 \graybox{
  \nrux{\rweak}
       {\gqCompTy {\gamma'} \Gamma t N}
@@ -1616,8 +1846,81 @@ Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
 \end{gather*}
 \rule{\textwidth}{0.2pt}
   \caption{Coeffect-graded call-by-push-value.}
-  \label{fig:cbpv}
+  \label{fig:coeff-cbpv}
 \end{figure}
+
+
+\subsection{Coeffect-graded CBPV: typing and semantics}
+
+We now have the mathematical structures in place to define a
+coeffect-graded variant of CBPV (see Fig.~\ref{coeff-cbpv}).
+The difference to pure CBPV is laid out in \emph{gray boxes}.
+
+The fundamental novelty is that the typing judgements
+$\qValTy \gamma \Gamma v P$ and $\qCompTy \gamma \Gamma t N$ are
+equipped with resource contexts $\gamma$ matching the typing contexts
+$\Gamma$.  A common pattern in the rules is that resource requirements
+of the subterms are added when both subterms are or maybe evaluated at
+runtime (rules \rintro\otimes, $\rlet^{+/-}$,
+\relim{\Box/\GS/\otimes/\diamond/\lolli}).  Note that in \relim\GS,
+the branches $t_i$ of the case statement (\relim\GS) share a resource
+context $\delta$, since only one of the branches is executed at
+runtime.  The different resource requirements of the branches can be
+subsumed under their maximum using rule \rweak.  Similarly, the
+components $t_i$ of a record (\rintro\Pi) share a resource context,
+since projection retrieves a single component (\relim\Pi).  This is
+the opposite of eager tuples (\rintro\otimes) where their eliminations
+makes all components available at the same time (\relim\otimes), thus,
+all have to be evaluated at runtime.
+
+Function types $\qfun r P N$ are now graded by a resource qualifier
+$r$ that specifies how the function argument is to be used in the
+function body.  In quantitative type with $\R = \Pot \bN$, qualifier
+$r$ gives the possible usage quantities of the function argument,
+e.g. $\{1\}$ for exactly one use (linear), $\{0,1\}$ for at most one
+use (affine), $\{0\}$ for no use (constant), and $\bN$ for arbitrary
+use (unrestricted).  A resource qualifier could also be a security
+level (public or private), and many other instances of $\R$ exist.  If
+a lambda abstraction $\lam x t$ is typed with $\qfun r P N$, qualifier
+$r$ is attached to variable $x$ in the resource context (rule
+\rintro\lolli).  If a function $t : \qfun r P N$ is applied (rule
+\relim\lolli), we need an $r$-qualified argument $v : rP$.  We could
+have given a qualified value typing judgement
+$\qValTy \gamma \Gamma v {rP}$ in the style of
+\citet{mcBride:wadler60} that---in the quantitative
+interpretation---provides $r$ copies of $v$ to be consumed by the
+function.  Such a judgement could come with a scaling rule
+\[
+\ru{\qValTy \gamma \Gamma v {sP}
+  }{\qValTy{r\gamma}\Gamma v {(rs)P}}
+\]
+that allow to scale the production of $v$ by $r$ if the resources are
+scaled accordingly (from $\gamma$ to $r\gamma$).  We bake scaling into
+the elimination rules instead.  Thus, $\relim\lolli$ receives an
+argument $\qValTy \delta \Gamma v P$, and to satisfy the demands of
+the function $\qCompTy \gamma \Gamma t {\qfun r P N}$, the resources
+$\delta$ for the argument are scaled by $r$, summing the resource
+requirements for the application to $\gamma + r\delta$.
+%
+Analogous scaling of the eliminatee is baked into the other value
+eliminators (\relim\Box, \relim\GS, \relim\otimes) and into the
+\rlet-rules.
+
+As a consequence of eliminatee scaling, $\relim\Box$ is no longer
+``natural-deduction'' style like projection, but ``sequent-calculus''
+style like $\relim\diamond$.  The original construct $\force v$ could
+eliminate an unscaled thunk $\qValTy \gamma \Gamma v {\Box N}$,
+however, computation typing $\qCompTy \gamma \Gamma {\force v} N$ has
+no scaling option, since negative types $N$ will not be interpreted as
+$\D$-coalgebras.  Scaling is semantically restricted to positive
+types, and in our type system, to context entries.  Thus, we extend
+CBPV to negative variables $y : N$ that come with a resource qualifier
+$r$ in the context and can there be interpreted as elements of
+$\D[r]\,\denn N$.  This is a modification also taken in call-by-need
+CBPV \citep{mcDermottMycroft:esop19}; this compromise allows us to
+keep CBPV's polarization of types where positive types stand for
+comonad coalgebras and negative types for monad algebras.
+
 
 
 
