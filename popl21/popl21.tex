@@ -1787,8 +1787,9 @@ Terms.
 \dashruler{}
 Value typing \fbox{$\gqValTy \gamma \Gamma v P$}\,.
 \begin{gather*}
- \nru{\rvar^+}{}
-     {\ValTy {\gqext 0\Gamma 1x P} x P}
+ \nru{\rvar %^+
+    }{
+    }{\ValTy {\gqext 0\Gamma 1x P} x P}
 \qquad
  \nru{\rintro\Box}
      {\qCompTy \gamma \Gamma t N
@@ -2032,7 +2033,7 @@ Again, because of $\rweak$, we interpret typing derivations rather than terms.
 The interpretation is now rather straightforward, but we spell it out for reference.
 \[
 \begin{array}{llcl}
-\rvar^+
+\rvar %^+
   & \denv {\ValTy{\qext 0 \Gamma 1 x P} x P} r
   & = & \Gr \comp (\tdrop[\den\Gamma] \otimes \tid[\Denp P r])
 \\
@@ -2138,6 +2139,12 @@ computations, not just of values.
 
 \subsection{Coeffect-graded CBPV: equational theory and operational semantics}
 
+The equational theory and operational semantics of coeffect-graded
+CBPV is identical to the one of CBPV \citep[Fig.~11]{levy:hosc06}.  In
+this section, we make just a few remarks on an alternative
+presentation of the permutation laws (called ``sequencing laws'' in
+\loccit).
+
 The equational theory of pure CBPV comprises $\beta$ and $\eta$ laws,
 and \emph{sequencing laws} that syntactically express that negative
 types are monad algebras \citep[Fig.~11]{levy:hosc06}.  The sequencing
@@ -2213,6 +2220,7 @@ $\qsubst{v}{r}{z}{t'} = \qsplits r {v} {\bar x} {\qsubst {\ptup {\bar
 
 
 \subsection{Coeffect-graded CBPV: substitution and metatheory}
+\label{sec:subst}
 
 Substitution for coeffect-graded type system has been worked
 out in detail by \citet{atkeyWood:types19,woodAtkey:linearity20}.
@@ -2510,8 +2518,9 @@ Types.
 \dashruler{}
 Value typing \fbox{$\qValTy \gamma \Gamma v P$}\,.
 \begin{gather*}
- \nru{\rvar^+}{}
-     {\ValTy {\qext 0\Gamma 1x P} x P}
+ \nru{\rvar %^+
+    }{
+    }{\ValTy {\qext 0\Gamma 1x P} x P}
 \qquad
  \nru{\rintro\Box}
      {\gqeCompTy \gamma \Gamma t e N
@@ -2539,8 +2548,8 @@ Computation typing \fbox{$\gqeCompTy \gamma \Gamma t e N$}\,.
 % \\[1.5ex]
  \nru{\rlet} %^+}
      {\qValTy \delta \Gamma v P \qquad
-      \gCompTy {\qext \gamma \Gamma r x P} t e N
-    }{\gpeCompTy {\gamma + r\delta} \Gamma {\qlet r x v t} e N}
+      \CompTy {\qext \gamma \Gamma r x P} t e N
+    }{\peCompTy {\gamma + r\delta} \Gamma {\qlet r x v t} e N}
 \qquad
  \nru{\relim\Box}
      {\qValTy \gamma \Gamma v {\gthunkty e N}
@@ -2552,13 +2561,13 @@ Computation typing \fbox{$\gqeCompTy \gamma \Gamma t e N$}\,.
 \\[1.5ex]
  \nru{\relim\GS}
      {\qValTy \delta \Gamma v {\sumt I P} \quad
-      \forall i{:}I,\ \gCompTy {\qext \gamma \Gamma r {x_i} {P_i}} {t_i} e N
-    }{\gpeCompTy {\gamma + r\delta} \Gamma {\caser v {\{r x_i.\, t_i\}_{i:I}}} e N}
+      \forall i{:}I,\ \CompTy {\qext \gamma \Gamma r {x_i} {P_i}} {t_i} e N
+    }{\peCompTy {\gamma + r\delta} \Gamma {\caser v {\{r x_i.\, t_i\}_{i:I}}} e N}
 \quad
  \nru{\relim\otimes}
      {\qValTy \delta \Gamma v {\tupt I P} \quad
-      \gqeCompTy \gamma {\extr \Gamma {\overline{r x_i{:}P_i}^{i:I}}} t e N
-    }{\gpeCompTy {\gamma + r\delta} \Gamma {\qsplits r v {\bar x} t} e N}
+      \qeCompTy \gamma {\extr \Gamma {\overline{r x_i{:}P_i}^{i:I}}} t e N
+    }{\peCompTy {\gamma + r\delta} \Gamma {\qsplits r v {\bar x} t} e N}
 \\[1.5ex]
  \nru{\rintro\diamond}
      {\qValTy \gamma \Gamma v P
@@ -2570,21 +2579,22 @@ Computation typing \fbox{$\gqeCompTy \gamma \Gamma t e N$}\,.
     }{\gpeCompTy {\gamma + \delta} \Gamma {\bind x u t} {e_1 \bu e_2} N}
 \\[1.5ex]
  \nru{\rintro\lolli}
-     {\gCompTy {\qext \gamma \Gamma r x P} t e N
-    }{\gqeCompTy \gamma \Gamma {\lam x t} e {\qfun r P N}}
+     {\CompTy {\qext \gamma \Gamma r x P} t e N
+    }{\qeCompTy \gamma \Gamma {\lam x t} e {\qfun r P N}}
 \qquad
  \nru{\relim\lolli}
-     {\gqeCompTy \gamma \Gamma t e {\qfun r P N} \qquad
+     {\qeCompTy \gamma \Gamma t e {\qfun r P N} \qquad
       \qValTy \delta \Gamma v P
-    }{\gpeCompTy {\gamma + r\delta} \Gamma {\app t v} e N}
+    }{\peCompTy {\gamma + r\delta} \Gamma {\app t v} e N}
 \\[1.5ex]
  \nru{\rintro\Pi}
-     {\forall i{:}I,\ \gqeCompTy \gamma \Gamma {t_i} e {N_i}
-    }{\gqeCompTy \gamma \Gamma {\trecord {\{i : t_i\}_{i:I}}} e {\rect I N}}
+     {\forall i{:}I,\
+      \qeCompTy \gamma \Gamma {t_i} e {N_i}
+    }{\qeCompTy \gamma \Gamma {\trecord {\{i : t_i\}_{i:I}}} e {\rect I N}}
 \qquad
  \nru{\relim\Pi}
-     {\gqeCompTy \gamma \Gamma t e {\rect I N}
-    }{\gqeCompTy \gamma \Gamma {\proj i t} e {N_i}}
+     {\qeCompTy \gamma \Gamma t e {\rect I N}
+    }{\qeCompTy \gamma \Gamma {\proj i t} e {N_i}}
 \\[1.5ex]
  \nrux{\graybox{\rsub}}
       {\gqeCompTy {\gamma'} \Gamma t e N}
@@ -2608,6 +2618,95 @@ types \citep{levy:hosc06},
 thus, can be ``bottled up'' in $\thunk t : \thunkty e N$ and
 reactivated via forcing in $\force v : N \mid e$.
 
+
+\subsection{Graded CBPV: semantics}
+
+As in effect-graded CBPV, negative types $N$ are interpreted as graded
+monad algebras $\denn N : (\Eff,\leq) \to \CC$, and as in
+coeffect-graded CBPV, positive types are interpreted as graded comonad
+coalgebras $\denp P : (\R,\leq) \to \CC$.  Values
+$\qValTy \gamma \Gamma v P$ are interpreted as natural transformations
+$\dent v : \Denpar \Gamma {\_\cdot\gamma} \todot \denp P$ and
+computations $\qeCompTy \gamma \Gamma t e N$ as morphisms
+$\dent t : \Hom {\Den\Gamma \gamma} {\Denn N e}$.  Except for some
+change in typing, the denotation of terms is unchanged from
+coeffect-graded CBPV.  We recapitulate the most interesting cases here
+with the updated typing:
+\[
+\xymatrix@C=10ex@R=3ex{
+\denv {\thunk t} r
+& \Den \Gamma {r\gamma}     \ar[r]^{\extract}
+& \D[r]\,\Den\Gamma\gamma   \ar[r]^{\fmapt[{\D[r]}]{\dent t}}
+& \D[r]\,\Denn N e
+\\
+\dent {\force v}
+& \Den \Gamma \gamma    \ar[r]^{\denv v 1}
+& \D[1]\,\Denn N e      \ar[r]^{\extract}
+& \Denn N e
+\\
+\dent {\ret v}
+& \Den \Gamma {r\gamma}  \ar[r]^{\denv v r}
+& \Denp P r              \ar[r]^{\treturn}
+& \T[\Ge]\,\Denp P r
+\\
+\dent {\bind x u t}
+& \Den \Gamma {\gamma + \delta}                 \ar[r]^{\duplicate}
+& \Den \Gamma \gamma \otimes \Den \Gamma \delta \ar[r]^{\tid \otimes \dent u}
+& \Den \Gamma \gamma \otimes \T[e_1] \Denp P r  \ar[d]^{\strengthl}
+\\
+& \Denn N {e_1 \bu e_2}
+& \T[e_1]\,\Denn N {e_2}                        \ar[l]_{\run[\denn N]}
+& \T[e_1](\Den \Gamma \gamma \otimes \Denp P r) \ar[l]_{\fmapt[{\T[e_1]}] {\dent t}}
+% \dent {\bind x u t}
+% & \Den \Gamma {\gamma + \delta}                 \ar[r]^{\duplicate}
+% & \Den \Gamma \gamma \otimes \Den \Gamma \delta \ar[r]^{\tid \otimes \dent u}
+% & \Den \Gamma \gamma \otimes \T[e_1] \Denp P r  \ar[r]^{\strengthl}
+% & \T[e_1](\Den \Gamma \gamma \otimes \Denp P r) \ar[r]^{\fmap {\dent t}}
+% & \T[e_1]\,N_{e_2}                               \ar[r]^{\trun}
+% & N_{e_1 \bu e_2}
+}
+\]
+Subsumption (\rsub) is interpreted by pre- and post-composition with
+the functorial actions of $\den \Gamma$ and $\denn N$:
+\[
+\xymatrix@C=10ex{
+% \rsub
+% &
+\Den \Gamma {\gamma}   \ar[r]^{\Den\Gamma{\gamma \leq \gamma'}}
+& \Den \Gamma {\gamma'}  \ar[r]^{\dent t}
+& \Denn N e              \ar[r]^{\Denn N {e \leq e'}}
+& \Denn N {e'}
+}
+\]
+
+% \begin{align*}
+% & \denv {\thunk t} r
+% & &
+% \xymatrix{
+%   \Den \Gamma {r\gamma}     \ar[r]^{\extract}
+% & \D[r]\,\Den\Gamma\gamma   \ar[r]^{\fmapt[{\D[r]}]{\dent t}}
+% & \D[r]\,\Denn N e
+% }
+% \\
+% \xymatrix{
+%   \Den \Gamma \gamma    \ar[r]^{\denv v 1}
+% & \D[1]\,\Denn N e      \ar[r]^{\extract}
+% & \Denn N e
+% }
+% \\
+% & \dent {\ret v}
+% & &
+% \xymatrix@C=8ex{
+%   \Den \Gamma {r\gamma}  \ar[r]^{\denv v r}
+% & \Denp P r              \ar[r]^{\treturn}
+% & \T[\Ge]\,\Denp P r
+% }
+% \end{align*}
+
+The operational semantics of graded CBPV is identical to the one of
+CBPV, and the substitution typing of coeffect-graded CBPV
+(Section~\ref{sec:subst}) can be mechanically transferred to fully
+graded CBPV.
 
 %% Acknowledgments
 \begin{acks}                            %% acks environment is optional
