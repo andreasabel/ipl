@@ -205,7 +205,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 <concept_desc>Theory of computation~Operational semantics</concept_desc>
 <concept_significance>100</concept_significance>
 </concept>
-</ccs2012>
+</Cs2012>
 \end{CCSXML}
 
 \ccsdesc[500]{Theory of computation~Type theory}
@@ -246,6 +246,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \section{An effect-graded version of CBPV}
 
 %\newcommand{}{\ensuremath{}}
+\newcommand{\bla}{\ensuremath{\mbox{$$}}}
 \newcommand{\ie}{\emph{i.e.}}
 \newcommand{\eg}{\emph{e.g.}}
 \newcommand{\Eg}{\emph{E.g.}}
@@ -269,7 +270,9 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\Denp}[2]{\denp{#1}_{#2}}
 \newcommand{\Denn}[2]{\denn{#1}_{#2}}
 \newcommand{\Den}[2]{\den{#1}_{#2}}
+\newcommand{\Denpar}[2]{\Den{#1}{(#2)}}
 \newcommand{\denv}[2]{\dent{#1}_{#2}}
+\newcommand{\denvp}[2]{\dent{#1}_{(#2)}}
 
 \newcommand{\tEff}{\ensuremath{\mathsf{Eff}}}
 \newcommand{\Eff}{\ensuremath{\mathsf{Eff}}}
@@ -898,7 +901,7 @@ different branches of a case distinction, for instance, may produce
 very different effects.  To end up with a unique classifier $e$, the
 branches may have to be typed using effect subsumption (\rsub).  In
 fact, the uses of \rsub can be confined to the hypotheses of \relim\GS
-and \rintro\Pi, except for a final invokation of \rsub at the very end
+and \rintro\Pi, except for a final invocation of \rsub at the very end
 of the typing derivation.  Alternatively, we could have introduced
 effect algebras with suprema $\sup_{i:I} e_i$ instead of a preorder $e
 \leq e'$.  However, suprema might not always exist; by using
@@ -993,7 +996,7 @@ analogously:
     \langle \Denn N {e_1 \leq e_2} \comp \pi_i {} \rangle_{i:I} \\
 \end{array}
 \]
-That these coercions satify the identity and composition---the functor
+That these coercions satisfy the identity and composition---the functor
 laws for $\denn N$---is easy to verify.
 
 \subsubsection{Interpretation of terms}
@@ -1192,7 +1195,7 @@ though not all, \eg, the context comonad $S{\times}\_$.
 In this article, we consider only monoidal comonads.
 
 If type constructor $\Box$ is interpreted as a monoidal comonad $\D$,
-then all positive types $P$ can be intepreted as $\D$-coalgebras
+then all positive types $P$ can be interpreted as $\D$-coalgebras
 $A = \den P$, \ie, implement a morphism $\expose[A] : A \to \D\,A$
 satisfying the laws of a comonad coalgebra:
 \[
@@ -1258,7 +1261,7 @@ $\Hom{A}{B} \to \Hom{\T\,A}{B}$ for $\T$-algebras $B$ in CBPV.
 
 Graded comonads have been utilized to give semantics to
 context-dependent computation \citep{orchard:icfp14}.  For grading,
-loccit uses a \emph{resource algebra} in form of a pre-ordered
+\loccit uses a \emph{resource algebra} in form of a pre-ordered
 semiring
 $(\R,{+},0,{\cdot},1,\leq)$.
 % $(\R,\_{+}\_,0,\_{\cdot}\_,1,\leq)$.
@@ -1706,7 +1709,7 @@ We will also need to interpret context extension.  To this end, we
 shall employ a structured product
 $(C \boxtimes D)_{\gamma.\delta} = C_\gamma \otimes D_\delta$ where
 $\gamma : \R^I$ and $\delta : \R^J$ and thus $C \boxtimes D$ is a
-$\R^{I+J}$-graded $\D$-coalgebra.  Further, we implicitely use the
+$\R^{I+J}$-graded $\D$-coalgebra.  Further, we implicitly use the
 isomorphism between $1$-structured $\D$-coalgebras $C : \R^1 \to \CC$
 and $\R$-graded $\D$-coalgebras $A : \R \to \CC$ and define
 \[
@@ -1914,7 +1917,7 @@ exactly one use (linear), $\{0,1\}$ for at most one use (affine),
 $\{0\}$ for no use (constant), and $\bN$ for arbitrary use
 (unrestricted).  A resource qualifier could also be a security level
 (public or private), or a sensitivity level (a non-negative real)
-\citep{reedPeirce:icfp10}.  If a lambda abstraction $\lam x t$ is
+\citep{reedPierce:icfp10}.  If a lambda abstraction $\lam x t$ is
 typed with $\qfun r P N$, qualifier $r$ is attached to variable $x$ in
 the resource context (rule \rintro\lolli).  If a function
 $t : \qfun r P N$ is applied (rule \relim\lolli), we need an
@@ -2117,7 +2120,7 @@ types are monad algebras \citep[Fig.~11]{levi:hosc06}.  The sequencing
 laws contain a generalization of the associativity law for monads and
 allow to permute a bind under a $\lambda$ or record construction.  In
 the presence of $\eta$ for functions and records, they are
-interderivable with the following permutation laws:
+inter-derivable with the following permutation laws:
 \[
 \begin{array}{llcl}
 \rpi\diamond
@@ -2150,14 +2153,15 @@ $\qsubst{v}{r}{z}{t'} = \qsplits r {v} {\bar x} {\qsubst {\ptup {\bar
 
 Our extension of CBPV features negative variables $y$ standing for
 computations $u$, thus, we require a notion of computation
-substitution $\qsubst u r t y$ that should have the following semantics.
+substitution $\qsubst u r t y$ that should have the following semantics
+(see corollaries \ref{cor:tysinglesub} and \ref{cor:semsinglesub}).
 \begin{align*}
 &
   \ru{\qCompTy \delta \Gamma u N \qquad
       \oCompTy {\qext \gamma \Gamma r y N} t {N'}
-    }{\pCompTy {\gamma + r\delta} \Gamma {\qsubst u r t y} {N'}}
+    }{\pCompTy {\gamma + r\delta} \Gamma {\qsubst u r y t} {N'}}
 \\ &
-  \dent{\qsubst u r t y} = \dent t
+  \dent{\qsubst u r y t} = \dent t
     \comp (\tid[\den\Gamma \gamma]
              \otimes (\fmapt[{\D[r]}] \dent u \comp \expose[\den\Gamma]))
     \comp \duplicate[\den\Gamma]
@@ -2183,16 +2187,18 @@ these equations have the same denotation.
 Read as reduction rules, these laws are added to the operational
 semantics of CBPV, replacing $\beta$-law $\force{(\thunk u)} = u$.
 
+\subsection{Coeffect-graded CBPV: substitution and metatheory}
+
 Substitution for coeffect-graded type system has been worked
-out in detail by \citet{atkeyWood:types19}.  It straightforwardly extends to
-coeffect-graded CBPV.
+out in detail by \citet{atkeyWood:types19,woodAtkey:linearity20}.
+It straightforwardly extends to coeffect-graded CBPV.
 %
 A substitution $\sigma$ is a finite map from variable to terms,
 mapping positive variables $x$ to values $v$ and negative variables
 $y$ to computations $t$.  Substitution typing
 \fbox{$\SubstTy \Psi \Gamma \sigma \Delta$} is equipped with a matrix
-$\Psi \in \R^{\dom\Gamma \times \dom\Delta}$ recording the usage
-vector $\Psi(z) \in \R^{\dom\Gamma}$ for each variable
+$\Psi : \R^{\dom\Gamma \times \dom\Delta}$ recording the usage
+vector $\Psi(z) : \R^{\dom\Gamma}$ for each variable
 $z \in \dom\Delta = \dom \sigma$ in the domain of the substitution.
 \[
   \ru{
@@ -2210,19 +2216,38 @@ Capture-avoiding parallel substitution into values \fbox{$v \sigma$} and
 computations \fbox{$t \sigma$} is defined as usual by recursion on the term.
 
 The matrix $\Psi : \R^{\dom \Gamma \times \dom \Delta}$ acts as a
-linear map $\R^{\dom \Delta} \to \R^{\dom \Gamma}$ and allows us to
-state the substitution theorem.
+linear map
+$(\delta : \R^{\dom \Delta}) \mapsto (\delta\Psi : \R^{\dom \Gamma})$
+and allows us to state the substitution theorem.
 \begin{theorem}[Substitution preserves typing]
   Let $\SubstTy \Psi \Gamma \sigma \Delta$.
   \begin{enumerate}
-  \item If $\qValTy \delta \Delta v P$ then $\pValTy {\Psi\delta} \Gamma {v\sigma} P$.
+  \item If $\qValTy \delta \Delta v P$ then $\pValTy {\delta\Psi} \Gamma {v\sigma} P$.
   \item If $\qCompTy \delta \Delta t N$ then
-    $\pCompTy {\Psi\delta} \Gamma {t\sigma} N$.
+    $\pCompTy {\delta\Psi} \Gamma {t\sigma} N$.
   \end{enumerate}
 \end{theorem}
 \begin{proof}
   Straightforward adaptation of \citet{atkeyWood:types19}.
 \end{proof}
+\begin{corollary}[Single substitution preserves typing]
+  \label{cor:tysinglesub}
+  \bla
+  \begin{enumerate}
+  \item If $\qValTy \delta \Gamma v P$ and
+      $\oCompTy {\qext \gamma \Gamma r x P} t {N}$
+      then $\pCompTy {\gamma + r\delta} \Gamma {\qsubst v r x t} {N}$.
+  \item If $\qCompTy \delta \Gamma u N$ and
+      $\oCompTy {\qext \gamma \Gamma r y N} t {N'}$
+      then $\pCompTy {\gamma + r\delta} \Gamma {\qsubst u r y t} {N'}$.
+  \end{enumerate}
+\end{corollary}
+%\begin{remark}
+Analogous statements are available for the substitution into values
+$\ValTy {\qext \gamma \Gamma r x P} w {P'}$ and
+$\ValTy {\qext \gamma \Gamma r y N} w {P}$, however, they are not
+invoked in the proof of subject reduction.
+%\end{remark}
 \begin{corollary}[Subject reduction]
   $\beta$-reduction of coeffect-graded CBPV preserves types.
 \end{corollary}
@@ -2237,7 +2262,7 @@ as reducibility candidates or normalization by evaluation (\cf
 
 The denotation of a substitution $\SubstTy \Psi \Gamma \sigma \Delta$
 is a natural transformation
-$\denv \sigma \delta : \Hom {\Den \Gamma {\Psi\delta}} {\Den \Delta
+$\denv \sigma \delta : \Hom {\Den \Gamma {\delta\Psi}} {\Den \Delta
   \delta}$
 such that
 $
@@ -2247,27 +2272,91 @@ $
 =
 \denv \sigma {\delta'}
 \comp
-\Den \Gamma {\Psi\delta \leq \Psi\delta'}
+\Den \Gamma {\delta\Psi \leq \delta'\Psi}
 $.
 It is defined by recursion as follows:
-\begin{align*}
-& \ru{
+\[
+\begin{array}{ll@{~}c@{~}l@{~}c@{~}l}
+\ru{
     }{\SubstTy {0} \Gamma \sempty \cempty}
-& \dent \sempty
-& : \Hom {\Den\Gamma 0} \I
-& & = \tdrop[\den\Gamma]
-\\[2ex]
-& \ru{\SubstTy \Psi \Gamma \sigma \Delta \qquad
+& \denv \sempty \delta
+& : & \Hom {\Den\Gamma 0} \I
+\\ &
+& = & \tdrop[\den\Gamma]
+\\[3ex]
+\ru{\SubstTy \Psi \Gamma \sigma \Delta \qquad
       \qValTy \gamma \Gamma v P
     }{\pSubstTy {\Psi,\gamma} \Gamma {\sext \sigma x v} {\ext \Delta x P}}
-& \dent{\sext \sigma x v}
-& : \Hom  {\Den\Gamma{\Psi\delta,r\gamma}} {\Den \Delta \delta \otimes \Denp P r}
-& & = \denv \sigma \delta \otimes \denv v r
-\\[2ex]
-& \ru{\SubstTy \Psi \Gamma \sigma \Delta \qquad
+& \denvp {\sext \sigma x v} {\delta,r}
+& : & \Hom  {\Den\Gamma{(\delta,r)(\Psi,\gamma)}} {\Den \Delta \delta \otimes \Denp P r}
+\\ &
+& = & (\denv \sigma \delta \otimes \denv v r)
+\comp \duplicate[\den\Gamma]
+\\[3ex]
+\ru{\SubstTy \Psi \Gamma \sigma \Delta \qquad
       \qCompTy \gamma \Gamma t N
     }{\pSubstTy {\Psi,\gamma} \Gamma {\sext \sigma y t} {\ext \Delta y N}}
-\end{align*}
+& \denvp {\sext \sigma y t} {\delta,r}
+& : & \Hom  {\Den\Gamma{(\delta,r)(\Psi,\gamma)}} {\Den \Delta \delta \otimes \D[r]\,\denn N}
+\\ &
+& = & (\denv \sigma \delta \otimes (\fmapt[{\D[r]}]{\dent t} \comp \expose[{\den\Gamma}]))
+\comp \duplicate[\den\Gamma]
+\end{array}
+\]
+Observe that $(\delta,r)(\Psi,\gamma) = \delta\Psi + r\gamma$ and,
+consequently,
+$\duplicate[\den\Gamma] : \Hom {\Den\Gamma{(\delta,r)(\Psi,\gamma)}}
+{\Den\Gamma{\delta\Psi} \otimes \Den\Gamma{r\gamma}}$.
+\begin{theorem}[Soundness of substitution]
+  Let $\SubstTy \Psi \Gamma \sigma \Delta$.
+  \begin{enumerate}
+  \item If $\qValTy \delta \Delta v P$ then
+     $\denv{v\sigma}r = \denv v {r} \comp \denv \sigma {r\delta}
+      : \Hom {\Den{\Gamma}{r\delta\Psi}} {\Denp P r}$.
+  \item If $\qCompTy \delta \Delta t N$ then
+     $\dent{t\sigma} = \dent t \comp \denv \sigma \delta
+      : \Hom {\Den\Gamma{\delta\Psi}} {\denn N}$.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  By induction on the typing derivation of the term $v$ and $t$, resp.
+\end{proof}
+\begin{corollary}[Soundness of single substitution]
+  \label{cor:semsinglesub}
+  \bla
+  \begin{enumerate}
+  \item If $\qValTy \delta \Gamma v P$ and
+      $\oCompTy {\qext \gamma \Gamma r x P} t {N}$
+      then
+\[
+  \dent{\qsubst v r x t} = \dent t
+    \comp (\tid[\den\Gamma \gamma] \otimes \denv v r)
+    \comp \duplicate[\den\Gamma]
+  .
+\]
+  \item If $\qCompTy \delta \Gamma u N$ and
+      $\oCompTy {\qext \gamma \Gamma r y N} t {N'}$ then
+\[
+  \dent{\qsubst u r y t} = \dent t
+    \comp (\tid[\den\Gamma \gamma]
+             \otimes (\fmapt[{\D[r]}] \dent u \comp \expose[\den\Gamma]))
+    \comp \duplicate[\den\Gamma]
+  .
+\]
+  \end{enumerate}
+\end{corollary}
+\begin{proof}
+  After comprehending that the semantics of identity substitutions is
+  just $\tid$, we observe that the semantics of single substitutions
+  is $\dent {v/rx} = (\tid \otimes \denv v r) \comp \duplicate$ and
+  $\dent {t/ry} = (\tid \otimes (\fmapt[{\D[r]}]{\dent t} \comp \expose[{\den\Gamma}])) \comp
+  \duplicate$, resp.
+\end{proof}
+
+
+\subsection{Coeffect-graded CBPV without negative variables}
+
+We introduce negative variables $y : N$ for the sake of grading thunking ($\Box$).  There is an alternative
 
 
 \section{Fully graded CBPV}
@@ -2292,29 +2381,29 @@ CBPV where both effects and coeffects are graded.
 Fig.~\ref{fig:full-cbpv} presents its types and typing rules where the
 differences to the coeffect-graded version are
 \graybox{\mbox{highlighted}}.
-%
-We reintroduced effect grading into the computation typing
+
+We reintroduce effect grading into the computation typing
 $\qeCompTy \gamma \Gamma t e N$.  As in the effect-graded version,
 effects are accumulated in a single place, the monadic bind construct
-(\relim\diamond).  The negative variables $y : N$ we introduced for
+(\relim\diamond).  The negative variables $y : N$ we have introduced for
 coeffect grading are now annotated with an effect qualifier $e$ in the
 typing context $\Gamma$.  The full information about a negative
 variable $y$ in a graded context $\gamma\Gamma$ is type $N$, effect
 $e$ and coeffect $r$.  This combination is interpreted as
-$\D[r]\,\denn N e$ where the resource qualifier acts as ``multiplier''
+$\D[r]\,\Denn N e$ where the resource qualifier acts as ``multiplier''
 for the effect qualifier $e$.  However, we never have to carry out
 this ``multiplication'', thus, do not require a law how the comonad
 $\D$ distributes over the monad algebra $N$.  The reason is that only
-variables $y$ with $r=1$ can be used from the context $(\rvar^{-})$.
-In a well-formed derivation, other $r$s for variable are broken down
-in the course of the derivation until at the leaves (\rvar), only a
+variables $y$ with qualifier $r=1$ can be used from the context $(\rvar^{-})$.
+In a well-formed derivation, other resource qualifiers for variables are broken down
+in the course of the derivation until at the leaves (\rvar) only a
 single resource qualifier $r=1$ is left.
-%
+
 The crucial insight concerning the absence of distributive laws is the
 laziness of effects in CBPV.  They are only observed at positive
 types \citep{levy:hosc06},
 thus, using a negative variable $y : N \mid e$ only schedules
-the effect $e$, and likewise, in a negative let-binding ($\rlet^{-}$),
+the effect $e$.  Likewise, in a negative let-binding ($\rlet^{-}$),
 the effects $e$ associated with the computation $u$ bound to $y$ are
 not run but ``bottled up'' with the variable in the context.  The same
 happens for thunk elimination ($\relim\Box$): the effects of the
