@@ -171,14 +171,18 @@ types into value and computation types and can thus express both
 call-by-name and call-by-value evaluation in the presence of effects.
 Semantically, effects are modeled by a monad, and computation types as
 algebras over this monad.
+%
 Effect type systems usually express more information than the presence
-of an effect; often effects are categorized by pre-ordered monoid
+of an effect; often effects are categorized by preordered monoid
 where the monoid operation represents accumulation of effects and the
 order expresses effect subsumption, in analogy to subtyping.
 In this work, a \emph{graded} version of CBPV is presented where the typing
 of computations likens effect typing.  Semantically, computation types
 are then represented as graded monad algebras.
-Further we present a version of CBPV which additionally has graded coeffects.
+%
+Observing that the value types of CBPV can be interpreted as comonad coalgebras, we further present a version of CBPV that has coeffects graded by a preordered semiring.  Value types and contexts are interpreted as graded comonad coalgebras, allowing resource-aware interpretations of CBPV.
+%
+Finally, we combine the two systems into a fully graded version of CBPV where both effects and coeffects are graded.  Thus turns out to be possible without specifying an interaction between effects and coeffects.
 \end{abstract}
 
 
@@ -232,7 +236,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\ie}{\emph{i.e.}}
 \newcommand{\eg}{\emph{e.g.}}
 \newcommand{\Eg}{\emph{E.g.}}
-\newcommand{\loccit}{\emph{loc.\,cit.}}
+\newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
 \newcommand{\cf}{cf.\ }
 \newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
 \newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
@@ -441,24 +445,118 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\rsub}{\rulename{sub}}
 \newcommand{\rweak}{\rulename{weak}}
 
+% Concrete effects
+\newcommand{\tprint}{\mathsf{print}}
+\newcommand{\print}[2]{\tprint\,#1.\,#2}
+\newcommand{\toutput}{\mathsf{output}}
+%\newcommand{\output}[2][]{\toutput_{#1}\,#2}
+\newcommand{\tthrow}{\mathsf{throw}}
+\newcommand{\throw}[1]{\tthrow\,#1}
+\newcommand{\tcatch}{\mathsf{catch}}
+\newcommand{\catch}[3]{#1\,\tcatch\,#2 \mapsto #3}
+\newcommand{\traise}{\mathsf{raise}}
+%\newcommand{\raise}[1]{\traise\,#1} %clash
+\newcommand{\thandle}{\mathsf{handle}}
+\newcommand{\handle}[4][]{\thandle_{#1}\,#2\,#3\,#4}
+
 
 \section{Introduction}
 
-Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
-types into value and computation types and can thus express both
-call-by-name and call-by-value evaluation in the presence of effects.
-Semantically, effects are modeled by a monad, and computation types as
-algebras over this monad.
-Effect type systems usually express more information than the presence
-of an effect; typically effects are structured as pre-ordered monoid
-where the monoid operation represents accumulation of effects and the
-order subsumption, in analogy to subtyping.
-In this work, a \emph{graded} version of is presented where the typing
-of computations likens effect typing.  Semantically, computation types
-are then represented as graded monad algebras.
-Further we present a version of CBPV which additionally has graded coeffects.
+Levy's call-by-push-value calculus (CBPV) \citeyearpar{levy:hosc06}
+is a simply typed lambda
+calculus with disjoint sums and eager and lazy products that allows
+the modelling of ``lazy'' effects.  For instance, the CBPV-program
+\[\print {\mathtt{"function"}} \lam x {\print {\mathtt{"argument"}} x}\]
+of type $P \To \diamond P$, will, unlike the corresponding ML-program,
+not print the word ``function'' and return a function; it will simply
+wait for an input value of type $P$.  Only after an argument has been
+supplied, the program will print the words ``function'' and
+``argument'' and then return the argument.  The reason is that effects
+in CBPV can only be observed at \emph{value types} like $P$, and
+function types are not value types but computation types.  Effectful
+actions (like printing) at computation types $N$ are ``pushed down''
+the type structure until they reach a position at a monadic type
+$\diamond P$ where they can be executed.  Semantically, this is
+facilitated by interpreting computation types as monad algebras with
+an action $\trun : \T\,N \to N$ that allows to formally run effects
+transported by the monad $\T$ at type $N$, even though $N$ is not
+directly a monadic type $\diamond P$.
 
-\paragraph*{Preliminaries.}  The reader should bring some elementary
+CBPV polarizes types into value types $P$ and computation types $N$
+where the former embed into the latter as $\diamond P$ by the formal
+``monad''~$\diamond$ and the latter embed into the former as $\Box N$
+by ``thunking''~$\Box$.  In Levy's \emph{behavioral semantics},
+functor $\diamond$ is a left adjoint to functor $\Box$ and need not be
+a monad.  Quite the opposite, when modelling store
+$\diamond P = P \times S$ is a comonad and $\Box N = S \to N$ a monad.
+Contrastingly, in the above explained \emph{algebra semantics},
+$\diamond$ is indeed modeled by a monad $\T$, yet $\Box$ just by the
+identity.  It is however possible to model $\Box$ by a monoidal
+comonad $\D$, and positive types by comonad coalgebras with an action
+$\texpose : P \to \D\,P$ that makes the services of the comonad
+available at all value types, not just at $\Box N$.
+
+Building on these observations, we investigate in this article how
+CBPV %would look like if it would
+can
+keep track of not just the presence
+of an effect or coeffect but also the kind of effect and coeffect.
+Semantically, precise information about effects can be obtained by
+using a family of monads $\T[e]$ graded over effect classifiers $e$
+drawn from a preordered monoid \cite{katsumata:popl14}.  For CBPV, we
+generalize the concept of monad algebras $N$ to \emph{graded} such
+ones, $N_e$.  Syntactically, computation typing $\CompTy \Gamma t e N$
+is extended by an effect classifier $e$
+(as usual in type and effect systems \citep{nielsen:effect99})
+such that a computation can be
+interpreted by a morphism $\Gamma \to N_e$.
+
+Coeffect type systems
+\citep{brunel:esop14,orchard:icfp14,ghicaSmith:esop14} have been
+developed to track resource consumption by attaching usage information
+to each variable in the typing context.  Coeffect typing generalizes
+linear typing \citep{girard:linear} to quantitative typing
+\citep{sergeyVytiniotisPeytonJones:popl14,mcBride:wadler60,atkey:lics18}
+and subsumes sensitivity analysis \citep{reedPierce:icfp10} and static
+information control flow \citep{volpano:jcs96} aka security typing.
+Coeffects can be modeled by a comonad $\D[r]$ graded over resource
+qualifiers $r$ drawn from a preordered semiring.  For the sake of
+coeffect-graded CBPV, we generalize graded comonads to graded comonad
+coalgebras.  Value types $P$ and contexts $\Gamma$ are then
+interpreted as such coalgebras.  Value typing
+$\qValTy \gamma \Gamma v P$ and computation typing
+$\qCompTy \gamma \Gamma t N$ are based on linear typing an come
+equipped with a resource context~$\gamma$.  Semantically, values are
+interpreted as morphisms $\Gamma_{r\gamma} \to P_r$ allowing the
+``multiplication'' or \emph{scaling} of a value by $r$ % natural in $r$
+and computations as morphisms $\Gamma_\gamma \to N$.
+
+Finally, effect and coeffect graded CBPV can be combined into a fully
+graded CBPV calculus, surprisingly without sorting out any interaction
+between effects and coeffects, such as the distributive laws of
+\citet{orchard:icfp16}.  We credit the smoothness of the integration
+to the careful placement of monad and comonad in CBPV's type system,
+and the lack of need for scaling % of not just values but also
+of computations.
+
+\paragraph*{Contributions}
+\begin{enumerate}
+
+\item We introduce graded monad algebras and an effect-graded version
+  of CBPV in Section~\ref{sec:effect}, after recapitulating monads and
+  their algebras and graded monad.
+
+\item We further introduce graded comonad coalgebras and a
+  coeffect-graded version of CBPV in Section~\ref{sec:coeff}.  We give
+  its denotational and operational semantics and adapt Atkey and
+  Wood's substitution theorem \citeyearpar{atkeyWood:types19} to this
+  version of CBPV.
+
+\item We present an effect- and coeffect-graded version of CBPV in Section~\ref{sec:full-cbpv}.
+
+\end{enumerate}
+
+\paragraph*{Preliminaries}  The reader should bring some elementary
 knowledge of category theory, such as the interpretation of
 simply-typed lambda calculus in cartesian-closed categories.  However,
 we try to be gentle with categorical concepts such as monads and
@@ -471,6 +569,7 @@ $\CC_i \to \CC_j$ in $\SET$ for $i \to j$ in $\CC$ and morphisms are
 natural transformations $(f_i : A_i \to B_i)_{i:\CC}$.
 
 \section{An effect-graded version of CBPV}
+\label{sec:effect}
 
 % As effect algebra, we assume a pre-ordered monoid
 % $(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
@@ -1152,19 +1251,6 @@ Subsumption is interpreted by functoriality in $\Eff$.
 These definitions are understood in the context of the given typing rules.
 
 
-\newcommand{\tprint}{\mathsf{print}}
-\newcommand{\print}[2]{\tprint\,#1.\,#2}
-\newcommand{\toutput}{\mathsf{output}}
-%\newcommand{\output}[2][]{\toutput_{#1}\,#2}
-\newcommand{\tthrow}{\mathsf{throw}}
-\newcommand{\throw}[1]{\tthrow\,#1}
-\newcommand{\tcatch}{\mathsf{catch}}
-\newcommand{\catch}[3]{#1\,\tcatch\,#2 \mapsto #3}
-\newcommand{\traise}{\mathsf{raise}}
-%\newcommand{\raise}[1]{\traise\,#1} %clash
-\newcommand{\thandle}{\mathsf{handle}}
-\newcommand{\handle}[4][]{\thandle_{#1}\,#2\,#3\,#4}
-
 \subsection{Example effects}
 
 We replay some of Levy's \citeyearpar{levy:hosc06} effect examples in
@@ -1407,7 +1493,7 @@ The comonad laws are a simple dualization of the monad laws:
 }
 \]
 
-A \emph{monoidal} comonad implements an morphism $\tzip$ that combines
+A \emph{monoidal} comonad implements a morphism $\tzip$ that combines
 a tuples of comonadic values into one comonadic tuple:
 \[
 \begin{array}{lcl}
@@ -1471,9 +1557,9 @@ the operations $\tthunk$ and $\tforce$ are no longer the identity, but
 \end{array}
 \]
 The map $\dent\tthunk : \Hom A B \to \Hom A {\D\,B}$ generalizes
-$\tcobind : \Hom{\D\,A} B \to \Hom{\D\,A}{\D\,B}$ to $\D$-coalgebras
+$\tcobind : \Hom{\D\,C} B \to \Hom{\D\,C}{\D\,B}$ to $\D$-coalgebras
 $A$ in the same way that the monadic
-$\tbind : \Hom{A}{\T\,B} \to \Hom{\T\,A}{\T\,B}$ is generalized to
+$\tbind : \Hom{A}{\T\,D} \to \Hom{\T\,A}{\T\,D}$ is generalized to
 $\Hom{A}{B} \to \Hom{\T\,A}{B}$ for $\T$-algebras $B$ in CBPV.
 
 
@@ -1485,17 +1571,19 @@ $\Hom{A}{B} \to \Hom{\T\,A}{B}$ for $\T$-algebras $B$ in CBPV.
 
 \subsection{Graded comonads and their coalgebras}
 
-Graded comonads have been utilized to give semantics to
+\emph{Graded comonads} have been utilized to give semantics to
 context-dependent computation \citep{orchard:icfp14}.  For grading,
 \loccit uses a \emph{resource algebra} in form of a preordered
 semiring
-$(\R,{+},0,{\cdot},1,\leq)$.
+$(\R,{+},0,{\cdot},1,{\leq})$.
 % $(\R,\_{+}\_,0,\_{\cdot}\_,1,\leq)$.
 %
 The semantics is \emph{resource aware} and thus not constructed in a
 cartesian-closed category but in a symmetric monoidal closed category
-$(\CC,\otimes,\I,\lolli)$.  We overload the operators on
-exponentials, $\Lambda : \Hom {C \otimes A} B \to \Hom C {A \lolli B}$
+$(\CC,\otimes,\I,\lolli)$.
+Introduction $\Lambda$ and elimination $\teval$ of
+exponentials are there
+$\Lambda : \Hom {C \otimes A} B \to \Hom C {A \lolli B}$
 and $\teval : \Hom{(A \lolli B) \otimes A} B$.  The tensor product
 $\otimes$ is a bifunctor and it is customary to overload $\otimes$ for
 the functorial action
@@ -1503,6 +1591,7 @@ $f_1 \otimes f_2 : \Hom{A_1 \otimes A_2}{B_1 \otimes B_2}$ where
 $f_i : \Hom{A_i}{B_i}$.  We shall also use $I$-ary products
 $\tupt {i:I} {A_i}$ and their functorial action $\tupt {i:I} {f_i}$.
 Further, the symmetric monoidal structure is usually witnessed by
+natural
 isomorphisms for left $\lambda_A : \Hom {\I \otimes A} A$ and right
 unit $\rho_A : \Hom {A \otimes I} A$, associativity
 $\Ga_{A,B,C} : \Hom{A \otimes (B \otimes C)} {(A \otimes B) \otimes
@@ -1511,7 +1600,7 @@ and swap $\sigma_{A,B} : \Hom {A \otimes B} {B \otimes A}$.  We shall
 summarize combinations of these isomorphisms under the name
 $\isot : \Hom {\tupt I A} {\tupt J B}$ when the multisets
 $\{A_i\}_{i:I}$ and $\{B_j\}_{j:J}$ coincide modulo addition and
-deletion of $\I$s.
+deletion of units ($\I$).
 
 
 As a running example for resource accounting,
@@ -1519,7 +1608,7 @@ we use the semiring $\R = \Pot\bN \setminus \emptyset$ of
 \emph{multiplicities} ordered by $\supseteq$ with pointwise sum and
 product, \eg, $r + s = \{ n + m \mid n \in r, m \in s \}$.
 Subsemirings of $\R$ have been used for quantitative typing
-\cite{sergeyVytiniotisPeytonJones:popl14,mcBride:wadler60,atkey:lics08}.
+\cite{sergeyVytiniotisPeytonJones:popl14,mcBride:wadler60,atkey:lics18}.
 The order expresses precision of the quantities, \eg,
 $\{1\} \geq \{0,1\} \geq \bN$ states that linear use of a variable is more informative than affine use than unrestricted use.
 
@@ -1635,7 +1724,7 @@ Because the last law is not an equality but just the inequality
 $r (w \oplus w') \wleq rw \oplus rw'$, we have ``almost'' a
 semimodule.
 
-Objects of $\CC$ are functors $A : (\W,\wleq) \to \SET$ and morphisms
+Objects of $\CC$ are functors $A : [(\W,\wleq) \to \SET]$ and morphisms
 $f : \Hom A B$ are natural transformations
 $(f_w : A_w \to B_w)_{w:W}$, \ie,
 $B_{w \wleq w'} \comp f_w = f_{w'} \comp A_{w \wleq w'}$.  The tensor
@@ -1643,7 +1732,7 @@ $A \otimes B$ is Day's convolution
 $(A \otimes B)_w = \bigcup_{w_1 \oplus w_2 \wleq w} (A_{w_1} \times B_{w_2})$
 % $(A \otimes B)_w = \bigcup_{w_1,w_2 \mid w \geq w_1 \oplus w_2} A_{w_1} \times A_{w_2}$
 with unit $\I_w = \bigcup_{\emp \wleq w} 1$.  The unit $\I$ is
-constructible at world $w$ from nothing (set $1$) if $\emp \wleq w$,
+constructible at world $w$ from nothing (the unit set $1$) if $\emp \wleq w$,
 \ie, if the world $w$ includes the choice of using no resources.  A
 tensor $A \otimes B$ is constructible at world $w$ if $w$ includes the
 choice to split the resources into $w_1$ and $w_2$ to construct $A$
@@ -1656,13 +1745,15 @@ The thus constructed symmetric monoidal closed category $\CC$ has a
 $\R$-graded comonad
 \[
 \begin{array}{lcl}
-  \D & : & (\R,\leq) \to [\CC \to \CC] \\
+  \D & : & [(\R,\leq) \to [\CC \to \CC]] \\
 (\D[r] A)_w & = &
   \bigcup_{rw' \wleq w} A_{w'}
   % \bigcup_{w' \mid w \wleq rw'} A_{w'}
 \end{array}
 \]
-implementing trivially the following natural transformations.  Herein, we use the
+implementing trivially the following natural transformations.
+Herein, we use as second monoidal structure
+on the functor category $[\CC \to CC]$ the
 pointwise tensor product of functors
 $(\dot\otimes_{i:I}F_i)\,A = \otimes_{i:I}(F_i\,A)$ in
 $[\CC \to \CC]$, in particular $\dot\I\,A = \I$.
@@ -1782,7 +1873,7 @@ need to hold for the additive monoid and distributivity.
 }
 \]
 
-A $\D$-coalgebra is a functor $A : (\R,\leq) \to \CC$ with family of
+A $\D$-coalgebra is a functor $A : [(\R,\leq) \to \CC]$ with family of
 morphisms $\expose[r,s] : A_{rs} \to \D[r]\,A_s$ natural in $r$ and
 $s$.  For the $\D$-coalgebra $\D[\_]\,B$ the family $\expose$ is just
 $\tdisplay$, and the suitably generalizable laws for $\tdisplay$ are
@@ -1904,8 +1995,8 @@ $\qCompTy \gamma \Gamma t N$ can be interpreted as morphisms
 $\dent t : \Hom {\Den\Gamma \gamma} {\denn N}$.  Since each variable
 comes with its own resource qualifier, we cannot simply model the
 context as a tensor product $\tupt {x:\dom\Gamma} \den{\Gamma(x)}$ of
-$\D$-coalgebras since this product would indexed by a single resource
-qualifier $r \in \R$ rather than a resource context
+$\D$-coalgebras since this product would be indexed by a single resource
+qualifier $r : \R$ rather than a resource context
 $\gamma : \dom\Gamma \to \R$.  The solution offered by
 \citet{orchard:icfp14} are \emph{structured indexed comonads}.  We
 shall generalize this to comonad coalgebras to the extend needed for
@@ -1915,8 +2006,10 @@ interpreting contexts.
 $\gamma : \R^I$ form a left $\R$-semimodule under pointwise addition
 $(\gamma + \delta)(i) = \gamma(i) + \delta(i)$ and scaling
 $(r \cdot \gamma)(i) = r \cdot \gamma(i)$.  Contexts $\Gamma$ can thus
-be interpreted as \emph{$R^{\dom \Gamma}$-graded}
-(or \emph{structured}) $\D$-coalgebras $C$ with
+be interpreted as
+(\emph{structured} or)
+\emph{$\R^{\dom \Gamma}$-graded}
+$\D$-coalgebras $C$ with
 the following operations:
 \[
 \begin{array}{lcl}
@@ -1929,7 +2022,7 @@ the following operations:
 The second, generalized form of $\tduplicate$ will be used to split
 resources accumulated from $I$ parties.  Note that
 $A_r := C_{r\gamma}$ flattens a structured $\D$-coalgebra $C$ into an
-ordinary one ($A$).
+ordinary one, $A$.
 
 We will also need to interpret context extension.  To this end, we
 shall employ a structured product
@@ -2031,7 +2124,7 @@ Value typing \fbox{$\gqValTy \gamma \Gamma v P$}\,.
 \end{gather*}
 \dashruler{}
 Computation typing \fbox{$\gqCompTy \gamma \Gamma t N$}\,.
-\vspace{-2ex}
+%\vspace{-2ex}
 \begin{gather*}
 % \graybox{
 %  \nru{\rvar^-}{}
@@ -2133,7 +2226,7 @@ runtime (rules \rintro\otimes, \rlet, %$\rlet^{+/-}$,
 \relim{%\Box/
 \GS/\otimes/\diamond/\lolli}).  Note that in \relim\GS,
 the branches $t_i$ of the case statement (\relim\GS) share a resource
-context $\gamma$, since only one of the branches is executed at
+context $\gamma$ since only one of the branches is executed at
 runtime.  Via rule $\rweak$,
 the different resource requirements of the branches can be
 subsumed under their maximum wrt.\ $\leq_\R$.  Similarly, the
@@ -2170,7 +2263,8 @@ scaled accordingly (from $\gamma$ to $r\gamma$).
 %
 However, this would have prevented the typing of $\force v$ (rule
 \relim\Box), bcause there is no place for the scaling factor in
-computation typing.  Semantically, $v$ lives in $\D[\_]\denn N$, and
+computation typing.  Semantically, the $v$ in $\force v$
+lives in $\D[\_]\denn N$, and
 we can only $\textract$ the computation in $\denn N$ if we can
 instantiate the coeffect qualifier $\_$ to $1$.  Such is not possible
 if scaling already happened (and needs to be respected).
@@ -2219,8 +2313,8 @@ the monad.  Typing of bind ($\bind x u t$) attaches the resource qualifier $r$ s
 
 %\subsubsection{Interpretation of types}
 
-Positive types $P$ are interpreted as $\D$-algebras
-$\denp P : (\R,\leq) \to \CC$ and negative types $N$ as objects
+Positive types $P$ are interpreted as $\D$-coalgebras
+$\denp P : [(\R,\leq) \to \CC]$ and negative types $N$ as objects
 $\denn N : \CC$.
 % , except for in contexts, where they are interpreted as
 % $\D$-algebras $\Den N r = \D[r]\,\denn N$.  With $\den P = \denp P$,
@@ -2245,7 +2339,7 @@ $\den \Gamma = \boxtimes_{x:\dom\Gamma} \denp{\Gamma(x)}$.
 \]
 The symmetric monoidal category $\CC$ needs to be equipped with cartesian
 products $\rect I B$ as well as with distributive coproducts
-$\coprod_I A$ with
+$\coprod_I A$ with distribution morphism
 $\tdist : \Hom {C \otimes \coprod_I A} {\coprod_{i:I} {(C \otimes A_i)}}$.
 
 Computations $\qCompTy \gamma \Gamma t N$ are interpreted as morphisms
@@ -2495,7 +2589,7 @@ and allows us to state the substitution theorem.
   \begin{enumerate}
   \item If $\qValTy \delta \Gamma v P$ and
       $\ValTy {\qext \gamma \Gamma r x P} w {P'}$
-      then $\ValTy {\gamma + r\delta} \Gamma {\qsubst v r x w} {P'}$.
+      then $\pValTy {\gamma + r\delta} \Gamma {\qsubst v r x w} {P'}$.
   \item If $\qValTy \delta \Gamma v P$ and
       $\oCompTy {\qext \gamma \Gamma r x P} t {N}$
       then $\pCompTy {\gamma + r\delta} \Gamma {\qsubst v r x t} {N}$.
@@ -2848,9 +2942,9 @@ reactivated via forcing in $\force v : N \mid e$.
 \subsection{Graded CBPV: semantics}
 
 As in effect-graded CBPV, negative types $N$ are interpreted as graded
-monad algebras $\denn N : (\Eff,\leq) \to \CC$, and as in
+monad algebras $\denn N : [(\Eff,\leq) \to \CC]$, and as in
 coeffect-graded CBPV, positive types are interpreted as graded comonad
-coalgebras $\denp P : (\R,\leq) \to \CC$.  Values
+coalgebras $\denp P : [(\R,\leq) \to \CC]$.  Values
 $\qValTy \gamma \Gamma v P$ are interpreted as natural transformations
 $\dent v : \Denpar \Gamma {\_\cdot\gamma} \todot \denp P$ and
 computations $\qeCompTy \gamma \Gamma t e N$ as morphisms
@@ -2861,7 +2955,7 @@ with the updated typing:
 \[
 \xymatrix@C=10ex@R=3ex{
 \denv {\thunk t} r
-& \Den \Gamma {r\gamma}     \ar[r]^{\extract}
+& \Den \Gamma {r\gamma}     \ar[r]^{\expose}
 & \D[r]\,\Den\Gamma\gamma   \ar[r]^{\fmapt[{\D[r]}]{\dent t}}
 & \D[r]\,\Denn N e
 \\

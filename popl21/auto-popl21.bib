@@ -3,6 +3,11 @@
 
 @STRING{acm     = "ACM Press" }
 @STRING{eptcs   = "Electronic Proceedings in Theoretical Computer Science" }
+@STRING{esop14  = "Programming Languages and Systems - 23rd European
+                  Symposium on Programming, {ESOP} 2014, Held as Part of the
+                  European Joint Conferences on Theory and Practice of
+                  Software, {ETAPS} 2014, Grenoble, France, April 5-13, 2014,
+                  Proceedings" }
 @STRING{hosc    = "Journal of Higher-Order and Symbolic Computation" }
 @STRING{icfp10  = "Proceeding of the 15th {ACM} {SIGPLAN} international
                   conference on Functional programming, {ICFP} 2010,
@@ -14,6 +19,11 @@
                   Conference on Functional Programming, {ICFP} 2016, Nara,
                   Japan, September 18-22, 2016" }
 @STRING{infcomp = "Information and Computation" }
+@STRING{langmaack99="Correct System Design, Recent Insight and Advances, (to
+                  Hans Langmaack on the occasion of his retirement from his
+                  professorship at the University of Kiel)" }
+@STRING{lics18  = "33rd Annual {ACM/IEEE} Symposium on Logic in Computer
+                  Science, {LICS} 2018, {Oxford}, {UK}, {July} 9-12, 2018" }
 @STRING{lncs    = "Lecture Notes in Computer Science" }
 @STRING{msfp20  = "Proceedings Eighth Workshop on Mathematically Structured
                   Functional Programming, MSFP@ETAPS 2020, Dublin, Ireland,
@@ -22,6 +32,7 @@
                   Principles of Programming Languages, {POPL} '14, San Diego,
                   CA, USA, January 20-21, 2014" }
 @STRING{springer= "Springer" }
+@STRING{tcs     = "Theoretical Computer Science" }
 @STRING{types19abs="25th International Conference on Types for Proofs and
                   Programs, TYPES 2019, Oslo, Norway, June 11-14, 2019, Book
                   of Abstracts" }
@@ -43,6 +54,22 @@
   bibsource     = {dblp computer science bibliography, http://dblp.org}
 }
 
+@Article{         volpano:jcs96,
+  author        = {Dennis M. Volpano and Cynthia E. Irvine and Geoffrey
+                  Smith},
+  title         = {A Sound Type System for Secure Flow Analysis},
+  journal       = jcs,
+  volume        = 4,
+  number        = {2/3},
+  pages         = {167--188},
+  year          = 1996,
+  url           = {https://doi.org/10.3233/JCS-1996-42-304},
+  doi           = {10.3233/JCS-1996-42-304},
+  timestamp     = {Fri, 26 May 2017 22:53:13 +0200},
+  biburl        = {https://dblp.org/rec/bib/journals/jcs/VolpanoIS96},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
 @InProceedings{   sergeyVytiniotisPeytonJones:popl14,
   author        = {Ilya Sergey and Dimitrios Vytiniotis and Simon L. {Peyton
                   Jones}},
@@ -57,6 +84,20 @@
   timestamp     = {Thu, 09 Jan 2014 08:32:32 +0100},
   biburl        = {http://dblp.uni-trier.de/rec/bib/conf/popl/SergeyVJ14},
   bibsource     = {dblp computer science bibliography, http://dblp.org}
+}
+
+@InProceedings{   ghicaSmith:esop14,
+  author        = {Dan R. Ghica and Alex I. Smith},
+  title         = {Bounded Linear Types in a Resource Semiring},
+  booktitle     = esop14,
+  pages         = {331--350},
+  year          = 2014,
+  crossref      = {DBLP:conf/esop/2014},
+  url           = {https://doi.org/10.1007/978-3-642-54833-8_18},
+  doi           = {10.1007/978-3-642-54833-8_18},
+  timestamp     = {Fri, 19 May 2017 01:25:18 +0200},
+  biburl        = {https://dblp.org/rec/bib/conf/esop/GhicaS14},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
 @InProceedings{   katsumata:popl14,
@@ -87,6 +128,20 @@
   author        = {James Wood and Robert Atkey},
   year          = {2020},
   booktitle     = {Linearity-TLLA 2020}
+}
+
+@Article{         girard:linear,
+  author        = {Jean{-}Yves Girard},
+  title         = {Linear Logic},
+  journal       = tcs,
+  volume        = 50,
+  pages         = {1--102},
+  year          = 1987,
+  url           = {https://doi.org/10.1016/0304-3975(87)90045-4},
+  doi           = {10.1016/0304-3975(87)90045-4},
+  timestamp     = {Sat, 30 Dec 2017 13:59:02 +0100},
+  biburl        = {https://dblp.org/rec/bib/journals/tcs/Girard87},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
 @PhDThesis{       zeilberger:PhD,
@@ -122,6 +177,21 @@
   optpdf        = {},
   optdvi        = {},
   optabstract   = {}
+}
+
+@InProceedings{   brunel:esop14,
+  author        = {Alo{\"{\i}}s Brunel and Marco Gaboardi and Damiano Mazza
+                  and Steve Zdancewic},
+  title         = {A Core Quantitative Coeffect Calculus},
+  booktitle     = esop14,
+  pages         = {351--370},
+  year          = 2014,
+  crossref      = {DBLP:conf/esop/2014},
+  url           = {https://doi.org/10.1007/978-3-642-54833-8_19},
+  doi           = {10.1007/978-3-642-54833-8_19},
+  timestamp     = {Fri, 19 May 2017 01:25:18 +0200},
+  biburl        = {https://dblp.org/rec/bib/conf/esop/BrunelGMZ14},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
 @InProceedings{   reedPierce:icfp10,
@@ -197,6 +267,20 @@
   bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
+@InProceedings{   nielsen:effect99,
+  author        = {Flemming Nielson and Hanne Riis Nielson},
+  title         = {Type and Effect Systems},
+  booktitle     = langmaack99,
+  pages         = {114--136},
+  year          = {1999},
+  crossref      = {DBLP:conf/birthday/1999langmaack},
+  url           = {https://doi.org/10.1007/3-540-48092-7\_6},
+  doi           = {10.1007/3-540-48092-7\_6},
+  timestamp     = {Tue, 14 May 2019 10:00:52 +0200},
+  biburl        = {https://dblp.org/rec/conf/birthday/NielsonN99.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
 @Article{         levy:hosc06,
   author        = {Paul Blain Levy},
   title         = {Call-by-push-value: Decomposing call-by-value and
@@ -210,6 +294,35 @@
   doi           = {10.1007/s10990-006-0480-6},
   timestamp     = {Fri, 26 May 2017 22:50:49 +0200},
   biburl        = {https://dblp.org/rec/bib/journals/lisp/Levy06},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{   atkey:lics18,
+  author        = {Robert Atkey},
+  title         = {The Syntax and Semantics of Quantitative Type Theory},
+  booktitle     = lics18,
+  pages         = {56--65},
+  year          = {2018},
+  crossref      = {DBLP:conf/lics/2018},
+  url           = {https://doi.org/10.1145/3209108.3209189},
+  doi           = {10.1145/3209108.3209189},
+  alturl        = {https://bentnib.org/quantitative-type-theory.html},
+  timestamp     = {Wed, 21 Nov 2018 12:44:18 +0100},
+  biburl        = {https://dblp.org/rec/conf/lics/Atkey18.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@Proceedings{     DBLP:conf/birthday/1999langmaack,
+  editor        = {Ernst{-}R{\"{u}}diger Olderog and Bernhard Steffen},
+  title         = langmaack99,
+  series        = lncs,
+  volume        = 1710,
+  publisher     = springer,
+  year          = 1999,
+  url           = {https://doi.org/10.1007/3-540-48092-7},
+  doi           = {10.1007/3-540-48092-7},
+  timestamp     = {Tue, 14 May 2019 10:00:52 +0200},
+  biburl        = {https://dblp.org/rec/conf/birthday/1999langmaack.bib},
   bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
@@ -249,6 +362,21 @@
   bibsource     = {dblp computer science bibliography, http://dblp.org}
 }
 
+@Proceedings{     DBLP:conf/esop/2014,
+  editor        = {Zhong Shao},
+  title         = esop14,
+  booktitle     = esop14,
+  series        = lncs,
+  volume        = 8410,
+  publisher     = springer,
+  year          = 2014,
+  url           = {https://doi.org/10.1007/978-3-642-54833-8},
+  doi           = {10.1007/978-3-642-54833-8},
+  timestamp     = {Fri, 19 May 2017 01:25:18 +0200},
+  biburl        = {https://dblp.org/rec/bib/conf/esop/2014},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
 @Proceedings{     DBLP:conf/birthday/2016wadler,
   editor        = {Sam Lindley and Conor McBride and Philip W. Trinder and
                   Donald Sannella},
@@ -263,6 +391,19 @@
   timestamp     = {Wed, 30 Mar 2016 16:54:44 +0200},
   biburl        = {http://dblp.uni-trier.de/rec/bib/conf/birthday/2016wadler},
   bibsource     = {dblp computer science bibliography, http://dblp.org}
+}
+
+@Proceedings{     DBLP:conf/lics/2018,
+  editor        = {Anuj Dawar and Erich Gr{\"{a}}del},
+  title         = lics18,
+  booktitle     = lics18,
+  publisher     = acm,
+  year          = {2018},
+  url           = {https://doi.org/10.1145/3209108},
+  doi           = {10.1145/3209108},
+  timestamp     = {Wed, 21 Nov 2018 12:44:18 +0100},
+  biburl        = {https://dblp.org/rec/bib/conf/lics/2018},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
 @Proceedings{     DBLP:conf/popl/2014,
