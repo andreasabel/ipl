@@ -89,6 +89,7 @@
 \newtcbox{\grayboxtext}{on line,colback=gray!50,colframe=gray!50,size=fbox,arc=0pt,boxrule=0pt}%,beforeafter skip=0pt,leftright skip=0pt}
 \newcommand{\graybox}[1]{\grayboxtext{$#1$}}
 
+\theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
 \begin{document}
@@ -226,25 +227,6 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \maketitle
 
 
-\section{Introduction}
-
-Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
-types into value and computation types and can thus express both
-call-by-name and call-by-value evaluation in the presence of effects.
-Semantically, effects are modeled by a monad, and computation types as
-algebras over this monad.
-Effect type systems usually express more information than the presence
-of an effect; typically effects are structured as pre-ordered monoid
-where the monoid operation represents accumulation of effects and the
-order subsumption, in analogy to subtyping.
-In this work, a \emph{graded} version of is presented where the typing
-of computations likens effect typing.  Semantically, computation types
-are then represented as graded monad algebras.
-Further we present a version of CBPV which additionally has graded coeffects.
-
-
-\section{An effect-graded version of CBPV}
-
 %\newcommand{}{\ensuremath{}}
 \newcommand{\bla}{\ensuremath{\mbox{$$}}}
 \newcommand{\ie}{\emph{i.e.}}
@@ -299,7 +281,8 @@ Further we present a version of CBPV which additionally has graded coeffects.
 % \newcommand{\emp}{\emptyset}
 
 \newcommand{\CC}{\ensuremath{\mathcal{C}}}
-\newcommand{\Hom}[2]{\CC\,(#1,\,#2)}
+\newcommand{\EE}{\ensuremath{\mathcal{E}}}
+\newcommand{\Hom}[3][\CC]{#1\,(#2,\,#3)}
 \newcommand{\SET}{\mathsf{SET}}
 \newcommand{\CPO}{\mathsf{CPO}}
 \newcommand{\T}[1][]{\mathsf{T}_{#1}}
@@ -320,8 +303,9 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\fmap}[2][]{\tfmap_{#1}\,#2}
 \newcommand{\fmapt}[2][]{\tfmap_{#1}#2}
 \newcommand{\treturn}{\mathsf{return}}
+\newcommand{\return}[1][]{\treturn_{#1}}
 \newcommand{\tjoin}{\mathsf{join}}
-\newcommand{\join}{\mathsf{join}}
+\newcommand{\join}[1][]{\mathsf{join}_{#1}}
 \newcommand{\append}{\ensuremath{\mathbin{\mathtt{++}}}}
 \newcommand{\tcast}{\mathsf{cast}}
 \newcommand{\tdist}{\mathsf{dist}}
@@ -443,6 +427,7 @@ Further we present a version of CBPV which additionally has graded coeffects.
 %\newcommand{\CompTy}[4]{#1 \vdash #2 \mathrel{{:}\langle #3 \rangle} #4}
 \newcommand{\ru}{\dfrac}
 \newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
+\newcommand{\rux}[3]{\dfrac{#1}{#2}\;#3}
 \newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
 
 \newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
@@ -456,6 +441,37 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \newcommand{\rsub}{\rulename{sub}}
 \newcommand{\rweak}{\rulename{weak}}
 
+
+\section{Introduction}
+
+Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
+types into value and computation types and can thus express both
+call-by-name and call-by-value evaluation in the presence of effects.
+Semantically, effects are modeled by a monad, and computation types as
+algebras over this monad.
+Effect type systems usually express more information than the presence
+of an effect; typically effects are structured as pre-ordered monoid
+where the monoid operation represents accumulation of effects and the
+order subsumption, in analogy to subtyping.
+In this work, a \emph{graded} version of is presented where the typing
+of computations likens effect typing.  Semantically, computation types
+are then represented as graded monad algebras.
+Further we present a version of CBPV which additionally has graded coeffects.
+
+\paragraph*{Preliminaries.}  The reader should bring some elementary
+knowledge of category theory, such as the interpretation of
+simply-typed lambda calculus in cartesian-closed categories.  However,
+we try to be gentle with categorical concepts such as monads and
+recapitulate their definition where needed.  In many cases, it is
+sufficient to think in terms of the category $\SET$ where objects are
+sets and morphisms functions between sets, or in the functor category
+$[\CC \to \SET]$ where objects are monotone families of sets
+$(A_i)_{i:\CC}$ indexed by objects $i$ of $\CC$ such that
+$\CC_i \to \CC_j$ in $\SET$ for $i \to j$ in $\CC$ and morphisms are
+natural transformations $(f_i : A_i \to B_i)_{i:\CC}$.
+
+\section{An effect-graded version of CBPV}
+
 % As effect algebra, we assume a pre-ordered monoid
 % $(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
 % preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
@@ -468,6 +484,10 @@ Further we present a version of CBPV which additionally has graded coeffects.
 \subsection{Recapitulation: modelling effects via monads}
 \label{sec:ccc}
 
+In this section, we recapitulate monads and some essential vocabulary
+of category theory.  There are no surprises, thus, the experienced
+reader is invited to skip this section.
+
 Consider a categorical model $\CC$ of the simply-typed lambda calculus
 (STLC), i.e., where types $\tau$ and contexts $\GG$ are interpreted as
 objects $\den \tau$ and $\den \Gamma$ of $\CC$ and terms
@@ -477,15 +497,20 @@ as functions, mapping the valuation of their free variables to their
 value, or $\CPO$, interpreting types as complete partial orders and
 terms as monotone functions, or a presheaf model of the STLC etc.
 Typically, $\CC$ is a cartesian-closed category, i.e., has products
-$A_1 \times A_2$ of objects modelling product types and contexts,
-and exponentials $A \To
-B$ modeling function types.  Further $\CC$ maybe be distributive,
+$A_1 \times A_2$ of objects to model product types and contexts,
+and exponentials $A \To B$ to model function types.
+Further $\CC$ maybe be distributive,
 \ie, have coproducts $A_1 + A_2$ that distribute over products, to
 model variants aka disjoint sum types.
 
-Recall that effects are modeled by a suitable monad $\T$ in
-$\CC$.  An example would be the \emph{writer monad} $\T\,A = \String \times
-A$ that models the effect \emph{output}.
+Recall that effects are modeled by a suitable monad $\T : \CC \to \CC$
+in $\CC$.  We shall refer to elements of a monadic type $\T\,A$ as
+\emph{computations} when $\CC = \SET$.  For a general $\CC$,
+computations shall be the morphisms $\Hom A {\T\,B}$ called
+\emph{Kleisli arrows}.
+An example module would be the \emph{writer monad}
+$\T\,A = \String \times A$
+that models the effect \emph{output}.
 Another example would be the \emph{exception monad} $\Exc + \_$ where
 the result of a computation is either an exception $e : \Exc$ or a
 regular result.
@@ -493,21 +518,44 @@ The monad operations, together with
 their implementation for \emph{writer} in $\SET$, are the following:
 \[
 \begin{array}{lcl}
-\tfmap & : & (A \to B) \to \T\,A \to \T\,B \\
-\tfmap\, f\, (s,\; a) & = & (s,\, f\, b)
+\fmap[\T] & : & (A \to B) \to \T\,A \to \T\,B \\
+\fmap[\T] f\, (s,\; a) & = & (s,\, f\, b)
 \\[1ex]
-\treturn & : & A \to \T\,A \\
-\treturn\, a & = & (\verb|""|, a)
+\return[\T] & : & A \to \T\,A \\
+\return[\T]\, a & = & (\verb|""|, a)
 \\[1ex]
-\tjoin & : & \T\,(\T\,A) \to \T\,A \\
-\tjoin\,(s_1,(s_2,a)) & = & (s_1 \append s_2,\; a) \\
+\join[\T] & : & \T\,(\T\,A) \to \T\,A \\
+\join[\T]\,(s_1,(s_2,a)) & = & (s_1 \append s_2,\; a) \\
 \end{array}
 \]
 Herein, \verb|""| shall denote the empty string and $\append$ string
 concatenation.
 
-We assume familiarity with the functor laws $\tfmap\,\tid = \tid$ and
-$\tfmap\,(f \circ g) = \tfmap\,f \circ \tfmap\,g$.
+Monad unit $\treturn$ (written $\eta$ in category speak) turns a value
+into a pure computation and monad multiplication $\tjoin$ (written
+$\mu$ in category speak) combines two effects and thus allows
+sequencing of computations via \emph{Kleisli composition}
+$ (g : \Hom B {\T\,C}) \comp_{\T} (f : \Hom A {\T\,B}) = (\tjoin \comp
+  \fmap g \comp f : \Hom A {\T\,C})$.
+
+The presence of $\tfmap : \Hom A B \to \Hom {\T\,A} {\T\,B}$
+satisfying the functor laws $\tfmap\,\tid = \tid$ and
+$\tfmap\,(f \circ g) = \tfmap\,f \circ \tfmap\,g$ makes $\T$ a
+\emph{(endo)functor}, written $\T : [\CC \to \CC]$.  The
+endofunctors $F : [\CC \to \CC]$ form a category, the
+$\emph{functor category}$, with identity $\Id\,A = A$ and
+composition $(F \comp G)\,A = F\,(G\,A)$.  We shall write
+$f : F \todot G$ for morphisms in the functor category, called
+\emph{natural transformations}.  These are families
+$f_A : \Hom {F\,A} {G\,A}$ of morphisms that commute with the
+functor action $\tfmap$, \ie,
+$\fmap[G]h \comp f_A = f_B \comp \fmap[F]h$ for any $h : \Hom A B$.
+
+Unit $\treturn : \Id \todot \T$ and multiplication
+$\tjoin : \T \comp \T \todot \T$ are \emph{natural transformations}
+which breaks down to $\fmap[\T] h \comp \treturn = \treturn \comp h$
+and $\fmap[\T] h \comp \tjoin = \tjoin \comp \fmap{(\fmap h)}$.
+%
 The three equational
 laws of $\tjoin$ can be visualized compactly in the following
 commutative diagram.
@@ -531,7 +579,7 @@ commutative diagram.
 Following \citet{katsumata:popl14}
 we can obtain more information about effects using a monad $\T[e]$
 \emph{graded} over elements $e$ of a suitable effect algebra $\Eff$.
-An effect algebra be a pre-ordered monoid
+An effect algebra be a preordered monoid
 $(\Eff,\bu,\Ge,\leq)$ such that $\_{\bu}\_$ is monotone wrt.\ the
 preorder $\leq$ in both arguments.  The unit $\Ge$ shall mean \emph{no
   effect} and the operation $\_{\bu}\_$ serves to accumulate effects,
@@ -564,7 +612,7 @@ their $\SET$-implementation for the graded writer:
 \tjoin & : & \T[e_1]\,(\T[e_2]\,A) \to \T[e_1 \bu e_2]\,A \\
 \tjoin\,(s_1,(s_2,a)) & = & (s_1 \append s_2,\; a)
 \\[1ex]
-\tcast & : & \T[e] \to \T[e'] \mbox{ for } e \leq e'\\
+\tcast & : & \T[e]\,A \to \T[e']\,A \mbox{ for } e \leq e'\\
 \tcast & = & \tid \\
 \end{array}
 \]
@@ -602,6 +650,40 @@ Further, $\tcast$ commutes with $\tfmap$, namely $\tfmap\,f \circ
 \tcast = \tcast \circ \tfmap\,f$, and in two ways with $\tjoin$, namely
 $\tjoin \circ \tcast = \tcast \circ \tjoin$ and $\tjoin
 \circ \tfmap\,\tcast = \tcast \circ \tjoin$.
+We may write $\T[e_1 \leq e_2]$ for the natural transformation
+$\tcast : \T[e_1] \todot \T[e_2]$.
+
+\begin{remark}[$\Eff$-graded monad are lax monoidal functors $\T : {[\Eff \to [\CC \to \CC]]}$]
+The concept of a graded monad can be more succinctly expressed by
+using more advanced language of category theory.  (This reformulation
+is not essential for the remainder of the exposition and may be
+skipped on first reading.)
+
+Recall that a \emph{monoidal category} $\EE$ has a designated object
+$\I : \EE$ and an operation $\_{\otimes}\_ : [\EE \to [\EE \to \EE]$,
+the \emph{tensor product} on objects of $\EE$ that is functorial in
+both positions.  Further, there are natural isomorphisms
+$\Gl : (\I \otimes A) \cong A$ and $\Gr : (A \otimes \I) \cong A$
+witnessing the unitality of $\I$ and
+$\alpha : (A \otimes (B \otimes C)) \cong ((A \otimes B) \otimes C)$
+witnessing associativity of $\otimes$.
+
+Any preordered monoid, such as $(\Eff,\_\bu\_,\Ge,\leq)$, makes a
+monoidal category $\EE = \Eff$ with Homset
+$\EE(e,e') = \{ () \mid e \leq e' \}$, tensor $\otimes = \bu$ and unit
+$\I = \Ge$.  Further, this category is \emph{thin}, \ie, there is at
+most one morphism between any two objects $e,e'$.
+
+A graded monad $\T : [\Eff \to [\CC \to \CC]]$ is then a morphism from
+monoidal category $(\Eff,\bu,\Ge)$ to monoidal category
+$([\CC \to \CC],\comp,\Id)$.  The monoidal structure in the latter is
+just functor composition and identity functor.  Operations $\tcast$
+and $\tfmap$ witness the functoriality of $\T$ in its first and second
+argument.  The operations $\treturn$ and $\tjoin$ witness (in a
+directed way) the preservation of unit $\Ge$ and multiplication $\bu$
+by $\T$, making $\T$ a \emph{lax monoidal functor}.
+(End of remark.)
+\end{remark}
 
 \subsection{CBPV, monad algebras, and their graded version}
 \label{sec:graded_algebra}
@@ -611,13 +693,14 @@ computational lambda-calculus \cite{moggi:infcomp91} that allows effects
 not only in monadic types, \ie, in objects $\T\,A$, but more generally
 in computation types.  These correspond to monad algebras for $\T$ in $\CC$,
 aka $\T$-algebras.
-Those are objects $B$ together with a morphism $\run[B] : \T\,B
+Those algebras are objects $B$ together with a morphism $\run[B] : \T\,B
 \to B$ that allows to formally \emph{run} the monad, ``merging'' its
 effects into $B$.
 The prime example of a monad algebra is simply a monadic
 type, because $\run[\T\,A] : \T\,(\T\,A) \to \T\,A$ is just
 $\tjoin$.  Levy \citeyearpar{levy:hosc06} shows that monad algebras are
-closed under products and exponentiation with arbitrary objects.  \Eg,
+closed under products ($\times$) and exponentiation ($\To$)
+with arbitrary objects.  \Eg,
 in $\SET$ we can define, for \emph{writer} algebras:
 \[
 \begin{array}{lcl}
@@ -695,6 +778,15 @@ here the graded writer example:
 \\
 \end{array}
 \]
+
+\begin{remark}[Naturality of $\trun$]
+  The $\T$-algebra $B : [\Eff \to \CC]$ comes with a natural morphism
+  $\run[e_1,e_2] : \Hom {\T[e_1]\,B_{e_2}} {B_{e_1 \bu e_2}}$ in the
+  sense that
+  $B_{(e_1\leq e_1') \bu (e_2 \leq e_2')} \comp {\run[e_1,e_2]} =
+  {\run[e_1',e_2']} \comp \T[e_1 \leq e_1']\,B_{e_2 \leq e_2'}$.
+\end{remark}
+
 
 \begin{figure}[htbp]
 \flushleft
@@ -832,6 +924,8 @@ Computation typing \fbox{$\CompTy \Gamma t {\graybox{e}} N$}\,.
 \subsection{Effect-graded CBPV: syntax and typing}
 \label{sec:effect-cbpv}
 
+With the theory of graded monads in place,
+we design a graded version of CBPV.
 The syntax and typing rules for effect-graded CBPV are given in
 Fig.~\ref{fig:cbpv}.  The differences to pure CBPV are in
 \graybox{\mbox{gray boxes}}.
@@ -884,9 +978,9 @@ $e$ in the thunk type $\thunkty e N$.
 
 Effects are accumulated via the introduction and elimination rule for
 the graded monad.  The unit $\ret v$ of the monad is effect-free
-(\rintro\diamond), running this computation just produces the pure
+(\rintro\diamond); running this computation just produces the pure
 value $v$.  Sequencing computations $u$ and $t$ via the \emph{bind}
-construct $\bind x u t$ composes the effects $e_1$ of $u$ with the
+construct ``$\bind x u t$'' composes the effects $e_1$ of $u$ with the
 effects $e_2$ of $t$ in that order.  The intuition is that first $u$
 is run, producing effects classified by $e_1$, and its result is bound
 to $x$ to run $t$, producing effects classified by $e_2$.  The sum of
@@ -897,7 +991,7 @@ CBPV, except that they propagate the effect classifier $e$ from
 hypothesis to conclusion.  Note that in case distinction (\relim\GS)
 and record construction (\rintro\Pi) all subterms $t_i$ are required
 to produce effects classified by the same $e$.  However, in reality,
-different branches of a case distinction, for instance, may produce
+different branches of \eg a case distinction may produce
 very different effects.  To end up with a unique classifier $e$, the
 branches may have to be typed using effect subsumption (\rsub).  In
 fact, the uses of \rsub can be confined to the hypotheses of \relim\GS
@@ -915,17 +1009,20 @@ construction of a typing derivation.
 
 \subsection{Effect graded CBPV: denotational semantics}
 
-The denotational semantics of graded CBPV has been informally explained in
+The denotational semantics of the novel parts
+of graded CBPV has been informally explained in
 sections \ref{sec:ccc} to \ref{sec:graded_algebra} already; in the following,
 we spell out the details.  We assume a distributive cartesian-closed
-category $\CC$ with a strong graded monad $\T : \Eff \to \CC \to \CC$.
+category $\CC$ with a strong graded monad $\T : [\Eff \to [\CC \to \CC]]$.
 Let us agree on some notation for the constructions on objects and
 morphisms:
 \begin{itemize}
 \item Product $\prod_{i:I} A_i$ with projections $\pi_i : \CC(\prod_I
   A, A_i)$ and tupling $\langle f_i
   \rangle_{i:I} : \CC(C,\prod_i A)$ for $f_i : \CC(C,A_i)$.  Binary
-  products $\prod_{\{1,2\}} A$ are written $A_1 \times A_2$.
+  products $\prod_{\{1,2\}} A$ are written $A_1 \times A_2$,
+  and the nullary product (terminal object)
+  is written $1$ with nullary tupling $\langle\rangle : \CC(C,1)$.
 \item Coproduct $\coprod_{i:I} A_i$ with injections $\iota_i :
   \CC(A_i,\coprod_I A)$ and cotupling $[f_i]_{i:I} : \CC(\coprod_I A,
   B)$ for $f_i : \CC(A_i,B)$.
@@ -949,7 +1046,10 @@ This interpretation lifts to contexts $\Gamma$ via $\denp \Gamma =
 \prod_{x:\dom(\Gamma)} \denp{\Gamma(x)}$.
 
 Negative types $N$ are interpreted
-as functors $\denn N : (\Eff,\leq) \to \CC$ mapping
+as functors
+$\denn N : [\Eff \to \CC]$
+%$\denn N : (\Eff,\leq) \to \CC$
+mapping
 effect classifiers $e$ to objects $\Denn N e$ and effect subsumption $e
 \leq e'$ to morphisms $\Denn N {e \leq e'} : \Denn N e \to \Denn N {e'}$.
 \[
@@ -970,9 +1070,9 @@ effect classifiers $e$ to objects $\Denn N e$ and effect subsumption $e
 \end{array}
 \]
 The graded $\T$-algebra structure $\run[\denn N]$ is constructed by
-induction on $N$:
+induction on $N$, as well as functoriality $\Denn N {e_1 \leq e_2}$:
 \[
-\begin{array}{lcl}
+\begin{array}{l@{~~}c@{\hspace{1ex}}l}
   \run[\denn N] & : & \Hom {\T[e_1](\Denn N {e_2})} {\Denn N {e_1 \bu e_2}} \\
   \run[\denn {\diamond P}] & = & \tjoin \\
   \run[\denn {P \To N}]   & = & \Lambda(\run[\denn N] \circ
@@ -980,14 +1080,9 @@ induction on $N$:
   \run[\denn {\rect I N}] & = & \langle \run[\denn{N_i}] \comp
                                 \fmap[\T]{\pi_i} \rangle_{i:I} \\
 \end{array}
-\]
-This construction is the same as \citet{levy:hosc06}, modulo grading.
-The algebra laws ensue.
-
-The coercion morphisms $\Denn N {e_1 \leq e_2}$ are obtained
-analogously:
-\[
-\begin{array}{rcl}
+\
+%\qquad
+\begin{array}{r@{\hspace{1ex}}c@{\hspace{1ex}}l}
   \Denn N {e_1 \leq e_2} & : & \Hom {\Denn N {e_1}} {\Denn N {e_2}} \\
   \Denn {\diamond P} {e_1 \leq e_2} & = & \tcast \\
   \Denn {P \To N}   {e_1 \leq e_2} & = &
@@ -996,8 +1091,26 @@ analogously:
     \langle \Denn N {e_1 \leq e_2} \comp \pi_i {} \rangle_{i:I} \\
 \end{array}
 \]
-That these coercions satisfy the identity and composition---the functor
+This construction is the same as \citet{levy:hosc06}, modulo grading.
+The algebra laws ensue.
+That the coercions $\Denn N {e_1 \leq e_2}$
+satisfy identity and composition---the functor
 laws for $\denn N$---is easy to verify.
+
+% The coercion morphisms $\Denn N {e_1 \leq e_2}$ are obtained
+% analogously:
+% \[
+% \begin{array}{rcl}
+%   \Denn N {e_1 \leq e_2} & : & \Hom {\Denn N {e_1}} {\Denn N {e_2}} \\
+%   \Denn {\diamond P} {e_1 \leq e_2} & = & \tcast \\
+%   \Denn {P \To N}   {e_1 \leq e_2} & = &
+%     \Lambda(\Denn N {e_1 \leq e_2} \comp \teval) \\
+%   \Denn {\rect I N} {e_1 \leq e_2} & = &
+%     \langle \Denn N {e_1 \leq e_2} \comp \pi_i {} \rangle_{i:I} \\
+% \end{array}
+% \]
+% That these coercions satisfy the identity and composition---the functor
+% laws for $\denn N$---is easy to verify.
 
 \subsubsection{Interpretation of terms}
 
@@ -1005,12 +1118,12 @@ Values $\ValTy \Gamma v P$ are interpreted as morphisms $\dent v :
 \Hom {\denp \Gamma} {\denp P}$ just as in pure CBPV.  Computations
 $\CompTy \Gamma t e N$ are interpreted as morphisms $\dent t : \Hom
 {\denp \Gamma} {\Denn N e}$.  Most of the cases are straightforward
-and in analogy to CBPV, let us thus focus on the
+and in analogy to CBPV, so let us focus on the
 \graybox{\mbox{modified}} rules where grading comes into play.  A
 subtlety is that we interpret \emph{typing derivations} rather than terms,
 because rule \rsub is a silent construction on raw terms but becomes a
 coercion in the denotational semantics.  The most natural way to make
-this precise is to use intrinsically well-typed syntax; from typing
+this precise is to use intrinsically well-typed syntax.  Going from typing
 rules to such well-typed syntax is a routine transformation which we
 do not spell out here.  The reader interested in well-typed syntax for
 CBPV is referred to \citet{abelSattler:ppdp19}.
@@ -1038,12 +1151,108 @@ Subsumption is interpreted by functoriality in $\Eff$.
 \]
 These definitions are understood in the context of the given typing rules.
 
-\subsection{Grading via a partial monoid}
+
+\newcommand{\tprint}{\mathsf{print}}
+\newcommand{\print}[2]{\tprint\,#1.\,#2}
+\newcommand{\toutput}{\mathsf{output}}
+%\newcommand{\output}[2][]{\toutput_{#1}\,#2}
+\newcommand{\tthrow}{\mathsf{throw}}
+\newcommand{\throw}[1]{\tthrow\,#1}
+\newcommand{\tcatch}{\mathsf{catch}}
+\newcommand{\catch}[3]{#1\,\tcatch\,#2 \mapsto #3}
+\newcommand{\traise}{\mathsf{raise}}
+%\newcommand{\raise}[1]{\traise\,#1} %clash
+\newcommand{\thandle}{\mathsf{handle}}
+\newcommand{\handle}[4][]{\thandle_{#1}\,#2\,#3\,#4}
+
+\subsection{Example effects}
+
+We replay some of Levy's \citeyearpar{levy:hosc06} effect examples in
+graded CBPV.
+
+\paragraph{Printing}
+
+Outputting a fixed string $s$ before computing $t$ is
+facilitated by ``$\print s t$'' which we type by the following rule:
+\[
+  \rux{\CompTy \Gamma t m N
+     }{\CompTy \Gamma {\print s t} {n + m} N
+     }{s : \StringLe n}
+\]
+Herein, we use effect algebra $(\bN \cup \{\infty\},+,0,\leq)$ and
+graded monad $\T[n]A = \StringLe n \times A$.
+%
+This allows us to implement a family of morphisms
+$\toutput : \StringLe n \to \Hom[\SET] {1} {\T[n]\,1}$ to interpret
+the print statement as
+$\dent {\print s t} = \run[\den N] \comp \fmap[\T]{\pi_2} \comp
+\strengthr \comp \langle \toutput\,s \comp \langle\rangle,\, \dent t
+\rangle$:
+\[
+\xymatrix@C=8ex{
+  \den \Gamma
+     \ar[rr]^{\langle \toutput\,s \comp \langle\rangle,\, \dent t \rangle}
+&& \T[n]\,1 \times \Denn N m
+     \ar[r]^{\strengthr}
+& \T[n](1 \times \Denn N m)
+     \ar[r]^{\fmap[\T]{\pi_2}}
+& \T[n]\,\Denn N m
+     \ar[r]^{\trun}
+& \Denn N {n + m}
+}
+\]
+
+% This allows us to implement a family of natural transformations $\toutput_A : \StringLe n \to \Hom[\SET] {\T[m]\,A} {\T[n+m]\,A}$
+
+\paragraph{Exceptions}
+
+Given a set $\Exc$ of exceptions whose elements we refer to by $e$ and whose subsets by $E$,
+consider the effect algebra $(\Pot\Exc,\cup,\emptyset,\subseteq)$.
+Primitives for throwing and catching exceptions can be added to graded
+CBPV by the following rules:
+\newcommand{\eee}{E_1\setminus\{e\} \cup E_2}
+\[
+  \ru{}{\CompTy \Gamma {\throw e} {\{e\}} N} %{e : \Exc}
+\qquad
+  \ru{\CompTy \Gamma u {E_1} N \qquad
+      \CompTy \Gamma t {E_2} N
+    }{\CompTy \Gamma {\catch u e t} {\eee} N}
+\]
+If $u$ throws exception $e$, then ``$\catch u e t$'' computes $t$, else $u$.
+%
+In $\SET$ we use the graded monad $\T[E]\,A = E + A$ and a family of
+morphism $\traise\,e : \SET(1,\T[\{e\}]A)$ to interpret
+$\dent{\throw e} = \traise\,e \comp \langle\rangle$.  To interpret
+$\tcatch$, define a family
+$\thandle_N\,e : \Hom[\SET] {N_{E_1} \times N_{E_2}} {N_{\eee}}$ by
+induction on $N \in \NTy$:
+\[
+\begin{array}{lcl}
+  \handle[\diamond P] e g h & = & \left\{
+                                  \begin{array}{ll}
+                                    h & \mbox{if } g = \iota_1 e \\
+                                    g & \mbox{otherwise}
+                                  \end{array}
+\right. \\
+  \handle[P \To N] e g h \, a & = & \handle[N] e {(g\,a)} {(h\,a)} \\
+  \handle[\tupt I N] e g h \, i & = & \handle[N_i] e {(g\,i)} {(h\,i)} \\
+\end{array}
+\]
+Catching is then
+$\dent {\catch u e t} = \handle[N] e \comp \langle \dent u, \dent t
+\rangle$.
+Note that $\thandle$ cannot be defined in terms of $\trun$, but we
+have to break $N$ down to monadic type $\diamond P$
+to get access to the exception
+thrown by $u$.
+
+
+\subsection{Digression: grading via a partial monoid}
 
 Not all sequences of effects are always meaningful: For instance,
 reading from a file before it was opened is impossible and could be
 prevented statically by graded effect typing.  This could be modelled
-by adding a maximal element $\top : \Eff$---with $e \leq top$ for all
+by adding a maximal element $\top : \Eff$---with $e \leq \top$ for all
 $e : \Eff$ that signifies an inconsistent state.  This error element
 would also be dominant in sequences, \ie,
 $\top \bu e = e \bu \top = \top$.
@@ -1080,6 +1289,23 @@ and $\T[e_1] \circ \T[e_2] \todot \T[e]$ for $e_1 \bu e_2 \leq e$.  A
 $\T$-algebra $B$ has morphism $\run[B] : \T[e_1]B_{e_2} \to B_{e}$
 for $e_1 \bu e_2 \leq e$.
 
+\begin{remark}
+Another way of restricting effect composition is to use a 2-category
+$\Eff$ where the objects $i,j,k$ are state types, the morphisms $e$
+effect classifiers and the 2-cells effect subsumption $e \leq e'$.
+The necessary theory has been worked out by
+\citet{orchardWadlerEades:msfp20}.
+%
+An example would be a typed state monad
+$\T[e: i \to j] A = S_i \to (A \times S_j)$ where the state type $S_i$
+is indexed, and effects $e : i \to j$ may only make valid
+modifications to the state.
+%
+For instance, the index could be a set of pointers denoting the
+allocated heap cells and a read/write/deallocate effect would require
+the respective pointer to be a member of this set (and remove it in
+case of deallocate).
+\end{remark}
 
 
 \section{Coeffect-graded CBPV}
@@ -1261,7 +1487,7 @@ $\Hom{A}{B} \to \Hom{\T\,A}{B}$ for $\T$-algebras $B$ in CBPV.
 
 Graded comonads have been utilized to give semantics to
 context-dependent computation \citep{orchard:icfp14}.  For grading,
-\loccit uses a \emph{resource algebra} in form of a pre-ordered
+\loccit uses a \emph{resource algebra} in form of a preordered
 semiring
 $(\R,{+},0,{\cdot},1,\leq)$.
 % $(\R,\_{+}\_,0,\_{\cdot}\_,1,\leq)$.
