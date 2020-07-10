@@ -3134,26 +3134,27 @@ traces cannot be captured.  In their own words:
 \subsection{Coeffect typing}
 
 Our style of coeffect typing is heavily influenced by
-\citet{mcBride:wadler60} and \citet{atkey:lics18} who separate the
-quantification of variable \emph{usage} $\gamma$ from the variable
+\citet{mcBride:wadler60} and \citet{atkey:lics18} who keep the
+quantification of variable \emph{usage} in usage context $\gamma$
+separate from the variable
 \emph{declaration} in an ordinary typing context $\Gamma$.  This
-division of labor removed a major obstacle in the integration of
+division of labor has removed two major obstacle in the integration of
 linear and dependent types: the customary sorting of linear and
 unrestricted variables into separate typing contexts, and the
 dominance of context concatenation operations in the typing of
-multiplicative connectives in linear logic, \eg:
+the multiplicative connectives of linear logic, \eg:
 \[
   \ru{\Delta_1 \vdash v_1 : A_1 \qquad
       \Delta_2 \vdash v_2 : A_2
     }{\Delta_1.\Delta_2 \vdash (v_1, v_2) : A_1 \otimes A_2}
 \]
-In contrast, the coeffect type systems of
+In contrast to our style, the coeffect type systems of
 \citet{reedPierce:icfp10},
 \citet{orchard:icfp14},
 \citet{brunel:esop14},
 \citet{ghicaSmith:esop14}, and
 \citet{orchard:icfp19}
-keep context concatenation which does no harm in simply-typed settings
+keep context concatenation. This does no harm in simply-typed settings,
 but seems to duplicate a mechanism already present in form of the
 resource qualifier $0$.
 
