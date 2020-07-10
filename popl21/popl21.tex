@@ -518,7 +518,8 @@ to each variable in the typing context.  Coeffect typing generalizes
 linear typing \citep{girard:linear} to quantitative typing
 \citep{sergeyVytiniotisPeytonJones:popl14,mcBride:wadler60,atkey:lics18}
 and subsumes sensitivity analysis \citep{reedPierce:icfp10} and static
-information control flow \citep{volpano:jcs96} aka security typing.
+information control flow \citep{volpano:jcs96} aka security typing
+\citep{abadiBanerjeeHeintzeRiecke:popl99}.
 Coeffects can be modeled by a comonad $\D[r]$ graded over resource
 qualifiers $r$ drawn from a preordered semiring.  For the sake of
 coeffect-graded CBPV, we generalize graded comonads to graded comonad
@@ -549,7 +550,8 @@ of computations.
 \item We further introduce graded comonad coalgebras and a
   coeffect-graded version of CBPV in Section~\ref{sec:coeff}.  We give
   its denotational and operational semantics and adapt Atkey and
-  Wood's substitution theorem \citeyearpar{atkeyWood:types19} to this
+  Wood's substitution theorem
+  \citeyearpar{atkeyWood:types19,woodAtkey:linearity20} to this
   version of CBPV.
 
 \item We present an effect- and coeffect-graded version of CBPV in Section~\ref{sec:full-cbpv}.
@@ -2581,7 +2583,7 @@ and allows us to state the substitution theorem.
   \end{enumerate}
 \end{theorem}
 \begin{proof}
-  Straightforward adaptation of \citet{atkeyWood:types19}.
+  Straightforward adaptation of \citet{atkeyWood:types19,woodAtkey:linearity20}.
 \end{proof}
 \begin{corollary}[Single substitution preserves typing]
   \label{cor:tysinglesub}
@@ -3027,6 +3029,164 @@ The operational semantics of graded CBPV is identical to the one of
 CBPV, and the substitution typing of coeffect-graded CBPV
 (Section~\ref{sec:subst}) can be mechanically transferred to fully
 graded CBPV.
+
+\subsection{Discussion}
+
+Graded CBPV provides syntax to work with graded monads $\T[e]$ and
+comonads $\D[r]$.  \emph{A priori}, one could have expected that these
+constructs are directly reflected in the syntax of types, as
+$\compty e P$ and $\thunkty r N$.  Surprisingly, the adaptation of
+graded effect and coeffect typing to CBPV places the qualifiers in the
+opposite way, as $\compty r P$ and $\thunkty e N$.  Given our
+semantics of types as (co)monad (co)algebras, this apparent oddity has
+a natural explanation: the qualifiers do not instantiate the grade in
+the monad or comonad, but in the respective (co)algebra.  The
+alternative concrete syntax $\diamond P_r$ and $\Box N_e$ would maybe
+transport the intended semantics, $\T[-]{\Denp P r}$ and
+$\D[-]{\Denn N e}$, more directly.
+
+How does Graded CBPV work as a programming language?  A program is
+usually a set of definitions and then an entrypoint in form of an
+expression or simply the name of the main procedure.  In Graded CBPV,
+the definitions are given as a sequence of let-bindings whose final
+body serves as the entrypoint.  The entrypoint should be an expression
+of type $\compty 1 P$, producing an observable value and thus, the
+effects leading up to this result.  The expressions bound by the lets
+will often be functions (or records), but wrapped in thunks
+$\thunkty e N$ to satisfy the formal requirement to be of positive
+type.  This thunk is where the effects are declared that a function
+produces.  Thus, in the big picture, the effects of a computation
+\emph{are} stated in the types, not just in the typing judgement
+$\qeCompTy \gamma \Gamma t e N$, even though the effect annotation is
+in a \emph{a priori} unexpected location.
+
+\section{Related Work}
+
+\subsection{Effect tracking in CBPV}
+
+\citet{mcDermottMycroft:esop19} observe that CBPV can represent
+call-by-name and call-by-value evaluation strategies but not
+call-by-need.  As a remedy, they extend CBPV to ECBPV by variables
+$\underline x : \diamond P$ that hold monadic values, plus a
+corresponding let-binding construct.  They further present an
+effect-graded version of ECBPV, drawing effect qualifiers from a
+preordered monoid.  In contrast to our version, effects annotations
+$f$ are stored at monadic types $\compty f P$.  Instead of our
+judgement $\CompTy \Gamma t e N$ that accumulates effect traces $e$
+and a semantic interpretation of computation types $N$ as graded monad
+algebras, they define a syntactic operation $\compty f N$ that pushes
+down effect qualifier $f$ to the monadic types $\compty f' P$ in $N$
+where the effects are combined to $\compty{f \bu f'} P$.  This way of
+handling effect grading seems equivalent to our approach, albeit it is
+syntactic rather than semantic.
+
+In previous work, \citet{mcDermottMycroft:ocs18} use coeffect typing
+to track variable usage in call-by-need simply-typed lambda calculus
+with conditionals.  Compared to the usual resource semiring $\R$
+tailored to call-by-name usage analysis, their coeffect algebra is
+more expressive: it can produce traces of variable uses, including
+bound variables.  They show how graded effect tracking can be
+simulated by the coeffect typing, \eg, for the effect of
+non-determinism.  Naturally, they focus on operational semantics.
+
+% Filinski’s M3L (MultiMonadic MetaLanguage) [11],
+% whose latest version draws heavily on CBPV [12]
+
+To accomodate several sorts of effects in one language (CBPV hosts
+only a single effect type), \citet{kammarPlotkin:popl12} present MAIL,
+the Multi-Adjunctive Intermediate Language, which is a version of CBPV
+\emph{parameterized} by effect qualifiers.  In contrast to our
+effect-graded version of CBPV, effect qualifiers are a parameter to
+the type system as a whole, basically a \emph{mode} attached to the
+typing judgement.  Via effect subsumption, one can switch to a
+``wider'' mode.  However, as effects qualifiers are drawn from a
+preordered set rather than a monoid, more detailed static effect
+traces cannot be captured.  In their own words:
+\begin{quotation}
+  Instead of one kind of computation, for each effectset
+  $\varepsilon \in E$, we have $\varepsilon$-computations
+  $\mathsf{Comp}(\varepsilon)$ that can cause effects in
+  \ensuremath{\varepsilon}. We view MAIL as multiple copies of CBPV,
+  one for each \ensuremath{\varepsilon}, sharing the same values. One
+  can translate between these different CBPVs by means of coercion
+  [...]
+\end{quotation}
+
+% POPL12:
+% Algebraic Foundations for Effect-Dependent Optimisations
+% Ohad Kammar   Gordon D. Plotkin
+% w
+% - MAIL: Multi-Adjunctive Intermediate Language
+% - Both \Box and \diamonad annotated with effects
+% - No effect accumulation
+
+\subsection{Coeffect typing}
+
+Our style of coeffect typing is heavily influenced by
+\citet{mcBride:wadler60} and \citet{atkey:lics18} who separate the
+quantification of variable \emph{usage} $\gamma$ from the variable
+\emph{declaration} in an ordinary typing context $\Gamma$.  This
+division of labor removed a major obstacle in the integration of
+linear and dependent types: the customary sorting of linear and
+unrestricted variables into separate typing contexts, and the
+dominance of context concatenation operations in the typing of
+multiplicative connectives in linear logic, \eg:
+\[
+  \ru{\Delta_1 \vdash v_1 : A_1 \qquad
+      \Delta_2 \vdash v_2 : A_2
+    }{\Delta_1.\Delta_2 \vdash (v_1, v_2) : A_1 \otimes A_2}
+\]
+In contrast, the coeffect type systems of
+\citet{reedPierce:icfp10},
+\citet{orchard:icfp14},
+\citet{brunel:esop14},
+\citet{ghicaSmith:esop14}, and
+\citet{orchard:icfp19}
+keep context concatenation which does no harm in simply-typed settings
+but seems to duplicate a mechanism already present in form of the
+resource qualifier $0$.
+
+Our treatment of substitution in coeffect-graded CBPV is based on
+\citet{woodAtkey:linearity20}, who formalize (in Agda) substitution
+for intuitionistic linear logic with a subexponential representing a
+graded comonad.  They observe that instead of a preordered semiring, a
+left skew semiring can be used as resource algebra.  In a skew
+semiring, the laws involving multiplication only hold as inequalities,
+not equalities.
+
+\subsection{Interaction of effects and coeffects}
+
+\citet{orchard:icfp16} investigate systematically the possible
+interactions between semiring-graded coeffects and monoid-graded
+effects, in form of distributive laws between the graded comonad and
+monad.  We do not rely on such distributive laws in Graded CBPV.  The
+strict separation of value and computation types and the placement of
+the monad and comonad at the transition points makes interaction
+optional.  How to integrate distributive laws into Graded CBPV is left
+for future research.
+
+
+
+\section{Conclusions}
+
+In this article, we have demonstrated that CBPV can accommodate graded
+effects and coeffects in a smooth way, keeping the term grammar
+virtually unchanged and only adding effect and coeffect annotations at
+the transition points between value and computation types.  The
+surprising simplicity of our solution speaks for the design quality of
+Levy's CBPV calculus \cite{levy:hosc06}.  For instance, the analogy to
+intuitionistic linear logic---that lies at the heart of coeffect
+typing---is already implicitly present in the separation of value
+$(\otimes)$ and computation type products ($\Pi$).
+
+For the semantics of Graded CBPV, we have evolved the concepts of
+monad algebra and comonad coalgebra to their graded versions.
+
+In future work, we would like to investigate whether the distributive
+laws of \citet{orchard:icfp16} carry over to Graded CBPV, \eg, whether
+and how a graded comonad can be distributed over a graded monad
+algebra or, in the symmetric case, a graded monad distributes over a
+graded comonad coalgebra.
 
 %% Acknowledgments
 \begin{acks}                            %% acks environment is optional

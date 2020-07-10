@@ -8,6 +8,11 @@
                   European Joint Conferences on Theory and Practice of
                   Software, {ETAPS} 2014, Grenoble, France, April 5-13, 2014,
                   Proceedings" }
+@STRING{esop19  = "Programming Languages and Systems - 28th European
+                  Symposium on Programming, {ESOP} 2019, Held as Part of the
+                  European Joint Conferences on Theory and Practice of
+                  Software, {ETAPS} 2019, Prague, Czech Republic, April 6-11,
+                  2019, Proceedings" }
 @STRING{hosc    = "Journal of Higher-Order and Symbolic Computation" }
 @STRING{icfp10  = "Proceeding of the 15th {ACM} {SIGPLAN} international
                   conference on Functional programming, {ICFP} 2010,
@@ -28,9 +33,20 @@
 @STRING{msfp20  = "Proceedings Eighth Workshop on Mathematically Structured
                   Functional Programming, MSFP@ETAPS 2020, Dublin, Ireland,
                   25th April 2020" }
+@STRING{ocs     = "Open Computer Science" }
+@STRING{pacmpl  = "Proceedings of the ACM on Programming Languages" }
+@STRING{popl12  = "Proceedings of the 39th {ACM} {SIGPLAN-SIGACT} Symposium
+                  on Principles of Programming Languages, {POPL} 2012,
+                  Philadelphia, Pennsylvania, USA, January 22-28, 2012" }
 @STRING{popl14  = "The 41st Annual {ACM} {SIGPLAN-SIGACT} Symposium on
                   Principles of Programming Languages, {POPL} '14, San Diego,
                   CA, USA, January 20-21, 2014" }
+@STRING{popl99  = "{POPL} '99, Proceedings of the 26th {ACM} {SIGPLAN-SIGACT}
+                  Symposium on Principles of Programming Languages, San
+                  Antonio, TX, USA, January 20-22, 1999" }
+@STRING{ppdp19  = "Proceedings of the 21st International Symposium on
+                  Principles and Practice of Programming Languages, {PPDP}
+                  2019, Porto, Portugal, October 7-9, 2019" }
 @STRING{springer= "Springer" }
 @STRING{tcs     = "Theoretical Computer Science" }
 @STRING{types19abs="25th International Conference on Types for Proofs and
@@ -127,7 +143,8 @@
   title         = {A Linear Algebra Approach to Linear Metatheory},
   author        = {James Wood and Robert Atkey},
   year          = {2020},
-  booktitle     = {Linearity-TLLA 2020}
+  booktitle     = {Linearity-TLLA 2020},
+  url           = {https://bentnib.org/linear-metatheory.html}
 }
 
 @Article{         girard:linear,
@@ -153,30 +170,34 @@
   url           = {http://software.imdea.org/~noam.zeilberger/thesis.pdf}
 }
 
+@InProceedings{   abadiBanerjeeHeintzeRiecke:popl99,
+  author        = {Mart{\'{\i}}n Abadi and Anindya Banerjee and Nevin Heintze
+                  and Jon G. Riecke},
+  title         = {A Core Calculus of Dependency},
+  booktitle     = popl99,
+  pages         = {147--160},
+  year          = 1999,
+  crossref      = {DBLP:conf/popl/1999},
+  url           = {https://doi.org/10.1145/292540.292555},
+  doi           = {10.1145/292540.292555},
+  timestamp     = {Tue, 06 Nov 2018 11:07:43 +0100},
+  biburl        = {https://dblp.org/rec/conf/popl/AbadiBHR99.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
 @InProceedings{   abelSattler:ppdp19,
   author        = {Andreas Abel and Christian Sattler},
   title         = {Normalization by Evaluation for Call-By-Push-Value and
                   Polarized Lambda Calculus},
-  optcrossref   = {},
-  optkey        = {},
-  booktitle     = {Principles and Practice of Declarative Programming
-                  (PPDP'19)},
+  booktitle     = ppdp19,
+  pages         = {3:1--3:12},
   year          = {2019},
-  editor        = {Ekatarina Komendantskaya},
-  optvolume     = {},
-  optnumber     = {},
-  optseries     = {},
-  optpages      = {},
-  optmonth      = {},
-  optaddress    = {},
-  optorganization={},
-  optpublisher  = {},
-  optnote       = {},
-  opturl        = {},
-  optpostscript = {},
-  optpdf        = {},
-  optdvi        = {},
-  optabstract   = {}
+  crossref      = {DBLP:conf/ppdp/2019},
+  url           = {https://doi.org/10.1145/3354166.3354168},
+  doi           = {10.1145/3354166.3354168},
+  timestamp     = {Thu, 26 Sep 2019 14:23:10 +0200},
+  biburl        = {https://dblp.org/rec/conf/ppdp/0001S19.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
 @InProceedings{   brunel:esop14,
@@ -221,6 +242,36 @@
   doi           = {10.1016/0890-5401(91)90052-4},
   timestamp     = {Wed, 14 Nov 2018 10:35:08 +0100},
   biburl        = {https://dblp.org/rec/bib/journals/iandc/Moggi91},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{   kammarPlotkin:popl12,
+  author        = {Ohad Kammar and Gordon D. Plotkin},
+  title         = {Algebraic foundations for effect-dependent optimisations},
+  booktitle     = popl12,
+  pages         = {349--360},
+  year          = {2012},
+  crossref      = {DBLP:conf/popl/2012},
+  url           = {https://doi.org/10.1145/2103656.2103698},
+  doi           = {10.1145/2103656.2103698},
+  timestamp     = {Tue, 06 Nov 2018 11:07:43 +0100},
+  biburl        = {https://dblp.org/rec/conf/popl/KammarP12.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@Article{         orchard:icfp19,
+  author        = {Dominic Orchard and Vilem{-}Benjamin Liepelt and Harley
+                  Eades III},
+  title         = {Quantitative program reasoning with graded modal types},
+  journal       = pacmpl,
+  volume        = {3},
+  number        = {{ICFP}},
+  pages         = {110:1--110:30},
+  year          = {2019},
+  url           = {https://doi.org/10.1145/3341714},
+  doi           = {10.1145/3341714},
+  timestamp     = {Thu, 16 Apr 2020 13:51:45 +0200},
+  biburl        = {https://dblp.org/rec/journals/pacmpl/OrchardLE19.bib},
   bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
@@ -294,6 +345,36 @@
   doi           = {10.1007/s10990-006-0480-6},
   timestamp     = {Fri, 26 May 2017 22:50:49 +0200},
   biburl        = {https://dblp.org/rec/bib/journals/lisp/Levy06},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@Article{         mcDermottMycroft:ocs18,
+  author        = {Dylan McDermott and Alan Mycroft},
+  title         = {Call-by-need effects via coeffects},
+  journal       = ocs,
+  volume        = 8,
+  number        = 1,
+  pages         = {93--108},
+  year          = 2018,
+  url           = {https://doi.org/10.1515/comp-2018-0009},
+  doi           = {10.1515/comp-2018-0009},
+  timestamp     = {Fri, 27 Mar 2020 08:42:46 +0100},
+  biburl        = {https://dblp.org/rec/journals/cejcs/McDermottM18.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{   mcDermottMycroft:esop19,
+  author        = {Dylan McDermott and Alan Mycroft},
+  title         = {Extended Call-by-Push-Value: Reasoning About Effectful
+                  Programs and Evaluation Order},
+  booktitle     = esop19,
+  pages         = {235--262},
+  year          = {2019},
+  crossref      = {DBLP:conf/esop/2019},
+  url           = {https://doi.org/10.1007/978-3-030-17184-1\_9},
+  doi           = {10.1007/978-3-030-17184-1\_9},
+  timestamp     = {Fri, 31 Jan 2020 21:32:28 +0100},
+  biburl        = {https://dblp.org/rec/conf/esop/McDermottM19.bib},
   bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
@@ -377,6 +458,20 @@
   bibsource     = {dblp computer science bibliography, https://dblp.org}
 }
 
+@Proceedings{     DBLP:conf/esop/2019,
+  editor        = {Lu{\'{\i}}s Caires},
+  title         = esop19,
+  series        = lncs,
+  volume        = 11423,
+  publisher     = springer,
+  year          = 2019,
+  url           = {https://doi.org/10.1007/978-3-030-17184-1},
+  doi           = {10.1007/978-3-030-17184-1},
+  timestamp     = {Fri, 31 Jan 2020 21:32:28 +0100},
+  biburl        = {https://dblp.org/rec/conf/esop/2019.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
 @Proceedings{     DBLP:conf/birthday/2016wadler,
   editor        = {Sam Lindley and Conor McBride and Philip W. Trinder and
                   Donald Sannella},
@@ -416,6 +511,28 @@
   timestamp     = {Thu, 09 Jan 2014 08:21:22 +0100},
   biburl        = {http://dblp.uni-trier.de/rec/bib/conf/popl/2014},
   bibsource     = {dblp computer science bibliography, http://dblp.org}
+}
+
+@Proceedings{     DBLP:conf/popl/1999,
+  editor        = {Andrew W. Appel and Alex Aiken},
+  title         = popl99,
+  booktitle     = popl99,
+  publisher     = acm,
+  year          = 1999,
+  url           = {http://dl.acm.org/citation.cfm?id=292540},
+  timestamp     = {Mon, 21 May 2012 16:19:51 +0200},
+  biburl        = {https://dblp.org/rec/conf/popl/1999.bib},
+  bibsource     = {dblp computer science bibliography, https://dblp.org}
+}
+
+@Proceedings{     DBLP:conf/popl/2012,
+  editor        = {John Field and Michael Hicks},
+  title         = popl12,
+  booktitle     = popl12,
+  publisher     = acm,
+  year          = 2012,
+  ee            = {http://dl.acm.org/citation.cfm?id=2103656},
+  bibsource     = {DBLP, http://dblp.uni-trier.de}
 }
 
 @Proceedings{     DBLP:journals/corr/abs-2004-14735,
