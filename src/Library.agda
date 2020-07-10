@@ -6,6 +6,7 @@
 module Library where
 
 open import Size         public
+open import Level        public using () renaming (zero to lzero)
 
 open import Data.Unit    public using (⊤)
 open import Data.Empty   public using (⊥; ⊥-elim)
@@ -13,10 +14,10 @@ open import Data.Product public using (Σ; ∃; _×_; _,_; proj₁; proj₂; <_,
 open import Data.Sum     public using (_⊎_; inj₁; inj₂; [_,_]; [_,_]′) renaming (map to map-⊎)
 
 open import Data.List     public using (List; []; _∷_) hiding (module List)
-open import Data.List.All public using (All; []; _∷_)  hiding (module All)
-open import Data.List.Any public using (here; there)
+open import Data.List.Relation.Unary.All public using (All; []; _∷_)  hiding (module All)
+open import Data.List.Relation.Unary.Any public using (here; there)
 open import Data.List.Membership.Propositional         public using (_∈_)
-open import Data.List.Relation.Sublist.Propositional   public using (_⊆_; []; _∷_; _∷ʳ_; ⊆-refl; ⊆-trans) renaming (lookup to ⊆-lookup)
+open import Data.List.Relation.Binary.Sublist.Propositional   public using (_⊆_; []; _∷_; _∷ʳ_; ⊆-refl; ⊆-trans) renaming (lookup to ⊆-lookup)
 
 open import Function     public using (_∘_; _∘′_; id; _$_; _ˢ_; case_of_; const; flip)
 
@@ -25,10 +26,10 @@ open import Relation.Binary.PropositionalEquality public using (_≡_; refl; sym
 {-# BUILTIN REWRITE _≡_ #-}
 
 module All where
-  open import Data.List.All public
+  open import Data.List.Relation.Unary.All public
 
 module Any where
-  open import Data.List.Any public
+  open import Data.List.Relation.Unary.Any public
 
 -- open import Axiom.Extensionality.Propositional    public using (Extensionality)
 -- postulate

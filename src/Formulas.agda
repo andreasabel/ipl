@@ -1,4 +1,5 @@
 {-# OPTIONS --rewriting #-}
+-- {-# OPTIONS --confluence-check #-}
 
 -- Formulæ and hypotheses (contexts)
 
