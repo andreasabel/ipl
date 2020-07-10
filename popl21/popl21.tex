@@ -166,23 +166,30 @@
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-Call-by-push-value (CBPV) is a simply typed lambda calculus that polarizes
-types into value and computation types and can thus express both
-call-by-name and call-by-value evaluation in the presence of effects.
-Semantically, effects are modeled by a monad, and computation types as
-algebras over this monad.
-%
-Effect type systems usually express more information than the presence
-of an effect; often effects are categorized by preordered monoid
-where the monoid operation represents accumulation of effects and the
-order expresses effect subsumption, in analogy to subtyping.
-In this work, a \emph{graded} version of CBPV is presented where the typing
-of computations likens effect typing.  Semantically, computation types
-are then represented as graded monad algebras.
-%
-Observing that the value types of CBPV can be interpreted as comonad coalgebras, we further present a version of CBPV that has coeffects graded by a preordered semiring.  Value types and contexts are interpreted as graded comonad coalgebras, allowing resource-aware interpretations of CBPV.
-%
-Finally, we combine the two systems into a fully graded version of CBPV where both effects and coeffects are graded.  Thus turns out to be possible without specifying an interaction between effects and coeffects.
+Call-by-push-value (CBPV) is a simply typed lambda calculus that
+polarizes types into value and computation types and can thus
+express both call-by-name and call-by-value evaluation in the
+presence of effects.  Semantically, effects are modeled by a monad,
+and computation types as algebras over this monad.
+
+Effect type systems usually express more information than the
+presence of an effect; often effects are categorized by preordered
+monoid where the monoid operation represents accumulation of effects
+and the order expresses effect subsumption, in analogy to subtyping.
+In this work, a \emph{graded} version of CBPV is presented where the
+typing of computations likens effect typing.  Semantically,
+computation types are then represented as graded monad algebras.
+
+Observing that the value types of CBPV can be interpreted as comonad
+coalgebras, we further present a version of CBPV that has coeffects
+graded by a preordered semiring.  Value types and contexts are
+interpreted as graded comonad coalgebras, allowing resource-aware
+interpretations of CBPV.
+
+Finally, we combine the two systems into a fully graded version of
+CBPV where both effects and coeffects are graded.  This turns out to
+be possible without specifying any interaction between effects and
+coeffects.
 \end{abstract}
 
 
@@ -487,7 +494,7 @@ where the former embed into the latter as $\diamond P$ by the formal
 ``monad''~$\diamond$ and the latter embed into the former as $\Box N$
 by ``thunking''~$\Box$.  In Levy's \emph{behavioral semantics},
 functor $\diamond$ is a left adjoint to functor $\Box$ and need not be
-a monad.  Quite the opposite, when modelling store
+a monad.  Quite the opposite: when modelling store,
 $\diamond P = P \times S$ is a comonad and $\Box N = S \to N$ a monad.
 Contrastingly, in the above explained \emph{algebra semantics},
 $\diamond$ is indeed modeled by a monad $\T$, yet $\Box$ just by the
@@ -500,7 +507,7 @@ Building on these observations, we investigate in this article how
 CBPV %would look like if it would
 can
 keep track of not just the presence
-of an effect or coeffect but also the kind of effect and coeffect.
+of an effect or coeffect but also the \emph{kind} of effect and coeffect.
 Semantically, precise information about effects can be obtained by
 using a family of monads $\T[e]$ graded over effect classifiers $e$
 drawn from a preordered monoid \cite{katsumata:popl14}.  For CBPV, we
@@ -526,7 +533,7 @@ coeffect-graded CBPV, we generalize graded comonads to graded comonad
 coalgebras.  Value types $P$ and contexts $\Gamma$ are then
 interpreted as such coalgebras.  Value typing
 $\qValTy \gamma \Gamma v P$ and computation typing
-$\qCompTy \gamma \Gamma t N$ are based on linear typing an come
+$\qCompTy \gamma \Gamma t N$ are based on linear typing and come
 equipped with a resource context~$\gamma$.  Semantically, values are
 interpreted as morphisms $\Gamma_{r\gamma} \to P_r$ allowing the
 ``multiplication'' or \emph{scaling} of a value by $r$ % natural in $r$
@@ -537,8 +544,9 @@ graded CBPV calculus, surprisingly without sorting out any interaction
 between effects and coeffects, such as the distributive laws of
 \citet{orchard:icfp16}.  We credit the smoothness of the integration
 to the careful placement of monad and comonad in CBPV's type system,
-and the lack of need for scaling % of not just values but also
-of computations.
+so that scaling is restricted to values and does not arise for computations.
+% and the lack of need for scaling % of not just values but also
+% of computations.
 
 \paragraph*{Contributions}
 \begin{enumerate}
@@ -3062,6 +3070,9 @@ in a \emph{a priori} unexpected location.
 
 \section{Related Work}
 
+Our style of effect tracking and its interpretation via graded monads
+is based on \citet{wadlerThiemann:tocl03} and \citet{katsumata:popl14}.
+
 \subsection{Effect tracking in CBPV}
 
 \citet{mcDermottMycroft:esop19} observe that CBPV can represent
@@ -3070,12 +3081,12 @@ call-by-need.  As a remedy, they extend CBPV to ECBPV by variables
 $\underline x : \diamond P$ that hold monadic values, plus a
 corresponding let-binding construct.  They further present an
 effect-graded version of ECBPV, drawing effect qualifiers from a
-preordered monoid.  In contrast to our version, effects annotations
+preordered monoid.  In contrast to our version, effect annotations
 $f$ are stored at monadic types $\compty f P$.  Instead of our
 judgement $\CompTy \Gamma t e N$ that accumulates effect traces $e$
 and a semantic interpretation of computation types $N$ as graded monad
 algebras, they define a syntactic operation $\compty f N$ that pushes
-down effect qualifier $f$ to the monadic types $\compty f' P$ in $N$
+down effect qualifier $f$ to the monadic types $\compty {f'} P$ in $N$
 where the effects are combined to $\compty{f \bu f'} P$.  This way of
 handling effect grading seems equivalent to our approach, albeit it is
 syntactic rather than semantic.
@@ -3084,8 +3095,8 @@ In previous work, \citet{mcDermottMycroft:ocs18} use coeffect typing
 to track variable usage in call-by-need simply-typed lambda calculus
 with conditionals.  Compared to the usual resource semiring $\R$
 tailored to call-by-name usage analysis, their coeffect algebra is
-more expressive: it can produce traces of variable uses, including
-bound variables.  They show how graded effect tracking can be
+more expressive: it can produce traces of variable usage, including
+usage of bound variables.  They show how graded effect tracking can be
 simulated by the coeffect typing, \eg, for the effect of
 non-determinism.  Naturally, they focus on operational semantics.
 
