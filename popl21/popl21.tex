@@ -240,9 +240,9 @@ coeffects.
 
 %\newcommand{}{\ensuremath{}}
 \newcommand{\bla}{\ensuremath{\mbox{$$}}}
-\newcommand{\ie}{\emph{i.e.}}
-\newcommand{\eg}{\emph{e.g.}}
-\newcommand{\Eg}{\emph{E.g.}}
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
 \newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
 \newcommand{\cf}{cf.\ }
 \newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
@@ -463,8 +463,8 @@ coeffects.
 \newcommand{\catch}[3]{#1\,\tcatch\,#2 \mapsto #3}
 \newcommand{\traise}{\mathsf{raise}}
 %\newcommand{\raise}[1]{\traise\,#1} %clash
-\newcommand{\thandle}{\mathsf{handle}}
-\newcommand{\handle}[4][]{\thandle_{#1}\,#2\,#3\,#4}
+\newcommand{\thandle}[1][]{\mathsf{handle}_{#1}}
+\newcommand{\handle}[4][]{\thandle[{#1}]\,#2\,(#3,#4)}
 
 
 \section{Introduction}
@@ -617,7 +617,7 @@ in $\CC$.  We shall refer to elements of a monadic type $\T\,A$ as
 \emph{computations} when $\CC = \SET$.  For a general $\CC$,
 computations shall be the morphisms $\Hom A {\T\,B}$ called
 \emph{Kleisli arrows}.
-An example module would be the \emph{writer monad}
+An example monad would be the \emph{writer monad}
 $\T\,A = \String \times A$
 that models the effect \emph{output}.
 Another example would be the \emph{exception monad} $\Exc + \_$ where
@@ -649,7 +649,7 @@ $ (g : \Hom B {\T\,C}) \comp_{\T} (f : \Hom A {\T\,B}) = (\tjoin \comp
 
 The presence of $\tfmap : \Hom A B \to \Hom {\T\,A} {\T\,B}$
 satisfying the functor laws $\tfmap\,\tid = \tid$ and
-$\tfmap\,(f \circ g) = \tfmap\,f \circ \tfmap\,g$ makes $\T$ a
+$\tfmap\,(f \circ g) = \tfmap\,f \circ \tfmap\,g$ makes $\T$ an
 \emph{(endo)functor}, written $\T : [\CC \to \CC]$.  The
 endofunctors $F : [\CC \to \CC]$ form a category, the
 $\emph{functor category}$, with identity $\Id\,A = A$ and
@@ -661,7 +661,7 @@ functor action $\tfmap$, \ie,
 $\fmap[G]h \comp f_A = f_B \comp \fmap[F]h$ for any $h : \Hom A B$.
 
 Unit $\treturn : \Id \todot \T$ and multiplication
-$\tjoin : \T \comp \T \todot \T$ are \emph{natural transformations}
+$\tjoin : \T \comp \T \todot \T$ are \emph{natural transformations}---%
 which breaks down to $\fmap[\T] h \comp \treturn = \treturn \comp h$
 and $\fmap[\T] h \comp \tjoin = \tjoin \comp \fmap{(\fmap h)}$.
 %
@@ -769,7 +769,7 @@ is not essential for the remainder of the exposition and may be
 skipped on first reading.)
 
 Recall that a \emph{monoidal category} $\EE$ has a designated object
-$\I : \EE$ and an operation $\_{\otimes}\_ : [\EE \to [\EE \to \EE]$,
+$\I : \EE$ and an operation $\_{\otimes}\_ : [\EE \to [\EE \to \EE]]$,
 the \emph{tensor product} on objects of $\EE$ that is functorial in
 both positions.  Further, there are natural isomorphisms
 $\Gl : (\I \otimes A) \cong A$ and $\Gr : (A \otimes \I) \cong A$
@@ -798,7 +798,7 @@ by $\T$, making $\T$ a \emph{lax monoidal functor}.
 \label{sec:graded_algebra}
 
 Call-by-push value \cite{levy:hosc06} is a refinement of Moggi's
-computational lambda-calculus \cite{moggi:infcomp91} that allows effects
+computational lambda-calculus \citeyearpar{moggi:infcomp91} that allows effects
 not only in monadic types, \ie, in objects $\T\,A$, but more generally
 in computation types.  These correspond to monad algebras for $\T$ in $\CC$,
 aka $\T$-algebras.
@@ -870,7 +870,7 @@ a family of coercion morphisms $B_{e_1 \leq e_2} : B_{e_1} \to B_{e_2}$ with
 $B_{e \leq e} = \tid$ and $B_{e_2 \leq e_3} \circ B_{e_1 \leq e_2} =
 B_{e_1 \leq e_3}$.
 
-Graded monad algebras are as well closed under
+Graded monad algebras are, like non-graded ones, closed under
 pointwise products $(B \times B')_e = B_e \times B'_e$ and
 exponentiation with objects $(A \To B)_e = A \to B_e$;
 here the graded writer example:
@@ -889,7 +889,7 @@ here the graded writer example:
 \]
 
 \begin{remark}[Naturality of $\trun$]
-  The $\T$-algebra $B : [\Eff \to \CC]$ comes with a natural morphism
+  The $\T$-algebra $B : [\Eff \to \CC]$ comes with a \emph{natural} morphism
   $\run[e_1,e_2] : \Hom {\T[e_1]\,B_{e_2}} {B_{e_1 \bu e_2}}$ in the
   sense that
   $B_{(e_1\leq e_1') \bu (e_2 \leq e_2')} \comp {\run[e_1,e_2]} =
@@ -1045,9 +1045,11 @@ Types are classified into value types $P \in \PTy$ (written $A$ in
 \loccit).  These are positive and negative types in the terminology of
 focusing \cite{zeilberger:PhD}.
 Positive types are generated from base types $o$ via
-disjoint sums $\sumty i I P$ with tag set $I$, eager products $\tupty
-i I P$ of arity $I$ (composed
-from $1$ and $A_1 \times A_2$ in \loccit) and thunking $\thunkty e N$
+disjoint sums $\sumty i I P$ with tag set $I$,
+eager products $\tupty i I P$
+(composed from $1$ and $A_1 \times A_2$ in \loccit)
+of arity $I$
+and thunking $\thunkty e N$
 (written $U\,\underline B$ in \loccit).  In contrast to pure CBPV,
 thunk types $\thunkty e N$ are annotated with an effect $e$ that can
 be triggered when the thunk is forced.  Negative types are just as in
@@ -1060,7 +1062,7 @@ $\sumt I P$; notations $\tupt I P$ and
 $\rect I N$ are understood analogously.
 
 Terms are separated into values $v \in \PTm$ and computations $t \in
-\NTm$ and identical to pure CBPV, modulo changes in the concrete
+\NTm$ and are identical to pure CBPV, modulo changes in the concrete
 syntax.  Values introduce positive types,
 computations introduce
 negative types and
@@ -1133,8 +1135,10 @@ morphisms:
   and the nullary product (terminal object)
   is written $1$ with nullary tupling $\langle\rangle : \CC(C,1)$.
 \item Coproduct $\coprod_{i:I} A_i$ with injections $\iota_i :
-  \CC(A_i,\coprod_I A)$ and cotupling $[f_i]_{i:I} : \CC(\coprod_I A,
-  B)$ for $f_i : \CC(A_i,B)$.
+  \CC(A_i,\coprod_I A)$,
+  cotupling $[f_i]_{i:I} : \CC(\coprod_I A, B)$ for $f_i : \CC(A_i,B)$,
+  and distribution morphism
+  $\tdist : \Hom {C \times \coprod_I A} {\coprod_{i:I} {(C \times A_i)}}$.
 \item Exponential $A \To B$ with $\Lambda : \CC(C \times A, B) \to
   \CC(C, A \To B)$ and $\teval : \CC((A \To B) \times A, B)$.
 \item Graded monad $\T$ with functoriality $\fmap[\T] f :
@@ -1320,22 +1324,22 @@ In $\SET$ we use the graded monad $\T[E]\,A = E + A$ and a family of
 morphism $\traise\,e : \SET(1,\T[\{e\}]A)$ to interpret
 $\dent{\throw e} = \traise\,e \comp \langle\rangle$.  To interpret
 $\tcatch$, define a family
-$\thandle_N\,e : \Hom[\SET] {N_{E_1} \times N_{E_2}} {N_{\eee}}$ by
+$\thandle[N]\,e : \Hom[\SET] {N_{E_1} \times N_{E_2}} {N_{\eee}}$ by
 induction on $N \in \NTy$:
 \[
-\begin{array}{lcl}
-  \handle[\diamond P] e g h & = & \left\{
+\begin{array}{l@{~}lcl}
+  \handle[\diamond P] {&e} g h & = & \left\{
                                   \begin{array}{ll}
                                     h & \mbox{if } g = \iota_1 e \\
                                     g & \mbox{otherwise}
                                   \end{array}
 \right. \\
-  \handle[P \To N] e g h \, a & = & \handle[N] e {(g\,a)} {(h\,a)} \\
-  \handle[\tupt I N] e g h \, i & = & \handle[N_i] e {(g\,i)} {(h\,i)} \\
+  \handle[P \To N] {&e} g h \, a & = & \handle[N] e {g\,a} {h\,a} \\
+  \handle[\tupt I N] {&e} g h \, i & = & \handle[N_i] e {g\,i} {h\,i} \\
 \end{array}
 \]
 Catching is then
-$\dent {\catch u e t} = \handle[N] e \comp \langle \dent u, \dent t
+$\dent {\catch u e t} = \thandle[N]\,e \comp \langle \dent u, \dent t
 \rangle$.
 Note that $\thandle$ cannot be defined in terms of $\trun$, but we
 have to break $N$ down to monadic type $\diamond P$
@@ -1348,8 +1352,8 @@ thrown by $u$.
 Not all sequences of effects are always meaningful: For instance,
 reading from a file before it was opened is impossible and could be
 prevented statically by graded effect typing.  This could be modelled
-by adding a maximal element $\top : \Eff$---with $e \leq \top$ for all
-$e : \Eff$ that signifies an inconsistent state.  This error element
+by adding a maximal element $\top : \Eff$ (with $e \leq \top$ for all
+$e : \Eff$) that signifies an inconsistent state.  This error element
 would also be dominant in sequences, \ie,
 $\top \bu e = e \bu \top = \top$.
 A program $\CompTy \Gamma t e N$ would only be accepted if $e \not= \top$.
@@ -1425,8 +1429,8 @@ case of deallocate).
 \newcommand{\tbind}{\mathsf{bind}}
 \newcommand{\tget}{\mathsf{get}}
 \newcommand{\tmodify}{\mathsf{modify}}
-\newcommand{\thead}{\mathsf{head}}
-\newcommand{\ttail}{\mathsf{tail}}
+\newcommand{\thead}{\ensuremath{\mathsf{head}}}
+\newcommand{\ttail}{\ensuremath{\mathsf{tail}}}
 \newcommand{\suc}{(\_{+}1)}
 \newcommand{\Float}{\mathsf{Float}}
 \newcommand{\tiso}{\mathsf{iso}}
@@ -1481,7 +1485,7 @@ comonad in $\SET$ is as follows:
 \\[1.5ex]
   \tdisplay & : & \D\,B \to \D\,(\D\,B) \\
   \thead\,(\tdisplay\,s) & = & s \\
-  \ttail\,(\tdisplay\,s) & = & \tdisplay\,(\ttail\,s) \\
+  \makebox[0pt][l]{\ttail}\phantom{\thead}\,(\tdisplay\,s) & = & \tdisplay\,(\ttail\,s) \\
 \end{array}
 \]
 The generic operations of a comonad allow us to \emph{extract} the
@@ -1504,7 +1508,8 @@ The comonad laws are a simple dualization of the monad laws:
 \]
 
 A \emph{monoidal} comonad implements a morphism $\tzip$ that combines
-a tuples of comonadic values into one comonadic tuple:
+a tuples of comonadic values into one comonadic tuple---here
+implemented for the stream comonad:
 \[
 \begin{array}{lcl}
   \tzip & : & \tupt {i:I} {(\D\,B_i)} \to \D(\tupt I B) \\
@@ -1513,7 +1518,7 @@ a tuples of comonadic values into one comonadic tuple:
 \]
 Many other comonads are monoidal,
 like the store comonad $(S \To \_) \times S$,
-though not all, \eg, the context comonad $S{\times}\_$.
+though not all, \eg, the context comonad $S \times \_$.
 In this article, we consider only monoidal comonads.
 
 If type constructor $\Box$ is interpreted as a monoidal comonad $\D$,
@@ -1591,8 +1596,9 @@ $(\R,{+},0,{\cdot},1,{\leq})$.
 The semantics is \emph{resource aware} and thus not constructed in a
 cartesian-closed category but in a symmetric monoidal closed category
 $(\CC,\otimes,\I,\lolli)$.
-Introduction $\Lambda$ and elimination $\teval$ of
-exponentials are there
+There,
+introduction $\Lambda$ and elimination $\teval$ of
+exponentials are
 $\Lambda : \Hom {C \otimes A} B \to \Hom C {A \lolli B}$
 and $\teval : \Hom{(A \lolli B) \otimes A} B$.  The tensor product
 $\otimes$ is a bifunctor and it is customary to overload $\otimes$ for
@@ -1763,7 +1769,7 @@ $\R$-graded comonad
 \]
 implementing trivially the following natural transformations.
 Herein, we use as second monoidal structure
-on the functor category $[\CC \to CC]$ the
+on the functor category $[\CC \to \CC]$, the
 pointwise tensor product of functors
 $(\dot\otimes_{i:I}F_i)\,A = \otimes_{i:I}(F_i\,A)$ in
 $[\CC \to \CC]$, in particular $\dot\I\,A = \I$.
@@ -2231,7 +2237,8 @@ The fundamental novelty is that the typing judgements
 $\qValTy \gamma \Gamma v P$ and $\qCompTy \gamma \Gamma t N$ are
 equipped with resource contexts $\gamma$ matching the typing contexts
 $\Gamma$.  A common pattern in the rules is that resource requirements
-of the subterms are added when both subterms are or maybe evaluated at
+of the subterms are \emph{added}
+when \emph{both} subterms are or may be evaluated at
 runtime (rules \rintro\otimes, \rlet, %$\rlet^{+/-}$,
 \relim{%\Box/
 \GS/\otimes/\diamond/\lolli}).  Note that in \relim\GS,
@@ -2299,7 +2306,9 @@ is dual to the comonadic type $\thunkty e N$ from effect-graded CBPV
 (Section~\ref{sec:effect-cbpv}).  Since negative types are not
 $\D$-coalgebras and do not support scaling, the scaling in
 $\rintro\diamond$ is the last opportunity for scaling before entering
-the monad.  Typing of bind ($\bind x u t$) attaches the resource qualifier $r$ store in $\compty r P$ to the variable $x$ (\relim\diamond).
+the monad.
+Typing of bind ($\bind x u t$) attaches the resource qualifier $r$
+stored in $\compty r P$ to the variable $x$ (\relim\diamond).
 
 
 % As a consequence of eliminatee scaling, $\relim\Box$ is no longer
@@ -2502,15 +2511,18 @@ $\app{(\qlet r x v t)}w = \qlet r x v {\app t w}$ are instances of the
 $\beta$-law $\qlet r x v t = \qsubst v r x t$.
 %
 Herein, \fbox{$\qsubst v r x t$} shall the denote the
-(capture-avoiding) replacement $\subst v x t$ of a positive variable
-$x$ annotated by $r$ by value $v$ in term $t$.
+(capture-avoiding) replacement $\subst v x t$ of
+an $r$-annotated positive variable $x$
+by value $v$ in term $t$.
 %
 Permutations for value-eliminations like
 $\app {(\qsplits r v {\bar x} t)} w = \qsplits r v {\bar x} {\app t
   w}$
 are derivable (using the $\beta$-laws) from the $\eta$-laws, like
+the $\eta$-$\otimes$-law
 $\qsubst{v}{r}{z}{t'} = \qsplits r {v} {\bar x} {\qsubst {\ptup {\bar
-      x}} r z {t'}}$ for $\otimes$.
+      x}} r z {t'}}$
+(let $t' = \app {(\qsplits r z {\bar x} t)} w$).
 
 % Our extension of CBPV features negative variables $y$ standing for
 % computations $u$, thus, we require a notion of computation
@@ -2557,8 +2569,9 @@ out in detail by \citet{atkeyWood:types19,woodAtkey:linearity20}.
 It straightforwardly extends to coeffect-graded CBPV.
 %
 A substitution $\sigma$ is a finite map from variable to terms,
-mapping positive variables $x$ to values $v$ and negative variables
-$y$ to computations $t$.  Substitution typing
+mapping positive variables $x$ to values $v$.
+% and negative variables $y$ to computations $t$.
+Substitution typing
 \fbox{$\SubstTy \Psi \Gamma \sigma \Delta$} is equipped with a matrix
 $\Psi : \R^{\dom\Gamma \times \dom\Delta}$ recording the usage
 vector $\Psi(z) : \R^{\dom\Gamma}$ for each variable
@@ -2952,7 +2965,7 @@ reactivated via forcing in $\force v : N \mid e$.
 \subsection{Graded CBPV: semantics}
 
 As in effect-graded CBPV, negative types $N$ are interpreted as graded
-monad algebras $\denn N : [(\Eff,\leq) \to \CC]$, and as in
+monad algebras $\denn N : [(\Eff,\leq) \to \CC]$. Dually, as in
 coeffect-graded CBPV, positive types are interpreted as graded comonad
 coalgebras $\denp P : [(\R,\leq) \to \CC]$.  Values
 $\qValTy \gamma \Gamma v P$ are interpreted as natural transformations
@@ -3083,7 +3096,7 @@ corresponding let-binding construct.  They further present an
 effect-graded version of ECBPV, drawing effect qualifiers from a
 preordered monoid.  In contrast to our version, effect annotations
 $f$ are stored at monadic types $\compty f P$.  Instead of our
-judgement $\CompTy \Gamma t e N$ that accumulates effect traces $e$
+judgement $\CompTy \Gamma t e N$ (that accumulates effect traces $e$)
 and a semantic interpretation of computation types $N$ as graded monad
 algebras, they define a syntactic operation $\compty f N$ that pushes
 down effect qualifier $f$ to the monadic types $\compty {f'} P$ in $N$
@@ -3186,7 +3199,7 @@ effects and coeffects in a smooth way, keeping the term grammar
 virtually unchanged and only adding effect and coeffect annotations at
 the transition points between value and computation types.  The
 surprising simplicity of our solution speaks for the design quality of
-Levy's CBPV calculus \cite{levy:hosc06}.  For instance, the analogy to
+Levy's CBPV calculus \citeyearpar{levy:hosc06}.  For instance, the analogy to
 intuitionistic linear logic---that lies at the heart of coeffect
 typing---is already implicitly present in the separation of value
 $(\otimes)$ and computation type products ($\Pi$).
