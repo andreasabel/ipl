@@ -1,0 +1,20 @@
+name: build-test
+on:
+  # schedule: [{cron: '0 0 * * *'}]
+  push: {branches: master}
+jobs:
+  install-agda:
+    name: src/Everything on Agda-2.6.2.2, std-lib-1.7.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: omelkonian/setup-agda@master
+        with:
+          agda-version: 2.6.2.2
+          stdlib-version: 1.7.1
+          # libraries: |
+          main: src/Everything
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ribbon: true
+          # rts: -K256M -H1G -M8G -A128M
+          measure-typechecking: true

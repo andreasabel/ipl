@@ -88,10 +88,10 @@ module PresheafFormers {P : Poset} where
 
   True : Presheaf P
   True .⟦_⟧ a = ⊤
-  ⟦ True ⟧-hom p ⊤.tt = ⊤.tt
+  ⟦ True ⟧-hom p _ = _
 
   True-in : {H : Presheaf P} → H ≤ᵖ True
-  True-in _ = ⊤.tt
+  True-in _ = _
 
   False : Presheaf P
   False .⟦_⟧ a = ⊥
@@ -159,7 +159,7 @@ module PresheafFormers {P : Poset} where
     private module H = Presheaf H
 
     trueI : H ≤ᵖ True
-    trueI x = ⊤.tt
+    trueI x = _
 
     falseE : ∀ {M} → False ≤ᵖ M
     falseE = ⊥-elim
@@ -266,10 +266,10 @@ module _ {P : Poset} where
 
     True : Sheaf coverage
     True .presheaf = PF.True
-    True .glue _ _ = ⊤.tt
+    True .glue _ _ = _
 
     True-in : {H : Sheaf coverage} → H ≤ˢ True
-    True-in _ = ⊤.tt
+    True-in _ = _
 
     False : Sheaf coverage
     False = sheafify PF.False

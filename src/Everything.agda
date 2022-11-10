@@ -1,4 +1,4 @@
--- Normalization by Evaluation for Intuitionistic Predicate Logic (IPL)
+-- Normalization by Evaluation for Intuitionistic Propositional Logic (IPL)
 
 module Everything where
 

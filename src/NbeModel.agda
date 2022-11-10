@@ -331,7 +331,7 @@ mutual
   reflect : ∀ A → ⟨ A ⟩ NeImg A ↪ T⟦ A ⟧
   reflect (Atom P)      = iNe
   reflect True          = _
-  reflect False (t , _) = subst (Cover _ _ _) ⊥-elim-ext (falseC t)
+  reflect False (t , _) = subst (Cover _ _ _) (⊥-elim-ext {f = Ne⦅ t ⦆}) (falseC t)
 
   -- x : A ∨ B  is reflected as case(x, y. inl y, z. inr z)
   -- Need a proof of caseof x inj₁ inj₂ = x
