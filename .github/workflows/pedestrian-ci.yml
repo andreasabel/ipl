@@ -1,0 +1,36 @@
+name: agda-build
+
+on:
+  push:
+    branches:
+      - master
+      - ci-*
+
+jobs:
+  agda-build:
+    name: Agda-2.6.2.2 and std-lib
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $HOME/.stack
+            $HOME/std-lib-1.7.1
+          key: agda-2.6.2.2-std-lib-1.7.1
+
+      - name: Install Agda
+        run: stack install Agda-2.6.2.2
+
+      # Install standard library
+      - name: Install agda-stdlib
+        # if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: |
+          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
+          unzip v1.7.1.zip
+
+      - uses: actions/checkout@v3
+
+      - name: Run Agda
+        run:  agda -l agda-stdlib-1.7.1/standard-library.agda-lib -i src src/Everything.agda --html
