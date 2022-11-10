@@ -16,8 +16,8 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            $HOME/.stack
-            $HOME/std-lib-1.7.1
+            ~/.stack
+            ~/agda-stdlib-1.7.1
           key: agda-2.6.2.2-std-lib-1.7.1
 
       - name: Install Agda
