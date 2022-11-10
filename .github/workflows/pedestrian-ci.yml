@@ -32,6 +32,5 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      # - name: Run Agda
-      ##   run:  agda -l agda-stdlib-1.7.1/standard-library.agda-lib -i src src/Everything.agda --html
-      #   run:  agda -i agda-stdlib-1.7.1 -i src src/Everything.agda --html
+      - name: Run Agda
+        run:  agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
