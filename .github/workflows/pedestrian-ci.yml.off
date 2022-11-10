@@ -1,0 +1,68 @@
+name: pedestrian-ci
+
+on:
+  push:
+    branches:
+      - master
+      - ci-*
+
+jobs:
+  agda-build:
+    name: Agda ${{ matrix.agda }} std-lib ${{ matrix.std-lib }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-latest
+          resolver: lts
+          agda: 2.6.2.2
+          std-lib: 1.7.1
+        - os: ubuntu-latest
+          resolver: nightly
+          agda: 2.6.3
+          std-lib: 1.7.2
+
+    steps:
+
+      # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        id:   cache
+        with:
+          key: pedestrian-ci-agda-${{ matrix.agda }}-std-lib-${{ matrix.std-lib }}
+          path: |
+            ~/.local
+            ~/.stack
+            agda-stdlib-${{ matrix.std-lib }}
+            src/_build
+
+      - name: "Debug: directory listing (after cache)"
+        if: ${{ runner.debug }}
+        run: |
+          pwd
+          ls -al
+          tree -d -L 2
+          tree -L 2 .local
+
+      - name: Download agda-stdlib
+        if:  ${{ !steps.cache.outputs.cache-hit }}
+        run: |
+          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v${{ matrix.std-lib }}.zip
+          unzip v${{ matrix.std-lib }}.zip
+
+      - name: Install Agda
+        if:  ${{ !steps.cache.outputs.cache-hit }}
+        run: stack install Agda-${{ matrix.agda }} --resolver ${{ matrix.resolver }}
+
+      - name: "Debug: directory listing (before Agda)"
+        if: ${{ runner.debug }}
+        run: |
+          pwd
+          ls -al
+          tree -d -L 2
+
+      - name: Run Agda
+        run: agda -i agda-stdlib-${{ matrix.std-lib }}/src -i src src/Everything.agda --html

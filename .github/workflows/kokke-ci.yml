@@ -1,0 +1,45 @@
+name: agda-setup
+
+on:
+  push:
+    branches:
+      - master
+      - ci-*
+
+jobs:
+  agda-build:
+    name: Agda ${{ matrix.agda }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: windows-latest
+          agda: 2.6.2.2
+        - os: ubuntu-latest
+          agda: 2.6.3
+
+    steps:
+
+      # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        id:   cache
+        with:
+          key: agda-setup-ci-agda-${{ matrix.agda }}-std-lib-${{ matrix.std-lib }}
+          path: |
+            src/_build
+
+      - name: Setup Agda
+        uses: wenkokke/setup-agda@latest
+        with:
+          agda-version: ${{ matrix.agda }}
+          agda-stdlib-version: recommended
+          # agda-stdlib-version: '1.7.1'
+          # agda-stdlib-default: true
+
+      - name: Run Agda
+        working-directory: src
+        run: agda Everything.agda --html
