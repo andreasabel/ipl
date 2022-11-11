@@ -30,6 +30,11 @@ jobs:
           wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
           unzip v1.7.1.zip
 
+      - name: Before checkout
+        run: |
+          ls -al
+          tree -L 2
+
       - uses: actions/checkout@v3
 
       - name: Tree
