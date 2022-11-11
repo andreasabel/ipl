@@ -32,5 +32,14 @@ jobs:
 
       - uses: actions/checkout@v3
 
+      - name: Tree
+        run: |
+          tree -L 3
+
       - name: Run Agda
-        run:  agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
+        run: |
+          ls -al
+          tree -L 2
+
+
+# agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
