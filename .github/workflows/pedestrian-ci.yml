@@ -50,4 +50,4 @@ jobs:
           ls -al
 
       - name: Run Agda
-        run: agda -i ~/agda-stdlib-1.7.1/src -i src src/Everything.agda --html
+        run: agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
