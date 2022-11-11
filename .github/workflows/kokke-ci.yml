@@ -8,7 +8,7 @@ on:
 
 jobs:
   agda-build:
-    name: Agda-2.6.2.2 and std-lib
+    name: Agda-2.6.2.2 and std-lib-1.7.1
     runs-on: ubuntu-latest
 
     steps:
@@ -20,32 +20,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            agda-stdlib-1.7.1
             src/_build
-          key: std-lib-1.7.1
-
-      - name: After cache
-        run: |
-          pwd
-          ls -al ~
-          ls -al
+          key: agdai
 
       - name: Setup Agda
         uses: wenkokke/setup-agda@latest
         with:
           agda-version: '2.6.2.2'
-
-      # Install standard library
-      - name: Install agda-stdlib
-        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
-        run: |
-          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
-          unzip v1.7.1.zip
-
-      - name: Before Agda
-        run: |
-          pwd
-          ls -al
+          agda-stdlib-version: '1.7.1'
 
       - name: Run Agda
-        run: agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
+        run: agda -i src src/Everything.agda --html
