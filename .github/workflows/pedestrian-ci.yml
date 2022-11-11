@@ -28,7 +28,7 @@ jobs:
       - name: Install Agda
         # Cannot skip this installation step even if we find everything in the cache.
         # Reason might be that the PATH isn't set up correctly without running stack here.
-        # if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
+        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: stack install Agda-2.6.2.2
 
       # Install standard library
