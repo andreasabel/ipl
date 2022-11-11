@@ -13,16 +13,22 @@ jobs:
 
     steps:
 
+      # Checkout deletes stuff so we have to do it first.
+      - uses: actions/checkout@v3
+
       - id:   cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.stack
+            ~/.local
             ~/agda-stdlib-1.7.1
           key: agda-2.6.2.2-std-lib-1.7.1
 
       - name: Install Agda
-        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
+        # Cannot skip this installation step even if we find everything in the cache.
+        # Reason might be that the PATH isn't set up correctly without running stack here.
+        # if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: stack install Agda-2.6.2.2
 
       # Install standard library
@@ -32,19 +38,16 @@ jobs:
           wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
           unzip v1.7.1.zip
 
-      - name: Before checkout
-        run: |
-          pwd
-          ls -al
-          tree -L 2
-
-      - uses: actions/checkout@v3
+      # - name: Before checkout
+      #   run: |
+      #     pwd
+      #     ls -al
+      #     tree -L 2
 
       - name: After checkout
         run: |
           pwd
           ls -al
-          tree -L 2
 
       - name: Run Agda
         run: agda -i ~/agda-stdlib-1.7.1/src -i src src/Everything.agda --html
