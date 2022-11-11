@@ -13,7 +13,8 @@ jobs:
 
     steps:
 
-      - uses: actions/cache@v3
+      - id:   cache
+        uses: actions/cache@v3
         with:
           path: |
             ~/.stack
@@ -21,30 +22,29 @@ jobs:
           key: agda-2.6.2.2-std-lib-1.7.1
 
       - name: Install Agda
+        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: stack install Agda-2.6.2.2
 
       # Install standard library
       - name: Install agda-stdlib
-        # if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
+        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: |
           wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
           unzip v1.7.1.zip
 
       - name: Before checkout
         run: |
+          pwd
           ls -al
           tree -L 2
 
       - uses: actions/checkout@v3
 
-      - name: Tree
+      - name: After checkout
         run: |
-          tree -L 3
-
-      - name: Run Agda
-        run: |
+          pwd
           ls -al
           tree -L 2
 
-
-# agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
+      - name: Run Agda
+        run: agda -i ~/agda-stdlib-1.7.1/src -i src src/Everything.agda --html
