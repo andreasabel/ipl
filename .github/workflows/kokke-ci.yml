@@ -27,8 +27,9 @@ jobs:
         uses: wenkokke/setup-agda@latest
         with:
           agda-version: '2.6.2.2'
-          agda-stdlib-version: '1.7.1'
-          agda-stdlib-default: true
+          agda-stdlib-version: recommended
+          # agda-stdlib-version: '1.7.1'
+          # agda-stdlib-default: true
 
       - name: Run Agda
         run: agda -i src src/Everything.agda --html
