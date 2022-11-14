@@ -32,4 +32,5 @@ jobs:
           # agda-stdlib-default: true
 
       - name: Run Agda
-        run: agda -i src src/Everything.agda --html
+        working-directory: src
+        run: agda Everything.agda --html
