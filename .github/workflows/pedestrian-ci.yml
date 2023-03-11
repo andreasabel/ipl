@@ -16,9 +16,11 @@ jobs:
       matrix:
         include:
         - os: ubuntu-latest
+          resolver: lts
           agda: 2.6.2.2
           std-lib: 1.7.1
         - os: ubuntu-latest
+          resolver: nightly
           agda: 2.6.3
           std-lib: 1.7.2
 
@@ -53,7 +55,7 @@ jobs:
 
       - name: Install Agda
         if:  ${{ !steps.cache.outputs.cache-hit }}
-        run: stack install Agda-${{ matrix.agda }}
+        run: stack install Agda-${{ matrix.agda }} --resolver ${{ matrix.resolver }}
 
       - name: "Debug: directory listing (before Agda)"
         if: ${{ runner.debug }}

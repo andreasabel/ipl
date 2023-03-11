@@ -1,4 +1,4 @@
-name: wen-kokke-build
+name: agda-setup
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   agda-build:
-    name: Agda ${{ matrix.agda }} recommended std-lib
+    name: Agda ${{ matrix.agda }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
