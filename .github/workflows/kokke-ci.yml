@@ -8,25 +8,34 @@ on:
 
 jobs:
   agda-build:
-    name: Agda-2.6.2.2 and std-lib-1.7.1
-    runs-on: ubuntu-latest
+    name: Agda ${{ matrix.agda }} recommended std-lib
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: windows-latest
+          agda: 2.6.2.2
+        - os: ubuntu-latest
+          agda: 2.6.3
 
     steps:
 
-      # Checkout deletes stuff so we have to do it first.
+      # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
       - uses: actions/checkout@v3
 
-      - id:   cache
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
+        id:   cache
         with:
+          key: agda-setup-ci-agda-${{ matrix.agda }}-std-lib-${{ matrix.std-lib }}
           path: |
             src/_build
-          key: agdai
 
       - name: Setup Agda
         uses: wenkokke/setup-agda@latest
         with:
-          agda-version: '2.6.2.2'
+          agda-version: ${{ matrix.agda }}
           agda-stdlib-version: recommended
           # agda-stdlib-version: '1.7.1'
           # agda-stdlib-default: true
