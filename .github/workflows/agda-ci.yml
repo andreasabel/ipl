@@ -5,6 +5,13 @@ on:
     branches:
       - master
       - ci-*
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # Run always at YYYY-MM-03 03:03am
+    - cron: '3 3 3 * *'
+  workflow_dispatch:
 
 jobs:
   agda-build:
@@ -25,20 +32,24 @@ jobs:
       # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
       - uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        id:   cache
-        with:
-          key: agda-setup-ci-agda-${{ matrix.agda }}-std-lib-${{ matrix.std-lib }}
-          path: |
-            src/_build
-
       - name: Setup Agda
         uses: wenkokke/setup-agda@latest
+        id:   setup
         with:
           agda-version: ${{ matrix.agda }}
           agda-stdlib-version: recommended
           # agda-stdlib-version: '1.7.1'
           # agda-stdlib-default: true
+
+      - name: Cache build
+        uses: actions/cache@v3
+        id:   cache
+        with:
+          key: agda-setup-ci-agda-${{ steps.setup.outputs.agda-version }}
+          # Don't have version of standard library. :-(
+          # -std-lib-${{ matrix.std-lib }}
+          path: |
+            src/_build
 
       - name: Run Agda
         working-directory: src
