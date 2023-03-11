@@ -1,4 +1,4 @@
-name: agda-build
+name: pedestrian-ci
 
 on:
   push:
@@ -8,53 +8,59 @@ on:
 
 jobs:
   agda-build:
-    name: Agda-2.6.2.2 and std-lib
-    runs-on: ubuntu-latest
+    name: Agda ${{ matrix.agda }} std-lib ${{ matrix.std-lib }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-latest
+          agda: 2.6.2.2
+          std-lib: 1.7.1
+        - os: ubuntu-latest
+          agda: 2.6.3
+          std-lib: 1.7.2
 
     steps:
 
-      # Checkout deletes stuff so we have to do it first.
+      # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
       - uses: actions/checkout@v3
 
-      - id:   cache
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
+        id:   cache
         with:
+          key: pedestrian-ci-agda-${{ matrix.agda }}-std-lib-${{ matrix.std-lib }}
           path: |
-            ~/.stack
             ~/.local
-            agda-stdlib-1.7.1
+            ~/.stack
+            agda-stdlib-${{ matrix.std-lib }}
             src/_build
-          key: 1-agda-2.6.2.2-std-lib-1.7.1
 
-      - name: After cache
+      - name: "Debug: directory listing (after cache)"
+        if: ${{ runner.debug }}
         run: |
           pwd
-          ls -al ~
           ls -al
+          tree -d -L 2
+          tree -L 2 .local
+
+      - name: Download agda-stdlib
+        if:  ${{ !steps.cache.outputs.cache-hit }}
+        run: |
+          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v${{ matrix.std-lib }}.zip
+          unzip v${{ matrix.std-lib }}.zip
 
       - name: Install Agda
-        # Cannot skip this installation step even if we find everything in the cache.
-        # Reason might be that the PATH isn't set up correctly without running stack here.
-        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
-        run: stack install Agda-2.6.2.2
+        if:  ${{ !steps.cache.outputs.cache-hit }}
+        run: stack install Agda-${{ matrix.agda }}
 
-      # Install standard library
-      - name: Install agda-stdlib
-        if:  ${{ steps.cache.outputs.cache-hit != 'true' }}
-        run: |
-          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v1.7.1.zip
-          unzip v1.7.1.zip
-
-      # - name: Before checkout
-      #   run: |
-      #     pwd
-      #     ls -al
-      #     tree -L 2
-
-      - name: Before Agda
+      - name: "Debug: directory listing (before Agda)"
+        if: ${{ runner.debug }}
         run: |
           pwd
           ls -al
+          tree -d -L 2
 
       - name: Run Agda
-        run: agda -i agda-stdlib-1.7.1/src -i src src/Everything.agda --html
+        run: agda -i agda-stdlib-${{ matrix.std-lib }}/src -i src src/Everything.agda --html
