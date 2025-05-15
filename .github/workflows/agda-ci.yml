@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Agda
-        uses: wenkokke/setup-agda@latest
+        uses: wenkokke/setup-agda@main
         id:   setup
         with:
           agda-version: ${{ matrix.agda }}
