@@ -227,7 +227,7 @@ module _ {P : Poset} where
 
       sheafify : Presheaf P → Sheaf coverage
       sheafify F = G where
-        private module F = Presheaf F
+        module F = Presheaf F
         open Presheaf
 
         G : Sheaf coverage

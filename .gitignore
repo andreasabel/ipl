@@ -252,10 +252,14 @@ all.bib
 medium.bib
 short.bib
 
+# Temporary files
+*.old
+.DS_Store
 
 /github-pages-token.txt
 
 /docs/
+/html/
 /src/Bug*
 /src/Issue*
 /src/html/
