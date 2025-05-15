@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - master
-      - ci-*
   pull_request:
     branches:
       - master
-  schedule:
-    # Run always at YYYY-MM-03 03:03am
-    - cron: '3 3 3 * *'
+  # GitHub turns of scheduled runs after two months
+  # schedule:
+  #   # Run always at YYYY-MM-03 03:03am
+  #   - cron: '3 3 3 * *'
   workflow_dispatch:
 
 jobs:
@@ -24,13 +24,17 @@ jobs:
         include:
         - os: windows-latest
           agda: 2.6.2.2
-        - os: ubuntu-latest
+        - os: macos-latest
           agda: 2.6.3
+        - os: ubuntu-latest
+          agda: 2.6.4.3
+        - os: ubuntu-latest
+          agda: 2.7.0.1
 
     steps:
 
       # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Agda
         uses: wenkokke/setup-agda@latest
@@ -42,7 +46,7 @@ jobs:
           # agda-stdlib-default: true
 
       - name: Cache build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id:   cache
         with:
           key: agda-setup-ci-agda-${{ steps.setup.outputs.agda-version }}
@@ -50,6 +54,8 @@ jobs:
           # -std-lib-${{ matrix.std-lib }}
           path: |
             src/_build
+            ~/.agda/libraries.d
+# C:\Users\runneradmin\AppData\Roaming\agda\libraries.d\standard-library\v1.7.1
 
       - name: Run Agda
         working-directory: src
