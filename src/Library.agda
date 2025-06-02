@@ -1,11 +1,9 @@
 {-# OPTIONS --rewriting #-}
-
 -- Interface to the standard library.
 -- Place to add own auxiliary definitions.
 
 module Library where
 
-open import Size         public
 open import Level        public using () renaming (zero to lzero)
 
 open import Data.Unit    public using (⊤)
