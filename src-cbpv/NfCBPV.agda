@@ -143,25 +143,12 @@ mutual
     case    : ∀{I Ps}   (x : Σ̇ I Ps ∈ Γ)     (t : ∀ i → ◇ J (Ps i ∷ Γ))  → ◇ J Γ
     split   : ∀{P₁ P₂}  (x : (P₁ ×̇ P₂) ∈ Γ)  (t :    ◇ J (P₂ ∷ P₁ ∷ Γ))  → ◇ J Γ
 
-  data NComp (Q : Ty⁺) (Γ : Cxt) : Set where
-    ret    :           (v : NVal Q Γ)    → NComp Q Γ   -- Invoke RFoc
-    ne     :           (n : Ne (◇̇ Q) Γ)  → NComp Q Γ   -- Finish with LFoc
-      -- e.g. app (force f) x
-
-    -- Use lemma LFoc
-    bind   : ∀{P}      (u : Ne (◇̇ P) Γ)     (t : NComp Q (P ∷ Γ))           → NComp Q Γ
-
-    -- Left invertible
-    split  : ∀{P₁ P₂}  (x : (P₁ ×̇ P₂) ∈ Γ)  (t :    NComp Q (P₂ ∷ P₁ ∷ Γ))  → NComp Q Γ
-    case   : ∀{I Ps}   (x : Σ̇ I Ps    ∈ Γ)  (t : ∀ i → NComp Q (Ps i ∷ Γ))  → NComp Q Γ
-
   -- Right invertible
 
   data Nf : (N : Ty⁻) (Γ : Cxt) → Set where
     ret   : ∀{Γ P}    (v : ◇ (NVal P) Γ)      → Nf (◇̇ P) Γ   -- Invoke RFoc
     ne    : ∀{Γ o}    (let N = ◇̇ (base o))
                       (n : ◇ (Ne N) Γ)        → Nf N Γ
-    -- comp  : ∀{Γ P}   (t : NComp P Γ)        → Nf (◇̇ P) Γ
     rec   : ∀{Γ I N}  (t : ∀ i → Nf (N i) Γ)  → Nf (Π̇ I N) Γ
     abs   : ∀{Γ P N}  (t : Nf N (P ∷ Γ))      → Nf (P ⇒̇ N) Γ
 
