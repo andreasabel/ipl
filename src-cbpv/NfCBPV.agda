@@ -425,16 +425,16 @@ mutual
   λ⦅ t ⦆⁻ γ a = ⦅ t ⦆⁻ (a ∷ γ)
 
   ⦅_⦆⁻ : Comp N Γ → ⟦ Γ ⟧ᶜ →̇ ⟦ N ⟧⁻
-  ⦅ ret v ⦆⁻ = return ∘ ⦅ v ⦆⁺
-  ⦅ rec t ⦆⁻ = flip λ i → ⦅ t i ⦆⁻
-  ⦅ abs t ⦆⁻ = λ⦅ t ⦆⁻
+  ⦅ ret v ⦆⁻       = return ∘ ⦅ v ⦆⁺
+  ⦅ rec t ⦆⁻       = flip λ i → ⦅ t i ⦆⁻
+  ⦅ abs t ⦆⁻       = λ⦅ t ⦆⁻
   ⦅ split v t ⦆⁻ γ = let (a₁ , a₂) = ⦅ v ⦆⁺ γ in ⦅ t ⦆⁻ (a₂ ∷ (a₁ ∷ γ))
   ⦅ case v t ⦆⁻  γ = let (i , a) = ⦅ v ⦆⁺ γ in  ⦅ t i ⦆⁻ (a ∷ γ)
   ⦅ bind {Γ = Γ} {N = N} t t₁ ⦆⁻ = bind! (monᶜ Γ) (run⁻ N) ⦅ t ⦆⁻ λ⦅ t₁ ⦆⁻
-  ⦅ force v ⦆⁻  = extract ∘ ⦅ v ⦆⁺
-  ⦅ prj i t ⦆⁻  = (_$ i) ∘ ⦅ t ⦆⁻
-  ⦅ app t v ⦆⁻  = ⦅ t ⦆⁻  ˢ ⦅ v ⦆⁺
-  ⦅ letv v t ⦆⁻ = λ⦅ t ⦆⁻ ˢ ⦅ v ⦆⁺
+  ⦅ force v ⦆⁻     = extract ∘ ⦅ v ⦆⁺
+  ⦅ prj i t ⦆⁻     = (_$ i) ∘ ⦅ t ⦆⁻
+  ⦅ app t v ⦆⁻     = ⦅ t ⦆⁻  ˢ ⦅ v ⦆⁺
+  ⦅ letv v t ⦆⁻    = λ⦅ t ⦆⁻ ˢ ⦅ v ⦆⁺
 
 -- Reflection and reification
 
