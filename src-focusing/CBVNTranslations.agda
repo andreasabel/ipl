@@ -1,9 +1,9 @@
 {-# OPTIONS --allow-unsolved-metas #-}
-{-# OPTIONS --rewriting #-}
 
 module CBVNTranslations where
 
 open import Library
+open import Size
 open import Polarized
 
 -- Intuitionistic propositional logic

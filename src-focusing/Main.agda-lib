@@ -1,2 +1,5 @@
 depend : standard-library
 include : .
+flags:
+  --rewriting
+  --sized-types

@@ -1,9 +1,9 @@
 {-# OPTIONS --allow-unsolved-metas #-}
-{-# OPTIONS --rewriting #-}
 
 module Polarized where
 
 open import Library
+open import Size
 
 -- Focusing proofs
 

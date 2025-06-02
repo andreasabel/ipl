@@ -1,6 +1,7 @@
-{-# OPTIONS --rewriting #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Library
+open import Size
 
 -- Focusing proofs
 
