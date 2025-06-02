@@ -1,2 +1,4 @@
 include: .
 depend: standard-library
+flags:
+  --rewriting

@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 {-# OPTIONS --rewriting #-}
 
 -- Normalization by Evaluation for Graded Call-By-Push-Value.
