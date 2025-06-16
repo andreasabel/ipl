@@ -864,12 +864,12 @@ A  \ar@{=}[dr]
 
 \newcommand{\lolli}{\multimap}
 
-
+\newcommand{\rescol}[1]{{\color{violet}#1}}
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded comonad}
 \vspace{-2ex}
-\renewcommand{\D}[1][]{\Box_{#1}}
+\renewcommand{\D}[1][]{\Box_{\rescol{#1}}}
 \[
   \begin{array}{lcl}
     \textract & : & \D[1] B \to B \\
@@ -896,31 +896,33 @@ A  \ar@{=}[dr]
 \]
 \end{frame}
 
+\renewcommand{\A}[1]{A_{\rescol{#1}}}
+\newcommand{\forever}[1]{\Box_{\rescol{#1}}}
+\renewcommand{\D}[1][]{\Box_{\rescol{#1}}}
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded comonad coalgebras}
   \vspace{-3ex}
-\renewcommand{\D}[1][]{\Box_{#1}}
 \[
   \begin{array}{lcl}
-    A_{q \leq r} & : & A_q \to A_r \\
-    \texpose & : & A_{qr} \to \D[q]A_r \\
+    \A{q \leq r} & : & \A q \to \A{r} \\
+    \texpose & : & \A{qr} \to \D[q]\A{r} \\
   \end{array}
 \]
 \[
 \xymatrix@C=10ex{
-A_r  \ar[d]_{\texpose} \ar@{=}[dr]
+\A{r}  \ar[d]_{\texpose} \ar@{=}[dr]
 \\
-\D[1]\,A_r \ar[r]^{\textract}
-  & A_r
+\D[1]\,\A{r} \ar[r]^{\textract}
+  & \A{r}
 }
 \qquad
 \xymatrix@C=12ex{
-A_{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
-  & \D[qr]\,A_s \ar[d]^{\tdisplay}
+\A{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
+  & \D[qr]\,\A{s} \ar[d]^{\tdisplay}
 \\
-\D[q]\,A_{rs} \ar[r]^{\tmap\,\texpose}
-  & \D[q]\,(\D[r]\,A_s)
+\D[q]\,\A{rs} \ar[r]^{\tmap\,\texpose}
+  & \D[q]\,(\D[r]\,\A{s})
 }
 \]
 \end{frame}
@@ -936,15 +938,15 @@ A_{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
   \item Additive commutative monoid on grades maps to monoidal structure.
 \[
   \begin{array}{lcl}
-    \tdrop & : & \Box_0 B \to \I \\
-    \tduplicate & : & \Box_{r+s} B \to \Box_r B \otimes \Box_s B \\
+    \tdrop & : & \forever{0} B \to \I \\
+    \tduplicate & : & \forever{r+s} B \to \forever r B \otimes \forever s B \\
   \end{array}
 \]
   \item Extends to coalgebras.
 \[
   \begin{array}{lcl}
-    \tdrop_A & : & A_0 \to \I \\
-    \tduplicate_A & : & A_{r+s} \to A_r \otimes A_s \\
+    \tdrop_A & : & \A 0 \to \I \\
+    \tduplicate_A & : & \A{r+s} \to \A{r} \otimes \A{s} \\
   \end{array}
 \]
   \end{itemize}
@@ -958,39 +960,47 @@ A_{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
 Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \[
   \begin{array}{lcl}
-    (\Box N)_r & = & \Box_r N \\
-    (\sumt I P)_r & = & \sumt {i:I} {(P_i)_r} \\
-    (\tupt I P)_r & = & \tupt {i:I} {(P_i)_r} \\
+    (\Box N)_{\rescol{r}} & = & \forever r N \\
+    (\sumt I P)_{\rescol{r}} & = & \sumt {i:I} {(P_i)_{\rescol{r}}} \\
+    (\tupt I P)_{\rescol{r}} & = & \tupt {i:I} {(P_i)_{\rescol{r}}} \\
   \end{array}
 \]
 \[
   \begin{array}{lcl}
-    \texpose_{\Box N} & : & (\Box N)_{qr} \to \Box_q (\Box N)_r \\
+    \texpose_{\Box N} & : & (\Box N)_{\rescol{qr}} \to \forever q (\Box N)_{\rescol{r}} \\
     \texpose & = & \tdisplay \\[1ex]
-    \texpose_{\sumt I P} & : & (\sumt I P)_{qr} \to \Box_q (\sumt I P)_r\\
+    \texpose_{\sumt I P} & : & (\sumt I P)_{\rescol{qr}} \to \forever q (\sumt I P)_{\rescol{r}}\\
     \texpose_{\sumt I P} (i, v) & = & \tmap\, \tin_i\, (\texpose_{P_i} v) \\[1ex]
-    \texpose_{\tupt I P} & : & (\tupt I P)_{qr} \to \Box_q (\tupt I P)_r \\
+    \texpose_{\tupt I P} & : & (\tupt I P)_{\rescol{qr}} \to \forever q (\tupt I P)_{\rescol{r}} \\
     \texpose_{\tupt I P} (v_i)_{i:I} & = & \tzip\,(\texpose_{P_i} v_i)_{i:I} \\
   \end{array}
 \]
 %  \end{itemize}
 \end{frame}
 
+\renewcommand{\rr}{\rescol{r}}
+\renewcommand{\r}[1]{\rescol{r_{#1}}}
+\newcommand{\Gg}{\rescol{\gamma}}
+\newcommand{\Gd}{\rescol{\delta}}
+
+\newcommand{\sometimes}[1]{\langle \rescol{#1} \rangle}
+
+
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded contexts}
   %\vspace{-3ex}
   \begin{itemize}
-  \item Contexts $\Gamma$ come with grading contexts $\gamma$ of the same length.
-  \item $r_1P_1\dots r_nP_n = (r_1\dots r_n)(P_1 \dots P_n)$.
-  \item Grading contexts $\gamma$ (``vectors'') form a \emph{left module} to grades.
-  \item Write $\mathsf{e}_x$ for the unit vector $e_x(y) = 1$ iff $x=y$ else $0$.
-  \item Contexts $\Gamma$ are interpreted as \emph{structured} graded $\Box$-coalgebras $\Gamma_\gamma$.
+  \item Contexts $\Gamma$ come with grading contexts $\Gg$ of the same length.
+  \item $\r{1}P_1\dots \r{n}P_n = (\r{1}\dots \r{n})(P_1 \dots P_n)$.
+  \item Grading contexts $\Gg$ (``vectors'') form a \emph{left module} to grades.
+  \item Write $\rescol{\mathsf{e}_x}$ for the unit vector $\rescol{\mathsf{e}_x}(y) = \rescol1$ iff $x=y$ else $\rescol0$.
+  \item Contexts $\Gamma$ are interpreted as \emph{structured} graded $\Box$-coalgebras $\Gamma_{\rescol{\Gg}}$.
 \[
-  \begin{array}{lcl}
-    \texpose_\Gamma& : & \Gamma_{r\gamma} \to \Box_r \Gamma_\gamma \\
-    \tdrop_\Gamma & : & \Gamma_0 \to \I \\
-    \tduplicate_\Gamma & : & \Gamma_{\gamma+\delta} \to \Gamma_\gamma \otimes \Gamma_\delta \\
-    \tduplicate_\Gamma & : & \Gamma_{\sum_I \gamma} \to \tupt {i:I} \Gamma_{\gamma_i} \\
+  \begin{array}{lclcl}
+    \texpose_\Gamma& : & \Gamma_{\rescol{\rr\Gg}} & \to & \forever r \Gamma_{\rescol{\Gg}} \\
+    \tdrop_\Gamma & : & \Gamma_{\rescol{0}} & \to & \I \\
+    \tduplicate_\Gamma & : & \Gamma_{\rescol{\Gg+\Gd}} & \to & \Gamma_{\rescol{\Gg}} \otimes \Gamma_{\rescol{\Gd}} \\
+    \tduplicate_\Gamma & : & \Gamma_{\rescol{\sum_I \Gg}} & \to & \tupt {i:I} \Gamma_{\rescol{\Gg_i}} \\
   \end{array}
 \]
   \end{itemize}
@@ -1001,7 +1011,7 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 %   \frametitle{Coeffect-graded CBPV}
 %   %\vspace{-3ex}
 %   \begin{itemize}
-%   \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
+%   \item Negative types $N ::= \sometimes{ r } P \mid \rr P \lolli N \mid \recty i I N$.
 %   \end{itemize}
 % \end{frame}
 
@@ -1010,26 +1020,26 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 %   %\vspace{-3ex}
 %   \begin{itemize}
 %   %\item A derivation of $P \in \Gamma$ is a (value) variable.
-%   \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
-%   \item $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N$.
+%   \item Negative types $N ::= \sometimes{ r } P \mid \rr P \lolli N \mid \recty i I N$.
+%   \item $\Gg\Gamma \vdash P$ and $\Gg\Gamma \vdash N$.
 % \begin{gather*}
-%   \nrux{\tin_i}{\gamma\Gamma \vdash P_i}{\gamma\Gamma \vdash \sumt I P}{i{:}I}
+%   \nrux{\tin_i}{\Gg\Gamma \vdash P_i}{\Gg\Gamma \vdash \sumt I P}{i{:}I}
 %  \qquad
-%   \nru{\mathsf{tup}}{\forall i{:}I,\, \gamma_i\Gamma \vdash P_i}{(\sum_I \gamma) \Gamma \vdash \tupt I P}
+%   \nru{\mathsf{tup}}{\forall i{:}I,\, \Gg_i\Gamma \vdash P_i}{(\sum_I \Gg) \Gamma \vdash \tupt I P}
 % \\
 %   \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
 % \qquad
-%   \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+%   \nru{\tthunk}{\Gg\Gamma \vdash N}{\Gg\Gamma \vdash \Box N}
 % \end{gather*}
 %   \item Computing with values:
 % \begin{gather*}
-%   \nru{\tcase}{\delta\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \gamma\Gamma.rP_i \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+%   \nru{\tcase}{\Gd\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \Gg\Gamma.\rr P_i \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 % \qquad
-%   \nru{\tsplit}{\delta\Gamma \vdash \tupt I P \quad \gamma\Gamma.\overline{rP_i}^{i:I} \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+%   \nru{\tsplit}{\Gd\Gamma \vdash \tupt I P \quad \Gg\Gamma.\overline{\rr P_i}^{i:I} \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 %   \\
-%   \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+%   \nru{\tlet}{\Gd\Gamma \vdash P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 % \qquad
-%   \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+%   \nru{\tforce}{\Gg\Gamma \vdash \Box N}{\Gg\Gamma \vdash N}
 % \end{gather*}
 %   \end{itemize}
 % \end{frame}
@@ -1040,46 +1050,47 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 % \begin{itemize}
 %   \item Computation introductions:
 % \begin{gather*}
-%   \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+%   \nru{\treturn}{\Gg\Gamma \vdash P}{\rr\Gg\Gamma \vdash \sometimes{ r } P}
 % \qquad
-%   \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+%   \nru{\lambda}{\Gg\Gamma.\rr P \vdash N}{\Gg\Gamma \vdash \rr P \lolli N}
 % \qquad
-%   \nru{\trecord}{\forall i{:}I,\, \gamma\Gamma \vdash N_i}{\gamma\Gamma \vdash \rect I N}
+%   \nru{\trecord}{\forall i{:}I,\, \Gg\Gamma \vdash N_i}{\Gg\Gamma \vdash \rect I N}
 % \end{gather*}
 %   \item Computation eliminations:
 % \begin{gather*}
-%   \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+%   \nru{\tbind}{\Gd \Gamma \vdash \sometimes{ r } P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \Gd)}\Gamma \vdash N}
 % \qquad
-%   \nru{\tapp}{\gamma\Gamma \vdash rP \To N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+%   \nru{\tapp}{\Gg\Gamma \vdash \rr P \To N \quad \Gd\Gamma \vdash P}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 % \\
-%   \nru{\tproj_i}{\gamma\Gamma \vdash \rect I N}{\gamma\Gamma \vdash N_i}
+%   \nru{\tproj_i}{\Gg\Gamma \vdash \rect I N}{\Gg\Gamma \vdash N_i}
 % \end{gather*}
 %   \end{itemize}
 % \end{frame}
+
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Coeffect-graded CBPV}
   %\vspace{-3ex}
   \begin{itemize}
   %\item A derivation of $P \in \Gamma$ is a (value) variable.
-  \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
-  \item $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N$.
+  \item Negative types $N ::= \sometimes{ r } P \mid \rr P \lolli N \mid \recty i I N$.
+  \item $\Gg\Gamma \vdash P$ and $\Gg\Gamma \vdash N$.
 \begin{gather*}
-  \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
+  \nru{\tvar}{x : P \in \Gamma}{\rescol{\mathsf{e}_x}\Gamma \vdash P}
 \qquad
-  \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tlet}{\Gd\Gamma \vdash P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 \\
-  \nrux{\tin_i}{\gamma\Gamma \vdash P_i}{\gamma\Gamma \vdash \sumt I P}{i{:}I}
+  \nrux{\tin_i}{\Gg\Gamma \vdash P_i}{\Gg\Gamma \vdash \sumt I P}{i{:}I}
  \qquad
-  \nru{\tcase}{\delta\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \gamma\Gamma.rP_i \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tcase}{\Gd\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \Gg\Gamma.\rr P_i \vdash N}{\rescol{\rescol{(\Gg + \rr\Gd)}}\Gamma \vdash N}
 \\
-  \nru{\mathsf{tup}}{\forall i{:}I,\, \gamma_i\Gamma \vdash P_i}{(\sum_I \gamma) \Gamma \vdash \tupt I P}
+  \nru{\mathsf{tup}}{\forall i{:}I,\, \Gg_i\Gamma \vdash P_i}{\rescol{(\sum_I \Gg)} \Gamma \vdash \tupt I P}
 \qquad
-  \nru{\tsplit}{\delta\Gamma \vdash \tupt I P \quad \gamma\Gamma.\overline{rP_i}^{i:I} \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tsplit}{\Gd\Gamma \vdash \tupt I P \quad \Gg\Gamma.\overline{\rr P_i}^{i:I} \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 \\
-  \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+  \nru{\tthunk}{\Gg\Gamma \vdash N}{\Gg\Gamma \vdash \Box N}
 \qquad
-  \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+  \nru{\tforce}{\Gg\Gamma \vdash \Box N}{\Gg\Gamma \vdash N}
 \end{gather*}
   \end{itemize}
 \end{frame}
@@ -1090,17 +1101,17 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 %\begin{itemize}
 %  \item Computation introductions:
 \begin{gather*}
-  \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+  \nru{\treturn}{\Gg\Gamma \vdash P}{\rr\Gg\Gamma \vdash \sometimes{ r } P}
 \qquad
-  \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+  \nru{\tbind}{\Gd \Gamma \vdash \sometimes{ r } P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \Gd)}\Gamma \vdash N}
 \\[1ex]
-  \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+  \nru{\lambda}{\Gg\Gamma.\rr P \vdash N}{\Gg\Gamma \vdash \rr P \lolli N}
 \qquad
-  \nru{\tapp}{\gamma\Gamma \vdash rP \lolli N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tapp}{\Gg\Gamma \vdash \rr P \lolli N \quad \Gd\Gamma \vdash P}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 \\[1ex]
-  \nru{\trecord}{\forall i{:}I,\, \gamma\Gamma \vdash N_i}{\gamma\Gamma \vdash \rect I N}
+  \nru{\trecord}{\forall i{:}I,\, \Gg\Gamma \vdash N_i}{\Gg\Gamma \vdash \rect I N}
 \qquad
-  \nru{\tproj_i}{\gamma\Gamma \vdash \rect I N}{\gamma\Gamma \vdash N_i}
+  \nru{\tproj_i}{\Gg\Gamma \vdash \rect I N}{\Gg\Gamma \vdash N_i}
 \end{gather*}
 %  \end{itemize}
 \end{frame}
@@ -1109,34 +1120,34 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
   \frametitle{Semantics of coeffect-grading}
   %\vspace{-3ex}
   \begin{itemize}
-  \item Computations $\gamma\Gamma \vdash N$ are morphisms $\Gamma_\gamma \to N$.
-  \item Values $\gamma\Gamma \vdash P$ are morphisms families $\Gamma_{r\gamma} \to P_r$ natural in $r$.
+  \item Computations $\Gg\Gamma \vdash N$ are morphisms $\Gamma_{\rescol{\Gg}} \to N$.
+  \item Values $\Gg\Gamma \vdash P$ are morphisms families $\Gamma_{\rescol{\rr\Gg}} \to P_{\rescol{r}}$ natural in $\rr$.
 \begin{gather*}
-  \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
+  \nru{\tvar}{x : P \in \Gamma}{\rescol{\mathsf{e}_x}\Gamma \vdash P}
 \qquad
-  \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tlet}{\Gd\Gamma \vdash P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 \end{gather*}
 \[
   \begin{array}{lcl}
-    \tmcol\tvar & : & (\Gamma.P.\Delta)_{s(\vec 0.1.\vec 0)}
-       \to \Gamma_{\vec 0} \otimes P_s \otimes \Delta_{\vec 0}
-       \to P_s \\
-    \tmcol\tlet & : & \Gamma_{\gamma + r\delta}
-       \to \Gamma_{\gamma} \otimes \Gamma_{r\delta}
-       \to \Gamma_{\gamma} \otimes P_{r}
-       \to (\Gamma.P)_{\gamma.r}
+    \tmcol\tvar & : & (\Gamma.P.\Delta)_{\rescol{s(\vec 0.1.\vec 0)}}
+       \to \Gamma_{\rescol{\vec 0}} \otimes P_{\rescol{s}} \otimes \Gd_{\vec 0}
+       \to P_{\rescol{s}} \\
+    \tmcol\tlet & : & \Gamma_{\rescol{\Gg + \rr\Gd}}
+       \to \Gamma_{\rescol{\Gg}} \otimes \Gamma_{\rescol{\rr\Gd}}
+       \to \Gamma_{\rescol{\Gg}} \otimes P_{\rescol{r}}
+       \to (\Gamma.P)_{\rescol{\Gg.r}}
        \to N \\
   \end{array}
 \]
 \[
-  \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+  \nru{\tthunk}{\Gg\Gamma \vdash N}{\Gg\Gamma \vdash \Box N}
 \qquad
-  \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+  \nru{\tforce}{\Gg\Gamma \vdash \Box N}{\Gg\Gamma \vdash N}
 \]
 \[
   \begin{array}{lcl}
-    \tmcol\tthunk & : & \Gamma_{r\gamma} \to \Box_r\Gamma_\gamma \to \Box_rN = (\Box N)_r \\
-    \tmforce & : & \Gamma_\gamma = \Gamma_{1\gamma} \to (\Box N)_1 = \Box_1 N \to N \\
+    \tmcol\tthunk & : & \Gamma_{\rescol{\rr\Gg}} \to \forever \rr\Gamma_{\rescol{\Gg}} \to \forever rN = (\Box N)_{\rescol{r}} \\
+    \tmforce & : & \Gamma_{\rescol{\Gg}} = \Gamma_{\rescol{1\Gg}} \to (\Box N)_{\rescol{1}} = \forever 1 N \to N \\
   \end{array}
 \]
   \end{itemize}
@@ -1149,32 +1160,32 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
   \begin{itemize}
   \item Semantics of monadic computations.
 \[
-  \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+  \nru{\treturn}{\Gg\Gamma \vdash P}{\rr\Gg\Gamma \vdash \sometimes{ r } P}
 \qquad
-  \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+  \nru{\tbind}{\Gd \Gamma \vdash \sometimes{ r } P \quad \Gg\Gamma.\rr P \vdash N}{\rescol{(\Gg + \Gd)}\Gamma \vdash N}
 \]
 \[
   \begin{array}{lcl}
-    \tmret & : & \Gamma_{r\gamma} \to P_r \to \diamond P_r = \langle r \rangle P \\
-    \tmbind & : & \Gamma_{\gamma + \delta}
-      \to \Gamma_\gamma \otimes \Gamma_\delta
-      \to \Gamma_\gamma \otimes (\diamond P_r)
-      \to \diamond (\Gamma_\gamma \otimes P_r)
+    \tmret & : & \Gamma_{\rescol{\rr\Gg}} \to P_{\rescol{r}} \to \diamond P_{\rescol{r}} = \sometimes{ r } P \\
+    \tmbind & : & \Gamma_{\rescol{\Gg + \Gd}}
+      \to \Gamma_{\rescol{\Gg}} \otimes \Gamma_{\rescol{\Gd}}
+      \to \Gamma_{\rescol{\Gg}} \otimes (\diamond P_{\rescol{r}})
+      \to \diamond (\Gamma_{\rescol{\Gg}} \otimes P_{\rescol{r}})
       \to \diamond N
       \to N
   \end{array}
 \]
 \item Semantics of functions.
 \[
-  \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+  \nru{\lambda}{\Gg\Gamma.\rr P \vdash N}{\Gg\Gamma \vdash \rr P \lolli N}
 \qquad
-  \nru{\tapp}{\gamma\Gamma \vdash rP \lolli N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+  \nru{\tapp}{\Gg\Gamma \vdash \rr P \lolli N \quad \Gd\Gamma \vdash P}{\rescol{(\Gg + \rr\Gd)}\Gamma \vdash N}
 \]
 \[
   \begin{array}{lcl}
-    \tmapp & : & \Gamma_{\gamma + r\delta}
-       \to \Gamma_\gamma \otimes \Gamma_{r\delta}
-       \to \Gamma_\gamma \otimes P_r
+    \tmapp & : & \Gamma_{\rescol{\Gg + \rr\Gd}}
+       \to \Gamma_{\rescol{\Gg}} \otimes \Gamma_{\rescol{\rr\Gd}}
+       \to \Gamma_{\rescol{\Gg}} \otimes P_{\rescol{r}}
        \to N
   \end{array}
 \]
@@ -1186,11 +1197,11 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \begin{frame}%[fragile=singleslide]
   \frametitle{Fully graded CBPV}
   \begin{itemize}
-  \item Judgements $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N \mid \e$.
-  \item Interpreted as $\Gamma_{r\gamma} \to P_r$ and $\Gamma_\gamma \to N_{\e}$.
-  \item Monad $(\langle r \rangle P)_{\e} = \diamond_{\e} P_r$ and comonad $([\e]N)_r = \Box_r N_{\e}$.
-  \item No commutative laws needed!
-  \item No interaction between effects and coeffects in the framework.
+  \item Judgements $\Gg\Gamma \vdash P$ and $\Gg\Gamma \vdash N \mid \e$.
+  \item Interpreted as $\Gamma_{\rescol{\rr\Gg}} \to P_{\rescol{r}}$ and $\Gamma_{\rescol{\Gg}} \to N_{\e}$.
+  \item Monad $(\sometimes{ r } P)_{\e} = \diamond_{\e} P_{\rescol{r}}$ and comonad $([\e]N)_{\rescol{r}} = \forever r N_{\e}$.
+  %\item No commutative laws needed!
+  %\item No interaction between effects and coeffects in the framework.
   \end{itemize}
 \end{frame}
 
