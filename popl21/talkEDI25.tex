@@ -1,0 +1,1320 @@
+%\nonstopmode
+%\errorstopmode  %% opposite of nonstopmode
+\documentclass[t,fleqn,usenames,dvipsnames]{beamer}
+%\documentclass{article}\usepackage{beamerarticle}
+
+\makeatletter
+%\setlength\@mathmargin{1em}  %% reduce math margin
+%\def\leqn{\tagsleft@true}
+%\def\reqn{\tagsleft@false}
+\def\fleq{\@fleqntrue\let\mathindent\@mathmargin \@mathmargin=\leftmargini}
+\def\cneq{\@fleqnfalse}
+\g@addto@macro{\endsubequations}{\addtocounter{equation}{-1}}
+\makeatother
+
+\mode<presentation>
+{
+  % \usetheme{AnnArbor}
+  \useinnertheme[shadow=true]{rounded}
+  \useoutertheme{infolines}
+  %\setbeamercolor*{title in head/foot}{parent=palette secondary}
+  %\useoutertheme{shadow}
+  \usecolortheme{wolverine}
+
+  \setbeamerfont{block title}{size={}}
+  \setbeamercolor{titlelike}{parent=structure,bg=yellow!85!orange}
+
+  % My modification: centered title with white background
+  \setbeamercolor{frametitle}{bg=white}
+  \setbeamertemplate{frametitle}{
+      \Large\insertframetitle
+      \par
+      %{\centering\large\insertframesubtitle}
+      %\par
+  }
+  % \setbeamertemplate{frametitle}{
+  %   %\begin{center}
+  %     \Large\insertframetitle
+  %     \vspace{1ex}
+  %     %\hline
+  %     \par
+  %   %\end{center}
+  % }
+  % %% Does not work
+  % \setbeamercolor{frametitlecentered}{bg=white}
+  % \setbeamertemplate{frametitlecentered}{
+  %   \begin{center}
+  %     \Large\insertframetitle
+  %     \par
+  %   \end{center}
+  % }
+  % plus red emphasis
+  \setbeamercolor{alerted text}{fg=red!70!black}
+
+  % More space between items
+  %\defbeamertemplate*{itemize/enumerate body begin}{default}{\itemsep1ex}
+
+
+  \setbeamercolor{math text}{parent=titlelike}
+%  \setbeamercolor{math text displayed}{parent=palette primary}
+
+  % Fix background of theorems/proof
+  \setbeamercolor{block body}{parent=palette primary}%{bg=yellow!85!orange}
+  \setbeamercolor{block title}{parent=palette secondary}%{bg=orange}
+
+
+
+  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+
+} % end mode presentation
+
+%\usepackage{tcolorbox}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+%\usepackage{times}  % DYSFUNCTIONAL! looks awful when mixing mathtt and ordinary math.
+\usepackage{ifthen}
+%\usepackage[T1]{fontenc} %no effect
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+\usepackage{array} % for \newcolumntype
+\usepackage{bbm}
+\usepackage{calc} % for \widthof
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{alltt}
+\usepackage[normalem]{ulem} % strikethrough \sout
+\usepackage{cancel} % strikethrough math mode \cancel
+%\usepackage{enumitem} % set label in itemize
+\usepackage{pifont} % for \tickNo
+%\usepackage{}
+%\usepackage{listings}
+\usepackage[all]{xy}
+%\usepackage{proof}
+%\usepackage{eurosym}
+%\usepackage{graphics}
+\usepackage{bibentry}
+%\nobibliography{short}
+\bibliographystyle{plain}
+%\input{prooftree}
+
+\newtheorem{takehomemessage}[theorem]{\textbf{Take home message}}
+
+%\usepackage{agda}
+%\AgdaNoSpaceAroundCode{}
+
+\DeclareMathSymbol{\chkmark}{\mathord}{AMSa}{"58}
+
+% RGB colors
+\definecolor{darkred}{rgb}{0.5,0,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+\definecolor{dirtyred}{rgb}{0.7,0.2,0.1}
+\definecolor{dirtygreen}{rgb}{0.2,0.4,0.1}
+\definecolor{darkdirtygreen}{rgb}{0.13,0.25,0.07}
+\definecolor{dirtyblue}{rgb}{0.07,0.2,0.5}
+\definecolor{darkdirtyblue}{rgb}{0.1,0.15,0.35}
+\definecolor{lightblue}{rgb}{0.5,0.5,1}
+\definecolor{olivegreen}{rgb}{0.5,0.5,0}
+\definecolor{brown}{rgb}{0.65,0.35,0} % almost gold
+\definecolor{grey}{rgb}{0.33,0.33,0.33}
+\definecolor{darkbrown}{rgb}{0.35,0.15,0}
+\definecolor{darkgrey}{rgb}{0.16,0.16,0.16}
+
+\newcommand{\textred}[1]{{\color{dirtyred}\textbf{#1}}}
+
+%\newcommand{\tickYes}{{\color{darkgreen}\checkmark}} % does not work
+  %since checkmark invokes math mode
+\newcommand{\tickYes}{\ensuremath{\color{darkgreen}\chkmark}}
+\newcommand{\tickNo}{{\color{dirtyred}\hspace{1pt}\ding{55}}}
+
+%\usepackage[curve,matrix,arrow]{xy}
+%\usepackage{tikz} % Drawing diagrams
+%\usepackage{pgflibraryshapes} %Ellipses
+
+\newcommand{\SKIP}[1]{}
+\newcommand{\LESS}[1]{}
+
+% MACROS:
+\usepackage{agda}
+\newcommand{\inst}{}
+\input{colors}
+\input{talkMacros}
+
+% Semantics
+\renewcommand{\den}[1]{\semcol{\lv} #1 \semcol{\rv}}
+\newcommand{\posden}[1]{\poscol{\lv} #1 \poscol{\rv^{+}}}
+\newcommand{\negden}[1]{\negcol{\lv} #1 \negcol{\rv^{-}}}
+\newcommand{\cden}[1]{\den{\cxtcol{#1}}}
+\renewcommand{\A}[1][]{\semcol{\mathcal{A}}_{\cxtcol{#1}}}
+\renewcommand{\B}[1][]{\semcol{\mathcal{B}}_{\cxtcol{#1}}}
+\renewcommand{\C}[1][]{\semcol{\mathcal{C}}_{\cxtcol{#1}}}
+\renewcommand{\N}[1][]{\negcol{\mathcal{N}}_{\cxtcol{#1}}}
+\newcommand{\Np}[1][]{\negcol{\mathcal{N'}}_{\cxtcol{#1}}}
+\renewcommand{\P}[1][]{\poscol{\mathcal{P}}_{\cxtcol{#1}}}
+\newcommand{\Pp}[1][]{\poscol{\mathcal{P'}}_{\cxtcol{#1}}}
+
+\newcommand{\inject}[1]{\semcol{\iota_{#1}}}
+
+\newcommand{\semrun}{\covcol{\mathsf{run}}}
+\newcommand{\semcase}{\covcol{\mathsf{case}}}
+\newcommand{\covcase}{\covcol{\mathsf{case}}}
+\newcommand{\covabort}{\covcol{\mathsf{abort}}}
+\newcommand{\covreturn}{\covcol{\mathsf{return}}}
+\newcommand{\covjoin}{\covcol{\mathsf{join}}}
+\newcommand{\covmon}{\covcol{\mathsf{mon}}^{\cover{}}}
+\newcommand{\covmap}{\covcol{\mathsf{map}}}
+\newcommand{\covsmap}{\covcol{\widehat{\mathsf{map}}}}
+
+% \renewcommand{\tmc}[1]{\mathsf{#1}}
+% \renewcommand{\tmcol}[1]{\mathsf{#1}}
+\renewcommand{\varcol}{\tmcol}
+
+\renewcommand{\Var}[2]{\tVar\;#1\;#2}
+\renewcommand{\ru}[2]{\dfrac{%
+  \begin{array}[b]{@{}l@{}} #1 \end{array}\hfill%
+  }{%
+  \begin{array}[t]{@{}l@{}} #2 \end{array}\hfill%
+  }}
+
+% black text in mbox
+\newcommand{\mybox}[1]{\mbox{\color{black}#1}}
+
+% meta-level logic
+\renewcommand{\mfor}{\ \mybox{for}\ }
+\renewcommand{\mforsome}{\ \mybox{for some}\ }
+\renewcommand{\mthen}{\ \mybox{then}\ }
+\renewcommand{\mif}{\ \mybox{if}\ }
+\renewcommand{\miff}{\ \mybox{iff}\ }
+\renewcommand{\motherwise}{\ \mybox{otherwise}}
+\renewcommand{\mundefined}{\mybox{undefined}}
+\renewcommand{\mnot}{\mybox{not}\ }
+\renewcommand{\mand}{\ \mybox{and}\ }
+\renewcommand{\mor}{\ \mybox{or}\ }
+\renewcommand{\mimplies}{\ \mybox{implies}\ }
+\renewcommand{\mimply}{\ \mybox{imply}\ }
+\renewcommand{\mforall}{\ \mybox{for all}\ }
+\renewcommand{\mexists}{\mybox{exists}\ }
+\renewcommand{\mexist}{\mybox{exist}\ }
+\renewcommand{\mtrue}{\mybox{true}}
+\renewcommand{\mwith}{\ \mybox{with}\ }
+\renewcommand{\mwhere}{\ \mybox{where}\ }
+\renewcommand{\mholds}{\ \mybox{holds}\ }
+\renewcommand{\munless}{\ \mybox{unless}\ }
+\renewcommand{\mboth}{\ \mybox{both}\ }
+\renewcommand{\msuchthat}{\ \mybox{such that}\ }
+% proofs
+\renewcommand{\msince}{\mybox{since}\ }
+\renewcommand{\mdef}{\mybox{by def.}}
+\renewcommand{\mass}{\mybox{assumption}}
+\renewcommand{\mhyp}{\mybox{by hyp.}}
+\renewcommand{\mlemma}[1]{\mybox{by Lemma~#1}}
+\renewcommand{\mih}[1][]{\mybox{by ind.hyp.}#1}
+\renewcommand{\mgoal}[1][]{\mybox{goal\ifthenelse{\equal{#1}{}}{}{~#1}}}
+\renewcommand{\mby}[1]{\mybox{by #1}}
+\renewcommand{\minfrule}{\mybox{by inference rule}}
+
+
+% \renewcommand{\tin}{\mathsf{inn}}
+% \renewcommand{\thead}{\cop{\mathsf{head}}}
+% \renewcommand{\ttail}{\cop{\mathsf{tail}}}
+% % start copattern color
+% \newcommand{\shead}{\cop{\mathsf{head}}}
+% \newcommand{\stail}{\cop{\mathsf{tail}}}
+% \newcommand{\phead}{\cop{\mathsf{.head}}}
+% \newcommand{\ptail}{\cop{\mathsf{.tail}}}
+% \newcommand{\vecQ}{\cop{\vec Q}}
+% \newcommand{\bDelta}{\boring{\Delta}}
+% \newcommand{\bcovered}{\mathrel{\boring{\ccovered}}}
+% \newcommand{\bA}{\boring{A}}
+% \newcommand{\bC}{\boring{C}}
+% \newcommand{\bder}{\mathrel{\boring{\vdash}}}
+% \newcommand{\bcolon}{\mathrel{\boring{:}}}
+% \newcommand{\blpar}{\boring{(}}
+% \newcommand{\brpar}{\boring{)}}
+% \renewcommand{\vbranches}{\boring{\mathit{branches}}}
+% \renewcommand{\tout}{\cop{\mathsf{out}}}
+% \renewcommand{\tforce}{\cop{\mathsf{force}}}
+% \newcommand{\kw}[1]{{\bf\texttt{#1}}}
+% \newcommand{\kwnewtype}{\kw{newtype}}
+% \newcommand{\kwrecord}{\kw{record}}
+% \newcommand{\kwwhere}{\kw{where}}
+% \newcommand{\kwinstance}{\kw{instance}}
+% \newcommand{\kwcoinductive}{\kw{coinductive}}
+% \newcommand{\kwCoInductive}{\kw{CoInductive}}
+% \newcommand{\kwCoFixpoint}{\kw{CoFixpoint}}
+% \newcommand{\kwfield}{\kw{field}}
+% \renewcommand{\tcase}{\mathbf{case}}
+% \renewcommand{\tof}{\mathbf{of}}
+% \renewcommand{\caseof}[3]{\tcase\,#1\,\tof~#2 \mathrel{\boldsymbol\To} #3}
+% \newcommand{\tthead}{\cop{\texttt{head}}}
+% \newcommand{\tttail}{\cop{\texttt{tail}}}
+\newcommand{\ONE}{\mathbf{1}}
+
+% DOES NOT WORK:
+% rule with "boring" default text
+\newcommand{\setboring}{\setbeamercolor{math text}{fg=grey}\setbeamercolor{math display}{fg=grey}}
+\newcommand{\bru}[2]{\setboring\dfrac{\setboring#1}{\setboring#2}}
+
+\renewcommand*\ttdefault{txtt} % for listing package
+
+% \newcommand{\defHaskelllistings}{%
+%   \lstset{%
+%     language=Haskell,%
+%     basicstyle=\ttfamily\small\color{darkdirtyblue},% \ttfamily
+%     keywordstyle=\ttfamily\bfseries,% \underbar
+%     identifierstyle=,%
+%     commentstyle=\itshape,%
+%     columns=flexible,%spaceflexible,% fixed,% flexible,%
+%     showstringspaces=false,%
+% %    xleftmargin=\codeindent,% defined below
+%     breaklines=true,%
+%     deletekeywords={succ,zero,head,tail,zipWith,Either,List},%
+%     morekeywords={Set,Size,fun,cofun,pattern},% ,left,right,nil,cons
+%     literate={\\}{{$\lambda$}}1 {->}{{$\rightarrow$~}}2
+%              {<=}{{$\leq$~}}2 {<}{{$<$~}}1
+% %     literate={map}{map~}4
+% %       {even}{even~}5
+% %       {odd}{odd~}4
+%      }%
+% }
+%\defHaskelllistings
+
+\title[Graded CBPV]{Graded Call-by-Push-Value}
+\subtitle{Tracking (co)effects in a functional language}
+
+\author[Abel]{
+  Andreas Abel%\inst{1}
+}
+% \author{Andreas Abel\inst{1}
+%   \and Brigitte Pientka\inst{2}
+%   \and David Thibodeau\inst{2}
+%   \and Anton Setzer\inst{3}
+% }
+%{F.~Author\inst{1} \and S.~Another\inst{2}}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[] %Chalmers/GU/ENS Cachan] % (optional, but mostly needed)
+{
+  %\inst{1}%
+  Department of Computer Science and Engineering\\
+  Chalmers and University of Gothenburg, Sweden %\\[1ex]
+}
+%  \inst{1}%
+%  Department of Computer Science\\
+%  University of Somewhere
+%  \and
+%  \inst{2}%
+%  Department of Theoretical Philosophy\\
+%  University of Elsewhere}
+%% - Use the \inst command only if there are several affiliations.
+%% - Keep it simple, no one is interested in your street address.
+
+\date[LFCS'25] % (optional, should be abbreviation of conference name)
+{ LFCS seminar, U Edinburgh, Scotland \\
+  17 June 2025
+}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+%\subject{Software Verification}
+% This is only inserted into the PDF information catalog. Can be left
+% out.
+
+
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+
+%\AtBeginSubsection[]
+%\AtBeginSection[]
+%{
+%  \begin{frame}<beamer>
+%    \frametitle{Outline}
+%    \tableofcontents[currentsection,currentsubsection]
+%  \end{frame}
+%}
+
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command:
+
+%\beamerdefaultoverlayspecification{<+->}
+
+\makeatletter
+\def\MLine#1{\par\vspace{1ex}\hspace*{-\@totalleftmargin}\parbox{\textwidth}{\[#1\]}}
+\makeatother
+%\newenvironment{display}{\par\vspace{1ex}\hspace*{-\@totalleftmargin}\parbox{\textwidth}{\[}{\]}}
+
+
+%\newcommand{\List}{\mathsf{List}}
+\renewcommand{\Set}{\mathsf{Set}}
+\newcommand{\Tree}{\mathsf{Tree}}
+%\newcommand{\Prop}{\mathsf{Prop}}
+%\newcommand{\Type}{\mathsf{Type}}
+%\newcommand{\Size}{\mathsf{Size}}
+%\newcommand{\tfix}{\mathsf{fix}}
+%\newcommand{\Int}{\mathsf{Int}}
+%\newcommand{\tnil}{\mathsf{nil}}
+%\newcommand{\tcons}{\mathsf{cons}}
+%\newcommand{\vas}{\mathit{as}}
+%\newcommand{\ttuple}[1]{(#1)}
+
+%\newcommand{\oford}{\of\tord} \newcommand{\oftype}{\of\ttype}
+\newcommand{\oford}{}         \newcommand{\oftype}{}
+\newenvironment{prg}{\begin{quotation}\begin{tabbing}}{\end{tabbing}\end{quotation}}
+
+% COLORS
+\newcommand{\cHead}{\color{darkblue}}
+\newcommand{\cSub}{\color{brown}}
+\newcommand{\cWhite}{\color{white}}
+\newcommand{\cGray}{\color{gray}}
+\newcommand{\cGreen}{\color{olivegreen}}
+\newcommand{\cBrown}{\color{brown}}
+\newcommand{\cBlack}{\color{black}}
+\newcommand{\black}[1]{{\cBlack#1}}
+
+\newcommand{\cAnn}{\color{red!80!black}}%purple darkblue
+\newcommand{\cAside}{\color{gray}}
+\newcommand{\cEnum}{\color{darkgreen}}
+\newcommand{\cEm}{\cAnn} %\color{red}}
+\newcommand{\cCo}{\cAnn} %\color{red}} % copattern color
+\newcommand{\cop}[1]{{\cCo#1}}
+\newcommand{\cApp}{\color{violet}}
+\newcommand{\capp}[1]{{\cApp#1}}
+\newcommand{\cFocus}{\color{darkgreen}}
+\newcommand{\focus}[1]{{\cFocus#1}}
+\newcommand{\cMath}{\usebeamercolor[fg]{math text}}
+\newcommand{\cIdent}{\usebeamercolor[fg]{math text}}
+\newcommand{\ident}[1]{{\cIdent#1}}
+\newcommand{\cExp}{\cIdent}
+\newcommand{\cBoring}{\color{grey}}
+\newcommand{\boring}[1]{{\cBoring#1}}
+
+
+
+\renewcommand{\rulename}[1]{#1}
+
+% types
+\newcommand{\cType}{\color{orange!60!black}}
+
+
+\newcommand{\mlsays}[1]{}
+% {\begin{frame}%[fragile=singleslide]
+%   %\frametitle{Himself}
+%   \begin{minipage}[c]{0.5\linewidth}
+%    \includegraphics[height=0.9\textheight]{martin-loef-bw.png}
+%   \end{minipage}% NO SPACE HERE!
+%   \begin{minipage}[c]{0.5\linewidth}
+%    \begin{center}
+%      \bla \\[8ex]
+%      \Huge #1
+%    \end{center}
+%   \end{minipage}
+% \end{frame}
+% }
+
+\newcommand{\JOKE}[1]{} % No jokes.
+\renewcommand{\emph}[1]{\textit{\cType#1}}
+
+
+% \DeclareMathOperator*{\amp}{\&}
+% \DeclareMathOperator*{\bigamp}{\scalerel*{\&}{\sum}}
+% \usepackage{scalerel}
+
+\begin{document}
+
+\maketitle
+%\begin{frame}
+%  \titlepage
+%\end{frame}
+
+%\begin{frame}
+%  \frametitle{Outline}
+%  \tableofcontents
+%  % You might wish to add the option [pausesections]
+%\end{frame}
+
+\section{Call-by-Push-Value}
+
+
+% % Types
+% \newcommand{\tTy}{\mathsf{Ty}}
+% \newcommand{\Ty}[1]{\tTy^{#1}}
+% \newcommand{\PTy}{\Ty+}
+% \newcommand{\NTy}{\Ty-}
+% \newcommand{\Cxt}{\mathsf{Cxt}}
+% \newcommand{\RCxt}{\mathsf{RCxt}}
+% \newcommand{\cempty}{\emptyset}
+% \newcommand{\sempty}{\emptyset}
+% \newcommand{\sext}[3]{#1,#3/#2}
+% \newcommand{\extr}[2]{#1.#2}
+% \newcommand{\ext}[3]{#1.#2{:}#3}
+% \newcommand{\qext}[5]{#1#2.#3#4{:}#5}
+% \newcommand{\gqext}[5]{\graybox{#1}#2.\graybox{#3}#4{:}#5}
+
+
+\newcommand{\sumt}   [2]{\ensuremath{\Sigma_{#1} #2}}
+\newcommand{\tupt}   [2]{\ensuremath{\mathop\otimes_{#1} #2}}
+\newcommand{\rect}   [2]{\ensuremath{\Pi_{#1} #2}}
+\newcommand{\sumty}  [3]{\ensuremath{\Sigma_{#1:#2} #3_{#1}}}
+\newcommand{\tupty}  [3]{\ensuremath{\mathop\otimes_{#1:#2} #3_{#1}}}
+\newcommand{\recty}  [3]{\ensuremath{\Pi_{#1:#2} #3_{#1}}}
+\newcommand{\thunkty}[2]{\ensuremath{[#1]#2}}
+\newcommand{\compty} [2]{\ensuremath{\langle#1\rangle#2}}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Call-by-Push-Value (CBPV)}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Value (positive) types $P$ %% ::= \forever N \mid \dotone \mid P \dottimes P' \mid \dotzero \mid P \dotplus P'$
+\[
+  \begin{array}{ll}
+    o & \mbox{base type (e.g. integers)} \\
+    \sumty i I P & \mbox{variants/sums with labels $i:I$} \\
+    \tupty i I P & \mbox{tuples/vectors with indices $i:I$} \\
+    \Box N       & \mbox{thunks}
+  \end{array}
+\]
+  \item Computation (negative) types $N$ %% ::= \sometimes P \mid P \arrow N \mid N  $
+\[
+  \begin{array}{ll}
+    \diamond P & \mbox{monadic type} \\
+    P \To N & \mbox{function type (cbv)} \\
+    \recty i I N & \mbox{records with fields $i:I$} \\
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+\renewcommand{\tcase}{\mathsf{case}}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{CBPV typing: values}
+  %\vspace{-3ex}
+  \begin{itemize}
+  %\item A derivation of $P \in \Gamma$ is a (value) variable.
+  \item A derivation of $\Gamma \vdash P$ is a value expression, $P \in \Gamma$ is a variable.
+\begin{gather*}
+  \nrux{\tin_i}{\Gamma \vdash P_i}{\Gamma \vdash \sumt I P}{i{:}I}
+ \qquad
+  \nru{\mathsf{tup}}{\forall i{:}I,\, \Gamma \vdash P_i}{\Gamma \vdash \tupt I P}
+\\
+  \nru{\tvar}{P \in \Gamma}{\Gamma \vdash P}
+\qquad
+  \nru{\tthunk}{\Gamma \vdash N}{\Gamma \vdash \Box N}
+\end{gather*}
+  \item A derivation of $\Gamma \vdash N$ is a computation expression.
+
+  \item Computing with values:
+\begin{gather*}
+  \nru{\tcase}{\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \Gamma.P_i \vdash N}{\Gamma \vdash N}
+\qquad
+  \nru{\tsplit}{\Gamma \vdash \tupt I P \quad \Gamma.\overline{P_i}^{i:I} \vdash N}{\Gamma \vdash N}
+  \\
+  \nru{\tlet}{\Gamma \vdash P \quad \Gamma.P \vdash N}{\Gamma \vdash N}
+\qquad
+  \nru{\tforce}{\Gamma \vdash \Box N}{\Gamma \vdash N}
+\end{gather*}
+  \end{itemize}
+\end{frame}
+
+\newcommand{\trecord}{\mathsf{record}}
+\newcommand{\tproj}{\mathsf{proj}}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{CBPV typing: computations}
+\begin{itemize}
+  \item Computation introductions:
+\begin{gather*}
+  \nru{\treturn}{\Gamma \vdash P}{\Gamma \vdash \diamond P}
+\qquad
+  \nru{\lambda}{\Gamma.P \vdash N}{\Gamma \vdash P \To N}
+\qquad
+  \nru{\trecord}{\forall i{:}I,\, \Gamma \vdash N_i}{\Gamma \vdash \rect I N}
+\end{gather*}
+  \item Computation eliminations:
+\begin{gather*}
+  \nru{\tbind}{\Gamma \vdash \diamond P \quad \Gamma.P \vdash N}{\Gamma \vdash N}
+\qquad
+  \nru{\tapp}{\Gamma \vdash P \To N \quad \Gamma \vdash P}{\Gamma \vdash N}
+\\
+  \nru{\tproj_i}{\Gamma \vdash \rect I N}{\Gamma \vdash N_i}
+\end{gather*}
+  \end{itemize}
+\end{frame}
+
+\newcommand{\tprint}{\mathsf{print}}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{CBPV: effect}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Let $\top = \rect \emptyset \_$ be the unit type.
+  \item Simple effect: print string literals.
+  \[
+     \nru{\tprint\,s}{}{\Gamma \vdash \diamond \top}
+  \]
+  \item Example (using $\tbind$ infix):
+  \[f = \tprint\,\texttt{"function"}\,\tbind\,\_. \lambda x.\tprint\,\texttt{"argument"}\,\tbind\,\_.\tret\,(\tvar\,x)\]
+  \item CBPV effects are lazy, can only be observed at value types.
+  \item $f$ by itself prints nothing; $\tapp\,f\,\_$ prints \texttt{"function"} and \texttt{"argument"}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Monad and monad algebras}
+\renewcommand{\T}{\diamond}
+\[
+\xymatrix@C=12ex{
+  \T\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T\,(\T\,A) \ar[d]^{\tjoin}
+& \T\,(\T\,(\T\,A)) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\tjoin}
+\\
+& \T\,A       \ar@{=}[dr]^{\tid}
+& \T\,(\T\,A) \ar[l]_{\tjoin}
+\\
+&
+& \T\,A \ar[u]_{\tmap\,\treturn}
+}
+\]
+\[
+\xymatrix@C=10ex{
+  B     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T\,B \ar[d]^{\trun}
+& \T\,(\T\,B) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\trun}
+\\
+& B
+& \T\,B \ar[l]_{\trun}
+}
+\]
+  % \vspace{-3ex}
+  % \begin{itemize}
+  % \item
+  % \end{itemize}
+\end{frame}
+
+\newcommand{\tduplicate}{\mathsf{duplicate}}
+\newcommand{\tdisplay}{\mathsf{display}}
+\newcommand{\texpose}{\mathsf{expose}}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{CBPV: algebraic semantics}
+  %\vspace{-3ex}
+  \begin{itemize}
+  %\item Interpret both $P$ and $N$ as objects in a cartesian closed category with coproducts.
+  \item Assume a cartesian closed category with coproducts.
+  \item Contexts $P_1\ldots P_n$ are products $P_1 \times \ldots \times P_n$ and $\Gamma \vdash A$ homsets.
+  \item Interpret $\diamond$ as a strong monad; $\Box$ as identity (for now).
+  %, $\Box$ as a strong comonad.
+  \item Interpret each $N$ as monad algebra $\trun_N : \diamond N \to N$.
+  \[
+    \begin{array}{lcl}
+      \trun_{\diamond P} & : & \diamond (\diamond P) \to \diamond P \\
+      \trun_{\diamond P} & = & \tjoin \\[1ex]
+      \trun_{P \To N} & : & \diamond (P \To N) \to P \To N \\
+      \trun_{P \To N}\, m & = & \lambda p.\, \trun_N\,(\tmap\, (\lambda f.\, \tapp\,f\,p)\, m) \\[1ex]
+      \trun_{\rect I N} & : & \diamond (\rect I N) \to \rect I N \\
+      \trun_{\rect I N}\,m & = & \trecord\,i.\,\trun_N\,(\tmap\, \tproj_i\, m)
+    \end{array}
+  \]
+  \item This interprets binding in $N$ (going via $\diamond N$):
+\[
+  \nru{\tbind}{\Gamma \vdash \diamond P \quad \Gamma.P \vdash N}{\Gamma \vdash N}
+\]
+  \end{itemize}
+\end{frame}
+
+\section{Effect-graded CBPV}
+
+\newcommand{\tsub}{\mathsf{sub}}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Graded effects}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item $\Gamma \vdash N \mid e$ where $e$ is drawn from an effect pomonoid.
+  \item Example: keep track of the length of the output.
+  \[
+     \nrux{\tprint\,s}{}{\Gamma \vdash \diamond \top \mid n}{n = |s|}
+  \]
+  \item Effects accumulate.
+\[
+  \nru{\treturn}{\Gamma \vdash P}{\Gamma \vdash \diamond P \mid 0}
+\qquad
+  \nru{\tbind}{\Gamma \vdash \diamond P \mid e_1 \quad \Gamma.P \vdash N \mid e_2}{\Gamma \vdash N \mid e_1 + e_2}
+\]
+  \item Effects get frozen and subsumed.
+\[
+  \nru{\tthunk}{\Gamma \vdash N \mid e}{\Gamma \vdash [e]N}
+\qquad
+  \nru{\tforce}{\Gamma \vdash [e]N}{\Gamma \vdash N \mid e}
+\qquad
+  \nrux{\tsub}{\Gamma \vdash N \mid e}{\Gamma \vdash N \mid e'}{e \leq e'}
+\]
+  \end{itemize}
+\end{frame}
+
+\newcommand{\bu}{\bullet}
+\newcommand{\Char}{\mathsf{Char}}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Graded monads}
+  \vspace{-3ex}
+\renewcommand{\T}[1][]{\diamond_{#1}}
+\[
+  \begin{array}{lcl@{\qquad}rcl}
+    \multicolumn 3 r {} %{\mbox{Example:}}
+      & \T[n] A & = & \Char^n \times A \\
+    \treturn & : & A \to \T[\Ge] A
+      & a & \mapsto & (\mathtt{""},a) \\
+    \tjoin  & : & \T[e_1](\T[e_2] A) \to \T[e_1 \bu e_2] A
+      & (s_1,(s_2,a)) & \mapsto & (s_1 + s_2, a) \\
+    \T[e \leq e'] & : & \T[e] A \to \T[e'] A \\
+  \end{array}
+\]
+\[
+\xymatrix@C=8ex{
+  \T[e]\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,(\T[e]\,A) \ar[d]^{\tjoin}
+\\
+& \T[e]\,A
+}
+\quad
+\xymatrix@C=10ex{
+  \T[e]\,A     \ar[r]^{\tmap\,\treturn} \ar@{=}[dr]^{\tid}
+& \T[e]\,(\T[\Ge]\,A) \ar[d]^{\tjoin}
+\\
+& \T[e]\,A
+}
+\]
+\[
+\xymatrix@C=8ex{
+  \T[e_1 \bu e_2]\,(\T[e_3]\,A) \ar[d]^{\tjoin}
+& \T[e_1]\,(\T[e_2]\,(\T[e_3]\,A)) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\tjoin}
+\\
+  \T[e_1 \bu e_2 \bu e_3]\,A
+& \T[e_1]\,(\T[e_2 \bu e_3]\,A) \ar[l]_{\tjoin}
+}
+\]
+\end{frame}
+
+
+\newcommand{\run}[1][]{\mathsf{run}_{#1}}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Graded monad algebras}
+  \vspace{-3ex}
+\renewcommand{\T}[1][]{\diamond_{#1}}
+\[
+  \begin{array}{lcl}
+    B_{e \leq e'} & : & B_e \to B_{e'} \\
+    \run[B] & : & \T[e_1]\,B_{e_2} \to B_{e_1 \bu e_2} \\
+  \end{array}
+\]
+\[
+\xymatrix@C=10ex{
+  B_e     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,B_e \ar[d]^{\run[]}
+\\
+& B_e
+}
+\qquad
+\xymatrix@C=10ex{
+  \T[e_1 \bu e_2]\,B_{e_3} \ar[d]^{\run[]}
+& \T[e_1]\,(\T[e_2]\,B_{e_3}) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\run[]}
+\\
+  B_{e_1 \bu e_2 \bu e_3}
+& \T[e_1]\,B_{e_2 \bu e_3} \ar[l]_{\run[]}
+}
+\]
+\[
+  \begin{array}{lcl}
+    (\diamond P)_e & = & \diamond_e P \\
+    (P \To N)_e    & = & P \To N_e \\
+    (\tupty i I N)_e  & = & \tupt {i:I} {(N_i)_e} \\
+  \end{array}
+\]
+\end{frame}
+
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Graded effect semantics}
+  % \vspace{-3ex}
+  \begin{itemize}
+  \item Negative types $N$ are interpreted as functors from effects to objects.
+  \item Positive types $P$ are interpreted as objects; $[e]N = N_e$.
+  \item $\Gamma \vdash P$ is $\Gamma \to P$.
+  \item $\Gamma \vdash N \mid e$ is $\Gamma \to N_e$.
+\[
+  \nru{\treturn}{\Gamma \to P}{\Gamma \to \diamond_\Ge P}
+\qquad
+  \nru{\tbind}{\Gamma \to \diamond_{e_1} P \quad \Gamma \times P \to N_{e_2}}{\Gamma \to N_{e_1 \bu e_2}}
+\]
+  $\tbind$ justified by $\Gamma \to \Gamma \times \diamond_{e_1} P \to \diamond_{e_1}(\Gamma \times P) \to \diamond_{e_1}N_{e_2} \to N_{e_1 \bu e_2}$.
+  \end{itemize}
+\end{frame}
+
+\section{Coeffect CBPV}
+
+\newcommand{\textract}{\mathsf{extract}}
+%\newcommand{\tdisplay}{display}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Comonads and comonad coalgebras}
+\renewcommand{\D}{\Box}
+\[
+\xymatrix@C=10ex{
+\D\,B  \ar@{=}[dr]
+  & \D\,(\D\,B) \ar[l]_{\textract} \ar[r]^{\tdisplay}
+  & \D\,(\D\,(\D\,B))
+\\
+  & \D\,B \ar[u]_{\tdisplay} \ar[r]^{\tdisplay} \ar@{=}[dr]
+  & \D\,(\D\,B) \ar[u]_{\tmap\,\tdisplay} \ar[d]^{\tmap\,\textract}
+\\
+  &
+  & \D\,B
+}
+\]
+\[
+\xymatrix@C=10ex{
+A  \ar@{=}[dr]
+  & \D\,A \ar[l]_{\textract} \ar[r]^{\tdisplay}
+  & \D\,(\D\,A)
+\\
+  & A \ar[u]_{\texpose} \ar[r]^{\texpose}
+  & \D\,A \ar[u]_{\tmap\,\texpose}
+}
+\]
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Comonadic semantics}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Judgements $P_1 \ldots P_n \vdash A$ are homsets $P_1 \times \ldots \times P_n \to A$.
+  \item $\Box$ is interpreted as monoidal comonad ($\diamond$ as identity).
+  \item Positive types $P$ are $\Box$-coalgebras (negative types $N$ just objects).
+\[
+\begin{array}{lcl}
+  \texpose_{\Box N} & : & \Box N \to \Box (\Box N) \\
+  \texpose_{\Box N} & = & \tdisplay \\[1ex]
+  \texpose_{\sumt I P} & : & \sumt I P \to \Box (\sumt I P) \\
+  \texpose_{\sumt I P} (i, v) & = & \tmap\,\tin_i\, (\texpose_{P_i} v) \\[1ex]
+  % \texpose_{\sumt I P} & = & \left [ \tmap\,\tin_i \comp \texpose_{P_i} \right ]_{i:I} \\[1ex]
+  \texpose_{\tupt I P} & : & \tupt I P \to \Box(\tupt I P) \\
+  \texpose_{\tupt I P} (v_i)_{i:I} & = & \tzip\, (\texpose_{P_i} v_i)_{i:I} \\[1ex]
+  \tzip & : & \tupt {i:I} (\Box {B_i}) \to \Box (\tupt I B) \\[1ex]
+  \texpose_\Gamma & : & \Gamma \to \Box \Gamma \\[1ex]
+\end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  % \vspace{-3ex}
+  \begin{itemize}
+  \item Thunking needs monoidality.
+\[
+  \nru{\tthunk}{\Gamma \to N}{\Gamma \to \Box N}
+\qquad
+  \nru{\tforce}{\Gamma \to \Box N}{\Gamma \to N}
+\]
+\[
+  \begin{array}{lcl}
+    \tthunk & : & \Gamma \to \Box \Gamma \to \Box N \\
+    \tforce & : & \Gamma \to \Box N \to N \\
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+
+\section{Coeffect-graded CBPV}
+
+\newcommand{\lolli}{\multimap}
+
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Graded comonad}
+\vspace{-2ex}
+\renewcommand{\D}[1][]{\Box_{#1}}
+\[
+  \begin{array}{lcl}
+    \textract & : & \D[1] B \to B \\
+    \tdisplay & : & \D[qr] B \to \D[q](\D[r]B) \\
+  \end{array}
+\]
+\[
+\xymatrix@C=10ex{
+\D[r]\,B  \ar[d]_{\tdisplay} \ar[r]^{\tdisplay} \ar@{=}[dr]
+  & \D[r]\,(\D[1]\,B)  \ar[d]^{\tmap\,\textract}
+\\
+\D[1]\,(\D[r]\,B) \ar[r]^{\textract}
+  & \D[r]\,B
+}
+\]
+\[
+\xymatrix@C=12ex{
+\D[qrs]\,B \ar[d]_{\tdisplay} \ar[r]^{\tdisplay}
+  & \D[qr]\,(\D[s]\,B) \ar[d]^{\tdisplay}
+\\
+\D[q]\,(\D[rs]\,B) \ar[r]^{\tmap\,\tdisplay}
+  & \D[q]\,(\D[r]\,(\D[s]\,B))
+}
+\]
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Graded comonad coalgebras}
+  \vspace{-3ex}
+\renewcommand{\D}[1][]{\Box_{#1}}
+\[
+  \begin{array}{lcl}
+    A_{q \leq r} & : & A_q \to A_r \\
+    \texpose & : & A_{qr} \to \D[q]A_r \\
+  \end{array}
+\]
+\[
+\xymatrix@C=10ex{
+A_r  \ar[d]_{\texpose} \ar@{=}[dr]
+\\
+\D[1]\,A_r \ar[r]^{\textract}
+  & A_r
+}
+\qquad
+\xymatrix@C=12ex{
+A_{qrs} \ar[d]_{\texpose} \ar[r]^{\texpose}
+  & \D[qr]\,A_s \ar[d]^{\tdisplay}
+\\
+\D[q]\,A_{rs} \ar[r]^{\tmap\,\texpose}
+  & \D[q]\,(\D[r]\,A_s)
+}
+\]
+\end{frame}
+
+\newcommand{\tdrop}{\mathsf{drop}}
+\newcommand{\I}{\mathsf{I}}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Semiring-graded comonads}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Switch to a closed symmetric monoidal category.
+  \item Additive commutative monoid on grades maps to monoidal structure.
+\[
+  \begin{array}{lcl}
+    \tdrop & : & \Box_0 B \to \I \\
+    \tduplicate & : & \Box_{r+s} B \to \Box_r B \otimes \Box_s B \\
+  \end{array}
+\]
+  \item Extends to coalgebras.
+\[
+  \begin{array}{lcl}
+    \tdrop_A & : & A_0 \to \I \\
+    \tduplicate_A & : & A_{r+s} \to A_r \otimes A_s \\
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Semantics of positive types}
+  %\vspace{-3ex}
+  %\begin{itemize}
+  %\item
+Positive types $P$ are interpreted as graded $\Box$-coalgebras.
+\[
+  \begin{array}{lcl}
+    (\Box N)_r & = & \Box_r N \\
+    (\sumt I P)_r & = & \sumt {i:I} {(P_i)_r} \\
+    (\tupt I P)_r & = & \tupt {i:I} {(P_i)_r} \\
+  \end{array}
+\]
+\[
+  \begin{array}{lcl}
+    \texpose_{\Box N} & : & (\Box N)_{qr} \to \Box_q (\Box N)_r \\
+    \texpose & = & \tdisplay \\[1ex]
+    \texpose_{\sumt I P} & : & (\sumt I P)_{qr} \to \Box_q (\sumt I P)_r\\
+    \texpose_{\sumt I P} (i, v) & = & \tmap\, \tin_i\, (\texpose_{P_i} v) \\[1ex]
+    \texpose_{\tupt I P} & : & (\tupt I P)_{qr} \to \Box_q (\tupt I P)_r \\
+    \texpose_{\tupt I P} (v_i)_{i:I} & = & \tzip\,(\texpose_{P_i} v_i)_{i:I} \\
+  \end{array}
+\]
+%  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Graded contexts}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Contexts $\Gamma$ come with grading contexts $\gamma$ of the same length.
+  \item $r_1P_1\dots r_nP_n = (r_1\dots r_n)(P_1 \dots P_n)$.
+  \item Grading contexts $\gamma$ (``vectors'') form a \emph{left module} to grades.
+  \item Write $\mathsf{e}_x$ for the unit vector $e_x(y) = 1$ iff $x=y$ else $0$.
+  \item Contexts $\Gamma$ are interpreted as \emph{structured} graded $\Box$-coalgebras $\Gamma_\gamma$.
+\[
+  \begin{array}{lcl}
+    \texpose_\Gamma& : & \Gamma_{r\gamma} \to \Box_r \Gamma_\gamma \\
+    \tdrop_\Gamma & : & \Gamma_0 \to \I \\
+    \tduplicate_\Gamma & : & \Gamma_{\gamma+\delta} \to \Gamma_\gamma \otimes \Gamma_\delta \\
+    \tduplicate_\Gamma & : & \Gamma_{\sum_I \gamma} \to \tupt {i:I} \Gamma_{\gamma_i} \\
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Coeffect-graded CBPV}
+%   %\vspace{-3ex}
+%   \begin{itemize}
+%   \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile=singleslide]
+%   \frametitle{Coeffect-graded CBPV}
+%   %\vspace{-3ex}
+%   \begin{itemize}
+%   %\item A derivation of $P \in \Gamma$ is a (value) variable.
+%   \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
+%   \item $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N$.
+% \begin{gather*}
+%   \nrux{\tin_i}{\gamma\Gamma \vdash P_i}{\gamma\Gamma \vdash \sumt I P}{i{:}I}
+%  \qquad
+%   \nru{\mathsf{tup}}{\forall i{:}I,\, \gamma_i\Gamma \vdash P_i}{(\sum_I \gamma) \Gamma \vdash \tupt I P}
+% \\
+%   \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
+% \qquad
+%   \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+% \end{gather*}
+%   \item Computing with values:
+% \begin{gather*}
+%   \nru{\tcase}{\delta\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \gamma\Gamma.rP_i \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+% \qquad
+%   \nru{\tsplit}{\delta\Gamma \vdash \tupt I P \quad \gamma\Gamma.\overline{rP_i}^{i:I} \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+%   \\
+%   \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+% \qquad
+%   \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+% \end{gather*}
+%   \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}[fragile=singleslide]
+%   \frametitle{CBPV typing: computations}
+% \begin{itemize}
+%   \item Computation introductions:
+% \begin{gather*}
+%   \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+% \qquad
+%   \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+% \qquad
+%   \nru{\trecord}{\forall i{:}I,\, \gamma\Gamma \vdash N_i}{\gamma\Gamma \vdash \rect I N}
+% \end{gather*}
+%   \item Computation eliminations:
+% \begin{gather*}
+%   \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+% \qquad
+%   \nru{\tapp}{\gamma\Gamma \vdash rP \To N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+% \\
+%   \nru{\tproj_i}{\gamma\Gamma \vdash \rect I N}{\gamma\Gamma \vdash N_i}
+% \end{gather*}
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{Coeffect-graded CBPV}
+  %\vspace{-3ex}
+  \begin{itemize}
+  %\item A derivation of $P \in \Gamma$ is a (value) variable.
+  \item Negative types $N ::= \langle r \rangle P \mid rP \lolli N \mid \recty i I N$.
+  \item $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N$.
+\begin{gather*}
+  \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
+\qquad
+  \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+\\
+  \nrux{\tin_i}{\gamma\Gamma \vdash P_i}{\gamma\Gamma \vdash \sumt I P}{i{:}I}
+ \qquad
+  \nru{\tcase}{\delta\Gamma \vdash \sumt I P \quad \forall i{:}I,\, \gamma\Gamma.rP_i \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+\\
+  \nru{\mathsf{tup}}{\forall i{:}I,\, \gamma_i\Gamma \vdash P_i}{(\sum_I \gamma) \Gamma \vdash \tupt I P}
+\qquad
+  \nru{\tsplit}{\delta\Gamma \vdash \tupt I P \quad \gamma\Gamma.\overline{rP_i}^{i:I} \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+\\
+  \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+\qquad
+  \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+\end{gather*}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]
+  \frametitle{CBPV typing: computations}
+%\begin{itemize}
+%  \item Computation introductions:
+\begin{gather*}
+  \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+\qquad
+  \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+\\[1ex]
+  \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+\qquad
+  \nru{\tapp}{\gamma\Gamma \vdash rP \lolli N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+\\[1ex]
+  \nru{\trecord}{\forall i{:}I,\, \gamma\Gamma \vdash N_i}{\gamma\Gamma \vdash \rect I N}
+\qquad
+  \nru{\tproj_i}{\gamma\Gamma \vdash \rect I N}{\gamma\Gamma \vdash N_i}
+\end{gather*}
+%  \end{itemize}
+\end{frame}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Semantics of coeffect-grading}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Computations $\gamma\Gamma \vdash N$ are morphisms $\Gamma_\gamma \to N$.
+  \item Values $\gamma\Gamma \vdash P$ are morphisms families $\Gamma_{r\gamma} \to P_r$ natural in $r$.
+\begin{gather*}
+  \nru{\tvar}{x : P \in \Gamma}{\mathsf{e}_x\Gamma \vdash P}
+\qquad
+  \nru{\tlet}{\delta\Gamma \vdash P \quad \gamma\Gamma.rP \vdash N}{(\gamma + r\delta)\Gamma \vdash N}
+\end{gather*}
+\[
+  \begin{array}{lcl}
+    \tvar & : & (\Gamma.P.\Delta)_{s(\vec 0.1.\vec 0)}
+       \to \Gamma_{\vec 0} \otimes P_s \otimes \Delta_{\vec 0}
+       \to P_s \\
+    \tlet & : & \Gamma_{\gamma + r\delta}
+       \to \Gamma_{\gamma} \otimes \Gamma_{r\delta}
+       \to \Gamma_{\gamma} \otimes P_{r}
+       \to (\Gamma.P)_{\gamma.r}
+       \to N \\
+  \end{array}
+\]
+\[
+  \nru{\tthunk}{\gamma\Gamma \vdash N}{\gamma\Gamma \vdash \Box N}
+\qquad
+  \nru{\tforce}{\gamma\Gamma \vdash \Box N}{\gamma\Gamma \vdash N}
+\]
+\[
+  \begin{array}{lcl}
+    \tthunk & : & \Gamma_{r\gamma} \to \Box_r\Gamma_\gamma \to \Box_rN = (\Box N)_r \\
+    \tforce & : & \Gamma_\gamma = \Gamma_{1\gamma} \to (\Box N)_1 = \Box_1 N \to N \\
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Semantics ctd.}
+  %\vspace{-3ex}
+  \begin{itemize}
+  \item Semantics of monadic computations.
+\[
+  \nru{\treturn}{\gamma\Gamma \vdash P}{r\gamma\Gamma \vdash \langle r \rangle P}
+\qquad
+  \nru{\tbind}{\delta \Gamma \vdash \langle r \rangle P \quad \gamma\Gamma.r P \vdash N}{(\gamma + \delta)\Gamma \vdash N}
+\]
+\[
+  \begin{array}{lcl}
+    \treturn & : & \Gamma_{r\gamma} \to P_r \to \diamond P_r = \langle r \rangle P \\
+    \tbind & : & \Gamma_{\gamma + \delta}
+      \to \Gamma_\gamma \otimes \Gamma_\delta
+      \to \Gamma_\gamma \otimes (\diamond P_r)
+      \to \diamond (\Gamma_\gamma \otimes P_r)
+      \to \diamond N
+      \to N
+  \end{array}
+\]
+\item Semantics of functions.
+\[
+  \nru{\lambda}{\gamma\Gamma.rP \vdash N}{\gamma\Gamma \vdash rP \lolli N}
+\qquad
+  \nru{\tapp}{\gamma\Gamma \vdash rP \lolli N \quad \delta\Gamma \vdash P}{(\gamma + r\delta)\Gamma \vdash N}
+\]
+\[
+  \begin{array}{lcl}
+    \tapp & : & \Gamma_{\gamma + r\delta}
+       \to \Gamma_\gamma \otimes \Gamma_{r\delta}
+       \to \Gamma_\gamma \otimes P_r
+       \to N
+  \end{array}
+\]
+  \end{itemize}
+\end{frame}
+
+\section{Fully graded CBPV}
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{Fully graded CBPV}
+  \begin{itemize}
+  \item Judgements $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N \mid e$.
+  \item Interpreted as $\Gamma_{r\gamma} \to P_r$ and $\Gamma_\gamma \to N_e$.
+  \item Monad $(\langle r \rangle P)_e = \diamond_e P_r$ and comonad $([e]N)_r = \Box_r N_e$.
+  \item No commutative laws needed!
+  \item No interaction between effects and coeffects in the framework.
+  \end{itemize}
+\end{frame}
+
+
+
+% \begin{frame}[c]%[fragile=singleslide]
+%   \frametitle{Formalization}
+%   \begin{center}
+% Agda code \\[4ex]
+
+% \url{https://github.com/andreasabel/ipl/}
+%   \end{center}
+% \end{frame}
+
+
+
+\begin{frame}%[fragile=singleslide]
+\frametitle{References}
+\begin{itemize}
+\begin{small}
+
+\item
+\textbf{Paul Blain Levy}:
+Call-by-push-value: Decomposing call-by-value and call-by-name.
+HOSC 19(4), 2006.
+
+\end{small}
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}%[fragile=singleslide]
+%   \frametitle{Future work}
+%   %\vspace{-3ex}
+%   \begin{itemize}
+%   \item
+%   \end{itemize}
+% \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END DOC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \bibliography{short}
+
+\end{document}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}%[fragile=singleslide]
+  \frametitle{}
+  \vspace{-3ex}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
+
+\end{document}
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
