@@ -646,74 +646,81 @@
 
 \section{Effect-graded CBPV}
 
+\newcommand{\effcol}[1]{{\color{darkred}#1}}
 \newcommand{\tsub}{\mathsf{sub}}
+\newcommand{\e}{\effcol{e}}
+\newcommand{\ep}{\effcol{e'}}
+\newcommand{\eone}{\effcol{e_1}}
+\newcommand{\etwo}{\effcol{e_2}}
+\newcommand{\ethree}{\effcol{e_3}}
+\renewcommand{\Ge}{\effcol{\varepsilon}}
 
-\begin{frame}%[fragile=singleslide]
+\begin{frame}[fragile=singleslide]
   \frametitle{Graded effects}
   %\vspace{-3ex}
   \begin{itemize}
-  \item $\Gamma \vdash N \mid e$ where $e$ is drawn from an effect pomonoid.
+  \item $\Gamma \vdash N \mid \e$ where $\e$ is drawn from an effect pomonoid.
   \item Example: keep track of the length of the output.
   \[
-     \nrux{\tprint\,s}{}{\Gamma \vdash \diamond \top \mid n}{n = |s|}
+     \nrux{\tprint\,s}{}{\Gamma \vdash \diamond \top \mid \effcol{n}}{\effcol{n} = |s|}
   \]
   \item Effects accumulate.
 \[
-  \nru{\treturn}{\Gamma \vdash P}{\Gamma \vdash \diamond P \mid 0}
+  \nru{\treturn}{\Gamma \vdash P}{\Gamma \vdash \diamond P \mid \effcol0}
 \qquad
-  \nru{\tbind}{\Gamma \vdash \diamond P \mid e_1 \quad \Gamma.P \vdash N \mid e_2}{\Gamma \vdash N \mid e_1 + e_2}
+  \nru{\tbind}{\Gamma \vdash \diamond P \mid \eone \quad \Gamma.P \vdash N \mid \etwo}{\Gamma \vdash N \mid \eone + \etwo}
 \]
   \item Effects get frozen and subsumed.
 \[
-  \nru{\tthunk}{\Gamma \vdash N \mid e}{\Gamma \vdash [e]N}
+  \nru{\tthunk}{\Gamma \vdash N \mid \e}{\Gamma \vdash [\e]N}
 \qquad
-  \nru{\tforce}{\Gamma \vdash [e]N}{\Gamma \vdash N \mid e}
+  \nru{\tforce}{\Gamma \vdash [\e]N}{\Gamma \vdash N \mid \e}
 \qquad
-  \nrux{\tsub}{\Gamma \vdash N \mid e}{\Gamma \vdash N \mid e'}{e \leq e'}
+  \nrux{\tsub}{\Gamma \vdash N \mid \e}{\Gamma \vdash N \mid \ep}{\e \leq \ep}
 \]
   \end{itemize}
 \end{frame}
 
-\newcommand{\bu}{\bullet}
+\newcommand{\bu}{\effcol{\bullet}}
 \newcommand{\Char}{\mathsf{Char}}
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded monads}
   \vspace{-3ex}
-\renewcommand{\T}[1][]{\diamond_{#1}}
+\renewcommand{\T}[1][]{\diamond_{\effcol{#1}}}
 \[
   \begin{array}{lcl@{\qquad}rcl}
     \multicolumn 3 r {} %{\mbox{Example:}}
-      & \T[n] A & = & \Char^n \times A \\
+      & \T[n] A & = & \Char^{\effcol{n}} \times A \\
     \treturn & : & A \to \T[\Ge] A
       & a & \mapsto & (\mathtt{""},a) \\
-    \tjoin  & : & \T[e_1](\T[e_2] A) \to \T[e_1 \bu e_2] A
+    \tjoin  & : & \T[\eone](\T[\etwo] A) \to \T[\eone \bu \etwo] A
       & (s_1,(s_2,a)) & \mapsto & (s_1 + s_2, a) \\
-    \T[e \leq e'] & : & \T[e] A \to \T[e'] A \\
+    \T[\e \leq \ep] & : & \T[\e] A \to \T[\ep] A \\
   \end{array}
 \]
 \[
 \xymatrix@C=8ex{
-  \T[e]\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
-& \T[\Ge]\,(\T[e]\,A) \ar[d]^{\tjoin}
+  \T[\e]\,A     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,(\T[\e]\,A) \ar[d]^{\tjoin}
 \\
-& \T[e]\,A
+& \T[\e]\,A
 }
 \quad
 \xymatrix@C=10ex{
-  \T[e]\,A     \ar[r]^{\tmap\,\treturn} \ar@{=}[dr]^{\tid}
-& \T[e]\,(\T[\Ge]\,A) \ar[d]^{\tjoin}
+  \T[\e]\,A     \ar[r]^{\tmap\,\treturn} \ar@{=}[dr]^{\tid}
+& \T[\e]\,(\T[\Ge]\,A) \ar[d]^{\tjoin}
 \\
-& \T[e]\,A
+& \T[\e]\,A
 }
 \]
 \[
 \xymatrix@C=8ex{
-  \T[e_1 \bu e_2]\,(\T[e_3]\,A) \ar[d]^{\tjoin}
-& \T[e_1]\,(\T[e_2]\,(\T[e_3]\,A)) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\tjoin}
+  \T[\eone \bu \etwo]\,(\T[\ethree]\,A) \ar[d]^{\tjoin}
+& \T[\eone]\,(\T[\etwo]\,(\T[\ethree]\,A)) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\tjoin}
 \\
-  \T[e_1 \bu e_2 \bu e_3]\,A
-& \T[e_1]\,(\T[e_2 \bu e_3]\,A) \ar[l]_{\tjoin}
+  \T[\eone \bu \etwo \bu \ethree]\,A
+& \T[\eone]\,(\T[\etwo \bu \ethree]\,A) \ar[l]_{\tjoin}
 }
 \]
 \end{frame}
@@ -724,34 +731,34 @@
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded monad algebras}
   \vspace{-3ex}
-\renewcommand{\T}[1][]{\diamond_{#1}}
+\renewcommand{\T}[1][]{\diamond_{\effcol{#1}}}
 \[
   \begin{array}{lcl}
-    B_{e \leq e'} & : & B_e \to B_{e'} \\
-    \run[B] & : & \T[e_1]\,B_{e_2} \to B_{e_1 \bu e_2} \\
+    B_{\effcol{e \leq \ep}} & : & B_{\e} \to B_{\ep} \\
+    \run[B] & : & \T[\eone]\,B_{\etwo} \to B_{\eone \bu \etwo} \\
   \end{array}
 \]
 \[
 \xymatrix@C=10ex{
-  B_e     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
-& \T[\Ge]\,B_e \ar[d]^{\run[]}
+  B_{\e}     \ar[r]^{\treturn} \ar@{=}[dr]^{\tid}
+& \T[\Ge]\,B_{\e} \ar[d]^{\run[]}
 \\
-& B_e
+& B_{\e}
 }
 \qquad
 \xymatrix@C=10ex{
-  \T[e_1 \bu e_2]\,B_{e_3} \ar[d]^{\run[]}
-& \T[e_1]\,(\T[e_2]\,B_{e_3}) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\run[]}
+  \T[\eone \bu \etwo]\,B_{\ethree} \ar[d]^{\run[]}
+& \T[\eone]\,(\T[\etwo]\,B_{\ethree}) \ar[l]_{\tjoin} \ar[d]^{\tmap\,\run[]}
 \\
-  B_{e_1 \bu e_2 \bu e_3}
-& \T[e_1]\,B_{e_2 \bu e_3} \ar[l]_{\run[]}
+  B_{\eone \bu \etwo \bu \ethree}
+& \T[\eone]\,B_{\etwo \bu \ethree} \ar[l]_{\run[]}
 }
 \]
 \[
   \begin{array}{lcl}
-    (\diamond P)_e & = & \diamond_e P \\
-    (P \To N)_e    & = & P \To N_e \\
-    (\tupty i I N)_e  & = & \tupt {i:I} {(N_i)_e} \\
+    (\diamond P)_{\e} & = & \diamond_{\e} P \\
+    (P \To N)_{\e}    & = & P \To N_{\e} \\
+    (\tupty i I N)_{\e}  & = & \tupt {i:I} {(N_i)_{\e}} \\
   \end{array}
 \]
 \end{frame}
@@ -763,15 +770,15 @@
   % \vspace{-3ex}
   \begin{itemize}
   \item Negative types $N$ are interpreted as functors from effects to objects.
-  \item Positive types $P$ are interpreted as objects; $[e]N = N_e$.
+  \item Positive types $P$ are interpreted as objects; $[\e]N = N_{\e}$.
   \item $\Gamma \vdash P$ is $\Gamma \to P$.
-  \item $\Gamma \vdash N \mid e$ is $\Gamma \to N_e$.
+  \item $\Gamma \vdash N \mid \e$ is $\Gamma \to N_{\e}$.
 \[
   \nru{\treturn}{\Gamma \to P}{\Gamma \to \diamond_\Ge P}
 \qquad
-  \nru{\tbind}{\Gamma \to \diamond_{e_1} P \quad \Gamma \times P \to N_{e_2}}{\Gamma \to N_{e_1 \bu e_2}}
+  \nru{\tbind}{\Gamma \to \diamond_{\eone} P \quad \Gamma \times P \to N_{\etwo}}{\Gamma \to N_{\eone \bu \etwo}}
 \]
-  $\tmbind$ justified by $\Gamma \to \Gamma \times \diamond_{e_1} P \to \diamond_{e_1}(\Gamma \times P) \to \diamond_{e_1}N_{e_2} \to N_{e_1 \bu e_2}$.
+  $\tmbind$ justified by $\Gamma \to \Gamma \times \diamond_{\eone} P \to \diamond_{\eone}(\Gamma \times P) \to \diamond_{\eone}N_{\etwo} \to N_{\eone \bu \etwo}$.
   \end{itemize}
 \end{frame}
 
@@ -814,7 +821,7 @@ A  \ar@{=}[dr]
   %\vspace{-3ex}
   \begin{itemize}
   \item Judgements $P_1 \ldots P_n \vdash A$ are homsets $P_1 \times \ldots \times P_n \to A$.
-  \item $\Box$ is interpreted as monoidal comonad ($\diamond$ as identity).
+  \item $\Box$ is interpreted as monoidal comonad.
   \item Positive types $P$ are $\Box$-coalgebras (negative types $N$ just objects).
 \[
 \begin{array}{lcl}
@@ -1179,9 +1186,9 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \begin{frame}%[fragile=singleslide]
   \frametitle{Fully graded CBPV}
   \begin{itemize}
-  \item Judgements $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N \mid e$.
-  \item Interpreted as $\Gamma_{r\gamma} \to P_r$ and $\Gamma_\gamma \to N_e$.
-  \item Monad $(\langle r \rangle P)_e = \diamond_e P_r$ and comonad $([e]N)_r = \Box_r N_e$.
+  \item Judgements $\gamma\Gamma \vdash P$ and $\gamma\Gamma \vdash N \mid \e$.
+  \item Interpreted as $\Gamma_{r\gamma} \to P_r$ and $\Gamma_\gamma \to N_{\e}$.
+  \item Monad $(\langle r \rangle P)_{\e} = \diamond_{\e} P_r$ and comonad $([\e]N)_r = \Box_r N_{\e}$.
   \item No commutative laws needed!
   \item No interaction between effects and coeffects in the framework.
   \end{itemize}
