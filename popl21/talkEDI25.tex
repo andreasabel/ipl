@@ -558,7 +558,12 @@
   \end{itemize}
 \end{frame}
 
-\newcommand{\tprint}{\mathsf{print}}
+\newcommand{\tprint}{\tmcol{\mathsf{print}}}
+\newcommand{\tmbind}{\tmcol{\tbind}}
+\newcommand{\tmvar}{\tmcol{\tvar}}
+\newcommand{\tmret}{\tmcol{\treturn}}
+\newcommand{\tmapp}{\tmcol{\mathsf{app}}}
+\newcommand{\tmforce}{\tmcol{\tforce}}
 
 \begin{frame}%[fragile=singleslide]
   \frametitle{CBPV: effect}
@@ -569,10 +574,10 @@
   \[
      \nru{\tprint\,s}{}{\Gamma \vdash \diamond \top}
   \]
-  \item Example (using $\tbind$ infix):
-  \[f = \tprint\,\texttt{"function"}\,\tbind\,\_. \lambda x.\tprint\,\texttt{"argument"}\,\tbind\,\_.\tret\,(\tvar\,x)\]
+  \item Example (using $\tmbind$ infix):
+  \[f = \tprint\,\texttt{"function"}\,\tmbind\,\_. \lambda x.\tprint\,\texttt{"argument"}\,\tmbind\,\_.\tmret\,(\tmvar\,x)\]
   \item CBPV effects are lazy, can only be observed at value types.
-  \item $f$ by itself prints nothing; $\tapp\,f\,\_$ prints \texttt{"function"} and \texttt{"argument"}.
+  \item $f$ by itself prints nothing; $\tmapp\,f\,\_$ prints \texttt{"function"} and \texttt{"argument"}.
   \end{itemize}
 \end{frame}
 
@@ -766,7 +771,7 @@
 \qquad
   \nru{\tbind}{\Gamma \to \diamond_{e_1} P \quad \Gamma \times P \to N_{e_2}}{\Gamma \to N_{e_1 \bu e_2}}
 \]
-  $\tbind$ justified by $\Gamma \to \Gamma \times \diamond_{e_1} P \to \diamond_{e_1}(\Gamma \times P) \to \diamond_{e_1}N_{e_2} \to N_{e_1 \bu e_2}$.
+  $\tmbind$ justified by $\Gamma \to \Gamma \times \diamond_{e_1} P \to \diamond_{e_1}(\Gamma \times P) \to \diamond_{e_1}N_{e_2} \to N_{e_1 \bu e_2}$.
   \end{itemize}
 \end{frame}
 
@@ -840,8 +845,8 @@ A  \ar@{=}[dr]
 \]
 \[
   \begin{array}{lcl}
-    \tthunk & : & \Gamma \to \Box \Gamma \to \Box N \\
-    \tforce & : & \Gamma \to \Box N \to N \\
+    \tmcol\tthunk & : & \Gamma \to \Box \Gamma \to \Box N \\
+    \tmforce & : & \Gamma \to \Box N \to N \\
   \end{array}
 \]
   \end{itemize}
@@ -963,7 +968,6 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \]
 %  \end{itemize}
 \end{frame}
-
 
 \begin{frame}[fragile=singleslide]
   \frametitle{Graded contexts}
@@ -1107,10 +1111,10 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \end{gather*}
 \[
   \begin{array}{lcl}
-    \tvar & : & (\Gamma.P.\Delta)_{s(\vec 0.1.\vec 0)}
+    \tmcol\tvar & : & (\Gamma.P.\Delta)_{s(\vec 0.1.\vec 0)}
        \to \Gamma_{\vec 0} \otimes P_s \otimes \Delta_{\vec 0}
        \to P_s \\
-    \tlet & : & \Gamma_{\gamma + r\delta}
+    \tmcol\tlet & : & \Gamma_{\gamma + r\delta}
        \to \Gamma_{\gamma} \otimes \Gamma_{r\delta}
        \to \Gamma_{\gamma} \otimes P_{r}
        \to (\Gamma.P)_{\gamma.r}
@@ -1124,15 +1128,15 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \]
 \[
   \begin{array}{lcl}
-    \tthunk & : & \Gamma_{r\gamma} \to \Box_r\Gamma_\gamma \to \Box_rN = (\Box N)_r \\
-    \tforce & : & \Gamma_\gamma = \Gamma_{1\gamma} \to (\Box N)_1 = \Box_1 N \to N \\
+    \tmcol\tthunk & : & \Gamma_{r\gamma} \to \Box_r\Gamma_\gamma \to \Box_rN = (\Box N)_r \\
+    \tmforce & : & \Gamma_\gamma = \Gamma_{1\gamma} \to (\Box N)_1 = \Box_1 N \to N \\
   \end{array}
 \]
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}%[fragile=singleslide]
+\begin{frame}[fragile=singleslide]
   \frametitle{Semantics ctd.}
   %\vspace{-3ex}
   \begin{itemize}
@@ -1144,8 +1148,8 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \]
 \[
   \begin{array}{lcl}
-    \treturn & : & \Gamma_{r\gamma} \to P_r \to \diamond P_r = \langle r \rangle P \\
-    \tbind & : & \Gamma_{\gamma + \delta}
+    \tmret & : & \Gamma_{r\gamma} \to P_r \to \diamond P_r = \langle r \rangle P \\
+    \tmbind & : & \Gamma_{\gamma + \delta}
       \to \Gamma_\gamma \otimes \Gamma_\delta
       \to \Gamma_\gamma \otimes (\diamond P_r)
       \to \diamond (\Gamma_\gamma \otimes P_r)
@@ -1161,7 +1165,7 @@ Positive types $P$ are interpreted as graded $\Box$-coalgebras.
 \]
 \[
   \begin{array}{lcl}
-    \tapp & : & \Gamma_{\gamma + r\delta}
+    \tmapp & : & \Gamma_{\gamma + r\delta}
        \to \Gamma_\gamma \otimes \Gamma_{r\delta}
        \to \Gamma_\gamma \otimes P_r
        \to N
