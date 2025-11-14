@@ -30,26 +30,36 @@ jobs:
           agda: 2.6.4.3
         - os: ubuntu-latest
           agda: 2.7.0.1
+        - os: ubuntu-latest
+          agda: 2.8.0
+          std-lib: 2.3
 
     steps:
 
       # Checkout to $HOME empties $HOME so we have to do it before we put stuff there.
       - uses: actions/checkout@v4
 
-      - name: Setup Agda
+      - name: Setup Agda (< 2.8.0)
+        if: matrix.std-lib == ''
         uses: wenkokke/setup-agda@main
-        id:   setup
         with:
           agda-version: ${{ matrix.agda }}
           agda-stdlib-version: recommended
           # agda-stdlib-version: '1.7.1'
           # agda-stdlib-default: true
 
+      - name: Setup Agda (2.8.0)
+        if: matrix.std-lib != ''
+        uses: agda/agda-setup-action@v1
+        with:
+          agda-version: ${{ matrix.agda }}
+          agda-stdlib-version: ${{ matrix.std-lib }}
+
       - name: Cache build
         uses: actions/cache@v4
         id:   cache
         with:
-          key: agda-setup-ci-agda-${{ steps.setup.outputs.agda-version }}
+          key: agda-setup-ci-agda-${{ matrix.agda }}
           # Don't have version of standard library. :-(
           # -std-lib-${{ matrix.std-lib }}
           path: |
